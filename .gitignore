@@ -1,0 +1,10 @@
+.idea/
+*.iml
+
+# Logs
+logs/
+*.log
+
+# Database
+database/
+*.db

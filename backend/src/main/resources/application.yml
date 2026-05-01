@@ -1,0 +1,16 @@
+spring:
+  profiles:
+    active: dev
+
+app:
+  frontend:
+    url: http://localhost:5173
+  python:
+    url: http://localhost:8000
+
+logging:
+  file:
+    name: ./logs/backend.log
+  level:
+    root: INFO
+    com.kinetics.backend: DEBUG
