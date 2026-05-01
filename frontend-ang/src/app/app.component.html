@@ -1,0 +1,12 @@
+<app-notifications></app-notifications>
+
+<div class="view">
+  @if (showHeader) {
+    <app-header></app-header>
+  }
+    <main [ngClass]="{'header-visible': showHeader}">
+        <router-outlet></router-outlet>
+    </main>
+</div>
+
+<!-- <app-footer></app-footer> -->

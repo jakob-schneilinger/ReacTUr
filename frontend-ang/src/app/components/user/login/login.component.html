@@ -1,0 +1,16 @@
+<div class="container">
+  <div class="row">
+
+    <div class="col-md-6 col-lg-4 card align-self-center">
+
+      <h1>ReacTUr</h1>
+
+      <form class="form" [formGroup]="loginForm" (ngSubmit)="loginUser($event)">
+        <h3>Login</h3>
+
+        <button type="submit" class="primary" data-cy="login-button">Login</button>
+
+      </form>
+    </div>
+  </div>
+</div>

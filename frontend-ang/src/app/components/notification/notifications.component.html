@@ -1,0 +1,10 @@
+@for (not of notifications; track not) {
+<div class="notification" [attr.data-cy]="'notification-'+not.type">
+    <i (click)="close(not)" class="bi bi-x close"></i>
+    <div>
+        <i [class]="getTypeIcon(not.type)"></i>
+        <span class="title">{{not.title}}</span>
+    </div>
+    @if (not.message) {<p>{{not.message}}</p>}
+</div>
+}
