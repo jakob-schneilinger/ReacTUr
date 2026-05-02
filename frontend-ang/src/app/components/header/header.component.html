@@ -13,19 +13,23 @@
     <div class="navitem" routerLink="/admin" routerLinkActive="active-link" [hidden]="user?.role != 'admin'">Admin</div>
   </div>
 
-  <div class="profile-container" (click)="toggleDropdown($event)">
-    <i id="profile" title="User Profile" class="bi bi-person"></i>
-    <div class="dropdown-menu" [class.show]="isDropdownOpen">
-      <!--
-      <div class="dropdown-item">My Profile</div>
-      <div class="dropdown-item">Settings</div>
-      <div class="dropdown-divider"></div>
-      -->
-      <div class="dropdown-item logout-text" (click)="logout()">
-        Logout
-        <i id="logout" title="Logout" class="bi bi-box-arrow-right"></i>
-      </div>
+  <div ngbDropdown placement="bottom-end" class="d-inline-block">
+    <div id="profile" ngbDropdownToggle title="User Profile"></div>
+
+    <div ngbDropdownMenu>
+      <!-- logged in -->
+      <ng-container *ngIf="isLoggedIn; else loggedOutMenu">
+        <button ngbDropdownItem disabled>Hallo, {{ user?.firstName }}</button>
+        <div class="dropdown-divider"></div>
+        <button ngbDropdownItem (click)="logout()" class="text-danger">Logout</button>
+      </ng-container>
+
+      <!-- not logged in -->
+      <ng-template #loggedOutMenu>
+        <button ngbDropdownItem routerLink="/login">Login</button>
+      </ng-template>
+
     </div>
-    <div class="layout"></div>
   </div>
+
 </div>

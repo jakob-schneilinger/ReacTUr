@@ -1,123 +1,65 @@
-import { Injectable } from "@angular/core";
-import { Observable } from "rxjs";
-import { HttpClient } from "@angular/common/http";
-import { tap, map } from "rxjs/operators";
-import { jwtDecode, JwtPayload } from 'jwt-decode';
-import { Globals } from "../global/globals";
 import { User } from "../dtos/user";
-
-interface CustomJwtPayload extends JwtPayload {
-  firstName: string;
-  lastName: string;
-  email: string;
-  role: string;
-}
+import { Injectable } from '@angular/core';
+import { OAuthService } from 'angular-oauth2-oidc';
+import { authConfig } from '../auth.config';
 
 @Injectable({
   providedIn: 'root',
 })
 export class AuthService {
-  private authBaseUri: string;
-  private userBaseUri: string;
 
-  constructor(
-    private httpClient: HttpClient,
-    private globals: Globals,
-  ) {
-    this.authBaseUri = globals.backendUri + '/authentication';
-    this.userBaseUri = globals.backendUri + '/user';
+  public initialLoginSequence: Promise<boolean>;
+
+  constructor(private oauthService: OAuthService) {
+    this.oauthService.configure(authConfig);
+    this.oauthService.setupAutomaticSilentRefresh();
+
+    this.initialLoginSequence = this.oauthService.loadDiscoveryDocumentAndTryLogin();
   }
 
-  /**
-   * Login in the user. If it was successful, a valid JWT token will be stored
-   *
-   * @param loginDto User data
-
-  loginUser(loginDto: UserLoginDto): Observable<string> {
-    return this.httpClient
-      .post<{ token: string }>(this.authBaseUri, loginDto)
-      .pipe(map((res) => res.token))
-      .pipe(tap((token) => this.setToken(token)));
+  public login() {
+    this.oauthService.initCodeFlow();
   }
-   */
 
-  /**
-   * Creates an user.
-   *
-   * @param createDto User data
-  createUser(createDto: UserCreateDto): Observable<any> {
-    return this.httpClient
-      .post<{ token: string }>(this.userBaseUri + '/register', createDto)
-      .pipe(map((res) => res.token))
-      .pipe(tap((token) => this.setToken(token)));
+  public logout() {
+    this.oauthService.logOut();
   }
-   */
 
-  /**
-   * Check if a valid JWT token is saved in the localStorage
-   */
-  isLoggedIn() {
-    const token = this.getToken();
+  public isLoggedIn(): boolean {
+    return this.oauthService.hasValidAccessToken();
+  }
 
-    // TODO: remove when backend connected
-    return true;
+  public getToken(): string {
+    return this.oauthService.getAccessToken();
+  }
 
-    /*
-    if (token == null) {
-      return false;
+  public getLoggedInUser(): User | null {
+    if (!this.isLoggedIn()) {
+      return null;
     }
+    const claims: any = this.oauthService.getIdentityClaims();
+    if (!claims) return null;
 
-    return this.getTokenExpirationDate(token).valueOf() > new Date().valueOf();
-     */
-  }
-
-  logoutUser() {
-    console.log('Logout');
-    localStorage.removeItem('authToken');
-  }
-
-  getToken() {
-    return localStorage.getItem('authToken');
-  }
-
-  getLoggedInUser(): User | null {
-    const encodedToken = this.getToken();
-    // TODO: remove when backend connected
     return {
-      firstName: 'Jakob',
-      lastName: 'Schneilinger',
-      email: 'jakob@schneilinger.com',
-      role: 'admin',
+      firstName: claims['given_name'],
+      lastName: claims['family_name'],
+      email: claims['email'],
     };
-    /*
-    if (encodedToken) {
-      const token: CustomJwtPayload = jwtDecode(encodedToken);
-      return {
-        firstName: token['firstName'],
-        lastName: token['lastName'],
-        email: token['email'],
-        role: token['role'],
-      };
-    }
-    return null;
-     */
   }
 
-  /**
-   * Returns the user role based on the current token
-   */
-  private setToken(authResponse: string) {
-    localStorage.setItem('authToken', authResponse);
-  }
-
-  private getTokenExpirationDate(token: string): Date {
-    const decoded: any = jwtDecode(token);
-    if (decoded.exp === undefined) {
-      return new Date(0);
+  public getUserRole(): string {
+    if (!this.isLoggedIn()) {
+      return 'UNDEFINED';
     }
 
-    const date = new Date(0);
-    date.setUTCSeconds(decoded.exp);
-    return date;
+    const claims: any = this.oauthService.getIdentityClaims();
+    const roles: string[] = claims['realm_access']?.roles || [];
+
+    if (roles.includes('ADMIN')) {
+      return 'ADMIN';
+    } else if (roles.includes('USER')) {
+      return 'USER';
+    }
+    return 'UNDEFINED';
   }
 }

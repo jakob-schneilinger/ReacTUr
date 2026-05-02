@@ -1,21 +1,20 @@
 import { BrowserModule } from "@angular/platform-browser";
 import { NgModule } from "@angular/core";
 import { FormsModule, ReactiveFormsModule } from "@angular/forms";
-import { provideHttpClient, withInterceptorsFromDi } from "@angular/common/http";
-
-import { LoginComponent as UserLoginComponent } from "./components/user/login/login.component";
-import { RouterLink } from "@angular/router";
-import { UserComponent } from "./components/user/user.component";
+import { HttpClientModule } from "@angular/common/http";
 
 import { AppRoutingModule } from "./app-routing.module";
 import { AppComponent } from "./app.component";
 import { HeaderComponent } from "./components/header/header.component";
 import { HomeComponent } from "./components/home/home.component";
-import { NgbModule } from "@ng-bootstrap/ng-bootstrap";
-import { httpInterceptorProviders } from "./interceptors";
-import { CommonModule, NgOptimizedImage } from "@angular/common";
+import { LoginComponent as UserLoginComponent } from "./components/user/login/login.component";
+import { UserComponent } from "./components/user/user.component";
 import { NotificationsComponent } from "./components/notification/notifications.component";
 import { LayoutComponent } from './components/layout/layout.component';
+import { NgOptimizedImage } from "@angular/common";
+
+import { NgbModule } from "@ng-bootstrap/ng-bootstrap";
+import { OAuthModule } from "angular-oauth2-oidc";
 
 @NgModule({
   declarations: [
@@ -27,17 +26,22 @@ import { LayoutComponent } from './components/layout/layout.component';
     NotificationsComponent,
     LayoutComponent,
   ],
-  bootstrap: [AppComponent],
   imports: [
-    CommonModule,
     BrowserModule,
     AppRoutingModule,
     ReactiveFormsModule,
-    NgbModule,
     FormsModule,
-    RouterLink,
+    HttpClientModule,
     NgOptimizedImage,
+    NgbModule,
+    OAuthModule.forRoot({
+      resourceServer: {
+        allowedUrls: ['http://localhost:8080/api'],
+        sendAccessToken: true
+      }
+    }),
   ],
-  providers: [httpInterceptorProviders, provideHttpClient(withInterceptorsFromDi())],
+  providers: [],
+  bootstrap: [AppComponent]
 })
 export class AppModule {}

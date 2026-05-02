@@ -12,7 +12,7 @@ import org.springframework.web.client.RestClient;
 @RestController
 @RequestMapping("/api/test")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "http://localhost:5173") //TODO: security config
+//@CrossOrigin(origins = "http://localhost:5173") //TODO: security config
 public class TestEndpoint {
 
     private final RestClient restClient = RestClient.create();

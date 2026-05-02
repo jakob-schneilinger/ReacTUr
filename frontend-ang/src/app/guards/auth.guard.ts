@@ -1,25 +1,19 @@
-import { Injectable } from "@angular/core";
-import {
-  ActivatedRouteSnapshot,
-  Router,
-  RouterStateSnapshot,
-} from "@angular/router";
-import { AuthService } from "../services/auth.service";
+import { Injectable } from '@angular/core';
+import { ActivatedRouteSnapshot, RouterStateSnapshot, Router } from '@angular/router';
+import { AuthService } from '../services/auth.service';
 
 @Injectable({
-  providedIn: "root",
+  providedIn: 'root',
 })
 export class AuthGuard {
   constructor(private authService: AuthService, private router: Router) {}
 
-  canActivate(
-    next: ActivatedRouteSnapshot,
-    state: RouterStateSnapshot
-  ): boolean {
+  async canActivate(next: ActivatedRouteSnapshot, state: RouterStateSnapshot): Promise<boolean> {
+    await this.authService.initialLoginSequence;
     if (this.authService.isLoggedIn()) {
-      return true;
+      return true; // User darf auf /home
     } else {
-      this.router.navigate(["/login"], { queryParams: { goto: state.url } });
+      this.router.navigate(['/login']);
       return false;
     }
   }

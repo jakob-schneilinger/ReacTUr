@@ -1,43 +1,30 @@
-import { Component, HostListener, OnInit, ElementRef } from '@angular/core';
+import { Component } from "@angular/core";
 import { AuthService } from "../../services/auth.service";
-import { ActivatedRoute, Router } from "@angular/router";
+import { Router } from "@angular/router";
 import { User } from '../../dtos/user';
 
 @Component({
-  selector: 'app-header',
-  templateUrl: './header.component.html',
-  styleUrls: ['./header.component.scss'],
+  selector: "app-header",
+  templateUrl: "./header.component.html",
+  styleUrls: ["./header.component.scss"],
   standalone: false,
 })
-export class HeaderComponent implements OnInit {
+export class HeaderComponent {
+
   constructor(
     public router: Router,
     public authService: AuthService,
-    private eRef: ElementRef,
   ) {}
-  isDropdownOpen: boolean = false;
-  user: User | null = null;
 
-  ngOnInit() {
-    if (!this.authService.isLoggedIn()) return;
-    this.user = this.authService.getLoggedInUser();
-    console.log(this.user);
+  get isLoggedIn(): boolean {
+    return this.authService.isLoggedIn();
   }
 
-  toggleDropdown(event: Event) {
-    event.stopPropagation();
-    this.isDropdownOpen = !this.isDropdownOpen;
-  }
-
-  @HostListener('document:click', ['$event'])
-  clickout(event: Event) {
-    if (!this.eRef.nativeElement.contains(event.target)) {
-      this.isDropdownOpen = false;
-    }
+  get user(): User | null {
+    return this.authService.getLoggedInUser();
   }
 
   logout() {
-    this.authService.logoutUser();
-    this.router.navigate(['/login']);
+    this.authService.logout();
   }
 }
