@@ -13,7 +13,7 @@ import { HeaderComponent } from "./components/header/header.component";
 import { HomeComponent } from "./components/home/home.component";
 import { NgbModule } from "@ng-bootstrap/ng-bootstrap";
 import { httpInterceptorProviders } from "./interceptors";
-import { CommonModule } from "@angular/common";
+import { CommonModule, NgOptimizedImage } from "@angular/common";
 import { NotificationsComponent } from "./components/notification/notifications.component";
 import { LayoutComponent } from './components/layout/layout.component';
 
@@ -36,6 +36,7 @@ import { LayoutComponent } from './components/layout/layout.component';
     NgbModule,
     FormsModule,
     RouterLink,
+    NgOptimizedImage,
   ],
   providers: [httpInterceptorProviders, provideHttpClient(withInterceptorsFromDi())],
 })

@@ -15,8 +15,6 @@ export class UserComponent implements OnInit {
   canManage: boolean = false;
   isOwn: boolean = false;
   sentFriendRequest: boolean = false;
-  passwordChangeRequested: boolean = false;
-  removeAvatarOnSave: boolean = false;
 
   updateForm: UntypedFormGroup;
 
@@ -36,7 +34,5 @@ export class UserComponent implements OnInit {
 
   ngOnInit(): void {
     this.updateForm.reset();
-    this.passwordChangeRequested = false;
-    this.removeAvatarOnSave = false;
   }
 }

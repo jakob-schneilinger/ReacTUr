@@ -27,10 +27,8 @@ export class NotificationsComponent implements OnInit {
     // inject console
     const injectTo: NotificationType[] = globals.debugMode ? ["error"] : [];
     for (const type of injectTo) {
-      // @ts-ignore
-      const old = console[type];
-      // @ts-ignore
-      console[type] = (...params) => {
+      const old = console[type as keyof Console];
+      console[type as keyof Console] = (...params: any[]) => {
         let e = params[0];
 
         let message: string;
@@ -50,7 +48,7 @@ export class NotificationsComponent implements OnInit {
           status = e.status ?? status;
         } else {
           if (params[1] && params[1].error) {
-            e = params[1]
+            e = params[1];
             status = e.status ?? status;
             location = 'Backend';
             message = typeof e.error === 'string' ? e.error : JSON.stringify(e.error);
@@ -60,27 +58,16 @@ export class NotificationsComponent implements OnInit {
           }
         }
 
-        old(...params);
+        (old as Function).apply(console, params);
 
         this.spawnNotification({
           type,
           title: `${location} ${type} (${status})`,
           message,
-          closeAfter: 5000
+          closeAfter: 5000,
         });
       };
     }
-
-    /* const types = ["info", "log", "success", "warn", "error"];
-    let i = 0;
-    setInterval(() => {
-      this.spawnNotification({
-        title: "Test " + i++,
-        type: types[i % types.length] as any,
-        closeAfter: 2000,
-        message: "This is a notification body...",
-      });
-    }, 1000); */
   }
 
   ngOnInit(): void {

@@ -1,15 +1,31 @@
 <div id="navbar">
 
   <div id="items">
-    <div class="navitem logo" routerLink="/">
+    <div class="layout"></div>
+    <div class="navitem logo" routerLink="/search">
+      <img alt="ReacTUr Logo" ngSrc="images/enzyme.png" width="50" height="50" priority>
       <span>ReacTUr</span>
     </div>
     <div class="navitem" routerLink="/search" routerLinkActive="active-link">Search</div>
     <div class="navitem" routerLink="/experiments" routerLinkActive="active-link">Experiments</div>
     <div class="navitem" routerLink="/reactants" routerLinkActive="active-link">Reactants</div>
-    <div class="navitem" routerLink="/admin" routerLinkActive="active-link">Admin</div>
+    <div class="navitem" routerLink="/permissions" routerLinkActive="active-link" [hidden]="user?.role != 'reviewer' && user?.role != 'admin'">Permissions</div>
+    <div class="navitem" routerLink="/admin" routerLinkActive="active-link" [hidden]="user?.role != 'admin'">Admin</div>
   </div>
 
-  <div id="profile" title="User Profile"></div>
-
+  <div class="profile-container" (click)="toggleDropdown($event)">
+    <i id="profile" title="User Profile" class="bi bi-person"></i>
+    <div class="dropdown-menu" [class.show]="isDropdownOpen">
+      <!--
+      <div class="dropdown-item">My Profile</div>
+      <div class="dropdown-item">Settings</div>
+      <div class="dropdown-divider"></div>
+      -->
+      <div class="dropdown-item logout-text" (click)="logout()">
+        Logout
+        <i id="logout" title="Logout" class="bi bi-box-arrow-right"></i>
+      </div>
+    </div>
+    <div class="layout"></div>
+  </div>
 </div>

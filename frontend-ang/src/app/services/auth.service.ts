@@ -10,6 +10,7 @@ interface CustomJwtPayload extends JwtPayload {
   firstName: string;
   lastName: string;
   email: string;
+  role: string;
 }
 
 @Injectable({
@@ -58,11 +59,16 @@ export class AuthService {
   isLoggedIn() {
     const token = this.getToken();
 
+    // TODO: remove when backend connected
+    return true;
+
+    /*
     if (token == null) {
       return false;
     }
 
     return this.getTokenExpirationDate(token).valueOf() > new Date().valueOf();
+     */
   }
 
   logoutUser() {
@@ -76,34 +82,30 @@ export class AuthService {
 
   getLoggedInUser(): User | null {
     const encodedToken = this.getToken();
+    // TODO: remove when backend connected
+    return {
+      firstName: 'Jakob',
+      lastName: 'Schneilinger',
+      email: 'jakob@schneilinger.com',
+      role: 'admin',
+    };
+    /*
     if (encodedToken) {
       const token: CustomJwtPayload = jwtDecode(encodedToken);
       return {
         firstName: token['firstName'],
         lastName: token['lastName'],
         email: token['email'],
+        role: token['role'],
       };
     }
     return null;
+     */
   }
 
   /**
    * Returns the user role based on the current token
    */
-  getUserRole() {
-    const token: string | null = this.getToken();
-    if (token != null) {
-      const decoded: any = jwtDecode(token);
-      const authInfo: string[] = decoded.rol;
-      if (authInfo.includes('ROLE_ADMIN')) {
-        return 'ADMIN';
-      } else if (authInfo.includes('ROLE_USER')) {
-        return 'USER';
-      }
-    }
-    return 'UNDEFINED';
-  }
-
   private setToken(authResponse: string) {
     localStorage.setItem('authToken', authResponse);
   }

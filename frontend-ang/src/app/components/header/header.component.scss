@@ -1,4 +1,5 @@
 @use "@styles/variables.scss" as *;
+@import 'bootstrap-icons/font/bootstrap-icons.css';
 
 #navbar {
   height: 100%;
@@ -24,19 +25,6 @@
   align-items: center;
 
   gap: 1.5rem;
-}
-
-#profile {
-  height: 40px;
-  width: 40px;
-  border-radius: 50%;
-  background-color: $light_gray;
-  cursor: pointer;
-  transition: transform 0.2s ease;
-
-  &:hover {
-    transform: scale(1.05);
-  }
 }
 
 .navitem {
@@ -66,13 +54,107 @@
 }
 
 .logo {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 1rem;
   font-size: 1.5rem;
   font-weight: 800;
   letter-spacing: 0.5px;
   color: $primary;
-  margin-right: 1.5rem;
+  margin-right: 0.5rem;
 
   &:hover {
     opacity: 0.8;
+  }
+}
+
+.profile-container{
+  position: relative;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.layout {
+  width: 10vw;
+  @media (max-width: 1000px) {
+    display: none;
+  }
+}
+
+#profile {
+  font-size: 2rem;
+  cursor: pointer;
+  color: $light_black;
+  padding: 0.5rem;
+  transition: color 0.2s ease, transform 0.2s ease;
+
+  &:hover {
+    color: $primary;
+    transform: scale(1.1);
+  }
+}
+
+.dropdown-menu {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  margin-top: 0.5rem;
+  width: 200px;
+  background-color: $background;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-10px);
+  transition: all 0.2s ease;
+
+  &.show {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+  }
+}
+
+.dropdown-item {
+  padding: 0.75rem 1.25rem;
+  cursor: pointer;
+  color: $light_black;
+  font-weight: 500;
+  transition: background-color 0.2s ease, color 0.2s ease;
+
+  &:hover {
+    background-color: rgba($primary, 0.1);
+    color: $primary;
+  }
+}
+
+.dropdown-divider {
+  height: 1px;
+  background-color: $light_gray;
+  opacity: 0.2;
+  margin: 0.25rem 0;
+}
+
+.logout-text {
+  color: $error;
+
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+
+  #logout {
+    font-size: 1rem;
+  }
+
+  &:hover {
+    background-color: rgba($error, 0.1);
+    color: $error;
   }
 }
