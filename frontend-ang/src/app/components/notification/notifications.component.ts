@@ -1,11 +1,11 @@
-import { Component, ElementRef, Input, OnDestroy, OnInit } from "@angular/core";
+import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { Globals } from "../../global/globals";
 import { Notification, NotificationService, NotificationType } from "../../services/notification.service";
 
 @Component({
-  selector: "app-notifications",
-  templateUrl: "./notifications.component.html",
-  styleUrls: ["./notifications.component.scss"],
+  selector: 'app-notifications',
+  templateUrl: './notifications.component.html',
+  styleUrls: ['./notifications.component.scss'],
   standalone: false,
 })
 export class NotificationsComponent implements OnInit {
@@ -14,18 +14,22 @@ export class NotificationsComponent implements OnInit {
 
   getTypeIcon(type: NotificationType) {
     const types: { [key in NotificationType]: string } = {
-      error: "error bi bi-exclamation-diamond-fill",
-      info: "info bi bi-info-circle-fill",
-      log: "log bi bi-question-circle-fill",
-      success: "success bi bi-check-circle-fill",
-      warn: "warn bi bi-exclamation-triangle-fill",
+      error: 'error bi bi-exclamation-diamond-fill',
+      info: 'info bi bi-info-circle-fill',
+      log: 'log bi bi-question-circle-fill',
+      success: 'success bi bi-check-circle-fill',
+      warn: 'warn bi bi-exclamation-triangle-fill',
     };
     return types[type];
   }
 
-  constructor(private not: NotificationService, private globals: Globals) {
+  constructor(
+    private not: NotificationService,
+    private globals: Globals,
+    private cdr: ChangeDetectorRef
+  ) {
     // inject console
-    const injectTo: NotificationType[] = globals.debugMode ? ["error"] : [];
+    const injectTo: NotificationType[] = globals.debugMode ? ['error'] : [];
     for (const type of injectTo) {
       const old = console[type as keyof Console];
       console[type as keyof Console] = (...params: any[]) => {
@@ -78,8 +82,10 @@ export class NotificationsComponent implements OnInit {
   }
 
   spawnNotification(notification: Notification) {
-    if (!notification.type) notification.type = "log";
+    if (!notification.type) notification.type = 'log';
     this.notifications.push(notification);
+
+    this.cdr.detectChanges();
 
     if (!notification.closeAfter) return;
     setTimeout(() => this.close(notification), notification.closeAfter);
@@ -90,5 +96,7 @@ export class NotificationsComponent implements OnInit {
     if (i < 0) return;
 
     this.notifications.splice(i, 1);
+
+    this.cdr.detectChanges();
   }
 }

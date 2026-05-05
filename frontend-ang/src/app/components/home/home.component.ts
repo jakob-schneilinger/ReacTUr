@@ -1,11 +1,6 @@
-
-
 import { AuthService } from "../../services/auth.service";
 import { ActivatedRoute, Router } from "@angular/router";
-import { Component, OnInit, ViewChild, ElementRef, OnDestroy, ComponentRef } from "@angular/core";
-
-// for delete modal
-declare var bootstrap: any;
+import { Component } from "@angular/core";
 
 @Component({
   selector: 'app-home',

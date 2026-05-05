@@ -5,13 +5,14 @@ import { AuthGuard } from "./guards/auth.guard";
 import { HomeComponent } from "./components/home/home.component";
 
 import { LoginComponent } from "./components/user/login/login.component";
-import { UserComponent } from "./components/user/user.component";
+import { ExperimentSiteComponent } from './components/experiment-site/experiment-site.component';
+import { SearchSiteComponent } from './components/search-site/search-site.component';
 
 
 export const routes: Routes = [
-  { path: 'search', component: HomeComponent, canActivate: [AuthGuard] },
+  { path: 'search', component: SearchSiteComponent, canActivate: [AuthGuard] },
   { path: 'login', component: LoginComponent },
-  { path: 'experiments', component: HomeComponent, canActivate: [AuthGuard] },
+  { path: 'experiments', component: ExperimentSiteComponent, canActivate: [AuthGuard] },
   { path: 'reactants', component: HomeComponent, canActivate: [AuthGuard] },
   { path: 'permissions', component: HomeComponent, canActivate: [AuthGuard] },
   { path: 'admin', component: HomeComponent, canActivate: [AuthGuard] },

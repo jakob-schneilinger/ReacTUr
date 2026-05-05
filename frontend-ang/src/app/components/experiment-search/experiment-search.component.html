@@ -1,0 +1,34 @@
+<div class="search-container">
+
+  <div class="input-group">
+    <label>Reactant 1</label>
+    <div class="search-field">
+      <input
+        type="text"
+        [(ngModel)]="reactant1"
+        (ngModelChange)="onSearch()"
+        placeholder="e.g. Sodium" />
+      @if (!reactant1) {
+        <span class="icon bi bi-search"></span>
+      } @else {
+      <span class="icon bi bi-x text-black clear-btn" (click)="clearReactant1()"></span>
+    }
+    </div>
+  </div>
+
+  <div class="input-group">
+    <label>Reactant 2</label>
+    <div class="search-field">
+      <input
+        type="text"
+        [(ngModel)]="reactant2"
+        (ngModelChange)="onSearch()"
+        placeholder="e.g. Chloride" />
+      @if (!reactant2) {
+        <span class="icon bi bi-search"></span>
+      } @else {
+        <span class="icon bi bi-x text-black clear-btn" (click)="clearReactant2()"></span>
+      }
+    </div>
+  </div>
+</div>

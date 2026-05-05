@@ -1,0 +1,60 @@
+<div class="results-container">
+
+  @if (state === 'initial') {
+    <div class="message-box">
+      <p>Input reactants to search for reactions.</p>
+    </div>
+  } @else if (state === 'no-results') {
+  <div class="message-box">
+    <p>No experiments found for these reactants.</p>
+  </div>
+} @else if (state === 'has-results') {
+  <div class="cards-grid">
+    <div class="experiment-card" *ngFor="let exp of experiments">
+
+      <!-- Header Section -->
+      <div class="card-header">
+        <h3>{{ exp.reactant1 || 'Unknown' }} + {{ exp.reactant2 || 'Unknown' }}</h3>
+        <span class="scientist-badge" *ngIf="exp.scientist">By: {{ exp.scientist }}</span>
+      </div>
+
+      <!-- Metadata Grid -->
+      <div class="details-grid">
+        <div class="detail-item">
+          <strong>Date:</strong> {{ exp.dateYear }}-{{ exp.dateMonth }}-{{ exp.dateDay }}
+        </div>
+        <div class="detail-item">
+          <strong>Solvent:</strong> {{ exp.solvent || 'N/A' }}
+        </div>
+        <div class="detail-item">
+          <strong>Temp:</strong> {{ exp.temp !== undefined ? exp.temp + ' °C' : 'N/A' }}
+        </div>
+        <div class="detail-item">
+          <strong>Conc. A:</strong> {{ exp.concentrationA || 'N/A' }} mM
+        </div>
+        <div class="detail-item">
+          <strong>Conc. B:</strong> {{ exp.concentrationB || 'N/A' }} mM
+        </div>
+        <div class="detail-item">
+          <strong>Instrument:</strong> {{ exp.instrument || 'N/A' }}
+        </div>
+        <div class="detail-item">
+          <strong>Modality:</strong> {{ exp.modality || 'N/A' }}
+        </div>
+        <div class="detail-item">
+          <strong>Wavelength:</strong>
+          {{ exp.wavelength && exp.wavelength !== 'N/A' ? exp.wavelength + ' nm' : 'N/A' }}
+        </div>
+      </div>
+
+      <!-- Comments Section -->
+      <div class="comment-section" *ngIf="exp.comment">
+        <strong>Notes:</strong> {{ exp.comment }}
+      </div>
+
+      <button class="btn-primary" [routerLink]="'/experiments/' + exp.id">Select Experiment</button>
+    </div>
+  </div>
+}
+
+</div>

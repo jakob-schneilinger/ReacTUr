@@ -1,0 +1,78 @@
+@use "src/styles/global.scss" as *;
+@use "src/styles/variables.scss" as *;
+@import 'bootstrap-icons/font/bootstrap-icons.css';
+
+.layout-wrapper {
+  display: block;
+  width: 80%;
+  height: calc(100vh);
+  padding-top: 64px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.btn-primary {
+  background-color: $primary;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: background-color 0.2s;
+
+  margin-right: 0.75rem;
+  margin-bottom: 0.5rem;
+
+  &:hover {
+    background-color: $primary_hover !important;
+  }
+}
+
+.btn-clear {
+  background-color: $light_gray;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: background-color 0.2s;
+
+  &:hover {
+    background-color: $light_gray_hover !important;
+  }
+}
+
+.divider {
+  height: 1px;
+  background-color: $light_gray;
+  margin-bottom: 1rem;
+  width: 100%;
+}
+
+.collapse-toggle {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: $light_gray;
+  font-size: 0.875rem;
+  cursor: pointer;
+  margin-bottom: 1rem;
+  user-select: none;
+  transition: color 0.2s;
+
+  &:hover {
+    color: $light_gray_hover;
+  }
+
+  i {
+    font-size: 0.75rem;
+  }
+}
+
+.advanced-search-content {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.4s ease-in-out, opacity 0.3s ease-in-out;
+}

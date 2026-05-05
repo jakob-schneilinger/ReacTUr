@@ -1,4 +1,4 @@
-@use "@styles/variables.scss" as *;
+@use "src/styles/variables.scss" as *;
 @import 'bootstrap-icons/font/bootstrap-icons.css';
 
 #navbar {
@@ -78,7 +78,8 @@
 }
 
 .layout {
-  width: 10vw;
+  width: 9vw;
+  height: 20px;
   @media (max-width: 1000px) {
     display: none;
   }

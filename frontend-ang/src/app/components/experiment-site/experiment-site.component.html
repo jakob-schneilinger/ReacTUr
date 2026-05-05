@@ -1,0 +1,27 @@
+
+<div class="layout-wrapper">
+  <app-layout>
+
+    <!-- Linke Spalte -->
+    <div leftContent>
+      <h2>Experiments</h2>
+      <app-experiment-search
+        (searchChanged)="handleSearch($event)">
+      </app-experiment-search>
+
+      <button class="btn-create" (click)="handleCreate()">
+        Create new Experiment
+      </button>
+    </div>
+
+    <!-- Rechte Spalte -->
+    <div rightContent>
+      <app-experiment-results
+        [state]="currentSearchState"
+        [experiments]="foundExperiments"
+        (createNewReaction)="handleCreate()">
+      </app-experiment-results>
+    </div>
+
+  </app-layout>
+</div>

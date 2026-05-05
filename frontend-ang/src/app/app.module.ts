@@ -15,6 +15,11 @@ import { NgOptimizedImage } from "@angular/common";
 
 import { NgbModule } from "@ng-bootstrap/ng-bootstrap";
 import { OAuthModule } from "angular-oauth2-oidc";
+import { ExperimentSearchComponent } from './components/experiment-search/experiment-search.component';
+import { ExperimentResultsComponent } from './components/experiment-results/experiment-results.component';
+import { ExperimentSiteComponent } from './components/experiment-site/experiment-site.component';
+import { SearchSiteComponent } from './components/search-site/search-site.component';
+import { AdvancedSearchComponent } from './components/search-details/advanced-search.component';
 
 @NgModule({
   declarations: [
@@ -25,6 +30,11 @@ import { OAuthModule } from "angular-oauth2-oidc";
     UserComponent,
     NotificationsComponent,
     LayoutComponent,
+    ExperimentSearchComponent,
+    ExperimentResultsComponent,
+    ExperimentSiteComponent,
+    SearchSiteComponent,
+    AdvancedSearchComponent,
   ],
   imports: [
     BrowserModule,
@@ -37,11 +47,11 @@ import { OAuthModule } from "angular-oauth2-oidc";
     OAuthModule.forRoot({
       resourceServer: {
         allowedUrls: ['http://localhost:8080/api'],
-        sendAccessToken: true
-      }
+        sendAccessToken: true,
+      },
     }),
   ],
   providers: [],
-  bootstrap: [AppComponent]
+  bootstrap: [AppComponent],
 })
 export class AppModule {}

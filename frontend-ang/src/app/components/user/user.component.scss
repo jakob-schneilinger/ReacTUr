@@ -1,5 +1,5 @@
-@use "@styles/variables.scss" as *;
-@use "@styles/global.scss" as *;
+@use "src/styles/variables.scss" as *;
+@use "src/styles/global.scss" as *;
 
 .avatar {
   width: 10rem;
@@ -58,7 +58,6 @@
   padding: 2rem;
   margin: 0;
 }
-
 
 .share-link-input {
   width: 100%;

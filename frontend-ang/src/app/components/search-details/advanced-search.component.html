@@ -1,0 +1,143 @@
+<div class="advanced-search-container">
+
+  <!-- Date Component -->
+  <div class="input-group">
+    <label>Date</label>
+    <div class="date-group position-relative">
+      <input type="number" placeholder="DD" class="date-input" maxlength="2"
+             min="1" max="31"
+             [(ngModel)]="dateDay" (ngModelChange)="validateDay()">
+      <input type="number" placeholder="MM" class="date-input" maxlength="2"
+             min="1" max="12"
+             [(ngModel)]="dateMonth" (ngModelChange)="validateMonth()">
+      <input type="number" placeholder="YYYY" class="date-input year-input" maxlength="4"
+             min="1900" max="2500"
+             [(ngModel)]="dateYear" (ngModelChange)="validateYear()">
+      <input type="date" #datePicker class="hidden-date-picker" (change)="onCalendarSelect($event)">
+      <i class="bi bi-calendar icon-btn" (click)="datePicker.showPicker()"></i>
+    </div>
+  </div>
+
+  <!-- Scientist Component -->
+  <div class="input-group">
+    <label>Scientist</label>
+    <div class="search-field">
+      <input type="text" placeholder="Name"
+             [(ngModel)]="scientist" (ngModelChange)="onSearch()"/>
+      @if (scientist) {
+        <span class="icon bi bi-x text-black clear-btn" (click)="clearScientist()"></span>
+      }
+    </div>
+  </div>
+
+  <!-- Temperature Component -->
+  <div class="input-group">
+    <label>Temperature</label>
+    <div class="temperature-group">
+      <div class="temp-field-wrapper">
+        <input type="number" placeholder="From" class="temp-input"
+               min="−273.15" [max]="tempTo || '5000'"
+               [(ngModel)]="tempFrom" (ngModelChange)="onSearch()">
+        <span class="unit">°C</span>
+      </div>
+      <span class="separator">-</span>
+      <div class="temp-field-wrapper">
+        <input type="number" placeholder="To" class="temp-input"
+               [min]="tempFrom || '-237.15'" max="5000"
+               [(ngModel)]="tempTo" (ngModelChange)="onSearch()">
+        <span class="unit">°C</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Solvent Component -->
+  <div class="input-group">
+    <label>Solvent</label>
+    <div class="search-field">
+      <input type="text" placeholder="e.g. Water"
+             [(ngModel)]="solvent" (ngModelChange)="onSearch()"/>
+      @if (solvent) {
+        <span class="icon bi bi-x text-black clear-btn" (click)="clearSolvent()"></span>
+      }
+    </div>
+  </div>
+
+  <!-- Concentration Component -->
+  <div class="input-group">
+    <label>Concentration</label>
+    <div class="concentration-group">
+      <div class="concentration-field-wrapper">
+        <input type="number" placeholder="{{reactant1}}" class="concentration-input"
+               [(ngModel)]="concentrationA" (ngModelChange)="onSearch()">
+        <span class="unit">mM</span>
+      </div>
+      <span class="separator">&nbsp;</span>
+      <div class="concentration-field-wrapper">
+        <input type="number" placeholder="{{reactant2}}" class="concentration-input"
+               [(ngModel)]="concentrationB" (ngModelChange)="onSearch()">
+        <span class="unit">mM</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Instrument Component -->
+  <div class="input-group">
+    <label>Instrument</label>
+    <div class="search-field">
+      <input type="text" placeholder="Instrument Name"
+             [(ngModel)]="instrument" (ngModelChange)="onSearch()"/>
+      @if (instrument) {
+        <span class="icon bi bi-x text-black clear-btn" (click)="clearInstrument()"></span>
+      }
+    </div>
+  </div>
+
+  <!-- Modality Component -->
+  <div class="input-group">
+    <label>Modality</label>
+    <div class="search-field">
+      <input type="text" placeholder="Modality Type"
+             [(ngModel)]="modality" (ngModelChange)="onSearch()"/>
+      @if (modality) {
+        <span class="icon bi bi-x text-black clear-btn" (click)="clearModality()"></span>
+      }
+    </div>
+  </div>
+
+  <!-- Wavelength Component -->
+  <div class="input-group">
+    <label>Wavelength</label>
+    <div class="wavelength-group">
+      <div class="wavelength-field-wrapper">
+        <input type="number" placeholder="Wavelength" class="wavelength-input"
+               [(ngModel)]="wavelength" (ngModelChange)="onSearch()">
+        <span class="unit">nm</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Comment Component -->
+  <div class="input-group">
+    <label>Comment</label>
+    <div class="comment-field">
+      <textarea placeholder="Comment" [(ngModel)]="comment" (ngModelChange)="onSearch()">
+      </textarea>
+    </div>
+  </div>
+
+  <!-- Rate Constant Range Component -->
+  <div class="input-group">
+    <label>Rate Constant Range</label>
+    <div class="rate-constant-range-group">
+      <div class="rate-constant-range-field-wrapper">
+        <input type="number" placeholder="From" class="rate-constant-range-input"
+               [(ngModel)]="minRange" (ngModelChange)="onSearch()">
+      </div>
+      <span class="separator">-</span>
+      <div class="rate-constant-range-field-wrapper">
+        <input type="number" placeholder="To" class="rate-constant-range-input"
+               [(ngModel)]="maxRange" (ngModelChange)="onSearch()">
+      </div>
+    </div>
+  </div>
+</div>

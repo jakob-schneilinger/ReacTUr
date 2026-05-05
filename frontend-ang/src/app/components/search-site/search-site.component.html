@@ -1,0 +1,48 @@
+
+<div class="layout-wrapper">
+  <app-layout>
+
+    <!-- Linke Spalte -->
+    <div leftContent>
+      <h2>Search</h2>
+      <app-experiment-search
+        [triggerClear]="clearSignal"
+        (searchChanged)="handleSearch($event)">
+      </app-experiment-search>
+
+      <div class="divider"></div>
+
+      <div class="collapse-toggle" (click)="toggleAdvancedSearch()">
+        <span>Advanced Search</span>
+        <i class="bi" [ngClass]="isAdvancedSearchOpen ? 'bi-chevron-up' : 'bi-chevron-down'"></i>
+      </div>
+
+      <app-advanced-search
+        class="advanced-search-content"
+        [hidden]="!isAdvancedSearchOpen"
+        [reactant1]="reactant1"
+        [reactant2]="reactant2"
+        [triggerClear]="clearSignal"
+        (searchChanged)="handleAdvancedSearch($event)">
+      </app-advanced-search>
+
+      <!-- TODO: currently hidden, look if search without button is feasible -->
+      <button class="btn-primary" (click)="handleSearchButton()" [hidden]="true">
+        Search for Experiments
+      </button>
+
+      <button class="btn-clear" (click)="onClearClicked()">
+        Clear Fields
+      </button>
+    </div>
+
+    <!-- Rechte Spalte -->
+    <div rightContent>
+      <app-experiment-results
+        [state]="currentSearchState"
+        [experiments]="foundExperiments">
+      </app-experiment-results>
+    </div>
+
+  </app-layout>
+</div>
