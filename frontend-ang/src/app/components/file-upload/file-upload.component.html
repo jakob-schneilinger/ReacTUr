@@ -1,0 +1,14 @@
+
+<div class="container mt-4" style="max-width: 500px;">
+  <h6 class="mb-3">Upload your Files:</h6>
+
+  <app-drag-and-drop (filesSelected)="addFiles($event)"></app-drag-and-drop>
+
+  <div class="file-list mt-4">
+    <app-uploaded-file
+      *ngFor="let file of files; let i = index"
+      [file]="file"
+      (remove)="removeFile(i)">
+    </app-uploaded-file>
+  </div>
+</div>

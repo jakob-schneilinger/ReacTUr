@@ -51,6 +51,12 @@
   width: 100%;
 }
 
+.collapse-toggle-container {
+  display: flex;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
 .collapse-toggle {
   display: flex;
   align-items: center;
@@ -58,7 +64,6 @@
   color: $light_gray;
   font-size: 0.875rem;
   cursor: pointer;
-  margin-bottom: 1rem;
   user-select: none;
   transition: color 0.2s;
 

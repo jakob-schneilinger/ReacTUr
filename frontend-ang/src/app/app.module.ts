@@ -20,6 +20,11 @@ import { ExperimentResultsComponent } from './components/experiment-results/expe
 import { ExperimentSiteComponent } from './components/experiment-site/experiment-site.component';
 import { SearchSiteComponent } from './components/search-site/search-site.component';
 import { AdvancedSearchComponent } from './components/search-details/advanced-search.component';
+import { ExperimentDetailsSiteComponent } from './components/experiment-details/experiment-details-site/experiment-details-site.component';
+import { FileUploadComponent } from './components/file-upload/file-upload.component';
+import { DragAndDropComponent } from './components/file-upload/drag-and-drop/drag-and-drop.component';
+import { UploadedFileComponent } from './components/file-upload/uploaded-file/uploaded-file.component';
+import { DragAndDropDirective } from './directives/drag-and-drop.directive';
 
 @NgModule({
   declarations: [
@@ -35,6 +40,10 @@ import { AdvancedSearchComponent } from './components/search-details/advanced-se
     ExperimentSiteComponent,
     SearchSiteComponent,
     AdvancedSearchComponent,
+    ExperimentDetailsSiteComponent,
+    FileUploadComponent,
+    DragAndDropComponent,
+    UploadedFileComponent,
   ],
   imports: [
     BrowserModule,
@@ -50,6 +59,7 @@ import { AdvancedSearchComponent } from './components/search-details/advanced-se
         sendAccessToken: true,
       },
     }),
+    DragAndDropDirective,
   ],
   providers: [],
   bootstrap: [AppComponent],

@@ -81,7 +81,7 @@ export class AdvancedSearchComponent {
   }
 
   onCalendarSelect(event: any) {
-    console.log(event)
+    console.log(event) //TODO: remove when debugging done
     const selectedDate = event.target.value;
     if (selectedDate) {
       const parts = selectedDate.split('-');

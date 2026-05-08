@@ -1,0 +1,14 @@
+@use "src/styles/global.scss" as *;
+@use "src/styles/variables.scss" as *;
+@import 'bootstrap-icons/font/bootstrap-icons.css';
+
+.dropzone {
+  border: 2px dashed $light_gray;
+  background-color: white;
+  transition: background-color 0.2s ease;
+}
+
+.dropzone.bg-light {
+  background-color: $background !important;
+  border-color: $primary;
+}

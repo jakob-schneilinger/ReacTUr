@@ -12,16 +12,18 @@
 
       <div class="divider"></div>
 
-      <div class="collapse-toggle" (click)="toggleAdvancedSearch()">
-        <span>Advanced Search</span>
-        <i class="bi" [ngClass]="isAdvancedSearchOpen ? 'bi-chevron-up' : 'bi-chevron-down'"></i>
+      <div class="collapse-toggle-container">
+        <div class="collapse-toggle" (click)="toggleAdvancedSearch()">
+          <span>Advanced Search</span>
+          <i class="bi" [ngClass]="isAdvancedSearchOpen ? 'bi-chevron-up' : 'bi-chevron-down'"></i>
+        </div>
       </div>
 
       <app-advanced-search
         class="advanced-search-content"
         [hidden]="!isAdvancedSearchOpen"
-        [reactant1]="reactant1"
-        [reactant2]="reactant2"
+        [reactant1]="reactant1 || 'Reactant 1'"
+        [reactant2]="reactant2 || 'Reactant 2'"
         [triggerClear]="clearSignal"
         (searchChanged)="handleAdvancedSearch($event)">
       </app-advanced-search>

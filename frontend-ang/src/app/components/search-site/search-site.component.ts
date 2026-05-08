@@ -30,8 +30,8 @@ export class SearchSiteComponent {
   handleSearch(terms: { reactant1: string; reactant2: string }) {
     this.reactant1 = terms.reactant1;
     this.reactant2 = terms.reactant2;
-    console.log(terms);
-    console.log(this.metadata);
+    console.log(terms); //TODO: remove when debugging done
+    console.log(this.metadata); //TODO: remove when debugging done
     this.executeSearch();
   }
 
@@ -51,8 +51,8 @@ export class SearchSiteComponent {
       !this.metadata ||
       Object.values(this.metadata).every((val) => val === undefined || val === null || val === '');
 
-    console.log(isBasicEmpty)
-    console.log(isAdvancedEmpty)
+    console.log(isBasicEmpty); //TODO: remove when debugging done
+    console.log(isAdvancedEmpty); //TODO: remove when debugging done
 
     if (isBasicEmpty && isAdvancedEmpty) {
       this.currentSearchState = 'initial';
