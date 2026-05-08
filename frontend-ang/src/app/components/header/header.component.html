@@ -7,7 +7,29 @@
       <span>ReacTUr</span>
     </div>
     <div class="navitem" routerLink="/search" routerLinkActive="active-link">Search</div>
-    <div class="navitem" routerLink="/experiments" routerLinkActive="active-link">Experiments</div>
+    <div class="navitem"
+         ngbDropdown
+         display="static"
+         placement="bottom"
+         #experimentsDrop="ngbDropdown"
+         (mouseenter)="experimentsDrop.open()"
+         (mouseleave)="experimentsDrop.close()"
+         routerLinkActive="active-link">
+
+      <div ngbDropdownToggle
+           routerLink="/experiments"
+           class="dropdown-toggle-custom">
+        Experiments
+      </div>
+
+      <div ngbDropdownMenu class="experiments-menu-wrapper">
+        <div class="experiments-menu-content">
+          <button ngbDropdownItem routerLink="/experiments/create">
+            <i class="bi bi-plus-circle me-2"></i> Create Experiment
+          </button>
+        </div>
+      </div>
+    </div>
     <div class="navitem" routerLink="/reactants" routerLinkActive="active-link">Reactants</div>
     <div class="navitem" routerLink="/permissions" routerLinkActive="active-link" [hidden]="user?.role != 'reviewer' && user?.role != 'admin'">Permissions</div>
     <div class="navitem" routerLink="/admin" routerLinkActive="active-link" [hidden]="user?.role != 'admin'">Admin</div>
