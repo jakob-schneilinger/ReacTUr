@@ -19,15 +19,8 @@ export class FileUploadComponent implements OnInit {
 
   files: File[] = [];
 
-  addFiles(newFiles: FileList | File[]) {
-    // Convert FileList to Array and append to existing files
-    const filesArray = Array.from(newFiles);
-    this.files.push(...filesArray);
-  }
-
-  removeFile(index: number) {
-    this.files.splice(index, 1);
-  }
+  isDeleteModalOpen: boolean = false;
+  pendingDeleteIndex: number | null = null;
 
   ngOnInit(): void {
     this.route.params.subscribe({
@@ -39,5 +32,40 @@ export class FileUploadComponent implements OnInit {
         }
       },
     });
+  }
+
+  addFiles(newFiles: FileList | File[]) {
+    const filesArray = Array.from(newFiles);
+    this.files.push(...filesArray);
+  }
+
+  removeFile(index: number) {
+    this.files.splice(index, 1);
+  }
+
+  get pendingFileName(): string {
+    return this.pendingDeleteIndex !== null ? this.files[this.pendingDeleteIndex]?.name : '';
+  }
+
+  confirmRemoveFile(index: number) {
+    this.pendingDeleteIndex = index;
+    this.isDeleteModalOpen = true;
+  }
+
+  cancelDelete() {
+    this.isDeleteModalOpen = false;
+    this.pendingDeleteIndex = null;
+  }
+
+  executeDelete() {
+    if (this.pendingDeleteIndex !== null) {
+      const tempName = this.files[this.pendingDeleteIndex]?.name;
+      this.files.splice(this.pendingDeleteIndex, 1);
+      this.notification.success(
+        'File Removed',
+        `The file "${tempName}" was successfully removed from the list.`,
+      );
+    }
+    this.cancelDelete();
   }
 }

@@ -14,8 +14,9 @@ export class DragAndDropComponent {
 
   constructor(private notificationService: NotificationService) {}
 
-  onFileDropped(files: FileList) {
+  onFileDropped(files: FileList | File[]) {
     this.filesSelected.emit(files);
+    this.notificationService.success('Success', `${files.length} file(s) added.`);
   }
 
   onFileError(errorMessage: string) {
@@ -39,7 +40,7 @@ export class DragAndDropComponent {
       }
 
       if (validFiles.length > 0) {
-        this.filesSelected.emit(validFiles);
+        this.onFileDropped(validFiles);
       }
     }
     event.target.value = null;
