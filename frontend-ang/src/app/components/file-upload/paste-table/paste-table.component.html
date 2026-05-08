@@ -1,0 +1,45 @@
+<div class="paste-container">
+
+  <div class="toolbar">
+    <h3>Paste Data Table</h3>
+    <div class="actions">
+      <button
+        class="btn-clear"
+        (click)="clearTable()"
+        [disabled]="tableData.length === 0">
+        Clear
+      </button>
+      <button
+        class="btn-save"
+        (click)="saveAsCsv()"
+        [disabled]="tableData.length === 0">
+        Save as CSV
+      </button>
+    </div>
+  </div>
+
+  <!-- The Paste Zone -->
+  <div
+    class="paste-zone"
+    tabindex="0"
+    (paste)="onPaste($event)"
+    [class.has-data]="tableData.length > 0">
+
+    <!-- Placeholder when empty -->
+    <div class="placeholder" *ngIf="tableData.length === 0">
+      <p>Click here and press <strong>Ctrl+V</strong> (or Cmd+V) to paste data from Excel/Sheets.</p>
+    </div>
+
+    <!-- Data Table -->
+    <div class="table-wrapper" *ngIf="tableData.length > 0">
+      <table>
+        <tbody>
+        <tr *ngFor="let row of tableData; let i = index" [class.header-row]="i === 0">
+          <td *ngFor="let cell of row">{{ cell }}</td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+</div>

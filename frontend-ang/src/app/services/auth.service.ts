@@ -7,7 +7,6 @@ import { authConfig } from '../auth.config';
   providedIn: 'root',
 })
 export class AuthService {
-
   public initialLoginSequence: Promise<boolean>;
 
   constructor(private oauthService: OAuthService) {
@@ -17,15 +16,33 @@ export class AuthService {
     this.initialLoginSequence = this.oauthService.loadDiscoveryDocumentAndTryLogin();
   }
 
+  //TODO: remove
+  hardcoded_user: User = {
+    email: 'jakob@schneilinger.com',
+    firstName: 'Jakob',
+    lastName: 'Schneilinger',
+    role: 'admin',
+  };
+  hardcoded_logged_in: boolean = true;
+
   public login() {
+    //TODO: remove if auth working
+    this.hardcoded_logged_in = true;
+
     this.oauthService.initCodeFlow();
   }
 
   public logout() {
+    //TODO: remove if auth working
+    this.hardcoded_logged_in = false;
+
     this.oauthService.logOut();
   }
 
   public isLoggedIn(): boolean {
+    //TODO: remove if auth working
+    return this.hardcoded_logged_in;
+
     return this.oauthService.hasValidAccessToken();
   }
 
@@ -34,6 +51,9 @@ export class AuthService {
   }
 
   public getLoggedInUser(): User | null {
+    //TODO: remove if auth working
+    return this.hardcoded_user;
+
     if (!this.isLoggedIn()) {
       return null;
     }

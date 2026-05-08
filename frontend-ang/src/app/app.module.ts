@@ -25,6 +25,7 @@ import { FileUploadComponent } from './components/file-upload/file-upload.compon
 import { DragAndDropComponent } from './components/file-upload/drag-and-drop/drag-and-drop.component';
 import { UploadedFileComponent } from './components/file-upload/uploaded-file/uploaded-file.component';
 import { DragAndDropDirective } from './directives/drag-and-drop.directive';
+import { PasteTableComponent } from './components/file-upload/paste-table/paste-table.component';
 
 @NgModule({
   declarations: [
@@ -60,6 +61,7 @@ import { DragAndDropDirective } from './directives/drag-and-drop.directive';
       },
     }),
     DragAndDropDirective,
+    PasteTableComponent,
   ],
   providers: [],
   bootstrap: [AppComponent],
