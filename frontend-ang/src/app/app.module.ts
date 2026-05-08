@@ -26,6 +26,9 @@ import { DragAndDropComponent } from './components/file-upload/drag-and-drop/dra
 import { UploadedFileComponent } from './components/file-upload/uploaded-file/uploaded-file.component';
 import { DragAndDropDirective } from './directives/drag-and-drop.directive';
 import { PasteTableComponent } from './components/file-upload/paste-table/paste-table.component';
+import {
+  ExperimentCreateSiteComponent
+} from './components/experiment-create/experiment-create-site/experiment-create-site.component';
 
 @NgModule({
   declarations: [
@@ -46,6 +49,7 @@ import { PasteTableComponent } from './components/file-upload/paste-table/paste-
     DragAndDropComponent,
     UploadedFileComponent,
     PasteTableComponent,
+    ExperimentCreateSiteComponent,
   ],
   imports: [
     BrowserModule,

@@ -1,0 +1,12 @@
+@use "src/styles/global.scss" as *;
+@use "src/styles/variables.scss" as *;
+@import 'bootstrap-icons/font/bootstrap-icons.css';
+
+.layout-wrapper {
+  display: block;
+  width: 80%;
+  height: calc(100vh);
+  padding-top: 64px;
+  margin-left: auto;
+  margin-right: auto;
+}
