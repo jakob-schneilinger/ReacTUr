@@ -1,4 +1,3 @@
-// dnd.directive.ts
 import { Directive, Output, Input, EventEmitter, HostBinding, HostListener } from '@angular/core';
 
 @Directive({
@@ -7,6 +6,9 @@ import { Directive, Output, Input, EventEmitter, HostBinding, HostListener } fro
 export class DragAndDropDirective {
   @HostBinding('class.bg-light') fileOver: boolean = false;
   @Output() fileDropped = new EventEmitter<any>();
+  @Output() fileError = new EventEmitter<string>();
+
+  private allowedExtensions = ['txt', 'csv', 'dsx'];
 
   // Dragover listener
   @HostListener('dragover', ['$event']) onDragOver(evt: any) {
@@ -27,9 +29,27 @@ export class DragAndDropDirective {
     evt.preventDefault();
     evt.stopPropagation();
     this.fileOver = false;
-    let files = evt.dataTransfer.files;
+
+    const files: FileList = evt.dataTransfer.files;
+    const validFiles: File[] = [];
+
     if (files.length > 0) {
-      this.fileDropped.emit(files);
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+        const extension = file.name.split('.').pop()?.toLowerCase();
+
+        if (extension && this.allowedExtensions.includes(extension)) {
+          validFiles.push(file);
+        } else {
+          this.fileError.emit(
+            `File type .${extension} is not allowed. Only .txt, .csv, and .dsx are supported.`,
+          );
+        }
+      }
+
+      if (validFiles.length > 0) {
+        this.fileDropped.emit(validFiles);
+      }
     }
   }
 }

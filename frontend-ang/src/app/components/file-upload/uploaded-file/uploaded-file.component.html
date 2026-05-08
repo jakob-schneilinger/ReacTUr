@@ -5,15 +5,12 @@
       <h6 class="mb-0 text-truncate" style="max-width: 250px;">{{ file?.name }}</h6>
       <small class="text-muted text-uppercase">{{ getExtension(file.name) }}</small>
     </div>
-    <div class="d-flex flex-row justify-content-between align-items-center">
-      <div class="remove-icon pointer-event" (click)="onDownload()" title="Download">
-        <i class="bi bi-download fs-5"></i>
+    <div class="d-flex flex-row justify-content-between align-items-center gap-2">
+      <div class="icon download-icon" (click)="onDownload()" title="Download">
+        <i class="bi bi-download"></i>
       </div>
-      <button class="btn btn-sm btn-link text-dark text-decoration-none me-2" (click)="onDownload()" title="Download">
-        <i class="bi bi-download fs-5"></i>
-      </button>
-      <div class="remove-icon pointer-event" (click)="onRemove()" title="Remove">
-        <i class="bi bi-trash fs-5"></i>
+      <div class="icon remove-icon" (click)="onRemove()" title="Remove">
+        <i class="bi bi-trash"></i>
       </div>
     </div>
   </div>
