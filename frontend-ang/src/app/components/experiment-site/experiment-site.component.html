@@ -9,7 +9,7 @@
         (searchChanged)="handleSearch($event)">
       </app-experiment-search>
 
-      <button class="btn-create" (click)="handleCreate()">
+      <button class="btn-create">
         Create new Experiment
       </button>
     </div>
@@ -18,8 +18,7 @@
     <div rightContent>
       <app-experiment-results
         [state]="currentSearchState"
-        [experiments]="foundExperiments"
-        (createNewReaction)="handleCreate()">
+        [experiments]="foundExperiments">
       </app-experiment-results>
     </div>
 

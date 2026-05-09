@@ -4,8 +4,7 @@ export interface Metadata {
   scientist: string;
   temperature: number;
   solvent: string;
-  concentrationA: number;
-  concentrationB: number;
+  concentrations: number[];
   instrument?: string;
   modality?: string;
   wavelength?: number;

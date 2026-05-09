@@ -1,25 +1,8 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core';
+import { Experiment } from '../../dtos/experiment';
 
 export type SearchState = 'initial' | 'no-results' | 'has-results';
 
-// TODO: add to dto when structure fixed
-export interface Experiment {
-  id: number;
-  reactant1: string;
-  reactant2: string;
-  dateYear?: string;
-  dateMonth?: string;
-  dateDay?: string;
-  solvent?: string;
-  scientist?: string;
-  temp?: number;
-  concentrationA?: string;
-  concentrationB?: string;
-  instrument?: string;
-  modality?: string;
-  wavelength?: string;
-  comment?: string;
-}
 
 @Component({
   selector: 'app-experiment-results',
@@ -29,6 +12,38 @@ export interface Experiment {
 })
 export class ExperimentResultsComponent {
   @Input() state: SearchState = 'initial';
-  @Input() experiments: Experiment[] = []; // Ersetzen Sie 'any' mit Ihrem echten Interface
-  @Output() createNewReaction = new EventEmitter<void>();
+  @Input() experiments: Experiment[] = [];
+  @Output() getExport = new EventEmitter<number[]>();
+
+  selectedIds = new Set<number>();
+
+  toggleSelection(expId: number) {
+    if (this.selectedIds.has(expId)) {
+      this.selectedIds.delete(expId);
+    } else {
+      this.selectedIds.add(expId);
+    }
+    this.getExport.emit(Array.from(this.selectedIds)); // Export when needed TODO: Check if needed
+  }
+
+  isSelected(expId: number): boolean {
+    return this.selectedIds.has(expId);
+  }
+
+  get allSelected(): boolean {
+    if (this.experiments.length === 0) return false;
+    return this.experiments.every(exp => this.selectedIds.has(exp.id));
+  }
+
+  toggleSelectAll() {
+    if (this.allSelected) {
+      this.experiments.forEach(exp => this.selectedIds.delete(exp.id));
+    } else {
+      this.experiments.forEach(exp => this.selectedIds.add(exp.id));
+    }
+  }
+
+  onExportClicked() {
+    this.getExport.emit(Array.from(this.selectedIds));
+  }
 }

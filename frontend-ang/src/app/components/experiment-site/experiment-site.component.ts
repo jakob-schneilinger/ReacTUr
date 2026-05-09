@@ -29,12 +29,6 @@ export class ExperimentSiteComponent {
     }
   }
 
-  handleCreate() {
-    //TODO: remove when debugging done
-    console.log('Navigating to create new experiment/reaction...');
-    // z.B. this.router.navigate(['/create']);
-  }
-
   private performMockSearch(r1: string, r2: string) {
     if (r1.toLowerCase() === 'x' || r2.toLowerCase() === 'x') return [];
     return [
