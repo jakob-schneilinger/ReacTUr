@@ -123,7 +123,7 @@
     border-left: 4px solid #3b82f6;
   }
 
-  @media (max-width: 900px) {
+  @media (max-width: 950px) {
     .card-footer {
       gap: 0.5rem;
     }
@@ -154,7 +154,7 @@
       text-decoration: none;
     }
 
-    @media (max-width: 850px) {
+    @media (max-width: 900px) {
       .btn-custom {
         flex: 1 1 auto;
         height: 2rem;

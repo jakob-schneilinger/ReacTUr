@@ -26,43 +26,78 @@
 
             <h6 class="fw-bold mb-3">Include Fields</h6>
 
-            <div class="field-group mb-3">
+            <div class="field-group mb-4">
               <label class="text-muted small text-uppercase mb-2">Core Parameters</label>
-              <div class="form-check">
+              <div class="form-check form-switch mb-2">
                 <input class="form-check-input" type="checkbox" id="f_reactants" [(ngModel)]="exportFields.core.reactants" (change)="onFieldChange()">
                 <label class="form-check-label" for="f_reactants">Reactants</label>
               </div>
-              <div class="form-check">
+              <div class="form-check form-switch mb-2">
                 <input class="form-check-input" type="checkbox" id="f_date" [(ngModel)]="exportFields.core.date" (change)="onFieldChange()">
                 <label class="form-check-label" for="f_date">Date</label>
               </div>
-              <div class="form-check">
+              <div class="form-check form-switch mb-2">
                 <input class="form-check-input" type="checkbox" id="f_sci" [(ngModel)]="exportFields.core.scientist" (change)="onFieldChange()">
                 <label class="form-check-label" for="f_sci">Scientist</label>
+              </div>
+              <div class="form-check form-switch mb-2">
+                <input class="form-check-input" type="checkbox" id="f_temp" [(ngModel)]="exportFields.core.temperature" (change)="onFieldChange()">
+                <label class="form-check-label" for="f_temp">Temperature</label>
+              </div>
+              <div class="form-check form-switch mb-2">
+                <input class="form-check-input" type="checkbox" id="f_solv" [(ngModel)]="exportFields.core.solvent" (change)="onFieldChange()">
+                <label class="form-check-label" for="f_solv">Solvent</label>
               </div>
             </div>
 
             <div class="field-group">
               <label class="text-muted small text-uppercase mb-2">Additional Info</label>
-              <div class="form-check">
+              <div class="form-check form-switch mb-2">
                 <input class="form-check-input" type="checkbox" id="f_inst" [(ngModel)]="exportFields.additional.instrument" (change)="onFieldChange()">
                 <label class="form-check-label" for="f_inst">Instrument</label>
               </div>
-              <div class="form-check">
+              <div class="form-check form-switch mb-2">
                 <input class="form-check-input" type="checkbox" id="f_mod" [(ngModel)]="exportFields.additional.modality" (change)="onFieldChange()">
                 <label class="form-check-label" for="f_mod">Modality</label>
+              </div>
+              <div class="form-check form-switch mb-2">
+                <input class="form-check-input" type="checkbox" id="f_wave" [(ngModel)]="exportFields.additional.wavelength" (change)="onFieldChange()">
+                <label class="form-check-label" for="f_wave">Wavelength</label>
+              </div>
+              <div class="form-check form-switch mb-2">
+                <input class="form-check-input" type="checkbox" id="f_comm" [(ngModel)]="exportFields.additional.comment" (change)="onFieldChange()">
+                <label class="form-check-label" for="f_comm">Comment</label>
               </div>
             </div>
           </div>
 
           <div class="col-md-8 p-0 bg-light d-flex flex-column preview-panel">
             <div class="p-3 border-bottom d-flex justify-content-between align-items-center bg-white">
-              <span class="fw-bold text-secondary">Data Preview</span>
-              <span class="badge bg-secondary">Showing first {{ selectedExperiments.length > 10 ? 10 : selectedExperiments.length }} items</span>
+              <div>
+                <span class="fw-bold text-secondary me-2">Data Preview</span>
+                <span class="badge bg-secondary">Showing first {{ selectedExperiments.length > 5 ? 5 : selectedExperiments.length }} items</span>
+              </div>
+
+              <button class="btn btn-sm btn-outline-secondary" (click)="copyToClipboard()">
+                <i class="bi" [ngClass]="isCopied ? 'bi-check2 text-success' : 'bi-clipboard'"></i>
+                {{ isCopied ? 'Copied!' : 'Copy' }}
+              </button>
             </div>
 
-            <div class="flex-grow-1 p-3 overflow-auto">
-              <pre class="bg-dark text-light p-3 rounded code-preview"><code>{{ previewData }}</code></pre>
+            <div class="flex-grow-1 p-3 overflow-auto position-relative">
+
+              @if (isLoading) {
+                <div class="d-flex flex-column align-items-center justify-content-center h-100 text-secondary">
+                  <div class="spinner-border text-primary mb-3" style="width: 3rem; height: 3rem;" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                  </div>
+                  <span class="fw-bold">Fetching measurement data...</span>
+                  <span class="small mt-1">This may take a moment for large datasets.</span>
+                </div>
+              } @else {
+                <pre class="bg-dark text-light p-3 rounded code-preview"><code>{{ previewData }}</code></pre>
+              }
+
             </div>
           </div>
 

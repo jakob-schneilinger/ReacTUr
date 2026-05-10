@@ -1,8 +1,7 @@
 import { Injectable } from "@angular/core";
-import { map, Observable, of, tap } from "rxjs";
-import {User} from "../dtos/user";
+import { delay, Observable, of } from 'rxjs';
 import { AuthService } from "./auth.service";
-import { HttpClient, HttpParams } from "@angular/common/http";
+import { HttpClient } from "@angular/common/http";
 import { Globals } from "../global/globals";
 import { ExperimentData } from '../dtos/experiment';
 import { MOCK_EXPERIMENT_DATA } from '../mock/mock-experiments';
@@ -27,6 +26,11 @@ export class ExperimentService {
 
     const mockData = MOCK_EXPERIMENT_DATA.find(d => d.experimentId === experimentId);
     return of(mockData || { experimentId, measurements: [] });
+  }
+
+  getBulkExperimentData(experimentIds: number[]): Observable<ExperimentData[]> {
+    const mockData = MOCK_EXPERIMENT_DATA.filter(d => experimentIds.includes(d.experimentId));
+    return of(mockData).pipe(delay(800));
   }
 
   searchExperiment() {
