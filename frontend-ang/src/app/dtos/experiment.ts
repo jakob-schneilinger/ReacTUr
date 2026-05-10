@@ -6,3 +6,13 @@ export interface Experiment {
   metadata: Metadata;
   reactants: Reactant[];
 }
+
+export interface ExperimentData {
+  experimentId: number;
+  measurements: Measurement[];
+}
+
+export interface Measurement {
+  x: number[];
+  y: number[][];
+}

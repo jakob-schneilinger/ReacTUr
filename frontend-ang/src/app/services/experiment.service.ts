@@ -4,6 +4,8 @@ import {User} from "../dtos/user";
 import { AuthService } from "./auth.service";
 import { HttpClient, HttpParams } from "@angular/common/http";
 import { Globals } from "../global/globals";
+import { ExperimentData } from '../dtos/experiment';
+import { MOCK_EXPERIMENT_DATA } from '../mock/mock-experiments';
 
 @Injectable({
   providedIn: 'root',
@@ -17,6 +19,14 @@ export class ExperimentService {
     private authService: AuthService,
   ) {
     this.userBaseUri = this.globals.backendUri + '/experiment';
+  }
+
+  getExperimentData(experimentId: number): Observable<ExperimentData> {
+    // TODO: Backend-Call:
+    // return this.httpClient.get<ExperimentData>(`${this.userBaseUri}/${experimentId}/data`);
+
+    const mockData = MOCK_EXPERIMENT_DATA.find(d => d.experimentId === experimentId);
+    return of(mockData || { experimentId, measurements: [] });
   }
 
   searchExperiment() {

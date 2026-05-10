@@ -1,4 +1,4 @@
-import { Experiment } from '../dtos/experiment'; // Passe den Pfad zu deinen Interfaces an
+import { Experiment, ExperimentData, Measurement } from '../dtos/experiment'; // Passe den Pfad zu deinen Interfaces an
 
 export const MOCK_EXPERIMENTS: Experiment[] = [
   {
@@ -177,3 +177,33 @@ export const MOCK_EXPERIMENTS: Experiment[] = [
     }
   }
 ];
+
+function generateMockMeasurement(): Measurement {
+  const x: number[] = [];
+  const y1: number[] = [];
+  const y2: number[] = [];
+  const y3: number[] = [];
+  const y4: number[] = [];
+
+  let currentX = 1.005;
+  for (let i = 0; i < 100; i++) {
+    x.push(parseFloat(currentX.toFixed(4)));
+
+    y1.push(0.0137 + (Math.random() * 0.0001 - 0.0005));
+    y2.push(0.0138 + (Math.random() * 0.0001 - 0.0005));
+    y3.push(0.0140 + (Math.random() * 0.0002 - 0.0010));
+    y4.push(0.0137 + (Math.random() * 0.0001 - 0.0005));
+
+    currentX += 0.0075;
+  }
+
+  return {
+    x: x,
+    y: [y1, y2, y3, y4]
+  };
+}
+
+export const MOCK_EXPERIMENT_DATA: ExperimentData[] = MOCK_EXPERIMENTS.map(exp => ({
+  experimentId: exp.id,
+  measurements: [generateMockMeasurement()]
+}));
