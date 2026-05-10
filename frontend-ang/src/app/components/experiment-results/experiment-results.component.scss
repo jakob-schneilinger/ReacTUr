@@ -166,7 +166,7 @@
       color: white;
 
       &:hover {
-        background-color: darken($primary, 10%);
+        background-color: $primary_hover;
       }
     }
 
@@ -255,7 +255,7 @@
     transition: all 0.2s;
 
     &:hover:not(:disabled) {
-      background-color: darken($primary, 10%);
+      background-color: $primary_hover;
     }
 
     &:disabled {

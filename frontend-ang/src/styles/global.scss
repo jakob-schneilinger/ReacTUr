@@ -13,6 +13,12 @@ input[type="number"] {
   }
 }
 
+textarea {
+
+  scrollbar-gutter: stable;
+  scrollbar-width: thin;
+  scrollbar-color: #c1c1c1 transparent;
+}
 
 a {
   color: $primary;
