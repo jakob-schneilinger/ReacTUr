@@ -31,7 +31,6 @@ export class SearchSiteComponent {
     this.reactant1 = terms.reactant1;
     this.reactant2 = terms.reactant2;
     console.log(terms); //TODO: remove when debugging done
-    console.log(this.metadata); //TODO: remove when debugging done
     this.executeSearch();
   }
 
@@ -50,9 +49,6 @@ export class SearchSiteComponent {
     const isAdvancedEmpty =
       !this.metadata ||
       Object.values(this.metadata).every((val) => val === undefined || val === null || val === '');
-
-    console.log(isBasicEmpty); //TODO: remove when debugging done
-    console.log(isAdvancedEmpty); //TODO: remove when debugging done
 
     if (isBasicEmpty && isAdvancedEmpty) {
       this.currentSearchState = 'initial';
@@ -245,7 +241,6 @@ export class SearchSiteComponent {
       },
     ];
 
-    // Catch-all mock logic from original code
     if (this.reactant1.toLowerCase() === 'x' || this.reactant2.toLowerCase() === 'x') return [];
 
     return mockDatabase.filter((experiment) => {
@@ -261,14 +256,14 @@ export class SearchSiteComponent {
         return false;
 
       if (this.metadata) {
-        const md = this.metadata;
+        const md = this.metadata
 
-        if (md.dateDay && experiment.dateDay !== md.dateDay) return false;
-        if (md.dateMonth && experiment.dateMonth !== md.dateMonth) return false;
-        if (md.dateYear && experiment.dateYear !== md.dateYear) return false;
-        if (md.concentrationA && experiment.concentrationA !== md.concentrationA) return false;
-        if (md.concentrationB && experiment.concentrationB !== md.concentrationB) return false;
-        if (md.wavelength && experiment.wavelength !== md.wavelength) return false;
+        if (md.dateDay && parseInt(experiment.dateDay) !== parseInt(md.dateDay)) return false;
+        if (md.dateMonth && parseInt(experiment.dateMonth) !== parseInt(md.dateMonth)) return false;
+        if (md.dateYear && parseInt(experiment.dateYear) !== parseInt(md.dateYear)) return false;
+        if (md.concentrationA && parseFloat(experiment.concentrationA) !== parseFloat(md.concentrationA)) return false;
+        if (md.concentrationB && parseFloat(experiment.concentrationB) !== parseFloat(md.concentrationB)) return false;
+        if (md.wavelength && experiment.wavelength && parseFloat(experiment.wavelength) !== parseFloat(md.wavelength)) return false;
 
         if (
           md.scientist &&

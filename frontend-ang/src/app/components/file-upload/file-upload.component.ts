@@ -19,7 +19,7 @@ export class FileUploadComponent implements OnInit {
 
   files: File[] = [];
 
-  isDeleteModalOpen: boolean = false;
+  isDeleteFileModalOpen: boolean = false;
   pendingDeleteIndex: number | null = null;
 
   ngOnInit(): void {
@@ -27,8 +27,7 @@ export class FileUploadComponent implements OnInit {
       next: (params) => {
         const id = params['id'];
         if (!id) {
-          this.router.navigate(['/experiments'], { skipLocationChange: true });
-          return;
+          //TODO:
         }
       },
     });
@@ -36,10 +35,7 @@ export class FileUploadComponent implements OnInit {
 
   onPasteTableGenerated(file: File) {
     this.addFiles([file]);
-    this.notification.success(
-      'File Added',
-      `Pasted data converted and added as "${file.name}".`
-    );
+    this.notification.success('File Added', `Pasted data converted and added as "${file.name}".`);
   }
 
   addFiles(newFiles: FileList | File[]) {
@@ -57,11 +53,11 @@ export class FileUploadComponent implements OnInit {
 
   confirmRemoveFile(index: number) {
     this.pendingDeleteIndex = index;
-    this.isDeleteModalOpen = true;
+    this.isDeleteFileModalOpen = true;
   }
 
   cancelDelete() {
-    this.isDeleteModalOpen = false;
+    this.isDeleteFileModalOpen = false;
     this.pendingDeleteIndex = null;
   }
 

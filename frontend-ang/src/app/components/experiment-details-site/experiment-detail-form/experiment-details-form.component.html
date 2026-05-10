@@ -1,0 +1,227 @@
+<form class="search-container" [formGroup]="experimentForm" (ngSubmit)="onSubmit()">
+
+  <div formArrayName="reactants">
+    @for (control of reactantsControls; track $index) {
+      <div class="input-group">
+        <label>Reactants {{$index + 1}} (Structure or Substructure)</label>
+        <div class="search-field">
+          <input
+            type="text"
+            [formControlName]="$index"
+            placeholder="Value"
+            [class.is-invalid]="isReactantInvalid($index)"/>
+
+          @if (control.value && formState !== 'edit') {
+            <span class="icon bi bi-x text-black clear-btn" (click)="clearReactant($index)"></span>
+          }
+        </div>
+        @if (isReactantInvalid($index)) {
+          <div class="error-message">Reactant {{$index + 1}} is required.</div>
+        }
+      </div>
+    }
+  </div>
+
+  <div class="divider-container">
+    <div class="divider"></div>
+    <span class="divider-label">Required</span>
+    <div class="divider"></div>
+  </div>
+
+  <div class="input-group">
+    <label>Date</label>
+    <div class="search-field date-field">
+      <input type="date" formControlName="date" [class.is-invalid]="isInvalid('date')"/>
+    </div>
+    @if (isInvalid('date')) {
+      <div class="error-message">Date is required.</div>
+    }
+  </div>
+
+  <div class="input-group">
+    <label>Scientist</label>
+    <div class="search-field">
+      <input type="text" formControlName="scientist" [class.is-invalid]="isInvalid('scientist')" placeholder="Value" />
+      @if (experimentForm.get('scientist')?.value) {
+        <span class="icon bi bi-x text-black clear-btn" (click)="clearControl('scientist')"></span>
+      }
+    </div>
+    @if (isInvalid('scientist')) {
+      <div class="error-message">Scientist name is required.</div>
+    }
+  </div>
+
+  <div class="input-group">
+    <label>Temperature</label>
+    <div class="search-field">
+      <input type="number" formControlName="temperature" [class.is-invalid]="isInvalid('temperature')" placeholder="Value" />
+      <span class="icon text-dark">°C</span>
+    </div>
+    @if (isInvalid('temperature')) {
+      <div class="error-message">Temperature is required.</div>
+    }
+  </div>
+
+  <div class="input-group">
+    <label>Solvent</label>
+    <div class="search-field">
+      <input type="text" formControlName="solvent" [class.is-invalid]="isInvalid('solvent')" placeholder="Value" />
+      @if (experimentForm.get('solvent')?.value) {
+        <span class="icon bi bi-x text-black clear-btn" (click)="clearControl('solvent')"></span>
+      }
+    </div>
+    @if (isInvalid('solvent')) {
+      <div class="error-message">Solvent is required.</div>
+    }
+  </div>
+
+  <div class="input-group">
+    <label>Concentration Reactant 1</label>
+    <div class="search-field">
+      <input type="number" formControlName="concentrationA" [class.is-invalid]="isInvalid('concentrationA')" placeholder="Value" />
+      <span class="icon text-dark">mM</span>
+    </div>
+    @if (isInvalid('concentrationA')) {
+      <div class="error-message">
+        @if (experimentForm.get('concentrationA')?.hasError('required')) { Concentration is required. }
+        @if (experimentForm.get('concentrationA')?.hasError('min')) { Concentration cannot be negative. }
+      </div>
+    }
+  </div>
+
+  <div class="input-group">
+    <label>Concentration Reactant 2</label>
+    <div class="search-field">
+      <input type="number" formControlName="concentrationB" [class.is-invalid]="isInvalid('concentrationB')" placeholder="Value" />
+      <span class="icon text-dark">mM</span>
+    </div>
+    @if (isInvalid('concentrationB')) {
+      <div class="error-message">
+        @if (experimentForm.get('concentrationB')?.hasError('required')) { Concentration is required. }
+        @if (experimentForm.get('concentrationB')?.hasError('min')) { Concentration cannot be negative. }
+      </div>
+    }
+  </div>
+
+  <div class="divider-container">
+    <div class="divider"></div>
+    <span class="divider-label">Optional</span>
+    <div class="divider"></div>
+  </div>
+
+  <div class="input-group">
+    <label>Instrument</label>
+    <div class="search-field">
+      <input type="text" formControlName="instrument" [class.is-invalid]="isInvalid('instrument')" placeholder="Value" />
+      @if (experimentForm.get('instrument')?.value) {
+        <span class="icon bi bi-x text-black clear-btn" (click)="clearControl('instrument')"></span>
+      }
+    </div>
+    @if (isInvalid('instrument')) {
+      <div class="error-message">Instrument invalid.</div>
+    }
+  </div>
+
+  <div class="input-group">
+    <label>Modality</label>
+    <div class="search-field">
+      <input type="text" formControlName="modality" [class.is-invalid]="isInvalid('modality')" placeholder="Value" />
+      @if (experimentForm.get('modality')?.value) {
+        <span class="icon bi bi-x text-black clear-btn" (click)="clearControl('modality')"></span>
+      }
+    </div>
+    @if (isInvalid('modality')) {
+      <div class="error-message">Modality invalid.</div>
+    }
+  </div>
+
+  <div class="input-group">
+    <label>Wavelength</label>
+    <div class="search-field">
+      <input type="number" formControlName="wavelength" [class.is-invalid]="isInvalid('wavelength')" placeholder="Value" />
+      <span class="icon text-dark">nm</span>
+    </div>
+    @if (isInvalid('wavelength')) {
+      <div class="error-message">Wavelength invalid.</div>
+    }
+  </div>
+
+  <div class="input-group">
+    <label>Comment</label>
+    <div class="search-field align-items-start">
+      <textarea formControlName="comment" placeholder="Add additional details..." rows="3"></textarea>
+      @if (experimentForm.get('comment')?.value) {
+        <span class="icon bi bi-x text-black clear-btn" (click)="clearControl('comment')" style="top: 8px;"></span>
+      }
+    </div>
+  </div>
+
+  <div class="action-buttons mt-4">
+    <button type="submit" class="btn btn-primary">Submit</button>
+    <button type="button" class="btn btn-light" (click)="onCancel()">Cancel</button>
+    <button type="button" class="btn btn-danger" (click)="onDelete()" [hidden]="formState == 'create'">Delete</button>
+  </div>
+
+</form>
+
+
+<!-- Delete Experiment Modal -->
+<div
+  class="modal fade"
+  [ngClass]="{'show': isDeleteExperimentModalOpen}"
+  [style.display]="isDeleteExperimentModalOpen ? 'block' : 'none'"
+  tabindex="-1"
+  style="background-color: rgba(0,0,0,0.5);" >
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content shadow">
+
+      <div class="modal-header border-0 pb-0">
+        <h5 class="modal-title text-danger">
+          <i class="bi bi-exclamation-triangle-fill me-2"></i> Delete Experiment
+        </h5>
+        <button type="button" class="btn-close" (click)="closeModals()" aria-label="Close"></button>
+      </div>
+
+      <div class="modal-body py-4">
+        <p class="mb-0">Are you sure you want to permanently delete this experiment? This action cannot be undone.</p>
+      </div>
+
+      <div class="modal-footer border-0 pt-0">
+        <button type="button" class="" (click)="closeModals()">Cancel</button>
+        <button type="button" class="error" (click)="executeDelete()">Permanently Delete</button>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+
+<!-- Cancel Experiment Modal -->
+<div
+  class="modal fade"
+  [ngClass]="{'show': isCancelExperimentModalOpen}"
+  [style.display]="isCancelExperimentModalOpen ? 'block' : 'none'"
+  tabindex="-1"
+  style="background-color: rgba(0,0,0,0.5);" >
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content shadow">
+
+      <div class="modal-header border-0 pb-0">
+        <h5 class="modal-title text-danger">
+          <i class="bi bi-exclamation-triangle-fill me-2"></i> Unsaved Changes
+        </h5>
+        <button type="button" class="btn-close" (click)="closeModals()" aria-label="Close"></button>
+      </div>
+
+      <div class="modal-body py-4">
+        <p class="mb-0">You have unsaved changes. Are you sure you want to cancel? All progress will be lost.</p>
+      </div>
+
+      <div class="modal-footer border-0 pt-0">
+        <button type="button" class="" (click)="closeModals()">Continue Editing</button>
+        <button type="button" class="error" (click)="executeCancel()">Discard Changes</button>
+      </div>
+
+    </div>
+  </div>
+</div>

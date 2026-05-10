@@ -1,6 +1,19 @@
 @use "sass:color";
 @use "src/styles/variables.scss" as *;
 
+input[type="number"] {
+  // Firefox
+  -moz-appearance: textfield;
+
+  // Chrome, Safari, Edge, Opera
+  &::-webkit-outer-spin-button,
+  &::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+}
+
+
 a {
   color: $primary;
 }

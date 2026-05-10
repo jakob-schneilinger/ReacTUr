@@ -1,11 +1,7 @@
 
 <div class="container mt-4" style="max-width: 500px;">
 
-  <h6 class="mb-3">Upload your Files:</h6>
-
-  <app-paste-table (fileGenerated)="onPasteTableGenerated($event)">
-
-  </app-paste-table>
+  <app-paste-table (fileGenerated)="onPasteTableGenerated($event)"></app-paste-table>
 
   <app-drag-and-drop (filesSelected)="addFiles($event)"></app-drag-and-drop>
 
@@ -18,11 +14,11 @@
   </div>
 </div>
 
-<!-- Delete Modal -->
+<!-- Delete File Modal -->
 <div
   class="modal fade"
-  [ngClass]="{'show': isDeleteModalOpen}"
-  [style.display]="isDeleteModalOpen ? 'block' : 'none'"
+  [ngClass]="{'show': isDeleteFileModalOpen}"
+  [style.display]="isDeleteFileModalOpen ? 'block' : 'none'"
   tabindex="-1"
   style="background-color: rgba(0,0,0,0.5);" >
   <div class="modal-dialog modal-dialog-centered">

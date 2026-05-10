@@ -24,7 +24,7 @@ export class NotificationService {
     this.notify(title, 'log', duration, message);
   }
 
-  public success(title: string, message?: string, duration: number = 2000) {
+  public success(title: string, message?: string, duration: number = 3500) {
     this.notify(title, 'success', duration, message);
   }
 
@@ -32,7 +32,7 @@ export class NotificationService {
     this.notify(title, 'warn', duration, message);
   }
 
-  public error(title: string, message?: string, duration: number = 5000) {
+  public error(title: string, message?: string, duration: number = 6000) {
     this.notify(title, 'error', duration, message);
   }
 
