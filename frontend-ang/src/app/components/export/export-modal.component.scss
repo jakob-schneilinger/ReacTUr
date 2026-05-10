@@ -1,0 +1,33 @@
+.custom-backdrop {
+  background-color: rgba(0, 0, 0, 0.5);
+}
+
+.modal-body {
+  height: 60vh;
+  min-height: 500px;
+}
+
+.settings-panel {
+  background-color: #ffffff;
+  overflow-y: auto;
+}
+
+.preview-panel {
+  height: 100%;
+}
+
+.code-preview {
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 0.85rem;
+  margin: 0;
+  min-height: 100%;
+
+  &::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  &::-webkit-scrollbar-thumb {
+    background: #666;
+    border-radius: 4px;
+  }
+}

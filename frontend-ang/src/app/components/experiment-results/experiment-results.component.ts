@@ -23,7 +23,6 @@ export class ExperimentResultsComponent {
     } else {
       this.selectedIds.add(expId);
     }
-    this.getExport.emit(Array.from(this.selectedIds)); // Export when needed TODO: Check if needed
   }
 
   isSelected(expId: number): boolean {

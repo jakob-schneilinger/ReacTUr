@@ -25,6 +25,7 @@ import { FileUploadComponent } from './components/file-upload/file-upload.compon
 import { DragAndDropComponent } from './components/file-upload/drag-and-drop/drag-and-drop.component';
 import { UploadedFileComponent } from './components/file-upload/uploaded-file/uploaded-file.component';
 import { DragAndDropDirective } from './directives/drag-and-drop.directive';
+import { ExportModalComponent } from './components/export/export-modal.component';
 
 @NgModule({
   declarations: [
@@ -44,6 +45,7 @@ import { DragAndDropDirective } from './directives/drag-and-drop.directive';
     FileUploadComponent,
     DragAndDropComponent,
     UploadedFileComponent,
+    ExportModalComponent,
   ],
   imports: [
     BrowserModule,

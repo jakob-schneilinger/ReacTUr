@@ -42,9 +42,15 @@
     <div rightContent>
       <app-experiment-results
         [state]="currentSearchState"
-        [experiments]="foundExperiments">
+        [experiments]="foundExperiments"
+        (getExport)="handleExport($event)">
       </app-experiment-results>
     </div>
-
   </app-layout>
+  @if (isExportModalOpen) {
+    <app-export-modal
+      [selectedExperiments]="experimentsToExport"
+      (close)="isExportModalOpen = false">
+    </app-export-modal>
+  }
 </div>

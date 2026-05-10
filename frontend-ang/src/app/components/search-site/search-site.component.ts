@@ -21,6 +21,9 @@ export class SearchSiteComponent {
 
   isAdvancedSearchOpen: boolean = false;
 
+  isExportModalOpen: boolean = false;
+  experimentsToExport: Experiment[] = [];
+
   toggleAdvancedSearch() {
     this.isAdvancedSearchOpen = !this.isAdvancedSearchOpen;
   }
@@ -126,5 +129,10 @@ export class SearchSiteComponent {
 
       return true;
     });
+  }
+
+  handleExport(selectedIds: number[]) {
+    this.experimentsToExport = this.foundExperiments.filter(exp => selectedIds.includes(exp.id));
+    this.isExportModalOpen = true;
   }
 }
