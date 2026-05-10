@@ -9,7 +9,9 @@
         (searchChanged)="handleSearch($event)">
       </app-experiment-search>
 
-      <button class="btn-create">
+      <button class="btn-create"
+              [routerLink]="['/experiments/create']"
+              [queryParams]="{ reactant1: reactant1 || null, reactant2: reactant2 || null }">
         Create new Experiment
       </button>
     </div>

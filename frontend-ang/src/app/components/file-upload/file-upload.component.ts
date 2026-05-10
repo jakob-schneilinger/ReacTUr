@@ -19,8 +19,26 @@ export class FileUploadComponent implements OnInit {
 
   files: File[] = [];
 
+  isDeleteFileModalOpen: boolean = false;
+  pendingDeleteIndex: number | null = null;
+
+  ngOnInit(): void {
+    this.route.params.subscribe({
+      next: (params) => {
+        const id = params['id'];
+        if (!id) {
+          //TODO:
+        }
+      },
+    });
+  }
+
+  onPasteTableGenerated(file: File) {
+    this.addFiles([file]);
+    this.notification.success('File Added', `Pasted data converted and added as "${file.name}".`);
+  }
+
   addFiles(newFiles: FileList | File[]) {
-    // Convert FileList to Array and append to existing files
     const filesArray = Array.from(newFiles);
     this.files.push(...filesArray);
   }
@@ -29,15 +47,29 @@ export class FileUploadComponent implements OnInit {
     this.files.splice(index, 1);
   }
 
-  ngOnInit(): void {
-    this.route.params.subscribe({
-      next: (params) => {
-        const id = params['id'];
-        if (!id) {
-          this.router.navigate(['/experiments'], { skipLocationChange: true });
-          return;
-        }
-      },
-    });
+  get pendingFileName(): string {
+    return this.pendingDeleteIndex !== null ? this.files[this.pendingDeleteIndex]?.name : '';
+  }
+
+  confirmRemoveFile(index: number) {
+    this.pendingDeleteIndex = index;
+    this.isDeleteFileModalOpen = true;
+  }
+
+  cancelDelete() {
+    this.isDeleteFileModalOpen = false;
+    this.pendingDeleteIndex = null;
+  }
+
+  executeDelete() {
+    if (this.pendingDeleteIndex !== null) {
+      const tempName = this.files[this.pendingDeleteIndex]?.name;
+      this.files.splice(this.pendingDeleteIndex, 1);
+      this.notification.success(
+        'File Removed',
+        `The file "${tempName}" was successfully removed from the list.`,
+      );
+    }
+    this.cancelDelete();
   }
 }

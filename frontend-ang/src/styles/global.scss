@@ -1,6 +1,19 @@
 @use "sass:color";
 @use "src/styles/variables.scss" as *;
 
+input[type="number"] {
+  // Firefox
+  -moz-appearance: textfield;
+
+  // Chrome, Safari, Edge, Opera
+  &::-webkit-outer-spin-button,
+  &::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+}
+
+
 a {
   color: $primary;
 }
@@ -23,7 +36,7 @@ button {
   color: white;
 
   &:hover:not([disabled]) {
-    background-color: color.adjust($background, $lightness: -5%);
+    background-color: $light_gray_hover;
   }
 
   &.compact {
@@ -37,8 +50,8 @@ button {
     border-color: $primary;
 
     &:hover:not([disabled]) {
-      background-color: color.adjust($primary, $lightness: -5%);
-      border-color: color.adjust($primary, $lightness: -5%);
+      background-color: $primary_hover;
+      border-color: $primary_hover;
     }
   }
 

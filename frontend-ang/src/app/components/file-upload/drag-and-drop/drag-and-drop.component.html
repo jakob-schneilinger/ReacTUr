@@ -1,11 +1,19 @@
 
-<div class="dropzone p-5 mb-4 rounded text-center" app-drag-and-drop-directive (fileDropped)="onFileDropped($event)">
-  <input type="file" #fileDropRef id="fileDropRef" multiple (change)="fileBrowseHandler($event)" class="d-none" />
+<div class="dropzone p-2 mb-4 rounded text-center" app-drag-and-drop-directive (fileDropped)="onFileDropped($event)" (fileError)="onFileError($event)">
+  <input
+    type="file"
+    #fileDropRef
+    id="fileDropRef"
+    multiple
+    accept=".txt,.csv,.dsx"
+    (change)="fileBrowseHandler($event)"
+    class="d-none"
+  />
 
   <i class="bi bi-file-earmark-text fs-1"></i>
-  <h5 class="mt-2">Drag and Drop <br> or
+  <h5>Drag and Drop <br> or
     <a href="javascript:void(0)" class="text-primary text-decoration-none" (click)="fileDropRef.click()">Browse</a>
   </h5>
-  <p class="text-muted small mb-0">Supports: CSV, etc.</p>
+  <p class="text-muted small mb-0">Supports: CSV, TXT and DSX</p>
 </div>
 

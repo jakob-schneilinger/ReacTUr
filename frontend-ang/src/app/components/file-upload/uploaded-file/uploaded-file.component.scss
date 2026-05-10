@@ -2,3 +2,21 @@
 @use "src/styles/variables.scss" as *;
 @import 'bootstrap-icons/font/bootstrap-icons.css';
 
+.icon {
+  cursor: pointer;
+  transition: transform 0.2s;
+  font-size: 1.25rem;
+
+  &:hover {
+    transform: scale(1.1);
+  }
+}
+
+.download-icon {
+  color: $primary;
+
+}
+
+.remove-icon {
+  color: $error;
+}
