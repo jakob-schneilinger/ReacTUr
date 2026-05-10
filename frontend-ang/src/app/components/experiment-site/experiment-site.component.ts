@@ -11,7 +11,12 @@ export class ExperimentSiteComponent {
   currentSearchState: 'initial' | 'no-results' | 'has-results' = 'initial';
   foundExperiments: any[] = [];
 
+  reactant1: string = '';
+  reactant2: string = '';
+
   handleSearch(terms: { reactant1: string; reactant2: string }) {
+    this.reactant1 = terms.reactant1;
+    this.reactant2 = terms.reactant2;
     if (!terms.reactant1 && !terms.reactant2) {
       this.currentSearchState = 'initial';
       this.foundExperiments = [];

@@ -8,12 +8,16 @@ import { LoginComponent } from "./components/user/login/login.component";
 import { ExperimentSiteComponent } from './components/experiment-site/experiment-site.component';
 import { SearchSiteComponent } from './components/search-site/search-site.component';
 import { ExperimentDetailsSiteComponent } from './components/experiment-details/experiment-details-site/experiment-details-site.component';
+import {
+  ExperimentCreateSiteComponent
+} from './components/experiment-create/experiment-create-site/experiment-create-site.component';
 
 
 export const routes: Routes = [
   { path: 'search', component: SearchSiteComponent, canActivate: [AuthGuard] },
   { path: 'login', component: LoginComponent },
   { path: 'experiments', component: ExperimentSiteComponent, canActivate: [AuthGuard] },
+  { path: 'experiments/create', component: ExperimentCreateSiteComponent, canActivate: [AuthGuard] },
   { path: 'experiments/:id', component: ExperimentDetailsSiteComponent, canActivate: [AuthGuard] },
   { path: 'reactants', component: HomeComponent, canActivate: [AuthGuard] },
   { path: 'permissions', component: HomeComponent, canActivate: [AuthGuard] },

@@ -1,7 +1,11 @@
 
 <div class="container mt-4" style="max-width: 500px;">
-  <app-paste-table></app-paste-table>
+
   <h6 class="mb-3">Upload your Files:</h6>
+
+  <app-paste-table (fileGenerated)="onPasteTableGenerated($event)">
+
+  </app-paste-table>
 
   <app-drag-and-drop (filesSelected)="addFiles($event)"></app-drag-and-drop>
 

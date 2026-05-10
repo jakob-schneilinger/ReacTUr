@@ -34,6 +34,14 @@ export class FileUploadComponent implements OnInit {
     });
   }
 
+  onPasteTableGenerated(file: File) {
+    this.addFiles([file]);
+    this.notification.success(
+      'File Added',
+      `Pasted data converted and added as "${file.name}".`
+    );
+  }
+
   addFiles(newFiles: FileList | File[]) {
     const filesArray = Array.from(newFiles);
     this.files.push(...filesArray);

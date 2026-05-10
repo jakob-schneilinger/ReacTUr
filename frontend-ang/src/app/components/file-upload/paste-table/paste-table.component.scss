@@ -9,6 +9,7 @@
   overflow: hidden;
   display: flex;
   flex-direction: column;
+  margin-bottom: 1rem;
 }
 
 .toolbar {
@@ -22,7 +23,7 @@
   h3 {
     margin: 0;
     font-size: 16px;
-    color: #333;
+    color: $light_black;
   }
 
   .actions {
@@ -45,7 +46,7 @@
 
     .btn-clear {
       background-color: #fce4e4;
-      color: #d32f2f;
+      color: $error;
 
       &:hover:not(:disabled) { background-color: #fad2d2; }
     }
@@ -62,26 +63,25 @@
 .paste-zone {
   min-height: 200px;
   padding: 16px;
-  outline: none; /* Removes default focus ring, but you can style :focus if desired */
+  outline: none;
   transition: background-color 0.2s;
 
   &:focus:not(.has-data) {
-    background-color: #f0f7ff; /* subtle highlight when ready to paste */
+    background-color: $background;
   }
 
-  .placeholder {
+  .table-placeholder {
     height: 100%;
     display: flex;
     align-items: center;
     justify-content: center;
-    color: #666;
     text-align: center;
     min-height: 168px;
   }
 
   .table-wrapper {
     overflow-x: auto;
-    max-height: 400px;
+    max-height: 200px;
     overflow-y: auto;
   }
 
