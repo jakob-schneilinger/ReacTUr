@@ -1,5 +1,5 @@
 <div class="modal fade show custom-backdrop" tabindex="-1" style="display: block;" aria-modal="true" role="dialog">
-  <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+  <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable" [class.modal-xl-custom]="exportFormat !== 'json'">
     <div class="modal-content">
 
       <div class="modal-header">
@@ -24,51 +24,72 @@
               <label class="btn btn-outline-primary" for="btnradio2">CSV</label>
             </div>
 
-            <h6 class="fw-bold mb-3">Include Fields</h6>
+            @if (exportFormat === "json") {
+              <h6 class="fw-bold mb-3">Include Fields</h6>
 
-            <div class="field-group mb-4">
-              <label class="text-muted small text-uppercase mb-2">Core Parameters</label>
-              <div class="form-check form-switch mb-2">
-                <input class="form-check-input" type="checkbox" id="f_reactants" [(ngModel)]="exportFields.core.reactants" (change)="onFieldChange()">
-                <label class="form-check-label" for="f_reactants">Reactants</label>
+              <div class="field-group mb-4">
+                <label class="text-muted small text-uppercase mb-2">Core Parameters</label>
+                <div class="form-check form-switch mb-2">
+                  <input class="form-check-input" type="checkbox" id="f_reactants" [(ngModel)]="exportFields.core.reactants" (change)="onFieldChange()">
+                  <label class="form-check-label" for="f_reactants">Reactants</label>
+                </div>
+                <div class="form-check form-switch mb-2">
+                  <input class="form-check-input" type="checkbox" id="f_date" [(ngModel)]="exportFields.core.date" (change)="onFieldChange()">
+                  <label class="form-check-label" for="f_date">Date</label>
+                </div>
+                <div class="form-check form-switch mb-2">
+                  <input class="form-check-input" type="checkbox" id="f_sci" [(ngModel)]="exportFields.core.scientist" (change)="onFieldChange()">
+                  <label class="form-check-label" for="f_sci">Scientist</label>
+                </div>
+                <div class="form-check form-switch mb-2">
+                  <input class="form-check-input" type="checkbox" id="f_temp" [(ngModel)]="exportFields.core.temperature" (change)="onFieldChange()">
+                  <label class="form-check-label" for="f_temp">Temperature</label>
+                </div>
+                <div class="form-check form-switch mb-2">
+                  <input class="form-check-input" type="checkbox" id="f_solv" [(ngModel)]="exportFields.core.solvent" (change)="onFieldChange()">
+                  <label class="form-check-label" for="f_solv">Solvent</label>
+                </div>
               </div>
-              <div class="form-check form-switch mb-2">
-                <input class="form-check-input" type="checkbox" id="f_date" [(ngModel)]="exportFields.core.date" (change)="onFieldChange()">
-                <label class="form-check-label" for="f_date">Date</label>
-              </div>
-              <div class="form-check form-switch mb-2">
-                <input class="form-check-input" type="checkbox" id="f_sci" [(ngModel)]="exportFields.core.scientist" (change)="onFieldChange()">
-                <label class="form-check-label" for="f_sci">Scientist</label>
-              </div>
-              <div class="form-check form-switch mb-2">
-                <input class="form-check-input" type="checkbox" id="f_temp" [(ngModel)]="exportFields.core.temperature" (change)="onFieldChange()">
-                <label class="form-check-label" for="f_temp">Temperature</label>
-              </div>
-              <div class="form-check form-switch mb-2">
-                <input class="form-check-input" type="checkbox" id="f_solv" [(ngModel)]="exportFields.core.solvent" (change)="onFieldChange()">
-                <label class="form-check-label" for="f_solv">Solvent</label>
-              </div>
-            </div>
 
-            <div class="field-group">
-              <label class="text-muted small text-uppercase mb-2">Additional Info</label>
-              <div class="form-check form-switch mb-2">
-                <input class="form-check-input" type="checkbox" id="f_inst" [(ngModel)]="exportFields.additional.instrument" (change)="onFieldChange()">
-                <label class="form-check-label" for="f_inst">Instrument</label>
+              <div class="field-group">
+                <label class="text-muted small text-uppercase mb-2">Additional Info</label>
+                <div class="form-check form-switch mb-2">
+                  <input class="form-check-input" type="checkbox" id="f_inst" [(ngModel)]="exportFields.additional.instrument" (change)="onFieldChange()">
+                  <label class="form-check-label" for="f_inst">Instrument</label>
+                </div>
+                <div class="form-check form-switch mb-2">
+                  <input class="form-check-input" type="checkbox" id="f_mod" [(ngModel)]="exportFields.additional.modality" (change)="onFieldChange()">
+                  <label class="form-check-label" for="f_mod">Modality</label>
+                </div>
+                <div class="form-check form-switch mb-2">
+                  <input class="form-check-input" type="checkbox" id="f_wave" [(ngModel)]="exportFields.additional.wavelength" (change)="onFieldChange()">
+                  <label class="form-check-label" for="f_wave">Wavelength</label>
+                </div>
+                <div class="form-check form-switch mb-2">
+                  <input class="form-check-input" type="checkbox" id="f_comm" [(ngModel)]="exportFields.additional.comment" (change)="onFieldChange()">
+                  <label class="form-check-label" for="f_comm">Comment</label>
+                </div>
               </div>
-              <div class="form-check form-switch mb-2">
-                <input class="form-check-input" type="checkbox" id="f_mod" [(ngModel)]="exportFields.additional.modality" (change)="onFieldChange()">
-                <label class="form-check-label" for="f_mod">Modality</label>
+            } @else {
+              <h6 class="fw-bold mb-3">Available Fields</h6>
+              <p class="text-muted small">Drag fields to the table to build your export.</p>
+
+              <div
+                cdkDropList
+                #availableList="cdkDropList"
+                [cdkDropListData]="availableFields"
+                [cdkDropListConnectedTo]="['tableHeaderList']"
+                class="d-flex flex-wrap gap-2 mb-4">
+
+                <div
+                  *ngFor="let field of availableFields"
+                  cdkDrag
+                  class="badge bg-light text-dark border p-2 cursor-grab"
+                  style="cursor: grab;">
+                  {{ field.label }}
+                </div>
               </div>
-              <div class="form-check form-switch mb-2">
-                <input class="form-check-input" type="checkbox" id="f_wave" [(ngModel)]="exportFields.additional.wavelength" (change)="onFieldChange()">
-                <label class="form-check-label" for="f_wave">Wavelength</label>
-              </div>
-              <div class="form-check form-switch mb-2">
-                <input class="form-check-input" type="checkbox" id="f_comm" [(ngModel)]="exportFields.additional.comment" (change)="onFieldChange()">
-                <label class="form-check-label" for="f_comm">Comment</label>
-              </div>
-            </div>
+            }
           </div>
 
           <div class="col-md-8 p-0 bg-light d-flex flex-column preview-panel">
@@ -78,9 +99,14 @@
                 <span class="badge bg-secondary">Showing first {{ selectedExperiments.length > 5 ? 5 : selectedExperiments.length }} items</span>
               </div>
 
-              <button class="btn btn-sm btn-outline-secondary" (click)="copyToClipboard()">
-                <i class="bi" [ngClass]="isCopied ? 'bi-check2 text-success' : 'bi-clipboard'"></i>
-                {{ isCopied ? 'Copied!' : 'Copy' }}
+              <button class="btn btn-sm btn-outline-secondary" (click)="copyToClipboard()" [disabled]="isCopying || isCopied">
+                @if (isCopying) {
+                  <span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+                  Copying...
+                } @else {
+                  <i class="bi" [ngClass]="isCopied ? 'bi-check2 text-success' : 'bi-clipboard'"></i>
+                  {{ isCopied ? 'Copied!' : 'Copy Full Data' }}
+                }
               </button>
             </div>
 
@@ -95,7 +121,54 @@
                   <span class="small mt-1">This may take a moment for large datasets.</span>
                 </div>
               } @else {
-                <pre class="bg-dark text-light p-3 rounded code-preview"><code>{{ previewData }}</code></pre>
+                @if (exportFormat === "json") {
+                  <pre class="bg-dark text-light p-3 rounded code-preview"><code>{{ previewData }}</code></pre>
+                } @else {
+                  <div class="p-0 bg-light d-flex flex-column preview-panel">
+
+                    <div class="flex-grow-1 p-3 overflow-auto">
+
+                      <div
+                        cdkDropList
+                        id="tableHeaderList"
+                        [cdkDropListData]="selectedColumns"
+                        cdkDropListOrientation="horizontal"
+                        (cdkDropListDropped)="drop($event)"
+                        class="d-flex bg-white border rounded p-2 mb-3 align-items-center"
+                        style="min-height: 60px; overflow-x: auto;">
+
+                        <div *ngIf="selectedColumns.length === 0" class="text-muted w-100 text-center fst-italic">
+                          Drag & Drop fields here...
+                        </div>
+
+                        <div
+                          *ngFor="let col of selectedColumns; let i = index"
+                          cdkDrag
+                          class="badge bg-primary me-2 p-2 d-flex align-items-center"
+                          style="cursor: grab; white-space: nowrap;">
+                          {{ col.label }}
+                          <i class="bi bi-x-circle ms-2" style="cursor: pointer;" (click)="removeColumn(i)"></i>
+                        </div>
+
+                      </div>
+
+                      <div class="table-responsive bg-white border rounded">
+                        <table class="table table-sm table-striped m-0">
+                          <thead>
+                          <tr>
+                            <th *ngFor="let col of selectedColumns">{{ col.label }}</th>
+                          </tr>
+                          </thead>
+                          <tbody>
+                            <tr *ngFor="let row of tableData; let i = index" [class.header-row]="i === 0">
+                              <td *ngFor="let cell of row">{{ cell }}</td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  </div>
+                }
               }
 
             </div>

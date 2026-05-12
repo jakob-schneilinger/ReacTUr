@@ -2,6 +2,16 @@
   background-color: rgba(0, 0, 0, 0.5);
 }
 
+.modal-xl {
+  transition: max-width 0.4s ease-in-out;
+  max-width: 900px;
+}
+
+.modal-xl-custom {
+  transition: max-width 0.4s ease-in-out;
+  max-width: 90%;
+}
+
 .modal-body {
   height: 60vh;
   min-height: 500px;

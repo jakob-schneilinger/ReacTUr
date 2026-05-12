@@ -29,6 +29,7 @@ import { PasteTableComponent } from './components/file-upload/paste-table/paste-
 import { ExperimentCreateSiteComponent } from './components/experiment-create/experiment-create-site/experiment-create-site.component';
 import { ExperimentDetailsFormComponent } from './components/experiment-details-site/experiment-detail-form/experiment-details-form.component';
 import { ExportModalComponent } from './components/export/export-modal.component';
+import { DragDropModule } from '@angular/cdk/drag-drop';
 
 
 @NgModule({
@@ -69,6 +70,7 @@ import { ExportModalComponent } from './components/export/export-modal.component
       },
     }),
     DragAndDropDirective,
+    DragDropModule,
   ],
   providers: [],
   bootstrap: [AppComponent],
