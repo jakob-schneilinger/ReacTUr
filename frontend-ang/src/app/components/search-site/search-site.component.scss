@@ -37,6 +37,7 @@
   padding: 0.5rem 1rem;
   font-size: 0.875rem;
   cursor: pointer;
+  margin-right: 1rem;
   transition: background-color 0.2s;
 
   &:hover {
@@ -80,4 +81,28 @@
   max-height: 0;
   overflow: hidden;
   transition: max-height 0.4s ease-in-out, opacity 0.3s ease-in-out;
+}
+
+
+
+
+.sketcher-container {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  margin-top: 15px;
+
+  .sketcher-box {
+    canvas {
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      background: white;
+    }
+    label {
+      display: block;
+      font-size: 0.8rem;
+      margin-bottom: 5px;
+      color: #666;
+    }
+  }
 }

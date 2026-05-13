@@ -15,9 +15,8 @@ export class ExperimentSearchComponent {
       this.clearReactant2();
     }
   }
-
-  reactant1: string = '';
-  reactant2: string = '';
+  @Input() reactant1: string = "";
+  @Input() reactant2: string = "";
 
   onSearch() {
     this.searchChanged.emit({

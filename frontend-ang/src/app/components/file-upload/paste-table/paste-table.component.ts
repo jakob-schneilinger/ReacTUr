@@ -22,13 +22,68 @@ export class PasteTableComponent {
   }
 
   private parsePastedData(text: string): void {
-    const rows = text.split('\n');
+    const separator = this.detectSeparator(text);
 
-    this.tableData = rows.map(row => row.split('\t'));
+    const rawRows = text.split(/\r?\n/);
 
-    this.tableData = this.tableData.filter(row =>
-      row.some(cell => cell && cell.trim() !== '')
-    );
+    this.tableData = rawRows
+      .map((row) => this.parseRow(row, separator))
+      .filter((row) => row.some((cell) => cell && cell.trim() !== ''));
+
+    // normalise numbers
+    this.tableData = this.tableData.map((row) => row.map((cell) => this.normalizeNumber(cell)));
+  }
+
+  private detectSeparator(text: string): string {
+    const firstLine = text.split('\n')[0] || '';
+    if (firstLine.includes('\t')) return '\t'; // tab
+    if (firstLine.includes(';')) return ';'; // ;
+    if (firstLine.includes(',')) return ','; // ,
+    return '\t'; // Fallback
+  }
+
+  private parseRow(row: string, separator: string): string[] {
+    const result: string[] = [];
+    let currentCell = '';
+    let inQuotes = false;
+
+    for (let i = 0; i < row.length; i++) {
+      const char = row[i];
+      if (char === '"') {
+        inQuotes = !inQuotes;
+      } else if (char === separator && !inQuotes) {
+        result.push(currentCell.trim());
+        currentCell = '';
+      } else {
+        currentCell += char;
+      }
+    }
+    result.push(currentCell.trim());
+
+    return result.map((cell) => cell.replace(/^"|"$/g, '').replace(/""/g, '"'));
+  }
+
+  private normalizeNumber(value: string): string {
+    const trimmed = value.trim();
+
+    if (!/^[-]?[\d.,]+$/.test(trimmed)) {
+      return value;
+    }
+
+    const lastDot = trimmed.lastIndexOf('.');
+    const lastComma = trimmed.lastIndexOf(',');
+
+    // remove thousand point and change comma to decimal point (1.234,56 to 1234.56)
+    if (lastComma > lastDot) {
+      return trimmed.replace(/\./g, '').replace(',', '.');
+    }
+
+    // remove thousand comma (1,234.56 to 1234.56)
+    if (lastDot > lastComma && lastComma !== -1) {
+      return trimmed.replace(/,/g, '');
+    }
+
+    return trimmed;
   }
 
   clearTable(): void {
@@ -64,7 +119,7 @@ export class PasteTableComponent {
     //this.clearTable();
   }
 
-  private getTimestamp():string{
+  private getTimestamp(): string {
     const date = new Date();
     const pad = (n: number) => String(n).padStart(2, '0');
     const year = date.getFullYear();

@@ -22,12 +22,29 @@
               {
                 "glob": "**/*",
                 "input": "public"
+              },
+              {
+                "glob": "RDKit_minimal.wasm",
+                "input": "node_modules/@rdkit/rdkit/dist",
+                "output": "/"
+              },
+              {
+                "glob": "**/*",
+                "input": "lib/ChemDoodleWeb/install/uis",
+                "output": "/uis"
               }
             ],
             "styles": [
               "node_modules/bootstrap/dist/css/bootstrap.min.css",
               "node_modules/bootstrap-icons/font/bootstrap-icons.css",
-              "src/styles.css"
+              "src/styles.css",
+              "lib/ChemDoodleWeb/install/ChemDoodleWeb.css"
+            ],
+            "scripts": [
+              "node_modules/3dmol/build/3Dmol.js",
+              "node_modules/@rdkit/rdkit/dist/RDKit_minimal.js",
+              "lib/ChemDoodleWeb/install/ChemDoodleWeb.js",
+              "lib/ChemDoodleWeb/install/ChemDoodleWeb-uis.js"
             ],
             "polyfills": ["@angular/localize/init"]
           },
