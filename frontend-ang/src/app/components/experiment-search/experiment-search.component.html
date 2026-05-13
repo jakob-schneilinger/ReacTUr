@@ -1,34 +1,65 @@
 <div class="search-container">
 
-  <div class="input-group">
-    <label>Reactant 1</label>
-    <div class="search-field">
+  <!-- Reactant 1 -->
+  <div class="mb-3">
+    <label class="form-label">Reactant 1</label>
+    <div class="input-group">
       <input
         type="text"
+        class="form-control"
         [(ngModel)]="reactant1"
         (ngModelChange)="onSearch()"
         placeholder="e.g. Sodium" />
-      @if (!reactant1) {
-        <span class="icon bi bi-search"></span>
-      } @else {
-      <span class="icon bi bi-x text-black clear-btn" (click)="clearReactant1()"></span>
-    }
-    </div>
-  </div>
 
-  <div class="input-group">
-    <label>Reactant 2</label>
-    <div class="search-field">
-      <input
-        type="text"
-        [(ngModel)]="reactant2"
-        (ngModelChange)="onSearch()"
-        placeholder="e.g. Chloride" />
-      @if (!reactant2) {
-        <span class="icon bi bi-search"></span>
+      <!-- Stift-Button -->
+      <button class="btn btn-outline-primary" type="button" (click)="openDraw(1)">
+        <i class="bi bi-pencil-square"></i>
+      </button>
+
+      <!-- Clear oder Search Icon -->
+      @if (!reactant1) {
+        <span class="input-group-text"><i class="bi bi-search"></i></span>
       } @else {
-        <span class="icon bi bi-x text-black clear-btn" (click)="clearReactant2()"></span>
+        <button class="btn btn-outline-danger" type="button" (click)="clearReactant1()">
+          <i class="bi bi-x"></i>
+        </button>
       }
     </div>
   </div>
+
+  <!-- Reactant 2 -->
+  <div class="mb-3">
+    <label class="form-label">Reactant 2</label>
+    <div class="input-group">
+      <input
+        type="text"
+        class="form-control"
+        [(ngModel)]="reactant2"
+        (ngModelChange)="onSearch()"
+        placeholder="e.g. Chloride" />
+
+      <!-- Stift-Button -->
+      <button class="btn btn-outline-primary" type="button" (click)="openDraw(2)">
+        <i class="bi bi-pencil-square"></i>
+      </button>
+
+      <!-- Clear oder Search Icon -->
+      @if (!reactant2) {
+        <span class="input-group-text"><i class="bi bi-search"></i></span>
+      } @else {
+        <button class="btn btn-outline-danger" type="button" (click)="clearReactant2()">
+          <i class="bi bi-x"></i>
+        </button>
+      }
+    </div>
+  </div>
+
 </div>
+
+@if (isDrawModalOpen) {
+  <app-draw-mol
+    [initialSmiles]="currentSmilesForModal"
+    (save)="onModalSave($event)"
+    (closeModal)="isDrawModalOpen = false">
+  </app-draw-mol>
+}

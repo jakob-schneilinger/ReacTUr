@@ -1,7 +1,7 @@
 import { AfterViewInit, Component, OnInit } from '@angular/core';
-import { AdvancedSearch } from '../../dtos/metadata';
-import { MOCK_EXPERIMENTS } from '../../mock/mock-experiments';
-import { Experiment } from '../../dtos/experiment';
+import { AdvancedSearch } from '../../../dtos/metadata';
+import { MOCK_EXPERIMENTS } from '../../../mock/mock-experiments';
+import { Experiment } from '../../../dtos/experiment';
 
 declare var initRDKitModule: any;
 declare var ChemDoodle: any;
@@ -12,7 +12,7 @@ declare var ChemDoodle: any;
   styleUrls: ['./search-site.component.scss'],
   standalone: false,
 })
-export class SearchSiteComponent implements OnInit, AfterViewInit {
+export class SearchSiteComponent implements OnInit {
   currentSearchState: 'initial' | 'no-results' | 'has-results' = 'initial';
   foundExperiments: any[] = [];
 
@@ -24,61 +24,6 @@ export class SearchSiteComponent implements OnInit, AfterViewInit {
 
   async ngOnInit() {
     this.rdkitModule = await initRDKitModule();
-  }
-
-  ngAfterViewInit() {
-    // Initialize Canvases
-    this.sketcher1 = new ChemDoodle.SketcherCanvas('sketcher1', 400, 250, { useServices: false });
-    this.sketcher2 = new ChemDoodle.SketcherCanvas('sketcher2', 400, 250, { useServices: false });
-
-    // Listen for drawing actions (Mouse release)
-    const c1 = document.getElementById('sketcher1');
-    const c2 = document.getElementById('sketcher2');
-
-    console.log("Test1")
-
-    c1?.addEventListener('mouseup', () => this.syncCanvasToSmiles(1));
-    c2?.addEventListener('mouseup', () => this.syncCanvasToSmiles(2));
-  }
-
-  // Path 1: Visual Sketcher -> SMILES String
-  syncCanvasToSmiles(num: number) {
-
-    console.log('Test2');
-    this.isInternalChange = true; // Block handleSearch from overwriting the canvas
-    const sketcher = num === 1 ? this.sketcher1 : this.sketcher2;
-    const molBlock = ChemDoodle.writeMOL(sketcher.getMolecule());
-
-    try {
-      const mol = this.rdkitModule.get_mol(molBlock);
-      const smiles = mol.get_smiles();
-
-      if (num === 1) this.reactant1 = smiles;
-      else this.reactant2 = smiles;
-
-      mol.delete();
-      this.executeSearch();
-    } catch (e) {
-      /* Structure might be empty or invalid */
-    }
-
-    // Reset flag after Angular cycle
-    setTimeout(() => (this.isInternalChange = false), 100);
-  }
-
-  private updateCanvasFromSmiles(num: number, smiles: string) {
-    if (!this.rdkitModule || !smiles) return;
-    try {
-      const mol = this.rdkitModule.get_mol(smiles);
-      if (mol) {
-        const molBlock = mol.get_molblock();
-        const sketcher = num === 1 ? this.sketcher1 : this.sketcher2;
-        sketcher.loadMolecule(ChemDoodle.readMOL(molBlock));
-        mol.delete();
-      }
-    } catch (e) {
-      /* Ignore partial SMILES errors while typing */
-    }
   }
 
   clearSignal: number = 0;
@@ -110,11 +55,6 @@ export class SearchSiteComponent implements OnInit, AfterViewInit {
   handleSearch(terms: { reactant1: string; reactant2: string }) {
     this.reactant1 = terms.reactant1;
     this.reactant2 = terms.reactant2;
-
-    if (!this.isInternalChange) {
-      this.updateCanvasFromSmiles(1, this.reactant1);
-      this.updateCanvasFromSmiles(2, this.reactant2);
-    }
     this.executeSearch();
   }
 

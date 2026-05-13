@@ -7,7 +7,6 @@ import { Component, Output, EventEmitter, Input } from '@angular/core';
   standalone: false,
 })
 export class ExperimentSearchComponent {
-  // Event, das ausgelöst wird, wenn sich die Suche ändert
   @Output() searchChanged = new EventEmitter<{ reactant1: string; reactant2: string }>();
   @Input() set triggerClear(value: number) {
     if (value) {
@@ -17,6 +16,10 @@ export class ExperimentSearchComponent {
   }
   @Input() reactant1: string = "";
   @Input() reactant2: string = "";
+
+  isDrawModalOpen = false;
+  activeReactant: 1 | 2 = 1;
+  currentSmilesForModal = '';
 
   onSearch() {
     this.searchChanged.emit({
@@ -32,6 +35,22 @@ export class ExperimentSearchComponent {
 
   clearReactant2() {
     this.reactant2 = '';
+    this.onSearch();
+  }
+
+  openDraw(reactantNum: 1 | 2) {
+    this.activeReactant = reactantNum;
+    this.currentSmilesForModal = reactantNum === 1 ? this.reactant1 : this.reactant2;
+    this.isDrawModalOpen = true;
+  }
+
+  onModalSave(newSmiles: string) {
+    if (this.activeReactant === 1) {
+      this.reactant1 = newSmiles;
+    } else {
+      this.reactant2 = newSmiles;
+    }
+    this.isDrawModalOpen = false;
     this.onSearch();
   }
 }

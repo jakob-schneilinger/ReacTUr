@@ -1,16 +1,16 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core';
-import { Experiment } from '../../dtos/experiment';
+import { Experiment } from '../../../dtos/experiment';
 
 export type SearchState = 'initial' | 'no-results' | 'has-results';
 
 
 @Component({
   selector: 'app-experiment-results',
-  templateUrl: './experiment-results.component.html',
-  styleUrls: ['./experiment-results.component.scss'],
+  templateUrl: './search-results.component.html',
+  styleUrls: ['./search-results.component.scss'],
   standalone: false,
 })
-export class ExperimentResultsComponent {
+export class SearchResultsComponent {
   @Input() state: SearchState = 'initial';
   @Input() experiments: Experiment[] = [];
   @Output() getExport = new EventEmitter<number[]>();

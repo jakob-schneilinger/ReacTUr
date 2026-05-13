@@ -1,0 +1,40 @@
+<div class="modal fade show custom-backdrop" tabindex="-1" style="display: block;" aria-modal="true" role="dialog">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content border-0 shadow-lg rounded-3">
+
+      <div class="modal-header border-bottom-0 pb-0">
+        <h5 class="modal-title fw-bold">Draw Structure</h5>
+        <button type="button" class="btn-close" (click)="onClose()" aria-label="Close"></button>
+      </div>
+
+      <div class="modal-body text-center pt-3 pb-4 px-4">
+
+        <div class="sketcher-box border rounded bg-white mb-4 p-2 d-inline-block w-100"
+             (pointerup)="onCanvasInteraction()"
+             (keyup)="onCanvasInteraction()">
+          <canvas [id]="canvasId"></canvas>
+        </div>
+
+        <div class="input-group shadow-sm">
+          <span class="input-group-text bg-white fw-bold text-primary border-end-0">SMILES</span>
+          <input
+            type="text"
+            class="form-control border-start-0 ps-0 shadow-none"
+            [(ngModel)]="smilesString"
+            (ngModelChange)="onSmileInput($event)"
+            placeholder="e.g. C=CCC"
+          />
+        </div>
+
+      </div>
+
+      <div class="modal-footer border-top-0 pt-0 px-4 pb-4">
+        <button type="button" class="btn btn-secondary text-white px-4" (click)="onClose()">Cancel</button>
+        <button type="button" class="btn primary px-4" (click)="onSave()">
+          <i class="bi bi-check2 me-2"></i> Apply Structure
+        </button>
+      </div>
+
+    </div>
+  </div>
+</div>

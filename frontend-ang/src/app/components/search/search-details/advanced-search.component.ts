@@ -1,5 +1,5 @@
 import { Component, Output, EventEmitter, Input } from '@angular/core';
-import { AdvancedSearch } from '../../dtos/metadata';
+import { AdvancedSearch } from '../../../dtos/metadata';
 
 @Component({
   selector: 'app-advanced-search',
