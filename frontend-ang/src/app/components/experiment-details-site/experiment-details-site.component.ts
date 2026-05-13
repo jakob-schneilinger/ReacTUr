@@ -29,7 +29,8 @@ export class ExperimentDetailsSiteComponent implements OnInit {
       this.state = 'edit';
       const id = this.route.snapshot.paramMap.get('id');
       if (!id) {
-        this.router.navigate(['/experiment'], { skipLocationChange: true });
+        this.notification.error("Invalid Experiment URL", "Please navigate to experiments/create or experiments/:id with a valid id!");
+        this.router.navigate(['/search'], { skipLocationChange: true });
         return;
       }
       //TODO: load experiment data from backend
@@ -37,15 +38,5 @@ export class ExperimentDetailsSiteComponent implements OnInit {
     else {
       this.state = 'create';
     }
-
-    this.route.params.subscribe({
-      next: (params) => {
-        const id = params['id'];
-        if (!id) {
-          this.router.navigate(['/experiment'], { skipLocationChange: true });
-          return;
-        }
-      },
-    });
   }
 }

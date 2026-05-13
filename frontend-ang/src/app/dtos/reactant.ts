@@ -7,5 +7,6 @@ export interface Reactant {
   additionalShortNames?: string[];
   casNumber?: string;
   comment?: string;
-  reference?: string;
+  references?: string[];
+  structures?: File[];
 }

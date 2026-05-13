@@ -30,6 +30,7 @@ import { ExperimentCreateSiteComponent } from './components/experiment-create/ex
 import { ExperimentDetailsFormComponent } from './components/experiment-details-site/experiment-detail-form/experiment-details-form.component';
 import { ExportModalComponent } from './components/export/export-modal.component';
 import { DragDropModule } from '@angular/cdk/drag-drop';
+import { ReactantSiteComponent } from './components/reactant/reactant-site/reactant-site.component';
 
 
 @NgModule({
@@ -54,6 +55,7 @@ import { DragDropModule } from '@angular/cdk/drag-drop';
     PasteTableComponent,
     ExperimentCreateSiteComponent,
     ExperimentDetailsFormComponent,
+    ReactantSiteComponent,
   ],
   imports: [
     BrowserModule,

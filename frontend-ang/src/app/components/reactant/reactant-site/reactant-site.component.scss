@@ -1,0 +1,98 @@
+@use "src/styles/global.scss" as *;
+@use "src/styles/variables.scss" as *;
+@import "bootstrap-icons/font/bootstrap-icons.css";
+
+.layout-wrapper {
+  display: block;
+  width: 80%;
+  height: calc(100vh);
+  padding: 124px 24px 60px 24px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.reactants-container {
+  padding-bottom: 50px;
+}
+
+.divider {
+  height: 1px;
+  background-color: $light_gray;
+  margin-bottom: 1rem;
+  width: 100%;
+}
+
+.search-group {
+  box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+
+  .form-control {
+    &:focus {
+      box-shadow: none;
+      border-color: #dee2e6;
+    }
+  }
+}
+
+.reactant-card-horizontal {
+  border: 1px solid rgba(0,0,0,0.08);
+  border-radius: 8px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  width: 100%;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08) !important;
+  }
+
+  .type-badge {
+    background-color: $background;
+    color: #495057;
+    font-weight: 500;
+    border-radius: 4px;
+    padding: 0.35em 0.6em;
+    font-size: 0.75rem;
+  }
+
+  .smiles-container {
+    background-color: $background;
+    padding: 0.4rem 0.5rem;
+    border-radius: 4px;
+    border: 1px solid #e9ecef;
+    font-family: monospace;
+    font-size: 0.85rem;
+    color: #495057;
+
+    min-width: 0;
+
+    .text-truncate {
+      min-width: 0;
+    }
+
+    .copy-btn {
+      opacity: 0.75;
+      transition: opacity 0.2s ease, color 0.2s ease;
+      border: none;
+      background: transparent;
+
+      &:hover {
+        opacity: 1;
+        color: $primary !important;
+      }
+
+      i {
+        font-size: 1rem;
+      }
+    }
+  }
+}
+
+button.compact {
+  padding: 0.25rem !important;
+  i {
+    font-size: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.2rem;
+  }
+}
