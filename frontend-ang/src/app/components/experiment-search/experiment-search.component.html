@@ -1,57 +1,123 @@
 <div class="search-container">
 
-  <!-- Reactant 1 -->
   <div class="mb-3">
-    <label class="form-label">Reactant 1</label>
-    <div class="input-group">
-      <input
-        type="text"
-        class="form-control"
-        [(ngModel)]="reactant1"
-        (ngModelChange)="onSearch()"
-        placeholder="e.g. Sodium" />
+    <label class="form-label text-muted fw-bold mb-1">Reactant 1</label>
 
-      <!-- Stift-Button -->
-      <button class="btn btn-outline-primary" type="button" (click)="openDraw(1)">
-        <i class="bi bi-pencil-square"></i>
-      </button>
+    @if (!selectedReactant1) {
+      <div class="position-relative">
+        <div class="d-flex align-items-center w-100">
+          <input
+            type="text"
+            class="form-control bg-white"
+            [(ngModel)]="searchTerm1"
+            (ngModelChange)="onSearchInput(1)"
+            placeholder="Search by name, SMILES, or type..." />
 
-      <!-- Clear oder Search Icon -->
-      @if (!reactant1) {
-        <span class="input-group-text"><i class="bi bi-search"></i></span>
-      } @else {
-        <button class="btn btn-outline-danger" type="button" (click)="clearReactant1()">
-          <i class="bi bi-x"></i>
-        </button>
-      }
-    </div>
+          <button class=" btn-outline-primary" type="button" (click)="openDraw(1)">
+            <i class="bi bi-pencil-square"></i>
+          </button>
+
+          @if (!searchTerm1) {
+            <span class="input-group-text bg-light text-muted border-start-0"><i class="bi bi-search"></i></span>
+          } @else {
+            <button class="btn btn-outline-secondary bg-white border-start-0" type="button" (click)="clearReactant(1)">
+              <i class="bi bi-x"></i>
+            </button>
+          }
+        </div>
+
+        @if (suggestions1.length > 0) {
+          <div class="list-group position-absolute w-100 mt-1 custom-dropdown-menu">
+            @for (item of suggestions1; track item.shortName) {
+              <button type="button" class="list-group-item custom-dropdown-item border-0" (click)="selectReactant(1, item)">
+                <div class="d-flex w-100 justify-content-between align-items-center mb-1">
+                  <span class="reactant-name">{{ item.shortName }}</span>
+                  <span class="badge bg-secondary reactant-type">{{ item.type }}</span>
+                </div>
+                <span class="reactant-smiles text-break">{{ item.smiles }}</span>
+              </button>
+            }
+          </div>
+        }
+      </div>
+    }
+    @else {
+      <div class="selected-reactant-card shadow-sm position-relative">
+        <div class="d-flex justify-content-between align-items-center">
+
+          <div class="d-flex flex-column">
+            <span class="reactant-title text-primary">{{ selectedReactant1?.shortName }}</span>
+            <div class="d-flex align-items-center mt-1 gap-2">
+              <span class="badge rounded-pill bg-secondary bg-opacity-75">{{ selectedReactant1?.type }}</span>
+              <code class="text-muted bg-light px-2 rounded">{{ selectedReactant1?.smiles }}</code>
+            </div>
+          </div>
+
+          <button type="button" class="btn-close ms-3" aria-label="Close" (click)="clearReactant(1)" title="Remove"></button>
+
+        </div>
+      </div>
+    }
   </div>
 
-  <!-- Reactant 2 -->
   <div class="mb-3">
-    <label class="form-label">Reactant 2</label>
-    <div class="input-group">
-      <input
-        type="text"
-        class="form-control"
-        [(ngModel)]="reactant2"
-        (ngModelChange)="onSearch()"
-        placeholder="e.g. Chloride" />
+    <label class="form-label text-muted fw-bold mb-1">Reactant 2</label>
 
-      <!-- Stift-Button -->
-      <button class="btn btn-outline-primary" type="button" (click)="openDraw(2)">
-        <i class="bi bi-pencil-square"></i>
-      </button>
+    @if (!selectedReactant2) {
+      <div class="position-relative">
+        <div class="d-flex align-items-center w-100">
+          <input
+            type="text"
+            class="form-control bg-white"
+            [(ngModel)]="searchTerm2"
+            (ngModelChange)="onSearchInput(2)"
+            placeholder="Search by name, SMILES, or type..." />
 
-      <!-- Clear oder Search Icon -->
-      @if (!reactant2) {
-        <span class="input-group-text"><i class="bi bi-search"></i></span>
-      } @else {
-        <button class="btn btn-outline-danger" type="button" (click)="clearReactant2()">
-          <i class="bi bi-x"></i>
-        </button>
-      }
-    </div>
+          <button class="btn btn-outline-primary bg-white" type="button" (click)="openDraw(2)">
+            <i class="bi bi-pencil-square"></i>
+          </button>
+
+          @if (!searchTerm2) {
+            <span class="input-group-text bg-light text-muted border-start-0"><i class="bi bi-search"></i></span>
+          } @else {
+            <button class="btn btn-outline-secondary bg-white border-start-0" type="button" (click)="clearReactant(2)">
+              <i class="bi bi-x"></i>
+            </button>
+          }
+        </div>
+
+        @if (suggestions2.length > 0) {
+          <div class="list-group position-absolute w-100 mt-1 custom-dropdown-menu">
+            @for (item of suggestions2; track item.shortName) {
+              <button type="button" class="list-group-item custom-dropdown-item border-0" (click)="selectReactant(2, item)">
+                <div class="d-flex w-100 justify-content-between align-items-center mb-1">
+                  <span class="reactant-name">{{ item.shortName }}</span>
+                  <span class="badge bg-secondary reactant-type">{{ item.type }}</span>
+                </div>
+                <span class="reactant-smiles text-break">{{ item.smiles }}</span>
+              </button>
+            }
+          </div>
+        }
+      </div>
+    }
+    @else {
+      <div class="selected-reactant-card shadow-sm position-relative">
+        <div class="d-flex justify-content-between align-items-center">
+
+          <div class="d-flex flex-column">
+            <span class="reactant-title text-primary">{{ selectedReactant2?.shortName }}</span>
+            <div class="d-flex align-items-center mt-1 gap-2">
+              <span class="badge rounded-pill bg-secondary bg-opacity-75">{{ selectedReactant2?.type }}</span>
+              <code class="text-muted bg-light px-2 rounded">{{ selectedReactant2?.smiles }}</code>
+            </div>
+          </div>
+
+          <button type="button" class="btn-close ms-3" aria-label="Close" (click)="clearReactant(2)" title="Remove"></button>
+
+        </div>
+      </div>
+    }
   </div>
 
 </div>
