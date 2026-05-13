@@ -9,14 +9,30 @@
 }
 
 .input-group {
-  display: flex;
-  flex-direction: column;
-  margin-bottom: 1.25rem;
+  border-radius: 1rem;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
 
-  label {
-    margin-bottom: 0.5rem;
-    font-size: 0.875rem;
-    color: $light_black;
+  .form-control {
+    border-color: #cbd5e1;
+    box-shadow: none;
+
+    &:focus {
+      border-color: #0d6efd;
+
+      ~ .btn, ~ .input-group-text {
+        border-color: #0d6efd;
+      }
+    }
+  }
+
+  .btn, .input-group-text {
+    border-color: #cbd5e1;
+    color: #64748b;
+
+    &:hover {
+      background-color: #f8fafc !important;
+      color: #0d6efd;
+    }
   }
 }
 
@@ -28,8 +44,6 @@
   input {
     width: 100%;
     padding: 0.6rem 2.5rem 0.6rem 1rem;
-    border: 1px solid $light_gray;
-    border-radius: 20px;
     font-size: 0.875rem;
     outline: none;
     transition: border-color 0.2s ease-in-out;
@@ -43,6 +57,7 @@
     position: absolute;
     right: 12px;
     font-size: 1rem;
+    color: $light_gray;
   }
 
   .bi-search {
@@ -110,11 +125,10 @@
   }
 }
 
-/* --- Modernes Styling für das ausgewählte Molekül --- */
 .selected-reactant-card {
   background-color: #ffffff;
   border: 1px solid #e2e8f0;
-  border-left: 4px solid #0d6efd; /* Schöner blauer Balken an der Seite */
+  border-left: 4px solid #0d6efd;
   border-radius: 0.5rem;
   padding: 0.75rem 1.25rem;
   transition: all 0.2s ease-in-out;
@@ -130,15 +144,5 @@
   }
 }
 
-/* --- Kleines Upgrade für dein Input-Feld & Dropdown --- */
-.input-group {
-  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
-  border-radius: 0.5rem;
-  overflow: hidden; /* Macht die runden Ecken konsistent */
-
-  .form-control, .btn, .input-group-text {
-    border-color: #cbd5e1;
-  }
-}
 
 

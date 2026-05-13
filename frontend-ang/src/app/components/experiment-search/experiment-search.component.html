@@ -4,24 +4,38 @@
     <label class="form-label text-muted fw-bold mb-1">Reactant 1</label>
 
     @if (!selectedReactant1) {
-      <div class="position-relative">
-        <div class="d-flex align-items-center w-100">
+      <div class="position-relative search-container">
+
+        <!-- Bootstrap Input-Group für nahtloses Design -->
+        <div class="input-group shadow-sm">
           <input
             type="text"
-            class="form-control bg-white"
+            class="form-control bg-white border-end-0"
             [(ngModel)]="searchTerm1"
             (ngModelChange)="onSearchInput(1)"
             placeholder="Search by name, SMILES, or type..." />
 
-          <button class=" btn-outline-primary" type="button" (click)="openDraw(1)">
+          <!-- Draw Button (Stift) -->
+          <button
+            class="btn btn-outline-secondary border-start-0 border-end-0  border-1 bg-white"
+            type="button"
+            (click)="openDraw(1)"
+            title="Draw Molecule">
             <i class="bi bi-pencil-square"></i>
           </button>
 
+          <!-- Search oder Clear Icon -->
           @if (!searchTerm1) {
-            <span class="input-group-text bg-light text-muted border-start-0"><i class="bi bi-search"></i></span>
+            <span class="input-group-text bg-white text-muted border-start-0">
+          <i class="bi bi-search"></i>
+            </span>
           } @else {
-            <button class="btn btn-outline-secondary bg-white border-start-0" type="button" (click)="clearReactant(1)">
-              <i class="bi bi-x"></i>
+            <button
+              class="btn btn-outline-secondary bg-white border-start-0"
+              type="button"
+              (click)="clearReactant(1)"
+              title="Clear Search">
+              <i class="bi bi-x-lg text-danger"></i>
             </button>
           }
         </div>
@@ -64,8 +78,8 @@
     <label class="form-label text-muted fw-bold mb-1">Reactant 2</label>
 
     @if (!selectedReactant2) {
-      <div class="position-relative">
-        <div class="d-flex align-items-center w-100">
+      <div class="position-relative search-container">
+        <div class="input-group shadow-sm">
           <input
             type="text"
             class="form-control bg-white"
@@ -73,12 +87,12 @@
             (ngModelChange)="onSearchInput(2)"
             placeholder="Search by name, SMILES, or type..." />
 
-          <button class="btn btn-outline-primary bg-white" type="button" (click)="openDraw(2)">
+          <button class="btn btn-outline-secondary border-start-0 border-end-0  border-1 bg-white" type="button" (click)="openDraw(2)">
             <i class="bi bi-pencil-square"></i>
           </button>
 
           @if (!searchTerm2) {
-            <span class="input-group-text bg-light text-muted border-start-0"><i class="bi bi-search"></i></span>
+            <span class="input-group-text bg-white text-muted border-start-0"><i class="bi bi-search"></i></span>
           } @else {
             <button class="btn btn-outline-secondary bg-white border-start-0" type="button" (click)="clearReactant(2)">
               <i class="bi bi-x"></i>
