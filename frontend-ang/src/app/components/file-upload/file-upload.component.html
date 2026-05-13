@@ -3,7 +3,8 @@
 
   <app-paste-table (fileGenerated)="onPasteTableGenerated($event)"></app-paste-table>
 
-  <app-drag-and-drop (filesSelected)="addFiles($event)"></app-drag-and-drop>
+  <app-drag-and-drop (filesSelected)="addFiles($event)" [allowedExtensions]="allowedExtensions">
+  </app-drag-and-drop>
 
   <div class="file-list mt-4">
     <app-uploaded-file

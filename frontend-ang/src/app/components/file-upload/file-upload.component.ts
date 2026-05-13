@@ -1,7 +1,8 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, Input, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 import { NotificationService } from '../../services/notification.service';
+import { ExperimentService } from '../../services/experiment.service';
 
 @Component({
   selector: 'app-file-upload',
@@ -10,11 +11,14 @@ import { NotificationService } from '../../services/notification.service';
   standalone: false,
 })
 export class FileUploadComponent implements OnInit {
+  @Input() allowedExtensions: string[] = [];
+
   constructor(
     private authService: AuthService,
     private router: Router,
     private route: ActivatedRoute,
     private notification: NotificationService,
+    private experiments: ExperimentService,
   ) {}
 
   files: File[] = [];
@@ -27,7 +31,8 @@ export class FileUploadComponent implements OnInit {
       next: (params) => {
         const id = params['id'];
         if (!id) {
-          //TODO:
+          //TODO: Get already uploaded files
+          //this.experiments.getFiles();
         }
       },
     });

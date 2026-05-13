@@ -7,6 +7,8 @@
       <span>ReacTUr</span>
     </div>
     <div class="navitem" routerLink="/search" routerLinkActive="active-link">Search</div>
+    <div class="navitem" routerLink="/experiments/create" routerLinkActive="active-link">Create Experiment</div>
+    <!--
     <div class="navitem"
          ngbDropdown
          display="static"
@@ -30,6 +32,7 @@
         </div>
       </div>
     </div>
+    -->
     <div class="navitem" routerLink="/reactants" routerLinkActive="active-link">Reactants</div>
     <div class="navitem" routerLink="/permissions" routerLinkActive="active-link" [hidden]="user?.role != 'reviewer' && user?.role != 'admin'">Permissions</div>
     <div class="navitem" routerLink="/admin" routerLinkActive="active-link" [hidden]="user?.role != 'admin'">Admin</div>

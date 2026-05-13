@@ -5,7 +5,7 @@
     #fileDropRef
     id="fileDropRef"
     multiple
-    accept=".txt,.csv,.dsx"
+    [accept]="acceptedExtensionsString"
     (change)="fileBrowseHandler($event)"
     class="d-none"
   />
@@ -14,6 +14,6 @@
   <h5>Drag and Drop <br> or
     <a href="javascript:void(0)" class="text-primary text-decoration-none" (click)="fileDropRef.click()">Browse</a>
   </h5>
-  <p class="text-muted small mb-0">Supports: CSV, TXT and DSX</p>
+  <p class="text-muted small mb-0">Supports: {{acceptedExtensionsText}}</p>
 </div>
 
