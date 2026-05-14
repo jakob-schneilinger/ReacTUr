@@ -18,6 +18,9 @@ export class ReactantSiteComponent implements OnInit {
   isDeleteReactantModalOpen: boolean = false;
   pendingReactantName: string | null = '';
 
+  isViewModalOpen: boolean = false;
+  selectedReactantForView: Reactant | undefined = undefined;
+
   constructor(
     private router: Router,
     private reactantService: ReactantService,
@@ -26,10 +29,12 @@ export class ReactantSiteComponent implements OnInit {
 
   ngOnInit(): void {
     this.reactantService.getAllReactants().subscribe({
-      next: (value) => (this.reactants = value),
+      next: (value) => {
+        this.reactants = value;
+        this.onSearch();
+      },
       error: (err) => this.notification.error('Reactants unavailable', err),
     });
-    this.onSearch();
   }
 
   onSearch(): void {
@@ -53,7 +58,21 @@ export class ReactantSiteComponent implements OnInit {
   }
 
   viewDetails(shortName: string | undefined): void {
-    if (shortName) this.router.navigate(['/reactants', shortName]);
+    if (!shortName) return;
+
+    const reactantToView = this.reactants.find((r) => r.shortName === shortName);
+
+    if (reactantToView) {
+      this.selectedReactantForView = reactantToView;
+      this.isViewModalOpen = true;
+    } else {
+      this.notification.error('Error', 'Reactant details could not be found.');
+    }
+  }
+
+  closeViewModal(): void {
+    this.isViewModalOpen = false;
+    this.selectedReactantForView = undefined;
   }
 
   editReactant(shortName: string | undefined): void {

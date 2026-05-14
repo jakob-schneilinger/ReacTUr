@@ -9,6 +9,9 @@ import { ExperimentSiteComponent } from './components/experiment-site/experiment
 import { SearchSiteComponent } from './components/search-site/search-site.component';
 import { ExperimentDetailsSiteComponent } from './components/experiment-details-site/experiment-details-site.component';
 import { ReactantSiteComponent } from './components/reactant/reactant-site/reactant-site.component';
+import {
+  ReactantDetailsSiteComponent
+} from './components/reactant/reactant-details-site/reactant-details-site.component';
 
 
 export const routes: Routes = [
@@ -17,6 +20,7 @@ export const routes: Routes = [
   { path: 'experiments/create', component: ExperimentDetailsSiteComponent, canActivate: [AuthGuard], data: { state: "create" } },
   { path: 'experiments/:id', component: ExperimentDetailsSiteComponent, canActivate: [AuthGuard], data: { state: "edit" } },
   { path: 'reactants', component: ReactantSiteComponent, canActivate: [AuthGuard] },
+  { path: 'reactants/:name', component: ReactantDetailsSiteComponent, canActivate: [AuthGuard] },
   { path: 'permissions', component: HomeComponent, canActivate: [AuthGuard] },
   { path: 'admin', component: HomeComponent, canActivate: [AuthGuard] },
   { path: '', redirectTo: 'search', pathMatch: 'full' },

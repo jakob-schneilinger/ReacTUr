@@ -1,0 +1,90 @@
+<div class="modal fade show custom-backdrop" tabindex="-1" style="display: block;" aria-modal="true" role="dialog">
+  <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+    <div class="modal-content">
+
+      <div class="modal-header">
+        <h5 class="modal-title">
+          {{ selectedReactant?.shortName || 'Reactant Details' }}
+        </h5>
+        <button type="button" class="btn-close" (click)="close.emit()" aria-label="Close"></button>
+      </div>
+
+      <div class="modal-body">
+        <div class="container-fluid" *ngIf="selectedReactant">
+          <div class="row">
+
+            <div class="col-md-6 pe-4">
+              <h6 class="border-bottom pb-2 mb-3 text-primary">Reactant Information</h6>
+              <dl class="row">
+                <dt class="col-sm-4">Short Name</dt>
+                <dd class="col-sm-8">{{ selectedReactant.shortName }}</dd>
+
+                <dt class="col-sm-4">SMILES</dt>
+                <dd class="col-sm-8 text-break">{{ selectedReactant.smiles }}</dd>
+
+                <dt class="col-sm-4">Type</dt>
+                <dd class="col-sm-8">{{ selectedReactant.type }}</dd>
+
+                <dt class="col-sm-4 mt-3">Chemical Name</dt>
+                <dd class="col-sm-8 mt-3">{{ selectedReactant.chemicalName || '-' }}</dd>
+
+                <dt class="col-sm-4">Additional Names</dt>
+                <dd class="col-sm-8">{{ selectedReactant.additionalShortNames || '-' }}</dd>
+
+                <dt class="col-sm-4">CAS Number</dt>
+                <dd class="col-sm-8">{{ selectedReactant.casNumber || '-' }}</dd>
+
+                <dt class="col-sm-4">Comment</dt>
+                <dd class="col-sm-8">{{ selectedReactant.comment || '-' }}</dd>
+
+                <dt class="col-sm-4">References</dt>
+                <dd class="col-sm-8">{{ selectedReactant.references || '-' }}</dd>
+              </dl>
+            </div>
+
+            <div class="col-md-6 border-start ps-4" style="min-height: 600px">
+              <h6 class="border-bottom pb-2 mb-3 text-primary">3D Structure</h6>
+
+              @if (loadingStructures) {
+                <div class="d-flex flex-column justify-content-center align-items-center py-5" style="min-height: 200px;">
+                  <div class="spinner-border text-primary mb-3" role="status" style="width: 3rem; height: 3rem;">
+                    <span class="visually-hidden">Loading...</span>
+                  </div>
+                  <span class="text-muted fw-medium">Loading 3D structure...</span>
+                </div>
+              } @else {
+                @if (selectedReactant.structures) {
+                  <app-reactant-structure
+                    *ngFor="let structure of selectedReactant.structures"
+                    [structure]="structure">
+                  </app-reactant-structure>
+                } @else {
+                  <div class="alert alert-light text-center border mt-2 no-structure-container">
+                    No 3D structure data available to render.
+                  </div>
+                }
+              }
+
+              <h6 class="border-bottom pb-2 mb-3 mt-4 text-primary">Attached Files</h6>
+
+              <app-uploaded-file
+                *ngFor="let file of selectedReactant.structures;"
+                [file]="file"
+                [removePossible]="false">
+              </app-uploaded-file>
+
+              <div *ngIf="!selectedReactant.structures" class="text-muted small">No structural files attached.</div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn primary" (click)="editReactant(selectedReactant?.shortName)">Edit Reactant</button>
+        <button type="button" class="" (click)="this.close.emit()">Close</button>
+      </div>
+
+    </div>
+  </div>
+</div>

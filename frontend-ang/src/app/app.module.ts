@@ -31,6 +31,9 @@ import { ExperimentDetailsFormComponent } from './components/experiment-details-
 import { ExportModalComponent } from './components/export/export-modal.component';
 import { DragDropModule } from '@angular/cdk/drag-drop';
 import { ReactantSiteComponent } from './components/reactant/reactant-site/reactant-site.component';
+import { ReactantViewModalComponent } from './components/reactant/reactant-view-modal/reactant-view-modal.component';
+import { ReactantStructureComponent } from './components/reactant/reactant-structure/reactant-structure.component';
+import { ReactantDetailsSiteComponent } from './components/reactant/reactant-details-site/reactant-details-site.component';
 
 
 @NgModule({
@@ -56,6 +59,9 @@ import { ReactantSiteComponent } from './components/reactant/reactant-site/react
     ExperimentCreateSiteComponent,
     ExperimentDetailsFormComponent,
     ReactantSiteComponent,
+    ReactantDetailsSiteComponent,
+    ReactantViewModalComponent,
+    ReactantStructureComponent
   ],
   imports: [
     BrowserModule,

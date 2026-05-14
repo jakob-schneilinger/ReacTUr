@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { delay, Observable, of } from 'rxjs';
+import { delay, map, Observable, of } from 'rxjs';
 import { AuthService } from './auth.service';
 import { HttpClient } from '@angular/common/http';
 import { Globals } from '../global/globals';
@@ -29,12 +29,31 @@ export class ReactantService {
   getReactants(shortName: string): Observable<Reactant[]> {
     // TODO: Backend-Call
 
-    const mockdata = MOCK_REACTANTS.filter(reactant => reactant.shortName.toLowerCase().includes(shortName.toLowerCase()));
+    const mockdata = MOCK_REACTANTS.filter((reactant) =>
+      reactant.shortName.toLowerCase().includes(shortName.toLowerCase()),
+    );
     return of(mockdata);
   }
 
   deleteReactant(shortName: string): Observable<boolean> {
+    // TODO: Backend-Call
 
     return of(true);
+  }
+
+  getReactantStructures(shortName: string): Observable<File[]> {
+    // TODO: Backend-Call
+    const url = 'mol.xyz';
+
+    return this.httpClient
+      .get(url, {
+        responseType: 'blob',
+      })
+      .pipe(
+        map((blob: Blob) => {
+          const file = new File([blob], `${shortName}.xyz`, { type: 'chemical/x-xyz' });
+          return [file];
+        }),
+      );
   }
 }
