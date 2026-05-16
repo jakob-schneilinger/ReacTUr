@@ -1,0 +1,15 @@
+import { NgModule } from '@angular/core';
+import { RouterModule, Routes } from '@angular/router';
+import { ReactantSiteComponent } from './reactant-site/reactant-site.component';
+import { ReactantDetailsSiteComponent } from './reactant-details-site/reactant-details-site.component';
+
+const routes: Routes = [
+  { path: '', component: ReactantSiteComponent }, // /reactants
+  { path: ':name', component: ReactantDetailsSiteComponent }, // /reactants/:name
+];
+
+@NgModule({
+  imports: [RouterModule.forChild(routes)],
+  exports: [RouterModule],
+})
+export class ReactantRoutingModule {}

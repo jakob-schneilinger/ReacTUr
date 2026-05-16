@@ -35,6 +35,15 @@ export class ReactantService {
     return of(mockdata);
   }
 
+  getReactant(shortName: string): Observable<Reactant> {
+    // TODO: Backend-Call
+
+    const mockdata = MOCK_REACTANTS.filter((reactant) =>
+      reactant.shortName.toLowerCase() === shortName.toLowerCase(),
+    )[0];
+    return of(mockdata);
+  }
+
   deleteReactant(shortName: string): Observable<boolean> {
     // TODO: Backend-Call
 

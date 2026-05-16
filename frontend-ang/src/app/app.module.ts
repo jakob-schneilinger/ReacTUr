@@ -21,19 +21,11 @@ import { ExperimentSiteComponent } from './components/experiment-site/experiment
 import { SearchSiteComponent } from './components/search-site/search-site.component';
 import { AdvancedSearchComponent } from './components/search-details/advanced-search.component';
 import { ExperimentDetailsSiteComponent } from './components/experiment-details-site/experiment-details-site.component';
-import { FileUploadComponent } from './components/file-upload/file-upload.component';
-import { DragAndDropComponent } from './components/file-upload/drag-and-drop/drag-and-drop.component';
-import { UploadedFileComponent } from './components/file-upload/uploaded-file/uploaded-file.component';
-import { DragAndDropDirective } from './directives/drag-and-drop.directive';
-import { PasteTableComponent } from './components/file-upload/paste-table/paste-table.component';
 import { ExperimentCreateSiteComponent } from './components/experiment-create/experiment-create-site/experiment-create-site.component';
 import { ExperimentDetailsFormComponent } from './components/experiment-details-site/experiment-detail-form/experiment-details-form.component';
 import { ExportModalComponent } from './components/export/export-modal.component';
-import { DragDropModule } from '@angular/cdk/drag-drop';
-import { ReactantSiteComponent } from './components/reactant/reactant-site/reactant-site.component';
-import { ReactantViewModalComponent } from './components/reactant/reactant-view-modal/reactant-view-modal.component';
-import { ReactantStructureComponent } from './components/reactant/reactant-structure/reactant-structure.component';
-import { ReactantDetailsSiteComponent } from './components/reactant/reactant-details-site/reactant-details-site.component';
+import { CdkDrag, CdkDropList } from '@angular/cdk/drag-drop';
+import { SharedModule } from './shared/shared.module';
 
 
 @NgModule({
@@ -43,27 +35,18 @@ import { ReactantDetailsSiteComponent } from './components/reactant/reactant-det
     HomeComponent,
     UserLoginComponent,
     UserComponent,
-    NotificationsComponent,
-    LayoutComponent,
     ExperimentSearchComponent,
     ExperimentResultsComponent,
     ExperimentSiteComponent,
     SearchSiteComponent,
     AdvancedSearchComponent,
     ExperimentDetailsSiteComponent,
-    FileUploadComponent,
-    DragAndDropComponent,
-    UploadedFileComponent,
     ExportModalComponent,
-    PasteTableComponent,
     ExperimentCreateSiteComponent,
     ExperimentDetailsFormComponent,
-    ReactantSiteComponent,
-    ReactantDetailsSiteComponent,
-    ReactantViewModalComponent,
-    ReactantStructureComponent
   ],
   imports: [
+    SharedModule,
     BrowserModule,
     AppRoutingModule,
     ReactiveFormsModule,
@@ -77,8 +60,8 @@ import { ReactantDetailsSiteComponent } from './components/reactant/reactant-det
         sendAccessToken: true,
       },
     }),
-    DragAndDropDirective,
-    DragDropModule,
+    CdkDropList,
+    CdkDrag,
   ],
   providers: [],
   bootstrap: [AppComponent],

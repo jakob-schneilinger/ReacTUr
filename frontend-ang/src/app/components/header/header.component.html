@@ -47,7 +47,7 @@
         <ng-container *ngIf="isLoggedIn; else loggedOutMenu">
           <button ngbDropdownItem disabled>Hallo, {{ user?.firstName }}</button>
           <div class="dropdown-divider"></div>
-          <button ngbDropdownItem (click)="logout()" class="text-danger">
+          <button ngbDropdownItem (click)="logout()" class="text-danger logout-button">
             Logout
             <i id="logout_icon" title="Logout" class="bi bi-box-arrow-right"></i>
           </button>

@@ -9,7 +9,12 @@
 
     <!-- Rechte Spalte -->
     <div rightContent>
-      <app-file-upload [allowedExtensions]="['txt', 'csv', 'dsx']">
+      @for (structure of reactant?.structures; track structure.name) {
+        <app-reactant-structure [structure]="structure">
+
+        </app-reactant-structure>
+      }
+      <app-file-upload [showTable]="false" [allowedExtensions]="['xyz']">
 
       </app-file-upload>
     </div>

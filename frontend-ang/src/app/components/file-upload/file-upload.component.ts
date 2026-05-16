@@ -12,6 +12,7 @@ import { ExperimentService } from '../../services/experiment.service';
 })
 export class FileUploadComponent implements OnInit {
   @Input() allowedExtensions: string[] = [];
+  @Input() showTable: boolean = true;
 
   constructor(
     private authService: AuthService,
