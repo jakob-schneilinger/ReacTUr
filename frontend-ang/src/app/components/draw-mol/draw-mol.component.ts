@@ -90,7 +90,6 @@ export class DrawMolComponent implements OnInit, AfterViewInit {
       const molBlock = ChemDoodle.writeMOL(this.sketcher.getMolecule());
       const mol = this.rdkitModule.get_mol(molBlock);
 
-      // HIER IST DER FIX: Die Zuweisung in die Angular Zone packen
       this.ngZone.run(() => {
         this.smilesString = mol.get_smiles();
       });
