@@ -6,7 +6,8 @@ import { ReactantDetailsSiteComponent } from './reactant-details-site/reactant-d
 import { ReactantViewModalComponent } from './reactant-view-modal/reactant-view-modal.component';
 import { ReactantStructureComponent } from './reactant-structure/reactant-structure.component';
 import { SharedModule } from '../../shared/shared.module';
-import { FormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { ReactantDetailsFormComponent } from './reactant-details-site/reactant-details-form/reactant-details-form.component';
 
 @NgModule({
   declarations: [
@@ -14,7 +15,8 @@ import { FormsModule } from '@angular/forms';
     ReactantDetailsSiteComponent,
     ReactantViewModalComponent,
     ReactantStructureComponent,
+    ReactantDetailsFormComponent,
   ],
-  imports: [SharedModule, ReactantRoutingModule, FormsModule],
+  imports: [SharedModule, ReactantRoutingModule, FormsModule, ReactiveFormsModule],
 })
 export class ReactantModule {}

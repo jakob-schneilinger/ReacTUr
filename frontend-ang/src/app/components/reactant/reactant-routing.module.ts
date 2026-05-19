@@ -5,7 +5,8 @@ import { ReactantDetailsSiteComponent } from './reactant-details-site/reactant-d
 
 const routes: Routes = [
   { path: '', component: ReactantSiteComponent }, // /reactants
-  { path: ':name', component: ReactantDetailsSiteComponent }, // /reactants/:name
+  { path: 'create', component: ReactantDetailsSiteComponent, data: { state: 'create' } }, // /reactants/create
+  { path: ':name', component: ReactantDetailsSiteComponent, data: { state: 'edit' } }, // /reactants/:name
 ];
 
 @NgModule({

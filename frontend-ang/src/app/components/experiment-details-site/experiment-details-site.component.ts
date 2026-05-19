@@ -2,9 +2,11 @@ import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 import { NotificationService } from '../../services/notification.service';
-import { map } from 'rxjs';
+import { ExperimentService } from '../../services/experiment.service';
+import { ExperimentData } from '../../dtos/experiment';
+import { User } from '../../dtos/user';
 
-export type FormState = 'create' | 'edit';
+export type FormState = 'create' | 'edit' | 'view';
 
 @Component({
   selector: 'app-experiment-details-site',
@@ -18,21 +20,79 @@ export class ExperimentDetailsSiteComponent implements OnInit {
     private router: Router,
     private route: ActivatedRoute,
     private notification: NotificationService,
+    private experimentService: ExperimentService,
   ) {}
 
   state: FormState = 'create';
+  user: User | null = null;
+  role: string = "USER";
+
+  experiment: ExperimentData | undefined;
+
+
+  get formState() {
+    return this.state;
+  }
+
+  get experimentTitle() {
+    if (this.state === 'create') {
+      return "Create new Experiment"
+    } else if (this.state === 'edit') {
+      return "Edit Experiment"
+    } else {
+      return "View Experiment"
+    }
+  }
 
   ngOnInit(): void {
     const state = this.route.snapshot.data['state'];
-
-    if (state === 'edit') {
-      this.state = 'edit';
-      const id = this.route.snapshot.paramMap.get('id');
-      if (!id) {
-        this.notification.error("Invalid Experiment URL", "Please navigate to experiments/create or experiments/:id with a valid id!");
+    if (state !== 'create') {
+      this.user = this.authService.getLoggedInUser();
+      if (this.user) {
+        if (this.user.role) {
+          this.role = this.user.role;
+        }
+      }
+      this.state = state;
+      const idString = this.route.snapshot.paramMap.get('id');
+      if (!idString) {
+        this.notification.error(
+          'Invalid Experiment URL',
+          'Please navigate to experiments/create or experiments/:id with a valid id!',
+        );
         this.router.navigate(['/search'], { skipLocationChange: true });
         return;
       }
+      const id = parseInt(idString);
+      console.log("Test")
+      if (this.role != 'ADMIN') {
+        console.log('Test1');
+        if (this.user?.email) {
+          console.log('Test2');
+          // TODO: check role and permissions, switch to 'view' if not enough permission
+          this.authService.hasExperimentPermission(id, this.user?.email).subscribe({
+            next: (hasPermission) =>
+              hasPermission
+                ? console.log('User has permission to edit experiment')
+                : (this.state = 'view'),
+            error: (err) =>
+              this.notification.error(
+                'Permission Error',
+                `Permission Error for this Experiment! Error: ${err}`,
+              ),
+          });
+          if (!this.authService.hasExperimentPermission(id, this.user?.email)) {
+            console.log('Test3');
+            this.state = 'view';
+          }
+
+        }
+      }
+      this.experimentService.getExperimentData(id).subscribe({
+        next: value => this.experiment = value,
+        error: err => this.notification.error("Invalid Id", `No experiment found for this id: ${id}! Error: ${err}`)
+        }
+      )
       //TODO: load experiment data from backend
     }
     else {

@@ -23,13 +23,13 @@
                 <dd class="col-sm-8 text-break">{{ selectedReactant.smiles }}</dd>
 
                 <dt class="col-sm-4">Type</dt>
-                <dd class="col-sm-8">{{ selectedReactant.type }}</dd>
+                <dd class="col-sm-8">{{ selectedReactant.type1 }}</dd>
 
                 <dt class="col-sm-4 mt-3">Chemical Name</dt>
                 <dd class="col-sm-8 mt-3">{{ selectedReactant.chemicalName || '-' }}</dd>
 
                 <dt class="col-sm-4">Additional Names</dt>
-                <dd class="col-sm-8">{{ selectedReactant.additionalShortNames || '-' }}</dd>
+                <dd class="col-sm-8">{{ additionalNames }}</dd>
 
                 <dt class="col-sm-4">CAS Number</dt>
                 <dd class="col-sm-8">{{ selectedReactant.casNumber || '-' }}</dd>
@@ -38,7 +38,7 @@
                 <dd class="col-sm-8">{{ selectedReactant.comment || '-' }}</dd>
 
                 <dt class="col-sm-4">References</dt>
-                <dd class="col-sm-8">{{ selectedReactant.references || '-' }}</dd>
+                <dd class="col-sm-8">{{ references }}</dd>
               </dl>
             </div>
 
@@ -81,7 +81,9 @@
       </div>
 
       <div class="modal-footer">
-        <button type="button" class="btn primary" (click)="editReactant(selectedReactant?.shortName)">Edit Reactant</button>
+        @if (hasWritePermission) {
+          <button type="button" class="btn primary" (click)="editReactant(selectedReactant?.shortName)">Edit Reactant</button>
+        }
         <button type="button" class="" (click)="this.close.emit()">Close</button>
       </div>
 

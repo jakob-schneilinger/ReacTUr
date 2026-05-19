@@ -4,7 +4,7 @@ export const MOCK_REACTANTS: Reactant[] = [
   {
     shortName: 'EtOH',
     smiles: 'CCO',
-    type: 'Solvent',
+    type1: 'Solvent',
     chemicalName: 'Ethanol',
     additionalShortNames: ['Ethyl alcohol', 'Drinking alcohol'],
     casNumber: '64-17-5',
@@ -14,7 +14,7 @@ export const MOCK_REACTANTS: Reactant[] = [
   {
     shortName: 'DCM',
     smiles: 'C(Cl)Cl',
-    type: 'Solvent',
+    type1: 'Solvent',
     chemicalName: 'Dichloromethane',
     additionalShortNames: ['Methylene chloride'],
     casNumber: '75-09-2',
@@ -25,7 +25,7 @@ export const MOCK_REACTANTS: Reactant[] = [
     shortName: 'Pd(PPh3)4',
     smiles:
       'C1=CC=C(C=C1)P(C2=CC=CC=C2)C3=CC=CC=C3.C1=CC=C(C=C1)P(C2=CC=CC=C2)C3=CC=CC=C3.C1=CC=C(C=C1)P(C2=CC=CC=C2)C3=CC=CC=C3.C1=CC=C(C=C1)P(C2=CC=CC=C2)C3=CC=CC=C3.[Pd]',
-    type: 'Catalyst',
+    type1: 'Catalyst',
     chemicalName: 'Tetrakis(triphenylphosphine)palladium(0)',
     additionalShortNames: ['Pd tetrakis'],
     casNumber: '14221-01-3',
@@ -35,7 +35,7 @@ export const MOCK_REACTANTS: Reactant[] = [
   {
     shortName: 'PhBr',
     smiles: 'C1=CC=C(C=C1)Br',
-    type: 'Substrate',
+    type1: 'Substrate',
     chemicalName: 'Bromobenzene',
     additionalShortNames: ['Phenyl bromide'],
     casNumber: '108-86-1',
@@ -45,7 +45,7 @@ export const MOCK_REACTANTS: Reactant[] = [
   {
     shortName: 'PhB(OH)2',
     smiles: 'B(C1=CC=CC=C1)(O)O',
-    type: 'Substrate',
+    type1: 'Substrate',
     chemicalName: 'Phenylboronic acid',
     additionalShortNames: ['PBA'],
     casNumber: '98-80-6',
@@ -55,7 +55,7 @@ export const MOCK_REACTANTS: Reactant[] = [
   {
     shortName: 'TEA',
     smiles: 'CCN(CC)CC',
-    type: 'Reagent',
+    type1: 'Reagent',
     chemicalName: 'Triethylamine',
     additionalShortNames: ['Et3N'],
     casNumber: '121-44-8',
@@ -65,7 +65,7 @@ export const MOCK_REACTANTS: Reactant[] = [
   {
     shortName: 'DMAP',
     smiles: 'CN(C)C1=CC=NC=C1',
-    type: 'Catalyst',
+    type1: 'Catalyst',
     chemicalName: '4-Dimethylaminopyridine',
     additionalShortNames: [],
     casNumber: '1122-58-3',
@@ -75,7 +75,7 @@ export const MOCK_REACTANTS: Reactant[] = [
   {
     shortName: 'TFA',
     smiles: 'C(=O)(C(F)(F)F)O',
-    type: 'Reagent',
+    type1: 'Reagent',
     chemicalName: 'Trifluoroacetic acid',
     additionalShortNames: [],
     casNumber: '76-05-1',
@@ -85,7 +85,7 @@ export const MOCK_REACTANTS: Reactant[] = [
   {
     shortName: 'NaBH4',
     smiles: '[BH4-].[Na+]',
-    type: 'Reagent',
+    type1: 'Reagent',
     chemicalName: 'Sodium borohydride',
     additionalShortNames: [],
     casNumber: '16940-66-2',
@@ -95,7 +95,7 @@ export const MOCK_REACTANTS: Reactant[] = [
   {
     shortName: 'THF',
     smiles: 'C1CCOC1',
-    type: 'Solvent',
+    type1: 'Solvent',
     chemicalName: 'Tetrahydrofuran',
     additionalShortNames: ['Oxolane'],
     casNumber: '109-99-9',

@@ -12,6 +12,7 @@ import { Router } from '@angular/router';
 })
 export class ReactantViewModalComponent implements OnInit {
   @Input() selectedReactant: Reactant | undefined;
+  @Input() hasWritePermission: boolean = false;
   @Output() close = new EventEmitter<void>();
 
   loadingStructures: boolean = true;
@@ -46,6 +47,18 @@ export class ReactantViewModalComponent implements OnInit {
         },
       });
     }
+  }
+
+  get additionalNames() {
+    return this.selectedReactant?.additionalShortNames?.length
+      ? this.selectedReactant.additionalShortNames.join('; ')
+      : '-';
+  }
+
+  get references() {
+    return this.selectedReactant?.references?.length
+      ? this.selectedReactant.references.join('; ')
+      : '-';
   }
 
   editReactant(shortName: string | undefined): void {

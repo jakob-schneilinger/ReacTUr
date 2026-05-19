@@ -3,6 +3,7 @@ import { Router } from '@angular/router';
 import { Reactant } from '../../../dtos/reactant';
 import { ReactantService } from '../../../services/reactant.service';
 import { NotificationService } from '../../../services/notification.service';
+import { AuthService } from '../../../services/auth.service';
 
 @Component({
   selector: 'app-reactant-site',
@@ -24,8 +25,12 @@ export class ReactantSiteComponent implements OnInit {
   constructor(
     private router: Router,
     private reactantService: ReactantService,
+    private authService: AuthService,
     private notification: NotificationService,
   ) {}
+
+  role: string = "USER"
+  hasWritePermission: boolean = false;
 
   ngOnInit(): void {
     this.reactantService.getAllReactants().subscribe({
@@ -35,6 +40,9 @@ export class ReactantSiteComponent implements OnInit {
       },
       error: (err) => this.notification.error('Reactants unavailable', err),
     });
+
+    this.role = this.authService.getUserRole();
+    this.hasWritePermission = this.role != "USER";
   }
 
   onSearch(): void {
@@ -49,7 +57,7 @@ export class ReactantSiteComponent implements OnInit {
         reactant.shortName.toLowerCase().includes(term) ||
         reactant.smiles.toLowerCase().includes(term) ||
         (reactant.chemicalName && reactant.chemicalName.toLowerCase().includes(term)) ||
-        reactant.type.toLowerCase().includes(term),
+        reactant.type1.toLowerCase().includes(term),
     );
   }
 

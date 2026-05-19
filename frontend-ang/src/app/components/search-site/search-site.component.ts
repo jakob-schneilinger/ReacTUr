@@ -35,7 +35,7 @@ export class SearchSiteComponent implements OnInit, AfterViewInit {
     const c1 = document.getElementById('sketcher1');
     const c2 = document.getElementById('sketcher2');
 
-    console.log("Test1")
+    console.log('Test1');
 
     c1?.addEventListener('mouseup', () => this.syncCanvasToSmiles(1));
     c2?.addEventListener('mouseup', () => this.syncCanvasToSmiles(2));
@@ -43,7 +43,6 @@ export class SearchSiteComponent implements OnInit, AfterViewInit {
 
   // Path 1: Visual Sketcher -> SMILES String
   syncCanvasToSmiles(num: number) {
-
     console.log('Test2');
     this.isInternalChange = true; // Block handleSearch from overwriting the canvas
     const sketcher = num === 1 ? this.sketcher1 : this.sketcher2;
@@ -100,7 +99,7 @@ export class SearchSiteComponent implements OnInit, AfterViewInit {
     this.clearSignal = Date.now();
     this.reactant1 = '';
     this.reactant2 = '';
-    const mol = this.rdkitModule.get_mol("");
+    const mol = this.rdkitModule.get_mol('');
     const molBlock = mol.get_molblock();
     this.sketcher1.loadMolecule(molBlock);
     this.sketcher2.loadMolecule(molBlock);

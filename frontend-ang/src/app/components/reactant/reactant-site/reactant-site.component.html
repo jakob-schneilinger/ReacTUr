@@ -27,9 +27,11 @@
       </button>
     </div>
 
-    <button class="primary text-nowrap m-0" (click)="goToCreate()">
-      <i class="bi bi-plus-lg me-1"></i> Add Reactant
-    </button>
+    @if (role != "USER") {
+      <button class="primary text-nowrap m-0" (click)="goToCreate()">
+        <i class="bi bi-plus-lg me-1"></i> Add Reactant
+      </button>
+    }
 
   </div>
 
@@ -44,14 +46,14 @@
           <h5 class="fw-bold mb-0 text-truncate" [title]="reactant.shortName">
             {{ reactant.shortName }}
           </h5>
-          <span class="badge type-badge">{{ reactant.type }}</span>
+          <span class="badge type-badge">{{ reactant.type1 }}</span>
         </div>
 
-        <div class="text-muted text-truncate pe-3" style="min-width: 250px;" [title]="reactant.chemicalName || ''">
+        <div class="text-muted text-truncate pe-3" style="min-width: 200px;" [title]="reactant.chemicalName || ''">
           {{ reactant.chemicalName || '--' }}
         </div>
 
-        <div class="smiles-container d-flex align-items-center px-3 mx-2 flex-grow-1">
+        <div class="smiles-container d-flex align-items-center px-3 mx-2 flex-grow-1" >
           <div class="text-truncate me-2" [title]="reactant.smiles">
             {{ reactant.smiles }}
           </div>
@@ -60,16 +62,18 @@
           </button>
         </div>
 
-        <div class="d-flex justify-content-end gap-2 ms-auto ps-3" style="min-width: 150px;">
+        <div class="d-flex justify-content-end gap-2 ms-auto ps-3" [ngStyle]="{'min-width': hasWritePermission ? '125   px' : '47px'}">
           <button class="compact" (click)="viewDetails(reactant.shortName)" title="View Details">
             <i class="bi bi-file-earmark-text"></i>
           </button>
-          <button class="primary compact" (click)="editReactant(reactant.shortName)" title="Edit Reactant">
-            <i class="bi bi-pencil"></i>
-          </button>
-          <button class="error compact" (click)="deleteReactant(reactant.shortName)" title="Delete Reactant">
-            <i class="bi bi-trash"></i>
-          </button>
+          @if (hasWritePermission) {
+            <button class="primary compact" (click)="editReactant(reactant.shortName)" title="Edit Reactant">
+              <i class="bi bi-pencil"></i>
+            </button>
+            <button class="error compact" (click)="deleteReactant(reactant.shortName)" title="Remove Reactant">
+              <i class="bi bi-trash"></i>
+            </button>
+          }
         </div>
 
       </div>
@@ -120,5 +124,6 @@
 <app-reactant-view-modal
   *ngIf="isViewModalOpen"
   [selectedReactant]="selectedReactantForView"
+  [hasWritePermission]="hasWritePermission"
   (close)="closeViewModal()">
 </app-reactant-view-modal>

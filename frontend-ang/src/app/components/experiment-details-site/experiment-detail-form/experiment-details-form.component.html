@@ -1,5 +1,13 @@
 <form class="search-container" [formGroup]="experimentForm" (ngSubmit)="onSubmit()">
 
+  @if (formState === 'create') {
+    <div class="divider-container">
+      <div class="divider"></div>
+      <span class="divider-label">Required</span>
+      <div class="divider"></div>
+    </div>
+  }
+
   <div formArrayName="reactants">
     @for (control of reactantsControls; track $index) {
       <div class="input-group">
@@ -11,7 +19,7 @@
             placeholder="Value"
             [class.is-invalid]="isReactantInvalid($index)"/>
 
-          @if (control.value && formState !== 'edit') {
+          @if (control.value && formState === 'create') {
             <span class="icon bi bi-x text-black clear-btn" (click)="clearReactant($index)"></span>
           }
         </div>
@@ -22,11 +30,13 @@
     }
   </div>
 
-  <div class="divider-container">
-    <div class="divider"></div>
-    <span class="divider-label">Required</span>
-    <div class="divider"></div>
-  </div>
+  @if (formState === 'edit') {
+    <div class="divider-container">
+      <div class="divider"></div>
+      <span class="divider-label">Required</span>
+      <div class="divider"></div>
+    </div>
+  }
 
   <div class="input-group">
     <label>Date</label>
@@ -42,7 +52,7 @@
     <label>Scientist</label>
     <div class="search-field">
       <input type="text" formControlName="scientist" [class.is-invalid]="isInvalid('scientist')" placeholder="Value" />
-      @if (experimentForm.get('scientist')?.value) {
+      @if (experimentForm.get('scientist')?.value && formState !== 'view') {
         <span class="icon bi bi-x text-black clear-btn" (click)="clearControl('scientist')"></span>
       }
     </div>
@@ -64,14 +74,44 @@
 
   <div class="input-group">
     <label>Solvent</label>
-    <div class="search-field">
-      <input type="text" formControlName="solvent" [class.is-invalid]="isInvalid('solvent')" placeholder="Value" />
-      @if (experimentForm.get('solvent')?.value) {
+    <div class="search-field position-relative">
+      <input
+        type="text"
+        formControlName="solvent"
+        [class.is-invalid]="isInvalid('solvent')"
+        placeholder="Select or type..."
+        autocomplete="off"
+        (focus)="showSolvents = true"
+        (blur)="onBlur('solvent')"
+        (keydown)="onKeyDown($event, 'solvent')"/>
+
+      @if (showSolvents && filteredSolvents.length > 0) {
+        <ul class="dropdown-menu show w-100 shadow-sm"
+            style="position: absolute; top: 100%; left: 0; max-height: 200px; overflow-y: auto; z-index: 1050;">
+          @for (solvent of filteredSolvents; track solvent; let i = $index) {
+            <li>
+              <button
+                type="button"
+                class="dropdown-item dropdown-button"
+                [class.active]="i === activeSolventIndex"
+                (mousedown)="selectOption('solvent', solvent)"
+              >
+                {{ solvent }}
+              </button>
+            </li>
+          }
+        </ul>
+      }
+
+      @if (experimentForm.get('solvent')?.value && formState !== 'view') {
         <span class="icon bi bi-x text-black clear-btn" (click)="clearControl('solvent')"></span>
       }
     </div>
     @if (isInvalid('solvent')) {
       <div class="error-message">Solvent is required.</div>
+    }
+    @if (experimentForm.get('solvent')?.hasError('notInList')) {
+      <div class="error-message">Please select a valid option from the list.</div>
     }
   </div>
 
@@ -103,35 +143,87 @@
     }
   </div>
 
-  <div class="divider-container">
-    <div class="divider"></div>
-    <span class="divider-label">Optional</span>
-    <div class="divider"></div>
-  </div>
+  @if (formState !== 'view') {
+    <div class="divider-container">
+      <div class="divider"></div>
+      <span class="divider-label">Optional</span>
+      <div class="divider"></div>
+    </div>
+  }
 
   <div class="input-group">
     <label>Instrument</label>
-    <div class="search-field">
-      <input type="text" formControlName="instrument" [class.is-invalid]="isInvalid('instrument')" placeholder="Value" />
-      @if (experimentForm.get('instrument')?.value) {
+    <div class="search-field position-relative">
+      <input
+        type="text"
+        formControlName="instrument"
+        [class.is-invalid]="isInvalid('instrument')"
+        placeholder="Select or type..."
+        autocomplete="off"
+        (focus)="showInstruments = true"
+        (blur)="onBlur('instrument')"
+        (keydown)="onKeyDown($event, 'instrument')" />
+
+      @if (showInstruments && filteredInstruments.length > 0) {
+        <ul class="dropdown-menu show w-100 shadow-sm"
+            style="position: absolute; top: 100%; left: 0; max-height: 200px; overflow-y: auto; z-index: 1050;">
+          @for (instrument of filteredInstruments; track instrument; let i = $index) {
+            <li>
+              <button type="button" class="dropdown-item dropdown-button" [class.active]="i === activeInstrumentIndex" (mousedown)="selectOption('instrument', instrument)">
+                {{ instrument }}
+              </button>
+            </li>
+          }
+        </ul>
+      }
+
+      @if (experimentForm.get('instrument')?.value && formState !== 'view') {
         <span class="icon bi bi-x text-black clear-btn" (click)="clearControl('instrument')"></span>
       }
     </div>
     @if (isInvalid('instrument')) {
       <div class="error-message">Instrument invalid.</div>
     }
+    @if (experimentForm.get('instrument')?.hasError('notInList')) {
+      <div class="error-message">Please select a valid option from the list.</div>
+    }
   </div>
 
   <div class="input-group">
     <label>Modality</label>
-    <div class="search-field">
-      <input type="text" formControlName="modality" [class.is-invalid]="isInvalid('modality')" placeholder="Value" />
-      @if (experimentForm.get('modality')?.value) {
+    <div class="search-field position-relative">
+      <input
+        type="text"
+        formControlName="modality"
+        [class.is-invalid]="isInvalid('modality')"
+        placeholder="Select or type..."
+        autocomplete="off"
+        (focus)="showModalities = true"
+        (blur)="onBlur('modality')"
+        (keydown)="onKeyDown($event, 'modality')"/>
+
+      @if (showModalities && filteredModalities.length > 0) {
+        <ul class="dropdown-menu show w-100 shadow-sm"
+            style="position: absolute; top: 100%; left: 0; max-height: 200px; overflow-y: auto; z-index: 1050;">
+          @for (modality of filteredModalities; track modality; let i = $index) {
+            <li>
+              <button type="button" class="dropdown-item dropdown-button" [class.active]="i === activeModalityIndex" (mousedown)="selectOption('modality', modality)">
+                {{ modality }}
+              </button>
+            </li>
+          }
+        </ul>
+      }
+
+      @if (experimentForm.get('modality')?.value && formState !== 'view') {
         <span class="icon bi bi-x text-black clear-btn" (click)="clearControl('modality')"></span>
       }
     </div>
     @if (isInvalid('modality')) {
       <div class="error-message">Modality invalid.</div>
+    }
+    @if (experimentForm.get('modality')?.hasError('notInList')) {
+      <div class="error-message">Please select a valid option from the list.</div>
     }
   </div>
 
@@ -150,16 +242,20 @@
     <label>Comment</label>
     <div class="search-field align-items-start">
       <textarea formControlName="comment" placeholder="Add additional details..." rows="3"></textarea>
-      @if (experimentForm.get('comment')?.value) {
+      @if (experimentForm.get('comment')?.value && formState !== 'view') {
         <span class="icon bi bi-x text-black clear-btn" (click)="clearControl('comment')" style="top: 8px;"></span>
       }
     </div>
   </div>
 
   <div class="action-buttons mt-4">
-    <button type="submit" class="btn btn-primary">Submit</button>
+    @if (formState !== 'view') {
+      <button type="submit" class="btn btn-primary" >Submit</button>
+    }
     <button type="button" class="btn btn-light" (click)="onCancel()">Cancel</button>
-    <button type="button" class="btn btn-danger" (click)="onDelete()" [hidden]="formState == 'create'">Delete</button>
+    @if (formState !== 'view') {
+      <button type="button" class="btn btn-danger" (click)="onDelete()" [hidden]="">Delete</button>
+    }
   </div>
 
 </form>

@@ -1,9 +1,9 @@
 import { Component, Input, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, FormArray, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, FormArray, Validators, ValidatorFn, AbstractControl, ValidationErrors } from '@angular/forms';
 import { Router } from '@angular/router';
 import { NotificationService } from '../../../services/notification.service';
 
-export type FormState = 'create' | 'edit';
+export type FormState = 'create' | 'edit' | 'view';
 
 @Component({
   selector: 'app-experiment-details-form',
@@ -19,6 +19,22 @@ export class ExperimentDetailsFormComponent implements OnInit {
 
   experimentForm!: FormGroup;
 
+  // TODO: fetch from backend
+  knownSolvents = ['Water', 'Methanol', 'Ethanol', 'DMSO', 'Acetonitrile'];
+  knownInstruments = ['Spectrometer A', 'HPLC B', 'Mass Spec C'];
+  knownModalities = ['UV-Vis', 'Fluorescence', 'NMR'];
+
+  filteredSolvents: string[] = [];
+  showSolvents = false;
+  filteredInstruments: string[] = [];
+  showInstruments = false;
+  filteredModalities: string[] = [];
+  showModalities = false;
+
+  activeSolventIndex = -1;
+  activeInstrumentIndex = -1;
+  activeModalityIndex = -1;
+
   constructor(
     private fb: FormBuilder,
     private router: Router,
@@ -28,13 +44,15 @@ export class ExperimentDetailsFormComponent implements OnInit {
   ngOnInit(): void {
     this.initForm();
     this.setupReactionAutoFill();
+    this.setupFilters();
   }
 
   private initForm(): void {
-    const isEditMode = this.formState === 'edit';
+    const isEditMode = this.formState !== 'create';
+    const isViewMode = this.formState === 'view';
 
     this.experimentForm = this.fb.group({
-      // Reactants Array (Initialized with 2 fields based on A + B requirement)
+      // Reactants Array
       reactants: this.fb.array([
         this.fb.control({ value: '', disabled: isEditMode }, Validators.required),
         this.fb.control({ value: '', disabled: isEditMode }, Validators.required),
@@ -44,16 +62,112 @@ export class ExperimentDetailsFormComponent implements OnInit {
       date: ['', Validators.required],
       scientist: ['', Validators.required],
       temperature: ['', Validators.required],
-      solvent: ['', Validators.required],
+      solvent: ['', [Validators.required, this.inListValidator(this.knownSolvents)]],
       concentrationA: ['', [Validators.required, Validators.min(0)]],
       concentrationB: ['', [Validators.required, Validators.min(0)]],
 
       // Optional Metadata
-      instrument: [''],
-      modality: [''],
+      instrument: ['', [Validators.required, this.inListValidator(this.knownInstruments)]],
+      modality: ['', [Validators.required, this.inListValidator(this.knownModalities)]],
       wavelength: [''],
       comment: [''],
     });
+
+    if (isViewMode) {
+      this.experimentForm.disable();
+    }
+  }
+
+  private inListValidator(validOptions: string[]): ValidatorFn {
+    return (control: AbstractControl): ValidationErrors | null => {
+      if (!control.value) return null;
+
+      const isValid = validOptions.includes(control.value);
+
+      return isValid ? null : { notInList: { value: control.value } };
+    };
+  }
+
+  private setupFilters(): void {
+    this.filteredSolvents = [...this.knownSolvents];
+    this.filteredInstruments = [...this.knownInstruments];
+    this.filteredModalities = [...this.knownModalities];
+
+    // Filter Solvents
+    this.experimentForm.get('solvent')?.valueChanges.subscribe((value) => {
+      const searchTerm = (value || '').toLowerCase();
+      this.filteredSolvents = this.knownSolvents.filter((s) =>
+        s.toLowerCase().includes(searchTerm),
+      );
+      this.activeSolventIndex = -1;
+    });
+
+    this.experimentForm.get('instrument')?.valueChanges.subscribe((value) => {
+      const searchTerm = (value || '').toLowerCase();
+      this.filteredInstruments = this.knownInstruments.filter((i) =>
+        i.toLowerCase().includes(searchTerm),
+      );
+      this.activeInstrumentIndex = -1;
+    });
+
+    this.experimentForm.get('modality')?.valueChanges.subscribe((value) => {
+      const searchTerm = (value || '').toLowerCase();
+      this.filteredModalities = this.knownModalities.filter((m) =>
+        m.toLowerCase().includes(searchTerm),
+      );
+      this.activeModalityIndex = -1;
+    });
+  }
+
+  selectOption(controlName: string, value: string): void {
+    this.experimentForm.get(controlName)?.setValue(value);
+    if (controlName === 'solvent') this.showSolvents = false;
+    if (controlName === 'instrument') this.showInstruments = false;
+    if (controlName === 'modality') this.showModalities = false;
+  }
+
+  onBlur(dropdownName: 'solvent' | 'instrument' | 'modality'): void {
+    setTimeout(() => {
+      if (dropdownName === 'solvent') this.showSolvents = false;
+      if (dropdownName === 'instrument') this.showInstruments = false;
+      if (dropdownName === 'modality') this.showModalities = false;
+    }, 200);
+  }
+
+  onKeyDown(event: KeyboardEvent, dropdown: 'solvent' | 'instrument' | 'modality'): void {
+    let activeIndex: number;
+    let filteredList: string[];
+
+    if (dropdown === 'solvent') {
+      activeIndex = this.activeSolventIndex;
+      filteredList = this.filteredSolvents;
+    } else if (dropdown === 'instrument') {
+      activeIndex = this.activeInstrumentIndex;
+      filteredList = this.filteredInstruments;
+    } else {
+      activeIndex = this.activeModalityIndex;
+      filteredList = this.filteredModalities;
+    }
+
+    if (!filteredList.length) return;
+
+    if (event.key === 'ArrowDown') {
+      event.preventDefault();
+      activeIndex = activeIndex < filteredList.length - 1 ? activeIndex + 1 : activeIndex;
+    } else if (event.key === 'ArrowUp') {
+      event.preventDefault();
+      activeIndex = activeIndex > 0 ? activeIndex - 1 : 0;
+    } else if (event.key === 'Enter') {
+      if (activeIndex >= 0) {
+        event.preventDefault();
+        this.selectOption(dropdown, filteredList[activeIndex]);
+        activeIndex = -1;
+      }
+    }
+
+    if (dropdown === 'solvent') this.activeSolventIndex = activeIndex;
+    if (dropdown === 'instrument') this.activeInstrumentIndex = activeIndex;
+    if (dropdown === 'modality') this.activeModalityIndex = activeIndex;
   }
 
   get reactantsControls() {

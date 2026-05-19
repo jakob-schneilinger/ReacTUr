@@ -2,7 +2,7 @@
 export interface Reactant {
   shortName: string;
   smiles: string;
-  type: string;
+  type1: string;
   chemicalName?: string;
   additionalShortNames?: string[];
   casNumber?: string;

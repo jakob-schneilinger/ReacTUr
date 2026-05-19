@@ -9,6 +9,7 @@ import {
   ViewChild,
   NgZone,
 } from '@angular/core';
+import { NotificationService } from '../../../services/notification.service';
 
 declare var $3Dmol: any;
 
@@ -25,7 +26,10 @@ export class ReactantStructureComponent implements AfterViewInit, OnChanges, OnD
 
   private viewer: any;
 
-  constructor(private ngZone: NgZone) {}
+  constructor(
+    private ngZone: NgZone,
+    private notification: NotificationService,
+  ) {}
 
   ngAfterViewInit(): void {
     setTimeout(() => {
@@ -71,18 +75,34 @@ export class ReactantStructureComponent implements AfterViewInit, OnChanges, OnD
       const xyzDataString = await this.structure.text();
 
       if (xyzDataString.trim().startsWith('<')) {
-        console.error('expected XYZ data but received HTML, check file path');
+        this.notification.error("File Format Error", "Expected XYZ data but received HTML/XML format. Check file content!");
         return;
       }
 
       this.ngZone.runOutsideAngular(() => {
         this.viewer.clear();
         this.viewer.addModel(xyzDataString, 'xyz');
-        this.viewer.setStyle({}, {
-          stick: { radius: 0.15 },
-          sphere: { radius: 0.4 }
-        },);
+
+        const atoms = this.viewer.selectedAtoms({});
+
+        if (!atoms || atoms.length === 0) {
+          this.viewer.clear();
+          this.ngZone.run(() => {
+            this.notification.error(
+              'Invalid XYZ file',
+              'The uploaded XYZ file contains no valid chemical structure. Check file content!',
+            );
+          });
+          return;
+        }
       })
+      this.viewer.setStyle(
+        {},
+        {
+          stick: { radius: 0.15 },
+          sphere: { radius: 0.4 },
+        },
+      );
 
       this.viewer.zoomTo();
       this.viewer.render();
@@ -93,7 +113,7 @@ export class ReactantStructureComponent implements AfterViewInit, OnChanges, OnD
         }
       }, 100);
     } catch (error) {
-      console.error('error rendering the XYZ file:', error);
+      console.error('Error rendering the XYZ file:', error);
     }
   }
 }
