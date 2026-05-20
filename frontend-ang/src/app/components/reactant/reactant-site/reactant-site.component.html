@@ -8,7 +8,7 @@
 
   <div class="d-flex justify-content-between align-items-center mb-4">
 
-    <div class="input-group search-group" style="max-width: 500px;">
+    <div class="custom-search-wrapper input-group search-group" style="max-width: 500px;">
       <span class="input-group-text bg-white border-end-0">
         <i class="bi bi-search text-muted"></i>
       </span>
@@ -19,12 +19,24 @@
         [(ngModel)]="searchTerm"
         (input)="onSearch()"
       >
+
       <button
-        *ngIf="searchTerm"
-        class="btn btn-clear m-0 rounded-start-0"
-        (click)="searchTerm = ''; onSearch()">
-        <i class="bi bi-x-lg"></i>
+        class="btn icon-btn text-secondary"
+        type="button"
+        (click)="openDraw()"
+        title="Draw Molecule">
+        <i class="bi bi-pencil-square"></i>
       </button>
+
+      @if (searchTerm) {
+        <button
+          class="btn icon-btn text-danger"
+          type="button"
+          (click)="searchTerm = ''; onSearch()"
+          title="Clear Search">
+          <i class="bi bi-x-lg"></i>
+        </button>
+      }
     </div>
 
     @if (role != "USER") {
@@ -127,3 +139,11 @@
   [hasWritePermission]="hasWritePermission"
   (close)="closeViewModal()">
 </app-reactant-view-modal>
+
+@if (isDrawModalOpen) {
+  <app-draw-mol
+    [initialSmiles]="currentSmilesForModal"
+    (save)="onModalSave($event)"
+    (closeModal)="isDrawModalOpen = false">
+  </app-draw-mol>
+}

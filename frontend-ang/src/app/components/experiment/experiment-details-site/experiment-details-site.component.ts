@@ -1,10 +1,10 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { AuthService } from '../../services/auth.service';
-import { NotificationService } from '../../services/notification.service';
-import { ExperimentService } from '../../services/experiment.service';
-import { ExperimentData } from '../../dtos/experiment';
-import { User } from '../../dtos/user';
+import { AuthService } from '../../../services/auth.service';
+import { NotificationService } from '../../../services/notification.service';
+import { ExperimentService } from '../../../services/experiment.service';
+import { ExperimentData } from '../../../dtos/experiment';
+import { User } from '../../../dtos/user';
 
 export type FormState = 'create' | 'edit' | 'view';
 

@@ -19,7 +19,7 @@ export type FormState = 'create' | 'edit' | 'view';
   templateUrl: './reactant-details-form.component.html',
   styleUrls: [
     './reactant-details-form.component.scss',
-    '../../../experiment-details-site/experiment-detail-form/experiment-details-form.component.scss',
+    '../../../experiment/experiment-details-site/experiment-detail-form/experiment-details-form.component.scss',
   ],
   standalone: false,
 })

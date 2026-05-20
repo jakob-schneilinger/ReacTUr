@@ -1,6 +1,51 @@
 @use "src/styles/global.scss" as *;
 @use "src/styles/variables.scss" as *;
 
+.custom-search-wrapper {
+  border: 1px solid #cbd5e1;
+  border-radius: 0.5rem;
+  transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+
+  &:focus-within {
+    border-color: #0d6efd;
+    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25) !important;
+  }
+
+  .form-control {
+    border: none;
+    padding-left: 1rem;
+
+    &:focus {
+      outline: none;
+      box-shadow: none;
+    }
+  }
+
+  .input-group-text{
+    border: none
+  }
+
+  .icon-btn {
+    border: none;
+    border-radius: 0.5rem;
+    border-bottom-left-radius: 0.5rem !important;
+    border-top-left-radius: 0.5rem !important;
+    background: transparent;
+    padding: 0.4rem 0.6rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    &:hover {
+      background-color: #f1f5f9;
+    }
+
+    &:focus {
+      box-shadow: none;
+    }
+  }
+}
+
 .layout-wrapper {
   display: block;
   width: 80%;

@@ -1,10 +1,11 @@
 import { Component, Output, EventEmitter, Input } from '@angular/core';
-import { Reactant } from '../../dtos/reactant';
-import { MOCK_REACTANTS } from '../../mock/mock-experiments';
+import { Reactant } from '../../../dtos/reactant';
+import { MOCK_REACTANTS } from '../../../mock/mock-experiments';
 
 @Component({
   selector: 'app-experiment-search',
   templateUrl: './experiment-search.component.html',
+  styleUrls: ['./experiment-search.component.scss'],
   standalone: false,
 })
 export class ExperimentSearchComponent {
@@ -30,8 +31,12 @@ export class ExperimentSearchComponent {
   initVal1: string[] = [];
   initVal2: string[] = [];
 
-  @Input() set reactant1(val: string[]) { if(val) this.initVal1 = val; }
-  @Input() set reactant2(val: string[]) { if(val) this.initVal2 = val; }
+  @Input() set reactant1(val: string[]) {
+    if (val) this.initVal1 = val;
+  }
+  @Input() set reactant2(val: string[]) {
+    if (val) this.initVal2 = val;
+  }
 
   showSub1 = false;
   showSub2 = false;
@@ -58,13 +63,19 @@ export class ExperimentSearchComponent {
   emitSearch() {
     // Wenn Substruktur aktiv und gefüllt -> nimm Array.
     // Ansonsten nimm Exact -> wickle ihn in ein Array (oder leeres Array falls leer).
-    const r1 = (this.showSub1 && this.currentSub1.length > 0)
-      ? this.currentSub1
-      : (this.currentExact1 ? [this.currentExact1] : []);
+    const r1 =
+      this.showSub1 && this.currentSub1.length > 0
+        ? this.currentSub1
+        : this.currentExact1
+          ? [this.currentExact1]
+          : [];
 
-    const r2 = (this.showSub2 && this.currentSub2.length > 0)
-      ? this.currentSub2
-      : (this.currentExact2 ? [this.currentExact2] : []);
+    const r2 =
+      this.showSub2 && this.currentSub2.length > 0
+        ? this.currentSub2
+        : this.currentExact2
+          ? [this.currentExact2]
+          : [];
 
     this.searchChanged.emit({
       reactant1: r1,

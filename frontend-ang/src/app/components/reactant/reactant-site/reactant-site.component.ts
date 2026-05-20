@@ -16,11 +16,17 @@ export class ReactantSiteComponent implements OnInit {
   filteredReactants: Reactant[] = [];
   searchTerm: string = '';
 
+  role: string = 'USER';
+  hasWritePermission: boolean = false;
+
   isDeleteReactantModalOpen: boolean = false;
   pendingReactantName: string | null = '';
 
   isViewModalOpen: boolean = false;
   selectedReactantForView: Reactant | undefined = undefined;
+
+  isDrawModalOpen = false;
+  currentSmilesForModal = '';
 
   constructor(
     private router: Router,
@@ -28,9 +34,6 @@ export class ReactantSiteComponent implements OnInit {
     private authService: AuthService,
     private notification: NotificationService,
   ) {}
-
-  role: string = "USER"
-  hasWritePermission: boolean = false;
 
   ngOnInit(): void {
     this.reactantService.getAllReactants().subscribe({
@@ -42,7 +45,7 @@ export class ReactantSiteComponent implements OnInit {
     });
 
     this.role = this.authService.getUserRole();
-    this.hasWritePermission = this.role != "USER";
+    this.hasWritePermission = this.role != 'USER';
   }
 
   onSearch(): void {
@@ -130,5 +133,16 @@ export class ReactantSiteComponent implements OnInit {
       document.execCommand('copy');
       document.body.removeChild(textArea);
     }
+  }
+
+  openDraw() {
+    this.currentSmilesForModal = ""
+    this.isDrawModalOpen = true;
+  }
+
+  onModalSave(newSmiles: string) {
+    this.searchTerm = newSmiles;
+    this.onSearch();
+    this.isDrawModalOpen = false;
   }
 }

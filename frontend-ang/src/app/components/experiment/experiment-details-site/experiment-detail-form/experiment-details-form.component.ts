@@ -1,7 +1,7 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, FormArray, Validators, ValidatorFn, AbstractControl, ValidationErrors } from '@angular/forms';
 import { Router } from '@angular/router';
-import { NotificationService } from '../../../services/notification.service';
+import { NotificationService } from '../../../../services/notification.service';
 
 export type FormState = 'create' | 'edit' | 'view';
 
