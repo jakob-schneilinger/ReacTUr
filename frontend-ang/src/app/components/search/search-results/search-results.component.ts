@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter } from '@angular/core';
+import { Component, Input, Output, EventEmitter, OnChanges, SimpleChanges } from '@angular/core';
 import { Experiment } from '../../../dtos/experiment';
 
 export type SearchState = 'initial' | 'no-results' | 'has-results';
@@ -10,12 +10,33 @@ export type SearchState = 'initial' | 'no-results' | 'has-results';
   styleUrls: ['./search-results.component.scss'],
   standalone: false,
 })
-export class SearchResultsComponent {
+export class SearchResultsComponent implements OnChanges {
   @Input() state: SearchState = 'initial';
   @Input() experiments: Experiment[] = [];
   @Output() getExport = new EventEmitter<number[]>();
 
   selectedIds = new Set<number>();
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['experiments']) {
+      this.cleanupSelection();
+    }
+  }
+
+  private cleanupSelection(): void {
+    if (!this.experiments || this.experiments.length === 0) {
+      this.selectedIds.clear();
+      return;
+    }
+
+    const visibleIds = new Set(this.experiments.map(exp => exp.id));
+
+    for (const id of this.selectedIds) {
+      if (!visibleIds.has(id)) {
+        this.selectedIds.delete(id);
+      }
+    }
+  }
 
   toggleSelection(expId: number) {
     if (this.selectedIds.has(expId)) {

@@ -2,37 +2,52 @@
 @use "src/styles/variables.scss" as *;
 @import 'bootstrap-icons/font/bootstrap-icons.css';
 
+.advanced-search-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  margin-bottom: 1.5rem;
+}
+
 .input-group {
   display: flex;
   flex-direction: column;
+  gap: 0.35rem;
 
   label {
     margin-bottom: 0;
-    font-size: 0.875rem;
+    font-size: 0.85rem;
+    font-weight: 600;
     color: $light_black;
   }
 }
 
-.advanced-search-container {
-  margin-bottom: 1rem;
+%shared-input {
+  width: 100%;
+  padding: 0.4rem 0.75rem;
+  border: 1px solid $light_gray;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  outline: none;
+  background-color: white;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+
+  &:focus {
+    border-color: $primary;
+    box-shadow: 0 0 0 3px rgba($primary, 0.15);
+  }
 }
 
-/* Date */
 .date-group {
   display: flex;
   align-items: center;
   gap: 0.5rem;
 
   .date-input {
+    @extend %shared-input;
     width: 3.5rem;
-    padding: 0.3rem 0.5rem;
-    border: 1px solid $light_gray;
-    border-radius: 6px;
+    padding: 0.4rem 0.2rem;
     text-align: center;
-    font-size: 0.875rem;
-    outline: none;
-
-    &:focus { border-color: $primary; }
 
     &.year-input {
       width: 4.5rem;
@@ -41,214 +56,27 @@
 
   .icon-btn {
     font-size: 1.25rem;
-    color: $light_black;
+    color: $light_gray;
     cursor: pointer;
     margin-left: 0.25rem;
+    transition: color 0.2s;
+
+    &:hover { color: $primary; }
   }
 }
 
-.position-relative {
-  position: relative;
-}
-
+.position-relative { position: relative; }
 .hidden-date-picker {
-  position: absolute;
-  bottom: 0;
-  width: 1px;
-  height: 1px;
-  opacity: 0;
-  border: none;
-  padding: 0;
-  pointer-events: none;
+  position: absolute; bottom: 0; width: 1px; height: 1px;
+  opacity: 0; border: none; padding: 0; pointer-events: none;
 }
 
 .date-input::-webkit-outer-spin-button,
 .date-input::-webkit-inner-spin-button {
-  -webkit-appearance: none;
-  margin: 0;
+  -webkit-appearance: none; margin: 0;
 }
-.date-input[type=number] {
-  -moz-appearance: textfield;
-}
+.date-input[type=number] { -moz-appearance: textfield; }
 
-/* Temperature */
-.temperature-group {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-
-  .separator {
-    font-weight: bold;
-    color: $light_black;
-  }
-
-  .temp-field-wrapper {
-    position: relative;
-    display: flex;
-    align-items: center;
-    flex: 1;
-
-    .temp-input {
-      width: 100%;
-      padding: 0.3rem 2rem 0.3rem 1rem;
-      border: 1px solid $light_gray;
-      border-radius: 20px;
-      font-size: 0.875rem;
-      outline: none;
-
-      &:focus {
-        border-color: $primary;
-      }
-    }
-
-    .unit {
-      position: absolute;
-      right: 12px;
-      font-size: 0.875rem;
-      color: $light_black;
-      font-weight: 500;
-      pointer-events: none; /* Let clicks pass through to the input */
-    }
-  }
-}
-
-/* Concentration */
-.concentration-group {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-
-  .separator {
-    font-weight: bold;
-    color: $light_black;
-  }
-
-  .concentration-field-wrapper {
-    position: relative;
-    display: flex;
-    align-items: center;
-    flex: 1;
-
-    .concentration-input {
-      width: 100%;
-      padding: 0.3rem 2.75rem 0.3rem 1rem;
-      border: 1px solid $light_gray;
-      border-radius: 20px;
-      font-size: 0.875rem;
-      outline: none;
-
-      &:focus {
-        border-color: $primary;
-      }
-    }
-
-    .unit {
-      position: absolute;
-      right: 12px;
-      font-size: 0.875rem;
-      color: $light_black;
-      font-weight: 500;
-      pointer-events: none;
-    }
-  }
-}
-
-/* Wavelength */
-
-.wavelength-group {
-  display: flex;
-  align-items: center;
-
-  .wavelength-field-wrapper {
-    position: relative;
-    display: flex;
-    align-items: center;
-    flex: 1;
-
-    .wavelength-input {
-      width: 100%;
-      padding: 0.3rem 2.75rem 0.3rem 1rem;
-      border: 1px solid $light_gray;
-      border-radius: 20px;
-      font-size: 0.875rem;
-      outline: none;
-
-      &:focus {
-        border-color: $primary;
-      }
-    }
-    .unit {
-      position: absolute;
-      right: 12px;
-      font-size: 0.875rem;
-      color: $light_black;
-      font-weight: 500;
-      pointer-events: none;
-    }
-  }
-}
-
-/* Comment */
-.comment-field {
-  display: flex;
-  width: 100%;
-
-  textarea {
-    width: 100%;
-
-    padding: 0.75rem 1rem;
-    border: 1px solid $light_gray;
-
-    border-radius: 8px;
-    font-size: 0.875rem;
-    font-family: inherit;
-    outline: none;
-    transition: border-color 0.2s ease-in-out;
-
-    min-height: 80px;
-    resize: vertical;
-
-    scrollbar-gutter: stable;
-    scrollbar-width: thin;
-    scrollbar-color: #c1c1c1 transparent;
-
-    &:focus {
-      border-color: $primary;
-    }
-  }
-}
-
-/* Rate Constant Range */
-.rate-constant-range-group {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-
-  .separator {
-    font-weight: bold;
-    color: $light_black;
-  }
-
-  .rate-constant-range-field-wrapper {
-    position: relative;
-    display: flex;
-    align-items: center;
-    flex: 1;
-
-    .rate-constant-range-input {
-      width: 100%;
-      padding: 0.3rem 0.5rem 0.3rem 1rem;
-      border: 1px solid $light_gray;
-      border-radius: 20px;
-      font-size: 0.875rem;
-      outline: none;
-
-      &:focus {
-        border-color: $primary;
-      }
-    }
-  }
-}
 
 .search-field {
   position: relative;
@@ -256,36 +84,77 @@
   align-items: center;
 
   input {
-    width: 100%;
-    padding: 0.3rem 2.5rem 0.3rem 1rem;
-    border: 1px solid $light_gray;
-    border-radius: 15px;
-    font-size: 0.875rem;
-    outline: none;
-    transition: border-color 0.2s ease-in-out;
-
-    &:focus {
-      border-color: $primary;
-    }
+    @extend %shared-input;
+    padding-right: 2.25rem;
   }
 
   .icon {
     position: absolute;
-    right: 12px;
-    font-size: 1rem;
-  }
-
-  .bi-search {
-    color: $light_gray;
-    pointer-events: none;
+    right: 10px;
+    font-size: 1.1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
 
   .clear-btn {
     cursor: pointer;
-    font-size: 1.25rem;
+    color: $light_gray;
+    transition: color 0.2s;
 
-    &:hover {
-      color: $error !important;
+    &:hover { color: $error !important; }
+  }
+}
+
+
+.temperature-group,
+.concentration-group,
+.wavelength-group,
+.rate-constant-range-group {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+
+  .separator {
+    font-weight: 600;
+    color: $light_gray;
+  }
+
+  div[class$="-field-wrapper"] {
+    position: relative;
+    display: flex;
+    align-items: center;
+    flex: 1;
+
+    input {
+      @extend %shared-input;
     }
+
+    .temp-input, .concentration-input, .wavelength-input {
+      padding-right: 2rem;
+    }
+
+    .unit {
+      position: absolute;
+      right: 10px;
+      font-size: 0.8rem;
+      color: $light_gray;
+      font-weight: 600;
+      pointer-events: none;
+    }
+  }
+}
+
+.comment-field {
+  display: flex;
+  width: 100%;
+
+  textarea {
+    @extend %shared-input;
+    min-height: 80px;
+    resize: vertical;
+    scrollbar-gutter: stable;
+    scrollbar-width: thin;
+    scrollbar-color: #c1c1c1 transparent;
   }
 }
