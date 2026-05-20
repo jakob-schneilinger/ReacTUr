@@ -43,11 +43,12 @@ button {
 
   &:hover:not([disabled]) {
     background-color: $light_gray_hover;
+    color: white;
   }
 
   &.compact {
     border: none;
-    padding: 0 0.25rem;
+    padding: 0.25rem;
   }
 
   &.primary {

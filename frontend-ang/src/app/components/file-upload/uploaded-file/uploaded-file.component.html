@@ -9,7 +9,7 @@
       <div class="icon download-icon" (click)="onDownload()" title="Download">
         <i class="bi bi-download"></i>
       </div>
-      <div class="icon remove-icon" (click)="onRemove()" title="Remove">
+      <div *ngIf="removePossible" class="icon remove-icon" (click)="onRemove()" title="Remove">
         <i class="bi bi-trash"></i>
       </div>
     </div>

@@ -1,7 +1,9 @@
 
 <div class="container mt-4" style="max-width: 500px;">
 
-  <app-paste-table (fileGenerated)="onPasteTableGenerated($event)"></app-paste-table>
+  @if (showTable) {
+    <app-paste-table (fileGenerated)="onPasteTableGenerated($event)"></app-paste-table>
+  }
 
   <app-drag-and-drop (filesSelected)="addFiles($event)" [allowedExtensions]="allowedExtensions">
   </app-drag-and-drop>

@@ -1,5 +1,5 @@
 @use "src/styles/variables.scss" as *;
-@import 'bootstrap-icons/font/bootstrap-icons.css';
+@use "src/styles/global.scss" as *;
 
 #navbar {
   height: 100%;
@@ -141,6 +141,14 @@
   background-color: $light_gray;
   opacity: 0.2;
   margin: 0.25rem 0;
+}
+
+.logout-button {
+  background-color: $background !important;
+
+  &:hover {
+    background-color: #d8d8d8 !important;
+  }
 }
 
 .logout-text {

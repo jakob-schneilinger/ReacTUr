@@ -9,6 +9,7 @@ import { Component, EventEmitter, Input, Output } from '@angular/core';
 })
 export class UploadedFileComponent {
   @Input() file!: File;
+  @Input() removePossible: boolean = true;
   @Output() remove = new EventEmitter<void>();
   @Output() download = new EventEmitter<void>();
 
