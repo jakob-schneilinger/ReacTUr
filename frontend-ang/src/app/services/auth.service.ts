@@ -2,6 +2,7 @@ import { User } from "../dtos/user";
 import { Injectable } from '@angular/core';
 import { OAuthService } from 'angular-oauth2-oidc';
 import { authConfig } from '../auth.config';
+import { Observable, of } from 'rxjs';
 
 @Injectable({
   providedIn: 'root',
@@ -61,5 +62,9 @@ export class AuthService {
       return 'USER';
     }
     return 'UNDEFINED';
+  }
+
+  public hasExperimentPermission(id: number, email: string): Observable<boolean> {
+    return of(true)
   }
 }
