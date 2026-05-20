@@ -44,7 +44,7 @@ export class ReactantSelectorComponent implements OnInit {
       const lowerTerm = this.searchTerm.toLowerCase();
       this.suggestions = this.availableReactants.filter(r =>
         r.shortName.toLowerCase().includes(lowerTerm) ||
-        r.type.toLowerCase().includes(lowerTerm) ||
+        r.type1.toLowerCase().includes(lowerTerm) ||
         r.smiles.includes(this.searchTerm)
       );
     } else {
