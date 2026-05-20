@@ -1,5 +1,5 @@
 import { Component, Output, EventEmitter, Input } from '@angular/core';
-import { AdvancedSearch } from '../../dtos/metadata';
+import { AdvancedSearch } from '../../../dtos/metadata';
 
 @Component({
   selector: 'app-advanced-search',
@@ -9,8 +9,8 @@ import { AdvancedSearch } from '../../dtos/metadata';
 })
 export class AdvancedSearchComponent {
   @Output() searchChanged = new EventEmitter<AdvancedSearch>();
-  @Input() reactant1: string = '';
-  @Input() reactant2: string = '';
+  @Input() reactant1: string[] = [];
+  @Input() reactant2: string[] = [];
   @Input() set triggerClear(value: number) {
     if (value) {
       this.clearAll();

@@ -1,21 +1,42 @@
-import { Component, Input, Output, EventEmitter } from '@angular/core';
-import { Experiment } from '../../dtos/experiment';
+import { Component, Input, Output, EventEmitter, OnChanges, SimpleChanges } from '@angular/core';
+import { Experiment } from '../../../dtos/experiment';
 
 export type SearchState = 'initial' | 'no-results' | 'has-results';
 
 
 @Component({
   selector: 'app-experiment-results',
-  templateUrl: './experiment-results.component.html',
-  styleUrls: ['./experiment-results.component.scss'],
+  templateUrl: './search-results.component.html',
+  styleUrls: ['./search-results.component.scss'],
   standalone: false,
 })
-export class ExperimentResultsComponent {
+export class SearchResultsComponent implements OnChanges {
   @Input() state: SearchState = 'initial';
   @Input() experiments: Experiment[] = [];
   @Output() getExport = new EventEmitter<number[]>();
 
   selectedIds = new Set<number>();
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['experiments']) {
+      this.cleanupSelection();
+    }
+  }
+
+  private cleanupSelection(): void {
+    if (!this.experiments || this.experiments.length === 0) {
+      this.selectedIds.clear();
+      return;
+    }
+
+    const visibleIds = new Set(this.experiments.map(exp => exp.id));
+
+    for (const id of this.selectedIds) {
+      if (!visibleIds.has(id)) {
+        this.selectedIds.delete(id);
+      }
+    }
+  }
 
   toggleSelection(expId: number) {
     if (this.selectedIds.has(expId)) {

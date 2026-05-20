@@ -21,9 +21,9 @@ export class ExperimentSiteComponent {
   metadata: AdvancedSearch = {};
 
 
-  handleSearch(terms: { reactant1: string; reactant2: string }) {
-    this.reactant1 = terms.reactant1;
-    this.reactant2 = terms.reactant2;
+  handleSearch(terms: { reactant1: string[]; reactant2: string[] }) {
+    this.reactant1 = terms.reactant1[0];
+    this.reactant2 = terms.reactant2[0];
     this.executeSearch();
   }
 

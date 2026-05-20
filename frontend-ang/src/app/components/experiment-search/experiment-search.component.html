@@ -1,34 +1,59 @@
-<div class="search-container">
+<div class="d-flex flex-column gap-4">
 
-  <div class="input-group">
-    <label>Reactant 1</label>
-    <div class="search-field">
-      <input
-        type="text"
-        [(ngModel)]="reactant1"
-        (ngModelChange)="onSearch()"
-        placeholder="e.g. Sodium" />
-      @if (!reactant1) {
-        <span class="icon bi bi-search"></span>
-      } @else {
-      <span class="icon bi bi-x text-black clear-btn" (click)="clearReactant1()"></span>
+  <div>
+    <app-reactant-selector
+      label="Reactant 1"
+      [availableReactants]="availableReactants"
+      [initialValue]="initVal1[0]"
+      [clearSignal]="triggerClearValue"
+      (selectionChanged)="onReactantChange(1, $event)">
+    </app-reactant-selector>
+
+    <div class="d-flex justify-content-end mt-1">
+      <button
+        class="btn btn-sm btn-link text-decoration-none text-muted p-0"
+        (click)="showSub1 = !showSub1">
+        <i class="bi" [ngClass]="showSub1 ? 'bi-chevron-up' : 'bi-chevron-down'"></i>
+        {{ showSub1 ? 'Hide Substructure Filters' : 'Add Substructure Filters' }}
+      </button>
+    </div>
+
+    @if (showSub1) {
+      <div class="mt-2 p-3 bg-light border rounded">
+        <app-substructure-search
+          [availableReactants]="availableReactants"
+          (matchedReactants)="onSubstructureMatch(1, $event)">
+        </app-substructure-search>
+      </div>
     }
-    </div>
   </div>
 
-  <div class="input-group">
-    <label>Reactant 2</label>
-    <div class="search-field">
-      <input
-        type="text"
-        [(ngModel)]="reactant2"
-        (ngModelChange)="onSearch()"
-        placeholder="e.g. Chloride" />
-      @if (!reactant2) {
-        <span class="icon bi bi-search"></span>
-      } @else {
-        <span class="icon bi bi-x text-black clear-btn" (click)="clearReactant2()"></span>
-      }
+  <div>
+    <app-reactant-selector
+      label="Reactant 2"
+      [availableReactants]="availableReactants"
+      [initialValue]="initVal2[0]"
+      [clearSignal]="triggerClearValue"
+      (selectionChanged)="onReactantChange(2, $event)">
+    </app-reactant-selector>
+
+    <div class="d-flex justify-content-end mt-1">
+      <button
+        class="btn btn-sm btn-link text-decoration-none text-muted p-0"
+        (click)="showSub2 = !showSub2">
+        <i class="bi" [ngClass]="showSub2 ? 'bi-chevron-up' : 'bi-chevron-down'"></i>
+        {{ showSub2 ? 'Hide Substructure Filters' : 'Add Substructure Filters' }}
+      </button>
     </div>
+
+    @if (showSub2) {
+      <div class="mt-2 p-3 bg-light border rounded">
+        <app-substructure-search
+          [availableReactants]="availableReactants"
+          (matchedReactants)="onSubstructureMatch(2, $event)">
+        </app-substructure-search>
+      </div>
+    }
   </div>
+
 </div>

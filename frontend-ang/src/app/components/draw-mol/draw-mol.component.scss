@@ -1,0 +1,23 @@
+@use "src/styles/global.scss" as *;
+@use "src/styles/variables.scss" as *;
+@import 'bootstrap-icons/font/bootstrap-icons.css';
+
+.custom-backdrop {
+  background-color: rgba(0, 0, 0, 0.4);
+}
+
+.sketcher-box {
+  min-height: 320px;
+  border-color: #dee2e6 !important;
+  overflow: hidden;
+
+  canvas {
+    max-width: 100%;
+    height: auto;
+  }
+}
+
+.form-control:focus {
+  border-color: #dee2e6;
+  box-shadow: none;
+}

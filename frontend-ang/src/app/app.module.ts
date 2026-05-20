@@ -16,10 +16,10 @@ import { NgOptimizedImage } from "@angular/common";
 import { NgbModule } from "@ng-bootstrap/ng-bootstrap";
 import { OAuthModule } from "angular-oauth2-oidc";
 import { ExperimentSearchComponent } from './components/experiment-search/experiment-search.component';
-import { ExperimentResultsComponent } from './components/experiment-results/experiment-results.component';
+import { SearchResultsComponent } from './components/search/search-results/search-results.component';
 import { ExperimentSiteComponent } from './components/experiment-site/experiment-site.component';
-import { SearchSiteComponent } from './components/search-site/search-site.component';
-import { AdvancedSearchComponent } from './components/search-details/advanced-search.component';
+import { SearchSiteComponent } from './components/search/search-site/search-site.component';
+import { AdvancedSearchComponent } from './components/search/search-details/advanced-search.component';
 import { ExperimentDetailsSiteComponent } from './components/experiment-details-site/experiment-details-site.component';
 import { FileUploadComponent } from './components/file-upload/file-upload.component';
 import { DragAndDropComponent } from './components/file-upload/drag-and-drop/drag-and-drop.component';
@@ -30,6 +30,9 @@ import { ExperimentCreateSiteComponent } from './components/experiment-create/ex
 import { ExperimentDetailsFormComponent } from './components/experiment-details-site/experiment-detail-form/experiment-details-form.component';
 import { ExportModalComponent } from './components/export/export-modal.component';
 import { DragDropModule } from '@angular/cdk/drag-drop';
+import { DrawMolComponent } from './components/draw-mol/draw-mol.component';
+import { ReactantSelectorComponent } from './components/reactant-selector/reactant-selector.component';
+import { SubstructureSearchComponent } from './components/search/sub-structure-search/sub-structure-search.component';
 
 
 @NgModule({
@@ -39,10 +42,13 @@ import { DragDropModule } from '@angular/cdk/drag-drop';
     HomeComponent,
     UserLoginComponent,
     UserComponent,
+    DrawMolComponent,
+    ReactantSelectorComponent,
     NotificationsComponent,
     LayoutComponent,
     ExperimentSearchComponent,
-    ExperimentResultsComponent,
+    SubstructureSearchComponent,
+    SearchResultsComponent,
     ExperimentSiteComponent,
     SearchSiteComponent,
     AdvancedSearchComponent,

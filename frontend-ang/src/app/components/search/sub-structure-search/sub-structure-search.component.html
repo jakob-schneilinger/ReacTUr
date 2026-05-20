@@ -1,0 +1,54 @@
+<div class="d-flex flex-column gap-2">
+
+  @for (rule of rules; track rule.id; let i = $index) {
+    <div class="d-flex align-items-center gap-2">
+
+      <div class="input-group shadow-sm border-0 rounded">
+        @if (i > 0) {
+          <select
+            class="form-select bg-light text-secondary fw-bold"
+            style="max-width: 90px;"
+            [(ngModel)]="rule.operator"
+            (ngModelChange)="onRuleChange()">
+            <option value="AND">AND</option>
+            <option value="OR">OR</option>
+          </select>
+        } @else {
+          <span class="input-group-text bg-light text-secondary fw-bold" style="width: 90px; justify-content: center;">
+            IF
+          </span>
+        }
+
+        <input
+          type="text"
+          class="form-control border-start-0 font-monospace"
+          placeholder="Draw or paste SMILES..."
+          [(ngModel)]="rule.smiles"
+          (ngModelChange)="onRuleChange()">
+
+        <button class="btn btn-outline-secondary bg-white" type="button" (click)="openDraw(rule)" title="Draw Substructure">
+          <i class="bi bi-pencil-square"></i>
+        </button>
+      </div>
+
+      <button class="btn btn-link text-danger p-0 ms-1" (click)="removeRule(rule.id)" title="Remove Condition">
+        <i class="bi bi-trash"></i>
+      </button>
+
+    </div>
+  }
+
+  <div class="mt-1">
+    <button class="btn btn-sm btn-outline-primary" (click)="addRule()">
+      <i class="bi bi-plus-lg"></i> Add Condition
+    </button>
+  </div>
+</div>
+
+@if (isDrawModalOpen) {
+  <app-draw-mol
+    [initialSmiles]="currentSmilesForModal"
+    (save)="onModalSave($event)"
+    (closeModal)="isDrawModalOpen = false">
+  </app-draw-mol>
+}

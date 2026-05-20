@@ -12,19 +12,6 @@
         (searchChanged)="handleSearch($event)">
       </app-experiment-search>
 
-      <div class="sketcher-container">
-        <div class="sketcher-box">
-          <label>Reactant 1 Structure</label>
-          <canvas id="sketcher1"></canvas>
-        </div>
-
-        <div class="sketcher-box">
-          <label>Reactant 2 Structure</label>
-          <canvas id="sketcher2"></canvas>
-        </div>
-      </div>
-
-
       <div class="divider"></div>
 
       <div class="collapse-toggle-container">
@@ -37,8 +24,8 @@
       <app-advanced-search
         class="advanced-search-content"
         [hidden]="!isAdvancedSearchOpen"
-        [reactant1]="reactant1 || 'Reactant 1'"
-        [reactant2]="reactant2 || 'Reactant 2'"
+        [reactant1]="reactant1"
+        [reactant2]="reactant2"
         [triggerClear]="clearSignal"
         (searchChanged)="handleAdvancedSearch($event)">
       </app-advanced-search>
@@ -54,7 +41,10 @@
 
       <button class="btn-primary"
               [routerLink]="['/experiments/create']"
-              [queryParams]="{ reactant1: reactant1 || null, reactant2: reactant2 || null }">
+              [queryParams]="{
+          reactant1: reactant1.length ? reactant1 : null,
+          reactant2: reactant2.length ? reactant2 : null
+        }">
         Create new Experiment
       </button>
     </div>

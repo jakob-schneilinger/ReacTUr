@@ -6,7 +6,7 @@ import { HomeComponent } from "./components/home/home.component";
 
 import { LoginComponent } from "./components/user/login/login.component";
 import { ExperimentSiteComponent } from './components/experiment-site/experiment-site.component';
-import { SearchSiteComponent } from './components/search-site/search-site.component';
+import { SearchSiteComponent } from './components/search/search-site/search-site.component';
 import { ExperimentDetailsSiteComponent } from './components/experiment-details-site/experiment-details-site.component';
 import {
   ExperimentCreateSiteComponent

@@ -1,4 +1,35 @@
-import { Experiment, ExperimentData, Measurement } from '../dtos/experiment'; // Passe den Pfad zu deinen Interfaces an
+import { Experiment, ExperimentData, Measurement } from '../dtos/experiment';
+import { Reactant } from '../dtos/reactant'; // Passe den Pfad zu deinen Interfaces an
+
+export const MOCK_REACTANTS: Reactant[] = [
+  { shortName: 'Sodium', smiles: '[Na]', type: 'Metal' },
+  { shortName: 'Chlorine', smiles: 'Cl[Cl]', type: 'Halogen' },
+  { shortName: 'Hydrogen', smiles: '[H][H]', type: 'Gas' },
+  { shortName: 'Oxygen', smiles: 'O=O', type: 'Gas' },
+  { shortName: 'Ethanol', smiles: 'CCO', type: 'Solvent' },
+  { shortName: 'Phenol', smiles: 'c1ccccc1O', type: 'Solvent' },
+  { shortName: 'Bromine', smiles: 'Br[Br]', type: 'Halogen' },
+  { shortName: 'Carbon', smiles: '[C]', type: 'Non-metal' },
+  { shortName: 'Potassium', smiles: '[K]', type: 'Metal' },
+  { shortName: 'Iodine', smiles: 'I[I]', type: 'Halogen' },
+  { shortName: 'Iron', smiles: '[Fe]', type: 'Metal' },
+  { shortName: 'Sulfur', smiles: '[S]', type: 'Non-metal' },
+  { shortName: 'Nitrogen', smiles: 'N#N', type: 'Gas' },
+  { shortName: 'Copper', smiles: '[Cu]', type: 'Metal' },
+  { shortName: 'Nitric Acid', smiles: 'O[N+]([O-])=O', type: 'Acid' },
+  {
+    shortName: 'Salicylic Acid',
+    smiles: 'C1=CC=C(C(=C1)C(=O)O)O',
+    type: 'Organic'
+  },
+  {
+    shortName: 'Acetic Anhydride',
+    smiles: 'CC(=O)OC(=O)C',
+    type: 'Organic'
+  },
+  { shortName: 'Magnesium', smiles: '[Mg]', type: 'Metal' },
+  { shortName: 'Hydrochloric Acid', smiles: 'Cl', type: 'Acid' }
+];
 
 export const MOCK_EXPERIMENTS: Experiment[] = [
   {

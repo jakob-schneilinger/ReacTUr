@@ -1,0 +1,160 @@
+@use "src/styles/global.scss" as *;
+@use "src/styles/variables.scss" as *;
+@import 'bootstrap-icons/font/bootstrap-icons.css';
+
+.advanced-search-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  margin-bottom: 1.5rem;
+}
+
+.input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+
+  label {
+    margin-bottom: 0;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: $light_black;
+  }
+}
+
+%shared-input {
+  width: 100%;
+  padding: 0.4rem 0.75rem;
+  border: 1px solid $light_gray;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  outline: none;
+  background-color: white;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+
+  &:focus {
+    border-color: $primary;
+    box-shadow: 0 0 0 3px rgba($primary, 0.15);
+  }
+}
+
+.date-group {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+
+  .date-input {
+    @extend %shared-input;
+    width: 3.5rem;
+    padding: 0.4rem 0.2rem;
+    text-align: center;
+
+    &.year-input {
+      width: 4.5rem;
+    }
+  }
+
+  .icon-btn {
+    font-size: 1.25rem;
+    color: $light_gray;
+    cursor: pointer;
+    margin-left: 0.25rem;
+    transition: color 0.2s;
+
+    &:hover { color: $primary; }
+  }
+}
+
+.position-relative { position: relative; }
+.hidden-date-picker {
+  position: absolute; bottom: 0; width: 1px; height: 1px;
+  opacity: 0; border: none; padding: 0; pointer-events: none;
+}
+
+.date-input::-webkit-outer-spin-button,
+.date-input::-webkit-inner-spin-button {
+  -webkit-appearance: none; margin: 0;
+}
+.date-input[type=number] { -moz-appearance: textfield; }
+
+
+.search-field {
+  position: relative;
+  display: flex;
+  align-items: center;
+
+  input {
+    @extend %shared-input;
+    padding-right: 2.25rem;
+  }
+
+  .icon {
+    position: absolute;
+    right: 10px;
+    font-size: 1.1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .clear-btn {
+    cursor: pointer;
+    color: $light_gray;
+    transition: color 0.2s;
+
+    &:hover { color: $error !important; }
+  }
+}
+
+
+.temperature-group,
+.concentration-group,
+.wavelength-group,
+.rate-constant-range-group {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+
+  .separator {
+    font-weight: 600;
+    color: $light_gray;
+  }
+
+  div[class$="-field-wrapper"] {
+    position: relative;
+    display: flex;
+    align-items: center;
+    flex: 1;
+
+    input {
+      @extend %shared-input;
+    }
+
+    .temp-input, .concentration-input, .wavelength-input {
+      padding-right: 2rem;
+    }
+
+    .unit {
+      position: absolute;
+      right: 10px;
+      font-size: 0.8rem;
+      color: $light_gray;
+      font-weight: 600;
+      pointer-events: none;
+    }
+  }
+}
+
+.comment-field {
+  display: flex;
+  width: 100%;
+
+  textarea {
+    @extend %shared-input;
+    min-height: 80px;
+    resize: vertical;
+    scrollbar-gutter: stable;
+    scrollbar-width: thin;
+    scrollbar-color: #c1c1c1 transparent;
+  }
+}
