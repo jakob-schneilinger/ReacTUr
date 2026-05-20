@@ -32,6 +32,7 @@ import { ExportModalComponent } from './components/export/export-modal.component
 import { DragDropModule } from '@angular/cdk/drag-drop';
 import { DrawMolComponent } from './components/draw-mol/draw-mol.component';
 import { ReactantSelectorComponent } from './components/reactant-selector/reactant-selector.component';
+import { SubstructureSearchComponent } from './components/search/sub-structure-search/sub-structure-search.component';
 
 
 @NgModule({
@@ -46,6 +47,7 @@ import { ReactantSelectorComponent } from './components/reactant-selector/reacta
     NotificationsComponent,
     LayoutComponent,
     ExperimentSearchComponent,
+    SubstructureSearchComponent,
     SearchResultsComponent,
     ExperimentSiteComponent,
     SearchSiteComponent,

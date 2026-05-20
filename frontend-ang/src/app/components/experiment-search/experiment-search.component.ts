@@ -1,55 +1,74 @@
-import { Component, Output, EventEmitter, Input, OnInit } from '@angular/core';
+import { Component, Output, EventEmitter, Input } from '@angular/core';
 import { Reactant } from '../../dtos/reactant';
+import { MOCK_REACTANTS } from '../../mock/mock-experiments';
 
 @Component({
   selector: 'app-experiment-search',
   templateUrl: './experiment-search.component.html',
   standalone: false,
 })
-export class ExperimentSearchComponent implements OnInit {
-  @Output() searchChanged = new EventEmitter<{ reactant1: string; reactant2: string }>();
+export class ExperimentSearchComponent {
+  @Output() searchChanged = new EventEmitter<{
+    reactant1: string[];
+    reactant2: string[];
+  }>();
 
   triggerClearValue: number = 0;
+
   @Input() set triggerClear(value: number) {
     if (value) {
-      this.triggerClearValue = value; // Wird an die Childs weitergegeben
-      this.currentReactant1 = '';
-      this.currentReactant2 = '';
+      this.triggerClearValue = value;
+      this.currentExact1 = '';
+      this.currentExact2 = '';
+      this.currentSub1 = [];
+      this.currentSub2 = [];
+      this.showSub1 = false;
+      this.showSub2 = false;
     }
   }
 
-  initVal1 = '';
-  initVal2 = '';
-  @Input() set reactant1(val: string) { if(val) this.initVal1 = val; }
-  @Input() set reactant2(val: string) { if(val) this.initVal2 = val; }
+  initVal1: string[] = [];
+  initVal2: string[] = [];
 
-  // State halten für das finale Emit
-  currentReactant1 = '';
-  currentReactant2 = '';
+  @Input() set reactant1(val: string[]) { if(val) this.initVal1 = val; }
+  @Input() set reactant2(val: string[]) { if(val) this.initVal2 = val; }
 
-  availableReactants: Reactant[] = [
-    { shortName: 'Sodium', smiles: '[Na]', type: 'Metal' },
-    { shortName: 'Chlorine', smiles: 'Cl[Cl]', type: 'Halogen' },
-    { shortName: 'Hydrogen', smiles: '[H][H]', type: 'Gas' },
-    { shortName: 'Oxygen', smiles: 'O=O', type: 'Gas' },
-    { shortName: 'Ethanol', smiles: 'CCO', type: 'Solvent' }
-  ];
+  showSub1 = false;
+  showSub2 = false;
 
-  ngOnInit() {
-    this.currentReactant1 = this.initVal1;
-    this.currentReactant2 = this.initVal2;
-  }
+  currentExact1 = '';
+  currentExact2 = '';
+  currentSub1: string[] = [];
+  currentSub2: string[] = [];
+
+  availableReactants: Reactant[] = MOCK_REACTANTS; //TODO: do service call
 
   onReactantChange(num: 1 | 2, value: string) {
-    if (num === 1) {
-      this.currentReactant1 = value;
-    } else {
-      this.currentReactant2 = value;
-    }
+    if (num === 1) this.currentExact1 = value;
+    else this.currentExact2 = value;
+    this.emitSearch();
+  }
+
+  onSubstructureMatch(num: 1 | 2, matchedNames: string[]) {
+    if (num === 1) this.currentSub1 = matchedNames;
+    else this.currentSub2 = matchedNames;
+    this.emitSearch();
+  }
+
+  emitSearch() {
+    // Wenn Substruktur aktiv und gefüllt -> nimm Array.
+    // Ansonsten nimm Exact -> wickle ihn in ein Array (oder leeres Array falls leer).
+    const r1 = (this.showSub1 && this.currentSub1.length > 0)
+      ? this.currentSub1
+      : (this.currentExact1 ? [this.currentExact1] : []);
+
+    const r2 = (this.showSub2 && this.currentSub2.length > 0)
+      ? this.currentSub2
+      : (this.currentExact2 ? [this.currentExact2] : []);
 
     this.searchChanged.emit({
-      reactant1: this.currentReactant1,
-      reactant2: this.currentReactant2,
+      reactant1: r1,
+      reactant2: r2,
     });
   }
 }
