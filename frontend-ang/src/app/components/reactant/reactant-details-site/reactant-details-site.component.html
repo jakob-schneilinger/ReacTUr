@@ -13,7 +13,7 @@
     <!-- Rechte Spalte -->
     <div rightContent>
       @for (structure of structures; track $index) {
-        <app-reactant-structure [structure]="structure">
+        <app-reactant-structure [structure]="structure" [smiles]="reactant ? reactant.smiles : '' ">
 
         </app-reactant-structure>
       }

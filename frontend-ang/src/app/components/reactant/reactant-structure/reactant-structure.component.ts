@@ -3,6 +3,7 @@ import {
   Component,
   ElementRef,
   Input,
+  OnInit,
   OnChanges,
   OnDestroy,
   SimpleChanges,
@@ -10,8 +11,10 @@ import {
   NgZone,
 } from '@angular/core';
 import { NotificationService } from '../../../services/notification.service';
+import { timeout } from 'rxjs';
 
 declare var $3Dmol: any;
+declare var initRDKitModule: any;
 
 @Component({
   selector: 'app-reactant-structure',
@@ -19,23 +22,48 @@ declare var $3Dmol: any;
   styleUrls: ['./reactant-structure.component.scss'],
   standalone: false,
 })
-export class ReactantStructureComponent implements AfterViewInit, OnChanges, OnDestroy {
+export class ReactantStructureComponent implements AfterViewInit, OnInit, OnChanges, OnDestroy {
   @Input() structure: File | undefined;
+  @Input() smiles: string = '';
 
   @ViewChild('viewerContainer', { static: true }) viewerContainer!: ElementRef;
+  @ViewChild('rdkit2dContainer', { static: true }) rdkit2dContainer!: ElementRef;
 
   private viewer: any;
+  private rdkitModule: any = null;
 
   spinSpeed: number = 0.5;
+
+  viewMode: '2D' | '3D' = '2D';
 
   constructor(
     private ngZone: NgZone,
     private notification: NotificationService,
   ) {}
 
+  async ngOnInit(): Promise<void> {
+    try {
+      if (!(window as any)['RDKit']) {
+        this.rdkitModule = await initRDKitModule();
+        (window as any)['RDKit'] = this.rdkitModule;
+      } else {
+        this.rdkitModule = (window as any)['RDKit'];
+      }
+
+      if (this.smiles) {
+        this.render2DModel();
+      }
+    } catch (error) {
+      console.error('Failed to initialize RDKit module:', error);
+    }
+  }
+
   ngAfterViewInit(): void {
     setTimeout(() => {
       this.initViewer();
+      if (this.rdkitModule) {
+        this.render2DModel();
+      }
       this.renderModel();
     }, 50);
   }
@@ -43,6 +71,9 @@ export class ReactantStructureComponent implements AfterViewInit, OnChanges, OnD
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['structure'] && this.structure && !changes['structure'].isFirstChange()) {
       this.renderModel();
+    }
+    if (changes['smiles'] && this.smiles && !changes['smiles'].isFirstChange()) {
+      this.render2DModel();
     }
   }
 
@@ -56,9 +87,16 @@ export class ReactantStructureComponent implements AfterViewInit, OnChanges, OnD
       canvas.removeEventListener('mouseleave', this.onPointerUp);
     }
     if (this.viewer) {
-      this.viewer.clear();
-      this.viewer.removeAllModels();
-      this.viewer = null;
+      this.viewer.spin(false);
+
+      try {
+        this.viewer.removeAllModels();
+        this.viewer.clear();
+      } catch (error) {
+        console.warn('3Dmol teardown warning:', error);
+      } finally {
+        this.viewer = null;
+      }
     }
   }
 
@@ -92,9 +130,21 @@ export class ReactantStructureComponent implements AfterViewInit, OnChanges, OnD
 
   private onPointerUp = () => {
     if (this.viewer) {
-      this.viewer.spin('y', this.spinSpeed); // Or whatever speed you prefer
+      this.viewer.spin('y', this.spinSpeed);
     }
   };
+
+  toggleView(): void {
+    this.viewMode = this.viewMode === '2D' ? '3D' : '2D';
+
+    if (this.viewer) {
+      if (this.viewMode === '3D') {
+        this.viewer.spin('y', this.spinSpeed);
+      } else {
+        this.viewer.spin(false);
+      }
+    }
+  }
 
   private async renderModel(): Promise<void> {
     if (!this.viewer || !this.structure) {
@@ -149,6 +199,26 @@ export class ReactantStructureComponent implements AfterViewInit, OnChanges, OnD
       }, 100);
     } catch (error) {
       console.error('Error rendering the XYZ file:', error);
+    }
+  }
+
+  private render2DModel(): void {
+    if (!this.smiles || !this.rdkitModule) {
+      return;
+    }
+
+    try {
+      const mol = this.rdkitModule.get_mol(this.smiles);
+      if (mol) {
+        const svg = mol.get_svg();
+
+        this.rdkit2dContainer.nativeElement.innerHTML = svg;
+
+        mol.delete();
+      }
+    } catch (error) {
+      console.log('Error rendering 2D structure with RDKit:', error);
+      this.notification.error('2D Render Error', 'Could not generate 2D structure from SMILES.');
     }
   }
 }
