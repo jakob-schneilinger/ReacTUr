@@ -18,7 +18,6 @@ export const routes: Routes = [
   { path: 'reactants', component: ReactantSiteComponent, canActivate: [AuthGuard] },
   { path: 'reactants/create', component: ReactantDetailsSiteComponent, canActivate: [AuthGuard] , data: { state: 'create' } },
   { path: 'reactants/:name', component: ReactantDetailsSiteComponent, canActivate: [AuthGuard] , data: { state: 'edit' } },
-  { path: 'permissions', component: HomeComponent, canActivate: [AuthGuard] },
   { path: 'admin', component: HomeComponent, canActivate: [AuthGuard] },
   { path: '', redirectTo: 'search', pathMatch: 'full' },
   { path: '**', redirectTo: 'search' }

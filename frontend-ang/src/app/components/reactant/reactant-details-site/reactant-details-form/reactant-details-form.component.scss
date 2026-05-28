@@ -176,48 +176,6 @@
   margin: 0.25rem 0;
 }
 
-.action-buttons {
-  display: flex;
-  gap: 1rem;
-
-  .btn {
-    border-radius: 8px;
-    font-weight: 500;
-    padding: 0.5rem 1.5rem;
-    min-width: 120px;
-    border: none;
-    cursor: pointer;
-    transition: background-color 0.2s;
-
-    &.btn-light {
-      background-color: $light_gray;
-      color: white;
-
-      &:hover {
-        background-color: $light_gray_hover;
-      }
-    }
-
-    &.btn-primary {
-      background-color: $primary;
-      color: white;
-
-      &:hover {
-        background-color: $primary_hover;
-      }
-    }
-
-    &.btn-danger {
-      background-color: $error;
-      color: white;
-
-      &:hover {
-        background-color: $error-hover;
-      }
-    }
-  }
-}
-
 .error-message {
   color: $error;
   font-size: 0.75rem;

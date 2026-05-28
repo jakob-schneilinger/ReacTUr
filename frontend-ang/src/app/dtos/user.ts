@@ -2,7 +2,7 @@ export interface User {
   firstName: string;
   lastName: string;
   email: string;
-  role?: 'USER' | 'REVIEWER' | 'ADMIN';
+  role?: 'USER' | 'SUPERVISOR' | 'ADMIN';
 }
 
 export interface UserUpdateDto {

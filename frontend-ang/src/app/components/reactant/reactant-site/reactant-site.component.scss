@@ -97,9 +97,17 @@
     font-size: 0.75rem;
   }
 
+  .short-name {
+    min-width: 200px
+  }
+
+  .chemical-name {
+    min-width: 200px
+  }
+
   .smiles-container {
     background-color: $background;
-    padding: 0.4rem 0.5rem;
+    padding: 0.4rem 1.25rem;
     border-radius: 4px;
     border: 1px solid #e9ecef;
     font-family: monospace;
@@ -107,6 +115,7 @@
     color: #495057;
 
     min-width: 0;
+
 
     .text-truncate {
       min-width: 0;
@@ -126,6 +135,24 @@
       i {
         font-size: 1rem;
       }
+    }
+  }
+
+  @media (max-width: 870px) {
+    .smiles-container {
+      padding: 0.4rem 2.25rem 0.4rem 1.25rem !important;
+    }
+    .short-name {
+      min-width: 150px
+    }
+    .chemical-name {
+      min-width: 100px
+    }
+    .type-badge {
+      display: none;
+    }
+    .gap-2 {
+      gap: 0 !important;
     }
   }
 }

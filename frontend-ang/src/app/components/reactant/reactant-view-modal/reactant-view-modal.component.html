@@ -17,28 +17,28 @@
               <h6 class="border-bottom pb-2 mb-3 text-primary">Reactant Information</h6>
               <dl class="row">
                 <dt class="col-sm-4">Short Name</dt>
-                <dd class="col-sm-8">{{ selectedReactant.shortName }}</dd>
+                <dd class="col-sm-8 text-break">{{ selectedReactant.shortName }}</dd>
 
                 <dt class="col-sm-4">Type</dt>
-                <dd class="col-sm-8">{{ selectedReactant.type1 }}</dd>
+                <dd class="col-sm-8 text-break">{{ selectedReactant.type1 }}</dd>
 
                 <dt class="col-sm-4">SMILES</dt>
                 <dd class="col-sm-8 text-break">{{ selectedReactant.smiles }}</dd>
 
-                <dt class="col-sm-4 mt-3">Chemical Name</dt>
-                <dd class="col-sm-8 mt-3">{{ selectedReactant.chemicalName || '-' }}</dd>
+                <dt class="col-sm-4">Chemical Name</dt>
+                <dd class="col-sm-8 text-break">{{ selectedReactant.chemicalName || '-' }}</dd>
 
                 <dt class="col-sm-4">Additional Names</dt>
-                <dd class="col-sm-8">{{ additionalNames }}</dd>
+                <dd class="col-sm-8 text-break">{{ additionalNames }}</dd>
 
                 <dt class="col-sm-4">CAS Number</dt>
-                <dd class="col-sm-8">{{ selectedReactant.casNumber || '-' }}</dd>
+                <dd class="col-sm-8 text-break">{{ selectedReactant.casNumber || '-' }}</dd>
 
                 <dt class="col-sm-4">Comment</dt>
-                <dd class="col-sm-8">{{ selectedReactant.comment || '-' }}</dd>
+                <dd class="col-sm-8 text-break">{{ selectedReactant.comment || '-' }}</dd>
 
                 <dt class="col-sm-4">References</dt>
-                <dd class="col-sm-8">{{ references }}</dd>
+                <dd class="col-sm-8 text-break">{{ references }}</dd>
               </dl>
             </div>
 

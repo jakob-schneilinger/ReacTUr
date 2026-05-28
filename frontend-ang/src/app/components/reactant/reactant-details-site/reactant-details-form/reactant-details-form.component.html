@@ -89,7 +89,7 @@
     <label>Additional Short Names</label>
     <div formArrayName="additionalShortNames" class="array-fields-container">
       @for (control of additionalShortNames.controls; track $index) {
-        <div class="search-field has-multiple-icons">
+        <div class="search-field">
           <input
             type="text"
             [formControlName]="$index"
@@ -126,7 +126,7 @@
     <label>Reference(s)</label>
     <div formArrayName="references" class="array-fields-container">
       @for (control of references.controls; track $index) {
-        <div class="search-field has-multiple-icons">
+        <div class="search-field">
           <input
             type="text"
             [formControlName]="$index"

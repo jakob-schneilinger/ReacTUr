@@ -34,7 +34,6 @@
     </div>
     -->
     <div class="navitem" routerLink="/reactants" routerLinkActive="active-link">Reactants</div>
-    <div class="navitem" routerLink="/permissions" routerLinkActive="active-link" [hidden]="user?.role != 'REVIEWER' && user?.role != 'ADMIN'">Permissions</div>
     <div class="navitem" routerLink="/admin" routerLinkActive="active-link" [hidden]="user?.role != 'ADMIN'">Admin</div>
   </div>
 

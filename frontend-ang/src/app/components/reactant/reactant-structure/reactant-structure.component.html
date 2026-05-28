@@ -7,7 +7,7 @@
 <div class="view-wrapper">
 
   <div class="viewer-container container-2d" [class.active-view]="viewMode === '2D'">
-    <div #rdkit2dContainer class="rdkit-canvas"></div>
+    <div class="rdkit-svg-container" [innerHTML]="svg2D"></div>
   </div>
 
   <div #viewerContainer class="viewer-container container-3d" [class.active-view]="viewMode === '3D'">

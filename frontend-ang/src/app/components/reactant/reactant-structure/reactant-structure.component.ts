@@ -9,9 +9,10 @@ import {
   SimpleChanges,
   ViewChild,
   NgZone,
+  ChangeDetectorRef
 } from '@angular/core';
 import { NotificationService } from '../../../services/notification.service';
-import { timeout } from 'rxjs';
+import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 
 declare var $3Dmol: any;
 declare var initRDKitModule: any;
@@ -27,18 +28,20 @@ export class ReactantStructureComponent implements AfterViewInit, OnInit, OnChan
   @Input() smiles: string = '';
 
   @ViewChild('viewerContainer', { static: true }) viewerContainer!: ElementRef;
-  @ViewChild('rdkit2dContainer', { static: true }) rdkit2dContainer!: ElementRef;
 
   private viewer: any;
   private rdkitModule: any = null;
 
   spinSpeed: number = 0.5;
-
   viewMode: '2D' | '3D' = '2D';
+
+  svg2D: SafeHtml | null = null;
 
   constructor(
     private ngZone: NgZone,
     private notification: NotificationService,
+    private sanitizer: DomSanitizer,
+    private cd: ChangeDetectorRef
   ) {}
 
   async ngOnInit(): Promise<void> {
@@ -211,8 +214,9 @@ export class ReactantStructureComponent implements AfterViewInit, OnInit, OnChan
       const mol = this.rdkitModule.get_mol(this.smiles);
       if (mol) {
         const svg = mol.get_svg();
+        this.svg2D = this.sanitizer.bypassSecurityTrustHtml(svg);
 
-        this.rdkit2dContainer.nativeElement.innerHTML = svg;
+        this.cd.detectChanges();
 
         mol.delete();
       }
