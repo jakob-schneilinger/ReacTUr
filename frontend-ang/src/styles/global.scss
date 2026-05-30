@@ -13,6 +13,22 @@ input[type="number"] {
   }
 }
 
+%shared-input {
+  width: 100%;
+  padding: 0.4rem 0.75rem;
+  border: 1px solid $light_gray;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  outline: none;
+  background-color: white;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+
+  &:focus {
+    border-color: $primary;
+    box-shadow: 0 0 0 3px rgba($primary, 0.15);
+  }
+}
+
 textarea {
 
   scrollbar-gutter: stable;

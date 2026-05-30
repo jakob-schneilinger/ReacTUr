@@ -1,4 +1,4 @@
-import { Component, Input, OnInit, SimpleChanges } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output, SimpleChanges } from '@angular/core';
 import {
   FormBuilder,
   FormGroup,
@@ -14,6 +14,8 @@ import { Reactant } from '../../../../dtos/reactant';
 
 export type FormState = 'create' | 'edit' | 'view';
 
+declare var initRDKitModule: any;
+
 @Component({
   selector: 'app-reactant-details-form',
   templateUrl: './reactant-details-form.component.html',
@@ -26,6 +28,8 @@ export type FormState = 'create' | 'edit' | 'view';
 export class ReactantDetailsFormComponent implements OnInit {
   @Input() formState: FormState = 'edit';
   @Input() reactant?: Reactant;
+
+  @Output() smiles = new EventEmitter<string>();
 
   isDeleteReactantModalOpen = false;
   isCancelReactantModalOpen = false;
@@ -40,15 +44,24 @@ export class ReactantDetailsFormComponent implements OnInit {
 
   activeTypesIndex = -1;
 
+  rdkitModule: any;
+
   constructor(
     private fb: FormBuilder,
     private router: Router,
     private notification: NotificationService,
   ) {}
 
-  ngOnInit(): void {
+  async ngOnInit(): Promise<void> {
     this.initForm();
     this.setupFilters();
+
+    if (!(window as any)['RDKit']) {
+      this.rdkitModule = await initRDKitModule();
+      (window as any)['RDKit'] = this.rdkitModule;
+    } else {
+      this.rdkitModule = (window as any)['RDKit'];
+    }
   }
 
   get isEditMode(): boolean {
@@ -126,7 +139,7 @@ export class ReactantDetailsFormComponent implements OnInit {
     this.reactantForm = this.fb.group({
       // Required Inputs
       shortName: [{ value: '', disabled: this.isEditMode }, Validators.required],
-      smiles: ['', Validators.required],
+      smiles: ['', [Validators.required, this.smilesValidator()]],
       type1: ['', [Validators.required, this.inListValidator(this.knownTypes)]],
 
       // Optional Inputs
@@ -143,6 +156,62 @@ export class ReactantDetailsFormComponent implements OnInit {
       this.syncArray('references', this.reactant.references);
       this.reactantForm.patchValue(this.reactant);
     }
+
+    this.reactantForm.get('smiles')?.valueChanges.subscribe((value: string) => {
+      const smilesControl = this.reactantForm.get('smiles');
+      if (smilesControl?.valid) {
+        this.smiles.emit(value);
+      }
+    });
+  }
+
+  smilesValidator(): ValidatorFn {
+    return (control: AbstractControl): ValidationErrors | null => {
+      if (!control.value) return null;
+      const smiles = control.value;
+
+      if (!this.rdkitModule) {
+        console.warn('RDKit not initialized yet');
+        return null;
+      }
+
+      const options = JSON.stringify({ sanitize: false });
+      let unsanitizedMol;
+
+      try {
+        unsanitizedMol = this.rdkitModule.get_mol(smiles, options);
+      } catch (e) {
+        return { syntaxError: { value: smiles } };
+      }
+
+      if (
+        !unsanitizedMol ||
+        (typeof unsanitizedMol.is_valid === 'function' && !unsanitizedMol.is_valid())
+      ) {
+        if (unsanitizedMol) unsanitizedMol.delete();
+        return { syntaxError: { value: smiles } };
+      }
+
+      unsanitizedMol.delete();
+      let sanitizedMol;
+
+      try {
+        sanitizedMol = this.rdkitModule.get_mol(smiles);
+      } catch (e) {
+        return { sanitizationError: { value: smiles } };
+      }
+
+      if (
+        !sanitizedMol ||
+        (typeof sanitizedMol.is_valid === 'function' && !sanitizedMol.is_valid())
+      ) {
+        if (sanitizedMol) sanitizedMol.delete();
+        return { sanitizationError: { value: smiles } };
+      }
+
+      sanitizedMol.delete();
+      return null;
+    };
   }
 
   inListValidator(validOptions: string[]): ValidatorFn {

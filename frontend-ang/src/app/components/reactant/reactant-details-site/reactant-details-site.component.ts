@@ -91,6 +91,12 @@ export class ReactantDetailsSiteComponent implements OnInit {
     return this.state === 'create';
   }
 
+  updateSmiles(smiles: string) {
+    if (this.reactant) {
+      this.reactant.smiles = smiles;
+    }
+  }
+
   handleUploadedFiles(files: File[]) {
     this.structures = files;
   }

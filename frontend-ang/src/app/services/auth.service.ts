@@ -8,7 +8,6 @@ import { Observable, of } from 'rxjs';
   providedIn: 'root',
 })
 export class AuthService {
-
   public initialLoginSequence: Promise<boolean>;
 
   constructor(private oauthService: OAuthService) {
@@ -17,6 +16,13 @@ export class AuthService {
 
     this.initialLoginSequence = this.oauthService.loadDiscoveryDocumentAndTryLogin();
   }
+
+  hardcodedUser: User = {
+    firstName: 'Jakob',
+    lastName: 'Schneilinger',
+    email: 'jakob@schneilinger.com',
+    role: 'ADMIN',
+  };
 
   public login() {
     this.oauthService.initCodeFlow();
@@ -27,6 +33,7 @@ export class AuthService {
   }
 
   public isLoggedIn(): boolean {
+    return true;
     return this.oauthService.hasValidAccessToken();
   }
 
@@ -35,6 +42,7 @@ export class AuthService {
   }
 
   public getLoggedInUser(): User | null {
+    return this.hardcodedUser;
     if (!this.isLoggedIn()) {
       return null;
     }
@@ -49,6 +57,7 @@ export class AuthService {
   }
 
   public getUserRole(): string {
+    return this.hardcodedUser.role ?? "USER";
     if (!this.isLoggedIn()) {
       return 'UNDEFINED';
     }
@@ -64,7 +73,8 @@ export class AuthService {
     return 'UNDEFINED';
   }
 
+  // TODO: think about function, placement, parameters.
   public hasExperimentPermission(id: number, email: string): Observable<boolean> {
-    return of(true)
+    return of(false)
   }
 }

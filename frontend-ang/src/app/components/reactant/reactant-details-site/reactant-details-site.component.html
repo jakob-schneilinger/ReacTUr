@@ -5,7 +5,7 @@
     <!-- Linke Spalte -->
     <div leftContent>
       <h2>{{isEditMode ? reactant?.shortName : "Add new Reactant" }}</h2>
-      <app-reactant-details-form [formState]="state" [reactant]="reactant">
+      <app-reactant-details-form [formState]="state" [reactant]="reactant" (smiles)="updateSmiles($event)">
 
       </app-reactant-details-form>
     </div>

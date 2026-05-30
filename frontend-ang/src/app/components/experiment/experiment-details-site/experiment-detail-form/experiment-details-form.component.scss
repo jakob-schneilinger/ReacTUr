@@ -25,14 +25,8 @@
   align-items: center;
 
   input, textarea {
-    width: 100%;
-    padding: 0.6rem 2.5rem 0.6rem 1rem;
-    border: 1px solid $light_gray;
-    border-radius: 20px;
-    font-size: 0.875rem;
-    outline: none;
-    transition: border-color 0.2s ease-in-out;
-    background-color: #fff;
+    @extend %shared-input;
+    padding: 0.5rem 2rem 0.5rem 0.75rem;
 
     &:focus {
       border-color: $primary;

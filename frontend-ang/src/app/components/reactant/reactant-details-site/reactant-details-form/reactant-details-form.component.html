@@ -30,6 +30,12 @@
     @if (isInvalid('smiles')) {
       <div class="error-message">SMILES string is required.</div>
     }
+    @if (reactantForm.get('smiles')?.hasError('syntaxError')) {
+      <div class="error-message">SMILES format is invalid. Please check syntax.</div>
+    }
+    @if (reactantForm.get('smiles')?.hasError('sanitizationError')) {
+      <div class="error-message">SMILES format is invalid. Molecule structure failed RDKit sanitization.</div>
+    }
   </div>
 
   <div class="input-group">
