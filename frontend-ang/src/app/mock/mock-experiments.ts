@@ -2,7 +2,7 @@ import { Experiment, ExperimentData, Measurement } from '../dtos/experiment';
 import { Reactant } from '../dtos/reactant'; // Passe den Pfad zu deinen Interfaces an
 
 export const MOCK_REACTANTS: Reactant[] = [
-  { shortName: 'Sodium', smiles: '[Na]', type1: 'Metal' },
+  { shortName: 'Sodium', smiles: '[Na]', type1: 'Metal', chemicalName: 'full chemical name here'},
   { shortName: 'Chlorine', smiles: 'Cl[Cl]', type1: 'Halogen' },
   { shortName: 'Hydrogen', smiles: '[H][H]', type1: 'Gas' },
   { shortName: 'Oxygen', smiles: 'O=O', type1: 'Gas' },
@@ -10,12 +10,12 @@ export const MOCK_REACTANTS: Reactant[] = [
   { shortName: 'Phenol', smiles: 'c1ccccc1O', type1: 'Solvent' },
   { shortName: 'Bromine', smiles: 'Br[Br]', type1: 'Halogen' },
   { shortName: 'Carbon', smiles: '[C]', type1: 'Non-metal' },
-  { shortName: 'Potassium', smiles: '[K]', type1: 'Metal' },
+  { shortName: 'Potassium', smiles: '[K]', type1: 'Metal', chemicalName: 'full chemical name here'},
   { shortName: 'Iodine', smiles: 'I[I]', type1: 'Halogen' },
-  { shortName: 'Iron', smiles: '[Fe]', type1: 'Metal' },
+  { shortName: 'Iron', smiles: '[Fe]', type1: 'Metal', chemicalName: 'full chemical name here'},
   { shortName: 'Sulfur', smiles: '[S]', type1: 'Non-metal' },
   { shortName: 'Nitrogen', smiles: 'N#N', type1: 'Gas' },
-  { shortName: 'Copper', smiles: '[Cu]', type1: 'Metal' },
+  { shortName: 'Copper', smiles: '[Cu]', type1: 'Metal', chemicalName: 'full chemical name here'},
   { shortName: 'Nitric Acid', smiles: 'O[N+]([O-])=O', type1: 'Acid' },
   {
     shortName: 'Salicylic Acid',
@@ -27,7 +27,7 @@ export const MOCK_REACTANTS: Reactant[] = [
     smiles: 'CC(=O)OC(=O)C',
     type1: 'Organic'
   },
-  { shortName: 'Magnesium', smiles: '[Mg]', type1: 'Metal' },
+  { shortName: 'Magnesium', smiles: '[Mg]', type1: 'Metal', chemicalName: 'full chemical name here'},
   { shortName: 'Hydrochloric Acid', smiles: 'Cl', type1: 'Acid' }
 ];
 
@@ -35,7 +35,7 @@ export const MOCK_EXPERIMENTS: Experiment[] = [
   {
     id: 1,
     reactants: [
-      { shortName: 'Sodium', smiles: '[Na]', type1: 'Metal' },
+      { shortName: 'Sodium', smiles: '[Na]', type1: 'Metal', chemicalName: ' full chemical name here '},
       { shortName: 'Chlorine', smiles: 'Cl[Cl]', type1: 'Halogen' },
     ],
     metadata: {
@@ -71,7 +71,7 @@ export const MOCK_EXPERIMENTS: Experiment[] = [
   {
     id: 3,
     reactants: [
-      { shortName: 'Sodium', smiles: '[Na]', type1: 'Metal' },
+      { shortName: 'Sodium', smiles: '[Na]', type1: 'Metal', chemicalName: 'full chemical name here'},
       { shortName: 'Bromine', smiles: 'Br[Br]', type1: 'Halogen' },
     ],
     metadata: {
@@ -106,7 +106,7 @@ export const MOCK_EXPERIMENTS: Experiment[] = [
   {
     id: 5,
     reactants: [
-      { shortName: 'Potassium', smiles: '[K]', type1: 'Metal' },
+      { shortName: 'Potassium', smiles: '[K]', type1: 'Metal', chemicalName: 'full chemical name here'},
       { shortName: 'Iodine', smiles: 'I[I]', type1: 'Halogen' },
     ],
     metadata: {
@@ -123,7 +123,7 @@ export const MOCK_EXPERIMENTS: Experiment[] = [
   {
     id: 6,
     reactants: [
-      { shortName: 'Iron', smiles: '[Fe]', type1: 'Metal' },
+      { shortName: 'Iron', smiles: '[Fe]', type1: 'Metal', chemicalName: 'full chemical name here'},
       { shortName: 'Sulfur', smiles: '[S]', type1: 'Non-metal' },
     ],
     metadata: {
@@ -157,7 +157,7 @@ export const MOCK_EXPERIMENTS: Experiment[] = [
   {
     id: 8,
     reactants: [
-      { shortName: 'Copper', smiles: '[Cu]', type1: 'Metal' },
+      { shortName: 'Copper', smiles: '[Cu]', type1: 'Metal', chemicalName: 'full chemical name here'},
       { shortName: 'Nitric Acid', smiles: 'O[N+]([O-])=O', type1: 'Acid' },
     ],
     metadata: {
@@ -193,7 +193,7 @@ export const MOCK_EXPERIMENTS: Experiment[] = [
   {
     id: 10,
     reactants: [
-      { shortName: 'Magnesium', smiles: '[Mg]', type1: 'Metal' },
+      { shortName: 'Magnesium', smiles: '[Mg]', type1: 'Metal', chemicalName: 'full chemical name here'},
       { shortName: 'Hydrochloric Acid', smiles: 'Cl', type1: 'Acid' },
     ],
     metadata: {

@@ -40,6 +40,8 @@ import { UploadedFileComponent } from './components/file-upload/uploaded-file/up
 import { DragAndDropComponent } from './components/file-upload/drag-and-drop/drag-and-drop.component';
 import { PasteTableComponent } from './components/file-upload/paste-table/paste-table.component';
 import { DragAndDropDirective } from './directives/drag-and-drop.directive';
+import { HasRoleDirective } from './directives/has-role.directive';
+import { ExperimentViewModalComponent } from './components/experiment/experiment-view-modal/experiment-view-modal.component';
 
 @NgModule({
   declarations: [
@@ -51,6 +53,7 @@ import { DragAndDropDirective } from './directives/drag-and-drop.directive';
     DrawMolComponent,
     ReactantSelectorComponent,
     ExperimentSearchComponent,
+    ExperimentViewModalComponent,
     SubstructureSearchComponent,
     SearchResultsComponent,
     SearchSiteComponent,
@@ -88,6 +91,7 @@ import { DragAndDropDirective } from './directives/drag-and-drop.directive';
     CdkDrag,
     CommonModule,
     DragAndDropDirective,
+    HasRoleDirective,
   ],
   providers: [],
   bootstrap: [AppComponent],

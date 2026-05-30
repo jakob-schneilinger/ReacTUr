@@ -254,7 +254,7 @@
     }
     <button type="button" class="btn btn-light" (click)="onCancel()">Cancel</button>
     @if (formState !== 'view') {
-      <button type="button" class="btn btn-danger" (click)="onDelete()" [hidden]="">Delete</button>
+      <button type="button" class="btn btn-danger" (click)="onDelete()" *appHasRole="['SUPERVISOR','ADMIN']">Delete</button>
     }
   </div>
 

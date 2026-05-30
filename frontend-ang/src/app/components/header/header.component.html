@@ -34,7 +34,7 @@
     </div>
     -->
     <div class="navitem" routerLink="/reactants" routerLinkActive="active-link">Reactants</div>
-    <div class="navitem" routerLink="/admin" routerLinkActive="active-link" [hidden]="user?.role != 'ADMIN'">Admin</div>
+    <div class="navitem" routerLink="/admin" routerLinkActive="active-link" *appHasRole="['ADMIN']">Admin</div>
   </div>
 
   <div class="profile-container">

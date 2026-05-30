@@ -123,6 +123,10 @@ export class ExperimentService {
     //TODO: extra function for file upload? easier for backend?
   }
 
+  getFiles(id: number):Observable<File[]> {
+    return of([]);
+  }
+
   removeFile() {
     //TODO: remove file from experiment
   }

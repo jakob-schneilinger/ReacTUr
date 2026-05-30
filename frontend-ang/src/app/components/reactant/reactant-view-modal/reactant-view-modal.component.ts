@@ -19,7 +19,7 @@ export class ReactantViewModalComponent implements OnInit {
 
   constructor(
     private router: Router,
-    private experimentService: ReactantService,
+    private reactantService: ReactantService,
     private notification: NotificationService,
     private cd: ChangeDetectorRef,
   ) {}
@@ -28,7 +28,7 @@ export class ReactantViewModalComponent implements OnInit {
     if (this.selectedReactant) {
       this.loadingStructures = true;
 
-      this.experimentService.getReactantStructures(this.selectedReactant.shortName).subscribe({
+      this.reactantService.getReactantStructures(this.selectedReactant.shortName).subscribe({
         next: (files: File[]) => {
           setTimeout(() => {
             if (this.selectedReactant) {

@@ -166,9 +166,9 @@
   </div>
 
   <div class="action-buttons mt-4">
-    <button type="submit" class="btn btn-primary" [hidden]="formState === 'view'">Submit</button>
+    <button type="submit" class="btn btn-primary" *appHasRole="['SUPERVISOR','ADMIN']">Submit</button>
     <button type="button" class="btn btn-light" (click)="onCancel()">{{ formState === 'view' ? 'Back' : 'Cancel' }}</button>
-    <button type="button" class="btn btn-danger" (click)="onDelete()" [hidden]="formState !== 'edit'">Remove</button>
+    <button type="button" class="btn btn-danger" (click)="onDelete()" *appHasRole="['SUPERVISOR','ADMIN']" [hidden]="formState !== 'edit'">Remove</button>
   </div>
 
 </form>
