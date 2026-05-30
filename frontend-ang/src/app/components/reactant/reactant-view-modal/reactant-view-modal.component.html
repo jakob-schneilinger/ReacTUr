@@ -45,25 +45,17 @@
             <div class="col-md-6 border-start ps-4" style="min-height: 600px">
               <h6 class="border-bottom pb-2 mb-3 text-primary">Reactant Structure</h6>
 
-              @if (loadingStructures) {
-                <div class="d-flex flex-column justify-content-center align-items-center py-5" style="min-height: 200px;">
-                  <div class="spinner-border text-primary mb-3" role="status" style="width: 3rem; height: 3rem;">
-                    <span class="visually-hidden">Loading...</span>
-                  </div>
-                  <span class="text-muted fw-medium">Loading reactant structure...</span>
-                </div>
+              @if (loadingStructures || !selectedReactant.structures || selectedReactant.structures.length === 0) {
+                <app-reactant-structure
+                  [loading]="loadingStructures"
+                  [smiles]="selectedReactant.smiles || ''">
+                </app-reactant-structure>
               } @else {
-                @if (selectedReactant.structures) {
-                  @for (structure of selectedReactant.structures; track $index) {
-                    <app-reactant-structure
-                      [structure]="structure"
-                      [smiles]="selectedReactant ? selectedReactant.smiles : '' ">
-                    </app-reactant-structure>
-                  }
-                } @else {
-                  <div class="alert alert-light text-center border mt-2 no-structure-container">
-                    No structure data available to render.
-                  </div>
+                @for (structure of selectedReactant.structures; track $index) {
+                  <app-reactant-structure
+                    [structure]="structure"
+                    [smiles]="selectedReactant.smiles || ''">
+                  </app-reactant-structure>
                 }
               }
 
@@ -75,7 +67,7 @@
                 [removePossible]="false">
               </app-uploaded-file>
 
-              <div *ngIf="!selectedReactant.structures" class="text-muted small">No structural files attached.</div>
+              <div *ngIf="!selectedReactant.structures || selectedReactant.structures.length === 0" class="text-muted small">No structural files attached.</div>
             </div>
 
           </div>

@@ -26,6 +26,7 @@ declare var initRDKitModule: any;
 export class ReactantStructureComponent implements AfterViewInit, OnInit, OnChanges, OnDestroy {
   @Input() structure: File | undefined;
   @Input() smiles: string = '';
+  @Input() loading: boolean = false;
 
   @ViewChild('viewerContainer', { static: true }) viewerContainer!: ElementRef;
 
@@ -78,6 +79,13 @@ export class ReactantStructureComponent implements AfterViewInit, OnInit, OnChan
     if (changes['smiles'] && this.smiles && !changes['smiles'].isFirstChange()) {
       this.render2DModel();
     }
+    if (changes['loading'] && !this.loading) {
+      setTimeout(() => {
+        if (this.viewer) {
+          this.viewer.resize();
+        }
+      }, 100);
+    }
   }
 
   ngOnDestroy(): void {
@@ -108,7 +116,7 @@ export class ReactantStructureComponent implements AfterViewInit, OnInit, OnChan
       this.ngZone.runOutsideAngular(() => {
         this.viewer = $3Dmol.createViewer(this.viewerContainer.nativeElement, {
           backgroundColor: 'white',
-          antialias: true, // TODO: set to false if laggy
+          antialias: true,
           pixelRatio: 1,
         });
         const canvas = this.viewerContainer.nativeElement;
@@ -138,6 +146,8 @@ export class ReactantStructureComponent implements AfterViewInit, OnInit, OnChan
   };
 
   toggleView(): void {
+    if (!this.structure) return;
+
     this.viewMode = this.viewMode === '2D' ? '3D' : '2D';
 
     if (this.viewer) {

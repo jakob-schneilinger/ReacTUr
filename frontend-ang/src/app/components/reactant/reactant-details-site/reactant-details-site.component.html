@@ -12,10 +12,18 @@
 
     <!-- Rechte Spalte -->
     <div rightContent>
-      @for (structure of structures; track $index) {
-        <app-reactant-structure [structure]="structure" [smiles]="reactant ? reactant.smiles : '' ">
-
+      @if (loadingStructures || structures.length === 0) {
+        <app-reactant-structure
+          [loading]="loadingStructures"
+          [smiles]="reactant?.smiles || ''">
         </app-reactant-structure>
+      } @else {
+        @for (structure of structures; track $index) {
+          <app-reactant-structure
+            [structure]="structure"
+            [smiles]="reactant?.smiles || ''">
+          </app-reactant-structure>
+        }
       }
       <app-file-upload
         [showTable]="false"

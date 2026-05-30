@@ -6,7 +6,7 @@
   bottom: 0;
   right: 0;
   padding: 1rem 1rem;
-  z-index: 100;
+  z-index: 9999;
 
   &:not(* .notification) {
     padding: 0;

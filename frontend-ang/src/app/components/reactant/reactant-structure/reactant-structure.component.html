@@ -1,16 +1,29 @@
-<div class="structure-header">
-  <button class="toggle-btn" (click)="toggleView()">
-    Switch to {{ viewMode === '2D' ? '3D' : '2D' }} View
-  </button>
-</div>
-
-<div class="view-wrapper">
-
-  <div class="viewer-container container-2d" [class.active-view]="viewMode === '2D'">
-    <div class="rdkit-svg-container" [innerHTML]="svg2D"></div>
+@if (loading) {
+  <div class="d-flex flex-column justify-content-center align-items-center py-5" style="min-height: 200px;">
+    <div class="spinner-border text-primary mb-3" role="status" style="width: 3rem; height: 3rem;">
+      <span class="visually-hidden">Loading...</span>
+    </div>
+    <span class="text-muted fw-medium">Loading reactant structure...</span>
   </div>
+}
 
-  <div #viewerContainer class="viewer-container container-3d" [class.active-view]="viewMode === '3D'">
+<div [class.d-none]="loading">
+
+  @if (structure) {
+    <div class="structure-header">
+      <button class="toggle-btn" (click)="toggleView()">
+        Switch to {{ viewMode === '2D' ? '3D' : '2D' }} View
+      </button>
+    </div>
+  }
+
+  <div class="view-wrapper">
+    <div class="viewer-container container-2d" [class.active-view]="viewMode === '2D'">
+      <div class="rdkit-svg-container" [innerHTML]="svg2D"></div>
+    </div>
+
+    <div #viewerContainer class="viewer-container container-3d" [class.active-view]="viewMode === '3D'" [class.d-none]="!structure">
+    </div>
   </div>
 
 </div>

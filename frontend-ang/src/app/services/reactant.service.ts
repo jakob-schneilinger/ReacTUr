@@ -64,5 +64,7 @@ export class ReactantService {
           return [file];
         }),
       );
+
+    return of([])
   }
 }
