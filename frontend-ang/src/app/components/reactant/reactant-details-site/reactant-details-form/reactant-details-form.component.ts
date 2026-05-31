@@ -12,7 +12,7 @@ import { Router } from '@angular/router';
 import { NotificationService } from '../../../../services/notification.service';
 import { Reactant } from '../../../../dtos/reactant';
 
-export type FormState = 'create' | 'edit' | 'view';
+export type FormState = 'create' | 'edit';
 
 declare var initRDKitModule: any;
 
@@ -129,9 +129,6 @@ export class ReactantDetailsFormComponent implements OnInit {
       if (changes['reactant'] && this.reactant) {
         this.reactantForm.patchValue(this.reactant);
       }
-      if (changes['formState']) {
-        this.toggleFormState();
-      }
     }
   }
 
@@ -150,7 +147,6 @@ export class ReactantDetailsFormComponent implements OnInit {
       comment: [''],
     });
 
-    this.toggleFormState();
     if (this.reactant) {
       this.syncArray('additionalShortNames', this.reactant.additionalShortNames);
       this.syncArray('references', this.reactant.references);
@@ -234,12 +230,6 @@ export class ReactantDetailsFormComponent implements OnInit {
     }
   }
 
-  private toggleFormState(): void {
-    if (this.formState === 'view') {
-      this.reactantForm.disable();
-    }
-  }
-
   clearControl(controlName: string): void {
     this.reactantForm.get(controlName)?.setValue('');
     this.reactantForm.markAsDirty();
@@ -281,7 +271,7 @@ export class ReactantDetailsFormComponent implements OnInit {
   }
 
   onSubmit(): void {
-    if (this.reactantForm.valid && this.formState !== 'view') {
+    if (this.reactantForm.valid) {
       const formValue = this.reactantForm.getRawValue();
       // TODO: send to backend (create or edit based on formState)
       this.notification.success('Reactant Saved', 'Reactant was saved successfully!');
@@ -292,7 +282,7 @@ export class ReactantDetailsFormComponent implements OnInit {
   }
 
   onCancel(): void {
-    if (this.reactantForm.dirty && this.formState !== 'view') {
+    if (this.reactantForm.dirty) {
       this.isCancelReactantModalOpen = true;
     } else {
       this.executeCancel();

@@ -4,7 +4,7 @@ import { NotificationService } from '../../../services/notification.service';
 import { ReactantService } from '../../../services/reactant.service';
 import { Reactant } from '../../../dtos/reactant';
 
-export type FormState = 'create' | 'edit' | 'view';
+export type FormState = 'create' | 'edit';
 
 @Component({
   selector: 'app-reactant-details-site',

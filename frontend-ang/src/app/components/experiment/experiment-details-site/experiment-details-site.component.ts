@@ -6,7 +6,7 @@ import { ExperimentService } from '../../../services/experiment.service';
 import { ExperimentData } from '../../../dtos/experiment';
 import { User } from '../../../dtos/user';
 
-export type FormState = 'create' | 'edit' | 'view';
+export type FormState = 'create' | 'edit';
 
 @Component({
   selector: 'app-experiment-details-site',
@@ -74,18 +74,13 @@ export class ExperimentDetailsSiteComponent implements OnInit {
             next: (hasPermission) =>
               hasPermission
                 ? console.log('User has permission to edit experiment')
-                : (this.state = 'view'),
+                : console.warn('User does not have permission to edit experiment'),
             error: (err) =>
               this.notification.error(
                 'Permission Error',
                 `Permission Error for this Experiment! Error: ${err}`,
               ),
           });
-          if (!this.authService.hasExperimentPermission(id, this.user?.email)) {
-            console.log('Test3');
-            this.state = 'view';
-          }
-
         }
       }
       this.experimentService.getExperimentData(id).subscribe({

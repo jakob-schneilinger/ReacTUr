@@ -49,7 +49,7 @@ export class ExperimentViewModalComponent implements OnInit {
   }
 
   editExperiment(id: number | undefined): void {
-    if (id) this.router.navigate(['/experiment', id]);
+    if (id) this.router.navigate(['/experiments', id]);
   }
 
   get headerText():string {

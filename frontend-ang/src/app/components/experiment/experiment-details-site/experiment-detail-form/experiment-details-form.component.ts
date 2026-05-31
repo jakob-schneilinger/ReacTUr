@@ -3,7 +3,7 @@ import { FormBuilder, FormGroup, FormArray, Validators, ValidatorFn, AbstractCon
 import { Router } from '@angular/router';
 import { NotificationService } from '../../../../services/notification.service';
 
-export type FormState = 'create' | 'edit' | 'view';
+export type FormState = 'create' | 'edit';
 
 @Component({
   selector: 'app-experiment-details-form',
@@ -49,7 +49,6 @@ export class ExperimentDetailsFormComponent implements OnInit {
 
   private initForm(): void {
     const isEditMode = this.formState !== 'create';
-    const isViewMode = this.formState === 'view';
 
     this.experimentForm = this.fb.group({
       // Reactants Array
@@ -72,10 +71,6 @@ export class ExperimentDetailsFormComponent implements OnInit {
       wavelength: [''],
       comment: [''],
     });
-
-    if (isViewMode) {
-      this.experimentForm.disable();
-    }
   }
 
   private inListValidator(validOptions: string[]): ValidatorFn {
@@ -223,7 +218,7 @@ export class ExperimentDetailsFormComponent implements OnInit {
   executeCancel(): void {
     this.isCancelExperimentModalOpen = false;
     this.experimentForm.reset();
-    this.router.navigate(['/experiments']);
+    this.router.navigate(['/search']);
   }
 
   onDelete(): void {
@@ -235,7 +230,7 @@ export class ExperimentDetailsFormComponent implements OnInit {
     // TODO: Call backend delete
     this.notification.success('Experiment Deleted', 'Experiment was deleted successfully!');
     this.experimentForm.reset();
-    this.router.navigate(['/experiments']);
+    this.router.navigate(['/search']);
   }
 
   closeModals(): void {

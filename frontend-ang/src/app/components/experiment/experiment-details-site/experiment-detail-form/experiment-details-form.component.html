@@ -52,7 +52,7 @@
     <label>Scientist</label>
     <div class="search-field">
       <input type="text" formControlName="scientist" [class.is-invalid]="isInvalid('scientist')" placeholder="Value" />
-      @if (experimentForm.get('scientist')?.value && formState !== 'view') {
+      @if (experimentForm.get('scientist')?.value) {
         <span class="icon bi bi-x text-black clear-btn" (click)="clearControl('scientist')"></span>
       }
     </div>
@@ -103,7 +103,7 @@
         </ul>
       }
 
-      @if (experimentForm.get('solvent')?.value && formState !== 'view') {
+      @if (experimentForm.get('solvent')?.value) {
         <span class="icon bi bi-x text-black clear-btn" (click)="clearControl('solvent')"></span>
       }
     </div>
@@ -143,13 +143,11 @@
     }
   </div>
 
-  @if (formState !== 'view') {
-    <div class="divider-container">
-      <div class="divider"></div>
-      <span class="divider-label">Optional</span>
-      <div class="divider"></div>
-    </div>
-  }
+  <div class="divider-container">
+    <div class="divider"></div>
+    <span class="divider-label">Optional</span>
+    <div class="divider"></div>
+  </div>
 
   <div class="input-group">
     <label>Instrument</label>
@@ -177,7 +175,7 @@
         </ul>
       }
 
-      @if (experimentForm.get('instrument')?.value && formState !== 'view') {
+      @if (experimentForm.get('instrument')?.value) {
         <span class="icon bi bi-x text-black clear-btn" (click)="clearControl('instrument')"></span>
       }
     </div>
@@ -215,7 +213,7 @@
         </ul>
       }
 
-      @if (experimentForm.get('modality')?.value && formState !== 'view') {
+      @if (experimentForm.get('modality')?.value) {
         <span class="icon bi bi-x text-black clear-btn" (click)="clearControl('modality')"></span>
       }
     </div>
@@ -242,20 +240,16 @@
     <label>Comment</label>
     <div class="search-field align-items-start">
       <textarea formControlName="comment" placeholder="Add additional details..." rows="3"></textarea>
-      @if (experimentForm.get('comment')?.value && formState !== 'view') {
+      @if (experimentForm.get('comment')?.value) {
         <span class="icon bi bi-x text-black clear-btn" (click)="clearControl('comment')" style="top: 8px;"></span>
       }
     </div>
   </div>
 
   <div class="action-buttons mt-4">
-    @if (formState !== 'view') {
-      <button type="submit" class="btn btn-primary" >Submit</button>
-    }
+    <button type="submit" class="btn btn-primary" >Submit</button>
     <button type="button" class="btn btn-light" (click)="onCancel()">Cancel</button>
-    @if (formState !== 'view') {
-      <button type="button" class="btn btn-danger" (click)="onDelete()" *appHasRole="['SUPERVISOR','ADMIN']">Delete</button>
-    }
+    <button type="button" class="btn btn-danger" (click)="onDelete()">Delete</button>
   </div>
 
 </form>
