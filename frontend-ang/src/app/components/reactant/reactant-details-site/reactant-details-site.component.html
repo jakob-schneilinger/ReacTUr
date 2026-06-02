@@ -15,7 +15,7 @@
       @if (loadingStructures || structures.length === 0) {
         <app-reactant-structure
           [loading]="loadingStructures"
-          [smiles]="reactant?.smiles || ''">
+          [smiles]="smiles || ''">
         </app-reactant-structure>
       } @else {
         @for (structure of structures; track $index) {

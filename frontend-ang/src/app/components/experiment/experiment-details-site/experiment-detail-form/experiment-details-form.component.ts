@@ -2,6 +2,8 @@ import { Component, Input, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, FormArray, Validators, ValidatorFn, AbstractControl, ValidationErrors } from '@angular/forms';
 import { Router } from '@angular/router';
 import { NotificationService } from '../../../../services/notification.service';
+import { AuthService } from '../../../../services/auth.service';
+import { User } from '../../../../dtos/user';
 
 export type FormState = 'create' | 'edit';
 
@@ -35,16 +37,28 @@ export class ExperimentDetailsFormComponent implements OnInit {
   activeInstrumentIndex = -1;
   activeModalityIndex = -1;
 
+  user: User | null = null
+
   constructor(
     private fb: FormBuilder,
     private router: Router,
     private notification: NotificationService,
+    private authService: AuthService,
   ) {}
 
   ngOnInit(): void {
+    this.user = this.authService.getLoggedInUser();
     this.initForm();
     this.setupReactionAutoFill();
     this.setupFilters();
+  }
+
+  get fullName(): string {
+    return "" + this.user?.firstName + " " + this.user?.lastName;
+  }
+
+  get currentDate(): string {
+    return new Date().toISOString().split("T")[0]
   }
 
   private initForm(): void {
@@ -58,8 +72,8 @@ export class ExperimentDetailsFormComponent implements OnInit {
       ]),
 
       // Required Metadata
-      date: ['', Validators.required],
-      scientist: ['', Validators.required],
+      date: [this.currentDate, Validators.required],
+      scientist: [this.fullName, Validators.required],
       temperature: ['', Validators.required],
       solvent: ['', [Validators.required, this.inListValidator(this.knownSolvents)]],
       concentrationA: ['', [Validators.required, Validators.min(0)]],
@@ -71,6 +85,9 @@ export class ExperimentDetailsFormComponent implements OnInit {
       wavelength: [''],
       comment: [''],
     });
+
+    //TODO: if edit mode init form with existing data
+
   }
 
   private inListValidator(validOptions: string[]): ValidatorFn {

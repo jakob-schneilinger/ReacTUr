@@ -1,5 +1,5 @@
 import { Component, Input, Output, EventEmitter, OnInit } from '@angular/core';
-import { Reactant } from '../../dtos/reactant';
+import { Reactant } from '../../../dtos/reactant';
 
 @Component({
   selector: 'app-reactant-selector',

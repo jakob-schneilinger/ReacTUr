@@ -2,5 +2,9 @@
 @use "src/styles/variables.scss" as *;
 
 .substructure-btn {
-  background: white;
+  background-color: white;
+
+  &:hover {
+    background-color: $background !important;
+  }
 }

@@ -22,6 +22,7 @@ export class ReactantDetailsSiteComponent implements OnInit {
   ) {}
 
   reactant: Reactant | undefined;
+  smiles: string = "";
   loadingStructures: boolean = true;
 
   state: FormState = 'create';
@@ -92,6 +93,8 @@ export class ReactantDetailsSiteComponent implements OnInit {
   }
 
   updateSmiles(smiles: string) {
+    this.loadingStructures = !smiles;
+    this.smiles = smiles;
     if (this.reactant) {
       this.reactant.smiles = smiles;
     }

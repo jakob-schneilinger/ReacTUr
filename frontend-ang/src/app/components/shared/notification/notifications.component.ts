@@ -1,6 +1,6 @@
 import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
-import { Globals } from "../../global/globals";
-import { Notification, NotificationService, NotificationType } from "../../services/notification.service";
+import { Globals } from "../../../global/globals";
+import { Notification, NotificationService, NotificationType } from "../../../services/notification.service";
 
 @Component({
   selector: 'app-notifications',

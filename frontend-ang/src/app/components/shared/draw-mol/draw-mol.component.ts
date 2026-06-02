@@ -1,5 +1,13 @@
-import { AfterViewInit, Component, EventEmitter, Input, OnInit, Output, NgZone } from '@angular/core';
-
+import {
+  AfterViewInit,
+  Component,
+  EventEmitter,
+  Input,
+  OnInit,
+  Output,
+  NgZone,
+  HostListener,
+} from '@angular/core';
 declare var initRDKitModule: any;
 declare var ChemDoodle: any;
 
@@ -47,6 +55,8 @@ export class DrawMolComponent implements OnInit, AfterViewInit {
   private initChemDoodle() {
     this.sketcher = new ChemDoodle.SketcherCanvas(this.canvasId, 500, 300, { useServices: false });
 
+    this.resizeSketcher();
+
     const canvasElement = document.getElementById(this.canvasId);
     if (canvasElement) {
       canvasElement.addEventListener('mouseup', () => this.syncCanvasToSmiles());
@@ -79,7 +89,7 @@ export class DrawMolComponent implements OnInit, AfterViewInit {
     } catch (error) {
       console.warn('Invalid SMILES input', error);
     }
-    setTimeout(() => this.isSyncing = false, 50);
+    setTimeout(() => (this.isSyncing = false), 50);
   }
 
   private syncCanvasToSmiles() {
@@ -100,7 +110,7 @@ export class DrawMolComponent implements OnInit, AfterViewInit {
         this.smilesString = '';
       });
     }
-    setTimeout(() => this.isSyncing = false, 50);
+    setTimeout(() => (this.isSyncing = false), 50);
   }
 
   onSave() {
@@ -115,5 +125,28 @@ export class DrawMolComponent implements OnInit, AfterViewInit {
     setTimeout(() => {
       this.syncCanvasToSmiles();
     }, 100);
+  }
+
+  @HostListener('window:resize')
+  onWindowResize() {
+    this.resizeSketcher();
+  }
+
+  private resizeSketcher() {
+    if (!this.sketcher) return;
+
+    const container = document.getElementById(this.canvasId)?.parentElement;
+
+    if (container) {
+      const computedStyle = getComputedStyle(container);
+      const paddingX =
+        parseFloat(computedStyle.paddingLeft) + parseFloat(computedStyle.paddingRight);
+
+      const newWidth = container.clientWidth - paddingX;
+
+      if (newWidth > 0) {
+        this.sketcher.resize(newWidth, 300);
+      }
+    }
   }
 }

@@ -8,9 +8,9 @@ import {
   SimpleChanges,
 } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { AuthService } from '../../services/auth.service';
-import { NotificationService } from '../../services/notification.service';
-import { ExperimentService } from '../../services/experiment.service';
+import { AuthService } from '../../../services/auth.service';
+import { NotificationService } from '../../../services/notification.service';
+import { ExperimentService } from '../../../services/experiment.service';
 
 @Component({
   selector: 'app-file-upload',

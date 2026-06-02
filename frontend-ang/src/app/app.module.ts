@@ -5,12 +5,12 @@ import { HttpClientModule } from "@angular/common/http";
 
 import { AppRoutingModule } from "./app-routing.module";
 import { AppComponent } from "./app.component";
-import { HeaderComponent } from "./components/header/header.component";
+import { HeaderComponent } from "./components/shared/layout/header/header.component";
 import { HomeComponent } from "./components/home/home.component";
 import { LoginComponent as UserLoginComponent } from "./components/user/login/login.component";
 import { UserComponent } from "./components/user/user.component";
-import { NotificationsComponent } from "./components/notification/notifications.component";
-import { LayoutComponent } from './components/layout/layout.component';
+import { NotificationsComponent } from "./components/shared/notification/notifications.component";
+import { LayoutComponent } from './components/shared/layout/layout.component';
 import { CommonModule, NgOptimizedImage } from '@angular/common';
 
 import { NgbModule } from "@ng-bootstrap/ng-bootstrap";
@@ -22,8 +22,8 @@ import { AdvancedSearchComponent } from './components/search/search-details/adva
 import { ExperimentDetailsSiteComponent } from './components/experiment/experiment-details-site/experiment-details-site.component';
 import { ExperimentDetailsFormComponent } from './components/experiment/experiment-details-site/experiment-detail-form/experiment-details-form.component';
 import { ExportModalComponent } from './components/export/export-modal.component';
-import { DrawMolComponent } from './components/draw-mol/draw-mol.component';
-import { ReactantSelectorComponent } from './components/reactant-selector/reactant-selector.component';
+import { DrawMolComponent } from './components/shared/draw-mol/draw-mol.component';
+import { ReactantSelectorComponent } from './components/shared/reactant-selector/reactant-selector.component';
 import { SubstructureSearchComponent } from './components/search/sub-structure-search/sub-structure-search.component';
 import { CdkDrag, CdkDropList } from '@angular/cdk/drag-drop';
 import { ReactantSiteComponent } from './components/reactant/reactant-site/reactant-site.component';
@@ -35,10 +35,10 @@ import { ReactantStructureComponent } from './components/reactant/reactant-struc
 import {
   ReactantDetailsFormComponent
 } from './components/reactant/reactant-details-site/reactant-details-form/reactant-details-form.component';
-import { FileUploadComponent } from './components/file-upload/file-upload.component';
-import { UploadedFileComponent } from './components/file-upload/uploaded-file/uploaded-file.component';
-import { DragAndDropComponent } from './components/file-upload/drag-and-drop/drag-and-drop.component';
-import { PasteTableComponent } from './components/file-upload/paste-table/paste-table.component';
+import { FileUploadComponent } from './components/shared/file-upload/file-upload.component';
+import { UploadedFileComponent } from './components/shared/file-upload/uploaded-file/uploaded-file.component';
+import { DragAndDropComponent } from './components/shared/file-upload/drag-and-drop/drag-and-drop.component';
+import { PasteTableComponent } from './components/shared/file-upload/paste-table/paste-table.component';
 import { DragAndDropDirective } from './directives/drag-and-drop.directive';
 import { HasRoleDirective } from './directives/has-role.directive';
 import { ExperimentViewModalComponent } from './components/experiment/experiment-view-modal/experiment-view-modal.component';

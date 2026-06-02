@@ -1,5 +1,5 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
-import { NotificationService } from '../../../services/notification.service';
+import { NotificationService } from '../../../../services/notification.service';
 
 @Component({
   selector: 'app-drag-and-drop',

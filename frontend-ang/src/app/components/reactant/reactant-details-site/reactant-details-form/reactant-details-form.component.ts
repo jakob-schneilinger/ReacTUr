@@ -154,10 +154,7 @@ export class ReactantDetailsFormComponent implements OnInit {
     }
 
     this.reactantForm.get('smiles')?.valueChanges.subscribe((value: string) => {
-      const smilesControl = this.reactantForm.get('smiles');
-      if (smilesControl?.valid) {
-        this.smiles.emit(value);
-      }
+      this.smiles.emit(value);
     });
   }
 
