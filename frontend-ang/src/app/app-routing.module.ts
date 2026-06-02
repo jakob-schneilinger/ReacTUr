@@ -17,8 +17,8 @@ export const routes: Routes = [
   {
     path: 'experiments/create',
     component: ExperimentDetailsSiteComponent,
-    canActivate: [AuthGuard, RoleGuard],
-    data: { state: 'create', roles: ['ADMIN', 'SUPERVISOR'] },
+    canActivate: [AuthGuard],
+    data: { state: 'create'},
   },
   {
     path: 'experiments/:id',

@@ -33,7 +33,7 @@ export class AuthService {
   }
 
   public isLoggedIn(): boolean {
-    return true;
+    // return true;
     return this.oauthService.hasValidAccessToken();
   }
 
@@ -42,7 +42,7 @@ export class AuthService {
   }
 
   public getLoggedInUser(): User | null {
-    return this.hardcodedUser;
+    // return this.hardcodedUser;
     if (!this.isLoggedIn()) {
       return null;
     }
@@ -57,7 +57,7 @@ export class AuthService {
   }
 
   public getUserRole(): string {
-    return this.hardcodedUser.role ?? "USER";
+    // return this.hardcodedUser.role ?? "USER";
     if (!this.isLoggedIn()) {
       return 'UNDEFINED';
     }
