@@ -1,4 +1,4 @@
-import { Component, EventEmitter, OnInit, Output } from '@angular/core';
+import { ChangeDetectorRef, Component, EventEmitter, OnInit, Output } from '@angular/core';
 
 @Component({
   selector: 'app-paste-table',
@@ -10,6 +10,16 @@ export class PasteTableComponent {
   @Output() fileGenerated = new EventEmitter<File>();
 
   tableData: string[][] = [];
+  previewData: string[][] = [];
+  isLoading: boolean = false;
+
+  readonly MAX_PREVIEW_ROWS = 100;
+
+  constructor(
+    private cdr: ChangeDetectorRef,
+  ) {
+  }
+
 
   onPaste(event: ClipboardEvent): void {
     const clipboardData = event.clipboardData;
@@ -17,7 +27,17 @@ export class PasteTableComponent {
 
     if (pastedText) {
       event.preventDefault();
-      this.parsePastedData(pastedText);
+      this.isLoading = true;
+      this.cdr.detectChanges();
+
+      setTimeout(() => {
+        try {
+          this.parsePastedData(pastedText);
+        } finally {
+          this.isLoading = false;
+          this.cdr.detectChanges();
+        }
+      }, 50);
     }
   }
 
@@ -32,6 +52,8 @@ export class PasteTableComponent {
 
     // normalise numbers
     this.tableData = this.tableData.map((row) => row.map((cell) => this.normalizeNumber(cell)));
+
+    this.previewData = this.tableData.slice(0, this.MAX_PREVIEW_ROWS);
   }
 
   private detectSeparator(text: string): string {
@@ -88,6 +110,7 @@ export class PasteTableComponent {
 
   clearTable(): void {
     this.tableData = [];
+    this.previewData = [];
   }
 
   saveAsCsv(): void {

@@ -12,8 +12,9 @@
 
     <!-- Rechte Spalte -->
     <div rightContent>
-      <app-file-upload [allowedExtensions]="['txt', 'csv', 'dsx']">
-
+      <app-file-upload
+        [allowedExtensions]="['txt', 'csv', 'dsx']"
+        [maxFileSizeMB]="5">
       </app-file-upload>
     </div>
 

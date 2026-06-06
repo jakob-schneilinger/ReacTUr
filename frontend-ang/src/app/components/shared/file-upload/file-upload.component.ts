@@ -22,6 +22,7 @@ export class FileUploadComponent implements OnInit, OnChanges {
   @Input() allowedExtensions: string[] = [];
   @Input() showTable: boolean = true;
   @Input() existingFiles?: File[];
+  @Input() maxFileSizeMB?: number;
 
   @Output() filesChanged = new EventEmitter<File[]>();
 
@@ -57,6 +58,17 @@ export class FileUploadComponent implements OnInit, OnChanges {
   }
 
   onPasteTableGenerated(file: File) {
+    if (this.maxFileSizeMB) {
+      const maxSizeBytes = this.maxFileSizeMB * 1024 * 1024;
+      if (file.size > maxSizeBytes) {
+        this.notification.error(
+          'Upload Error',
+          `Pasted data exceeds the maximum allowed file size of ${this.maxFileSizeMB}MB.`,
+        );
+        return;
+      }
+    }
+
     this.addFiles([file]);
     this.notification.success('File Added', `Pasted data converted and added as "${file.name}".`);
   }

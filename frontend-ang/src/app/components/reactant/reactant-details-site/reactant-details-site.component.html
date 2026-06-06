@@ -29,6 +29,7 @@
         [showTable]="false"
         [allowedExtensions]="['xyz']"
         [existingFiles] = structures
+        [maxFileSizeMB]="5"
         (filesChanged)="handleUploadedFiles($event)" >
 
       </app-file-upload>

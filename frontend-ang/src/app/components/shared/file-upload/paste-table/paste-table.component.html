@@ -6,13 +6,13 @@
       <button
         class="btn-clear"
         (click)="clearTable()"
-        [disabled]="tableData.length === 0">
+        [disabled]="tableData.length === 0 || isLoading">
         Clear
       </button>
       <button
         class="btn-save"
         (click)="saveAsCsv()"
-        [disabled]="tableData.length === 0">
+        [disabled]="tableData.length === 0 || isLoading">
         Save as CSV
       </button>
     </div>
@@ -25,16 +25,25 @@
     (paste)="onPaste($event)"
     [class.has-data]="tableData.length > 0">
 
-    <!-- Placeholder when empty -->
-    <div class="table-placeholder" *ngIf="tableData.length === 0">
-      <p>Click here and press <strong>Ctrl+V</strong> (or Cmd+V) to paste data from Excel/Sheets.</p>
+    <div class="table-placeholder text-center text-muted" *ngIf="isLoading">
+      <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Loading...</span>
+      </div>
+      <p class="mb-0">Processing data, please wait...</p>
     </div>
 
-    <!-- Data Table -->
-    <div class="table-wrapper" *ngIf="tableData.length > 0">
+    <div class="table-placeholder" *ngIf="tableData.length === 0 && !isLoading">
+      <p>Click here and press <strong>Ctrl+V</strong> (or Cmd+V) to paste data from Excel/Prism/Sheets.</p>
+    </div>
+
+    <div class="table-wrapper" *ngIf="tableData.length > 0 && !isLoading">
+      <div class="alert alert-info py-1 px-2 mb-2 small text-center" *ngIf="tableData.length > previewData.length">
+        Showing preview of the first <strong>{{ previewData.length }}</strong> rows.
+        All <strong>{{ tableData.length }}</strong> rows are saved and ready for export.
+      </div>
       <table>
         <tbody>
-        <tr *ngFor="let row of tableData; let i = index" [class.header-row]="i === 0">
+        <tr *ngFor="let row of previewData; let i = index" [class.header-row]="i === 0">
           <td *ngFor="let cell of row">{{ cell }}</td>
         </tr>
         </tbody>

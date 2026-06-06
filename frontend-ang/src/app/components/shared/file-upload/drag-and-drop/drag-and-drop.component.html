@@ -1,5 +1,4 @@
-
-<div class="dropzone p-2 mb-4 rounded text-center" app-drag-and-drop-directive (fileDropped)="onFileDropped($event)" (fileError)="onFileError($event)">
+<div class="dropzone p-2 mb-4 rounded text-center" app-drag-and-drop-directive (fileDropped)="onFileDropped($event)">
   <input
     type="file"
     #fileDropRef
@@ -16,6 +15,8 @@
       <a href="javascript:void(0)" class="text-primary text-decoration-none" (click)="fileDropRef.click()">Browse</a>
     </h5>
   </div>
-  <p class="text-muted small mb-0">Supports: {{acceptedExtensionsText}}</p>
+  <p class="text-muted small mb-0">
+    Supports: {{acceptedExtensionsText}}
+    <span *ngIf="maxFileSizeMB"> (Max: {{maxFileSizeMB}}MB)</span>
+  </p>
 </div>
-
