@@ -22,6 +22,7 @@ export class AuthService {
     lastName: 'Schneilinger',
     email: 'jakob@schneilinger.com',
     role: 'ADMIN',
+    status: 'ACTIVATED',
   };
 
   public login() {
@@ -53,6 +54,8 @@ export class AuthService {
       firstName: claims['given_name'],
       lastName: claims['family_name'],
       email: claims['email'],
+      role: claims['role'] || 'USER', //TODO: get from keycloak
+      status: claims['status'] || 'ACCEPTED', //TODO: get from keycloak
     };
   }
 
@@ -75,6 +78,6 @@ export class AuthService {
 
   // TODO: think about function, placement, parameters.
   public hasExperimentPermission(id: number, email: string): Observable<boolean> {
-    return of(false)
+    return of(false);
   }
 }

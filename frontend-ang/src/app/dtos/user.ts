@@ -2,7 +2,8 @@ export interface User {
   firstName: string;
   lastName: string;
   email: string;
-  role?: 'USER' | 'SUPERVISOR' | 'ADMIN';
+  role: 'USER' | 'SUPERVISOR' | 'ADMIN';
+  status: 'PENDING' | 'ACTIVATED' | 'DEACTIVATED';
 }
 
 export interface UserUpdateDto {

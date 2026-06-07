@@ -42,6 +42,9 @@ import { PasteTableComponent } from './components/shared/file-upload/paste-table
 import { DragAndDropDirective } from './directives/drag-and-drop.directive';
 import { HasRoleDirective } from './directives/has-role.directive';
 import { ExperimentViewModalComponent } from './components/experiment/experiment-view-modal/experiment-view-modal.component';
+import { AdminSiteComponent } from './components/admin/admin-site/admin-site.component';
+import { UserManagementComponent } from './components/admin/user-management/user-management.component';
+import { OptionManagementComponent } from './components/admin/option-management/option-management.component';
 
 @NgModule({
   declarations: [
@@ -72,6 +75,9 @@ import { ExperimentViewModalComponent } from './components/experiment/experiment
     PasteTableComponent,
     NotificationsComponent,
     LayoutComponent,
+    AdminSiteComponent,
+    UserManagementComponent,
+    OptionManagementComponent,
   ],
   imports: [
     BrowserModule,
