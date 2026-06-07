@@ -18,6 +18,7 @@ export class AuthService {
   }
 
   hardcodedUser: User = {
+    id: '0',
     firstName: 'Jakob',
     lastName: 'Schneilinger',
     email: 'jakob@schneilinger.com',
@@ -51,11 +52,12 @@ export class AuthService {
     if (!claims) return null;
 
     return {
+      id: claims['id'] ?? '-1',
       firstName: claims['given_name'],
       lastName: claims['family_name'],
       email: claims['email'],
-      role: claims['role'] || 'USER', //TODO: get from keycloak
-      status: claims['status'] || 'ACCEPTED', //TODO: get from keycloak
+      role: claims['role'] ?? 'USER', //TODO: get from keycloak
+      status: claims['status'] ?? 'ACCEPTED', //TODO: get from keycloak
     };
   }
 

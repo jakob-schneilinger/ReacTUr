@@ -80,8 +80,8 @@ export class ExperimentDetailsFormComponent implements OnInit {
       concentrationB: ['', [Validators.required, Validators.min(0)]],
 
       // Optional Metadata
-      instrument: ['', [Validators.required, this.inListValidator(this.knownInstruments)]],
-      modality: ['', [Validators.required, this.inListValidator(this.knownModalities)]],
+      instrument: ['', [this.inListValidator(this.knownInstruments)]],
+      modality: ['', [this.inListValidator(this.knownModalities)]],
       wavelength: [''],
       comment: [''],
     });

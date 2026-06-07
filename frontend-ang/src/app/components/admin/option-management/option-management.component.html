@@ -1,0 +1,85 @@
+<div class="option-management-container d-flex flex-column gap-3">
+
+  <div class="card border-0 shadow-sm">
+    <div class="card-header bg-white pb-0 border-bottom-0">
+      <ul class="nav nav-pills category-tabs mb-3 d-flex gap-2">
+        @for (cat of categories; track cat.value) {
+          <li class="nav-item">
+            <button
+              class="nav-link px-3 py-1 rounded-pill"
+              [class.active]="selectedCategory === cat.value"
+              (click)="selectCategory(cat.value)">
+              {{ cat.label }}
+            </button>
+          </li>
+        }
+      </ul>
+    </div>
+
+    <div class="card-body p-0 border-top">
+      @if (isLoading) {
+        <div class="p-4 text-center text-muted">
+          <div class="spinner-border spinner-border-sm me-2" role="status"></div>
+          Loading options...
+        </div>
+      } @else if (options.length === 0) {
+        <div class="p-4 text-center text-muted">
+          No options found for {{ selectedCategory }}.
+        </div>
+      } @else {
+        <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
+          <table class="table table-hover mb-0 align-middle">
+            <thead class="table-light sticky-top">
+            <tr>
+              <th>Value</th>
+              <th>Status</th>
+              <th class="text-end">Action</th>
+            </tr>
+            </thead>
+            <tbody>
+              @for (option of options; track option.id) {
+                <tr>
+                  <td class="fw-medium">
+                    <div [class.opacity-50]="!option.isActive">{{ option.value }} </div>
+                  </td>
+                  <td>
+                    @if (option.isActive) {
+                      <span class="badge bg-success-subtle text-success border border-success-subtle">Active</span>
+                    } @else {
+                      <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle">Inactive</span>
+                    }
+                  </td>
+                  <td class="text-end">
+                    <button
+                      class="compact px-3 py-1"
+                      [ngClass]="option.isActive ? 'error' : 'primary'"
+                      (click)="toggleOptionStatus(option)">
+                      {{ option.isActive ? 'Deactivate' : 'Activate' }}
+                    </button>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+    </div>
+
+    <div class="card-footer bg-light p-3">
+      <form (ngSubmit)="addOption()" class="d-flex gap-2">
+        <input
+          type="text"
+          name="newOption"
+          class="add-input flex-grow-1"
+          placeholder="Type to add a new {{ selectedCategory }} option..."
+          [(ngModel)]="newOptionValue"
+          autocomplete="off"
+        />
+        <button type="submit" class="btn primary add-btn" [disabled]="!newOptionValue.trim()">
+          <i class="bi bi-plus-lg me-1"></i> Add
+        </button>
+      </form>
+    </div>
+  </div>
+
+</div>

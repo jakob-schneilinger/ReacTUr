@@ -161,9 +161,9 @@
   </div>
 
   <div class="action-buttons mt-4">
-    <button type="submit" class="btn btn-primary" *appHasRole="['SUPERVISOR','ADMIN']">Submit</button>
-    <button type="button" class="btn btn-light" (click)="onCancel()">Cancel</button>
-    <button type="button" class="btn btn-danger" (click)="onDelete()" *appHasRole="['SUPERVISOR','ADMIN']" [hidden]="formState !== 'edit'">Remove</button>
+    <button type="submit" class="form-button primary" *appHasRole="['SUPERVISOR','ADMIN']">Submit</button>
+    <button type="button" class="form-button" (click)="onCancel()">Cancel</button>
+    <button type="button" class="form-button error" (click)="onDelete()" *appHasRole="['SUPERVISOR','ADMIN']" [hidden]="formState !== 'edit'">Remove</button>
   </div>
 
 </form>
@@ -187,7 +187,7 @@
       </div>
       <div class="modal-footer border-0 pt-0">
         <button type="button" class="" (click)="closeModals()">Cancel</button>
-        <button type="button" class="error" (click)="executeDelete()">Yes, remove it</button>
+        <button type="button" class="error-warning" (click)="executeDelete()">Yes, remove it</button>
       </div>
     </div>
   </div>
@@ -212,7 +212,7 @@
       </div>
       <div class="modal-footer border-0 pt-0">
         <button type="button" class="" (click)="closeModals()">Continue Editing</button>
-        <button type="button" class="error" (click)="executeCancel()">Discard Changes</button>
+        <button type="button" class="error-warning" (click)="executeCancel()">Discard Changes</button>
       </div>
     </div>
   </div>

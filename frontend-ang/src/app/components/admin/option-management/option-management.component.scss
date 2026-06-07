@@ -1,3 +1,71 @@
 @use "src/styles/global.scss" as *;
 @use "src/styles/variables.scss" as *;
 
+.add-btn {
+  display: flex;
+  flex-direction: row;
+  padding-left: 1rem;
+  padding-right: 1rem;
+}
+
+.card-header {
+  padding: 0;
+}
+
+.option-management-container {
+
+  .category-tabs {
+    .nav-link {
+      border: 1px solid transparent;
+      cursor: pointer;
+      font-weight: 500;
+      transition: all 0.2s ease;
+
+      &:hover {
+        background-color: $white_gray;
+        color: $primary;
+      }
+
+      &.active {
+        background-color: rgba($primary, 0.1);
+        color: $primary;
+        border-color: rgba($primary, 0.2);
+      }
+    }
+  }
+
+  .add-input {
+    @extend %shared-input;
+  }
+
+  .table {
+    th {
+      font-weight: 600;
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: #6c757d;
+      border-top: none;
+      background-color: #f8f9fa;
+    }
+
+    td, th {
+      padding: 1rem;
+      border-bottom: 1px solid $background;
+    }
+
+    tr:last-child td {
+      border-bottom: none;
+    }
+
+    tr {
+      transition: opacity 0.3s ease;
+    }
+  }
+}
+
+
+.rounded-pill {
+  color: $primary;
+  background: $background;
+}

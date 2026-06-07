@@ -1,0 +1,18 @@
+@use "src/styles/variables.scss" as *;
+
+.substructure-btn{
+
+  &:hover {
+    background: $background !important;
+    color: $light_gray_hover;
+  }
+
+}
+
+.remove-condition-btn {
+  transition: transform 0.2s ease-in-out;
+
+  &:hover {
+    transform: scale(1.1)
+  }
+}

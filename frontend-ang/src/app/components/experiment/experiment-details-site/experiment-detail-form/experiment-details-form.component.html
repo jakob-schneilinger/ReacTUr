@@ -247,9 +247,9 @@
   </div>
 
   <div class="action-buttons mt-4">
-    <button type="submit" class="btn btn-primary" >Submit</button>
-    <button type="button" class="btn btn-light" (click)="onCancel()">Cancel</button>
-    <button type="button" class="btn btn-danger" (click)="onDelete()">Delete</button>
+    <button type="submit" class="form-button primary" >Submit</button>
+    <button type="button" class="form-button" (click)="onCancel()">Cancel</button>
+    <button type="button" class="form-button error" (click)="onDelete()">Delete</button>
   </div>
 
 </form>
@@ -278,7 +278,7 @@
 
       <div class="modal-footer border-0 pt-0">
         <button type="button" class="" (click)="closeModals()">Cancel</button>
-        <button type="button" class="error" (click)="executeDelete()">Permanently Delete</button>
+        <button type="button" class="error-warning" (click)="executeDelete()">Permanently Delete</button>
       </div>
 
     </div>
@@ -309,7 +309,7 @@
 
       <div class="modal-footer border-0 pt-0">
         <button type="button" class="" (click)="closeModals()">Continue Editing</button>
-        <button type="button" class="error" (click)="executeCancel()">Discard Changes</button>
+        <button type="button" class="error-warning" (click)="executeCancel()">Discard Changes</button>
       </div>
 
     </div>
