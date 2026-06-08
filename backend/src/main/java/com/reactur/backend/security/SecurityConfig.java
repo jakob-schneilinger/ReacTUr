@@ -1,4 +1,4 @@
-package com.reactur.backend.Security;
+package com.reactur.backend.security;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.security.autoconfigure.web.servlet.PathRequest;
