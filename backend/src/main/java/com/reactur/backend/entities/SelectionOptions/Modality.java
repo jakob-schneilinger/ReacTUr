@@ -1,4 +1,4 @@
-package com.reactur.backend.entities;
+package com.reactur.backend.entities.SelectionOptions;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

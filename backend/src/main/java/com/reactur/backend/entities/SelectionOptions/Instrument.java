@@ -1,4 +1,4 @@
-package com.reactur.backend.entities;
+package com.reactur.backend.entities.SelectionOptions;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -15,13 +15,13 @@ import lombok.Setter;
 import java.util.UUID;
 
 @Entity
-@Table(name = "solvent")
+@Table(name = "instrument")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Solvent {
+public class Instrument {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -29,4 +29,5 @@ public class Solvent {
 
     @Column(name = "name", unique = true)
     private String name;
+
 }

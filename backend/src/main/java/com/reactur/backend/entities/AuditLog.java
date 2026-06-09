@@ -45,6 +45,10 @@ public class AuditLog {
     private AuditAction action;
 
     @JdbcTypeCode(SqlTypes.JSON)
-    @Column(name = "changes", columnDefinition = "jsonb")
-    private Map<String, Object> changes;
+    @Column(name = "change_from", columnDefinition = "jsonb")
+    private Map<String, Object> changeFrom;
+
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(name = "change_to", columnDefinition = "jsonb")
+    private Map<String, Object> changeTo;
 }

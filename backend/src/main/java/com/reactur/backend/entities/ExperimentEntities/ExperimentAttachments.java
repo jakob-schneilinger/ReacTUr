@@ -1,4 +1,4 @@
-package com.reactur.backend.entities;
+package com.reactur.backend.entities.ExperimentEntities;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -36,6 +36,9 @@ public class ExperimentAttachments {
 
     @Column(name = "file_name", nullable = false)
     private String fileName;
+
+    @Column(name = "file_type", nullable = false)
+    private String fileType;
 
     @Column(name = "storage_reference_id", nullable = false)
     private String storageReferenceId;
