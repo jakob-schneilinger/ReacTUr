@@ -1,4 +1,4 @@
-package com.reactur.backend.Security;
+package com.reactur.backend.security;
 
 import com.reactur.backend.entities.User;
 import com.reactur.backend.repositories.UserRepository;

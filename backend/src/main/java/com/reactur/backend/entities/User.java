@@ -1,5 +1,6 @@
 package com.reactur.backend.entities;
 
+import com.reactur.backend.enums.Role;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -21,6 +22,9 @@ public class User {
 
     private String firstName;
     private String lastName;
+
+    @Column(name="role")
+    private Role role;
 
     @Column(updatable = false)
     private java.time.LocalDateTime createdAt = java.time.LocalDateTime.now();
