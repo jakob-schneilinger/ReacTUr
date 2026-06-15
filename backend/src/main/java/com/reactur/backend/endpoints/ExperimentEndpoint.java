@@ -22,6 +22,12 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class ExperimentEndpoint {
 
+    // TODO: Decide how to do with archived experiments
+    //  - Should archived experiments be visible to everybody, or just to admins (+ the original creator)?
+    //  - For Example, a different api for archived experiments, like get .../archived/uuid instead of directly /uuid ?
+    //  - Advantage: Easy to set who is allowed to access the /archived endpoint
+    //  - Disadvantage: Necessity for two endpoints with similar (but not equal) functionality
+
     @PostMapping
     public ResponseEntity<GetExperimentDto> createExperiment(SaveExperimentDto experimentDto) {
 
