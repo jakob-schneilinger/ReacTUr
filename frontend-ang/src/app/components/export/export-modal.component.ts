@@ -1,5 +1,5 @@
 import { Component, Input, Output, EventEmitter, OnInit, ChangeDetectorRef } from '@angular/core';
-import { Experiment } from '../../dtos/experiment';
+import { ExperimentDto } from '../../dtos/experiment.dto';
 import { ExperimentService } from '../../services/experiment.service';
 import { CdkDragDrop, moveItemInArray, transferArrayItem } from '@angular/cdk/drag-drop';
 
@@ -16,7 +16,7 @@ export interface ExportField {
   standalone: false
 })
 export class ExportModalComponent implements OnInit {
-  @Input() selectedExperiments: Experiment[] = [];
+  @Input() selectedExperiments: ExperimentDto[] = [];
   @Output() close = new EventEmitter<void>();
 
   exportFormat: 'json' | 'csv' = 'json';
@@ -104,11 +104,11 @@ export class ExportModalComponent implements OnInit {
 
     this.experimentService.getBulkExperimentData(idsToLoad).subscribe(heavyData => {
 
-      this.fullExportData = this.selectedExperiments.map(exp => {
-        const matchingHeavyData = heavyData.find(hd => hd.experimentId === exp.id);
+      this.fullExportData = this.selectedExperiments.map((exp) => {
+        const matchingHeavyData = heavyData.find((hd) => parseInt(hd.experimentId) === exp.id);
         return {
           ...exp,
-          measurements: matchingHeavyData ? matchingHeavyData.measurements : []
+          measurements: matchingHeavyData ? matchingHeavyData.measurements : [],
         };
       });
       this.isLoading = false;

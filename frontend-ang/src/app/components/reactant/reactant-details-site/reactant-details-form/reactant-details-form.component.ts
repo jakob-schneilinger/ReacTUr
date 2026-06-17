@@ -10,7 +10,7 @@ import {
 } from '@angular/forms';
 import { Router } from '@angular/router';
 import { NotificationService } from '../../../../services/notification.service';
-import { Reactant } from '../../../../dtos/reactant';
+import { ReactantDetailDto, ReactantDto } from '../../../../dtos/reactant.dto';
 
 export type FormState = 'create' | 'edit';
 
@@ -27,7 +27,7 @@ declare var initRDKitModule: any;
 })
 export class ReactantDetailsFormComponent implements OnInit {
   @Input() formState: FormState = 'edit';
-  @Input() reactant?: Reactant;
+  @Input() reactant?: ReactantDetailDto;
 
   @Output() smiles = new EventEmitter<string>();
 

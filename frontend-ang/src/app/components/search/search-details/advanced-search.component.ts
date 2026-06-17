@@ -1,5 +1,8 @@
 import { Component, Output, EventEmitter, Input } from '@angular/core';
-import { AdvancedSearch } from '../../../dtos/metadata';
+import { AdvancedSearchDto } from '../../../dtos/metadata.dto';
+import { SearchParametersDto } from '../../../dtos/search.dto';
+import { UserService } from '../../../services/user.service';
+import { NotificationService } from '../../../services/notification.service';
 
 @Component({
   selector: 'app-advanced-search',
@@ -8,7 +11,7 @@ import { AdvancedSearch } from '../../../dtos/metadata';
   standalone: false,
 })
 export class AdvancedSearchComponent {
-  @Output() searchChanged = new EventEmitter<AdvancedSearch>();
+  @Output() searchChanged = new EventEmitter<SearchParametersDto>();
   @Input() reactant1: string[] = [];
   @Input() reactant2: string[] = [];
   @Input() set triggerClear(value: number) {
@@ -16,6 +19,8 @@ export class AdvancedSearchComponent {
       this.clearAll();
     }
   }
+
+  constructor(private userService: UserService, private notifications: NotificationService) {}
 
   dateDay: string = '';
   dateMonth: string = '';
@@ -34,22 +39,34 @@ export class AdvancedSearchComponent {
   maxRange: string = '';
 
   onSearch() {
+    let scientists: string[] = [];
+    if (this.scientist !== '') {
+      this.userService.getAllUsers().subscribe({
+        next: (users) => { scientists = users.map((u) => u.uuid); },
+        error: (err) => this.notifications.error("Error Fetching Users", err)
+      });
+    }
+
+    // TODO: overthink this, solvent,instrument,modality want uuid
     this.searchChanged.emit({
-      dateDay: this.dateDay,
-      dateMonth: this.dateMonth,
-      dateYear: this.dateYear,
-      scientist: this.scientist,
-      tempFrom: this.tempFrom,
-      tempTo: this.tempTo,
+      reactantA: [],
+      reactantB: [],
+      dateMin: '',
+      dateMax: '',
+      scientist: scientists,
+      temperature_Min: parseFloat(this.tempFrom),
+      temperature_Max: parseFloat(this.tempTo),
       solvent: this.solvent,
-      concentrationA: this.concentrationA,
-      concentrationB: this.concentrationB,
+      concentrationA_Min: parseFloat('' /*this.concentrationA_Min*/),
+      concentrationA_Max: parseFloat('' /*this.concentrationA_Max*/),
+      concentrationB_Min: parseFloat('' /*this.concentrationB_Min*/),
+      concentrationB_Max: parseFloat('' /*this.concentrationB_Max*/),
       instrument: this.instrument,
       modality: this.modality,
-      wavelength: this.wavelength,
+      wavelength_Min: parseFloat('' /*this.wavelength_Min*/),
+      wavelength_Max: parseFloat('' /*this.wavelength_Max*/),
       comment: this.comment,
-      minRange: this.minRange,
-      maxRange: this.maxRange,
+      measurementSearch: [],
     });
   }
 
@@ -81,7 +98,7 @@ export class AdvancedSearchComponent {
   }
 
   onCalendarSelect(event: any) {
-    console.log(event) //TODO: remove when debugging done
+    console.log(event); //TODO: remove when debugging done
     const selectedDate = event.target.value;
     if (selectedDate) {
       const parts = selectedDate.split('-');

@@ -1,7 +1,7 @@
 import { Component } from "@angular/core";
 import { AuthService } from "../../../../services/auth.service";
 import { Router } from "@angular/router";
-import { User } from '../../../../dtos/user';
+import { UserDto } from '../../../../dtos/user.dto';
 
 @Component({
   selector: 'app-header',
@@ -20,7 +20,7 @@ export class HeaderComponent {
     return this.authService.isLoggedIn();
   }
 
-  get user(): User | null {
+  get user(): UserDto | null {
     return this.authService.getLoggedInUser();
   }
 

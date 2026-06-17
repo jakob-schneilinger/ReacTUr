@@ -9,7 +9,7 @@ export class AuthGuard {
   constructor(private authService: AuthService, private router: Router) {}
 
   async canActivate(next: ActivatedRouteSnapshot, state: RouterStateSnapshot): Promise<boolean> {
-    // return true;
+    return true;
     await this.authService.initialLoginSequence;
     if (this.authService.isLoggedIn()) {
       return true; // User darf auf /home

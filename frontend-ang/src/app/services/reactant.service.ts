@@ -4,53 +4,59 @@ import { AuthService } from './auth.service';
 import { HttpClient } from '@angular/common/http';
 import { Globals } from '../global/globals';
 import { MOCK_REACTANTS} from '../mock/mock-reactants';
-import { Reactant } from '../dtos/reactant';
+import { ReactantDetailDto, ReactantDto, SaveReactantDto } from '../dtos/reactant.dto';
 
 @Injectable({
   providedIn: 'root',
 })
 export class ReactantService {
-  private userBaseUri: string;
+  private reactantBaseUri: string;
+  private fileBaseUri: string;
 
   constructor(
     private httpClient: HttpClient,
     private globals: Globals,
     private authService: AuthService,
   ) {
-    this.userBaseUri = this.globals.backendUri + '/reactant';
+    this.reactantBaseUri = this.globals.backendUri + '/reactant';
+    this.fileBaseUri = this.globals.backendUri + '/file';
   }
 
-  getAllReactants(): Observable<Reactant[]> {
+  getAllReactants(): Observable<ReactantDto[]> {
     // TODO: Backend-Call
 
     return of(MOCK_REACTANTS);
+    return this.httpClient.get<ReactantDto[]>(this.reactantBaseUri);
   }
 
-  getReactants(shortName: string): Observable<Reactant[]> {
-    // TODO: Backend-Call
+  getArchivedReactants(): Observable<ReactantDto[]> {
+    return this.httpClient.get<ReactantDto[]>(`${this.reactantBaseUri}/archived`);
+  }
 
-    const mockdata = MOCK_REACTANTS.filter((reactant) =>
-      reactant.shortName.toLowerCase().includes(shortName.toLowerCase()),
+  getReactantDetail(uuid: string): Observable<ReactantDetailDto> {
+    return this.httpClient.get<ReactantDetailDto>(`${this.reactantBaseUri}/${uuid}`);
+  }
+
+  createReactant(saveReactant: SaveReactantDto): Observable<ReactantDetailDto> {
+    return this.httpClient.post<ReactantDetailDto>(this.reactantBaseUri, saveReactant);
+  }
+
+  updateReactant(uuid: string, saveReactant: SaveReactantDto): Observable<ReactantDetailDto> {
+    return this.httpClient.patch<ReactantDetailDto>(
+      `${this.reactantBaseUri}/${uuid}`,
+      saveReactant,
     );
-    return of(mockdata);
   }
 
-  getReactant(shortName: string): Observable<Reactant> {
-    // TODO: Backend-Call
-
-    const mockdata = MOCK_REACTANTS.filter((reactant) =>
-      reactant.shortName.toLowerCase() === shortName.toLowerCase(),
-    )[0];
-    return of(mockdata);
+  archiveReactant(uuid: string): Observable<void> {
+    return this.httpClient.delete<void>(`${this.reactantBaseUri}/${uuid}`);
   }
 
-  deleteReactant(shortName: string): Observable<boolean> {
-    // TODO: Backend-Call
-
-    return of(true);
+  restoreReactant(uuid: string): Observable<ReactantDto> {
+    return this.httpClient.put<ReactantDto>(`${this.reactantBaseUri}/${uuid}/restore`, {});
   }
 
-  getReactantStructures(shortName: string): Observable<File[]> {
+  getReactantStructures(reactant: ReactantDto): Observable<File[]> {
     // TODO: Backend-Call
     const url = 'mol.xyz';
 
@@ -60,11 +66,16 @@ export class ReactantService {
       })
       .pipe(
         map((blob: Blob) => {
-          const file = new File([blob], `${shortName}.xyz`, { type: 'chemical/x-xyz' });
+          const file = new File([blob], `${reactant.shortName}.xyz`, { type: 'chemical/x-xyz' });
           return [file];
         }),
       );
 
-    return of([])
+    return this.httpClient.get(this.fileBaseUri, { responseType: 'blob' }).pipe(
+      map((blob: Blob) => {
+        const file = new File([blob], `${reactant.shortName}.xyz`, { type: 'chemical/x-xyz' });
+        return [file];
+      }),
+    );
   }
 }

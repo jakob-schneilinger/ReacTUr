@@ -1,9 +1,9 @@
 import { Component, Input, Output, EventEmitter, OnInit, ChangeDetectorRef } from '@angular/core';
-import { Reactant } from '../../../dtos/reactant';
+import { ReactantDto } from '../../../dtos/reactant.dto';
 import { ReactantService } from '../../../services/reactant.service';
 import { NotificationService } from '../../../services/notification.service';
 import { Router } from '@angular/router';
-import { Experiment } from '../../../dtos/experiment';
+import { ExperimentDto, GetExperimentDto } from '../../../dtos/experiment.dto';
 import { ExperimentService } from '../../../services/experiment.service';
 
 @Component({
@@ -13,7 +13,7 @@ import { ExperimentService } from '../../../services/experiment.service';
   standalone: false,
 })
 export class ExperimentViewModalComponent implements OnInit {
-  @Input() selectedExperiment: Experiment | undefined;
+  @Input() selectedExperiment: GetExperimentDto | undefined;
   @Input() hasWritePermission: boolean = false;
   @Output() close = new EventEmitter<void>();
 
@@ -26,33 +26,42 @@ export class ExperimentViewModalComponent implements OnInit {
 
   ngOnInit() {
     if (this.selectedExperiment) {
-
+      /*
+      this.selectedExperiment.attachments
       this.experimentService.getFiles(this.selectedExperiment.id).subscribe({
         next: (files: File[]) => {
           setTimeout(() => {
-            /*
+
             if (this.selectedExperiment) {
               this.selectedExperiment.files = files;
             }
             this.cd.markForCheck();
 
-             */
+
           });
         },
-        error: (err) => {
+        error: (err: any) => {
           setTimeout(() => {
-            this.notification.error('File Error', 'Unable to fetch Experiment Files!');
+            this.notification.error(
+              'File Error',
+              `Unable to fetch Experiment Files! Error: ${err}`,
+            );
           });
         },
       });
+      */
     }
   }
 
-  editExperiment(id: number | undefined): void {
-    if (id) this.router.navigate(['/experiments', id]);
+  editExperiment(uuid: string | undefined): void {
+    if (uuid) this.router.navigate(['/experiments', uuid]);
   }
 
-  get headerText():string {
-    return '#' + this.selectedExperiment?.id + ' ' + this.selectedExperiment?.reactants[0].shortName + ' + ' + this.selectedExperiment?.reactants[1]?.shortName;
+  get headerText(): string {
+    return (
+      this.selectedExperiment?.reactantA.shortName +
+      ' + ' +
+      this.selectedExperiment?.reactantB.shortName
+    );
   }
 }

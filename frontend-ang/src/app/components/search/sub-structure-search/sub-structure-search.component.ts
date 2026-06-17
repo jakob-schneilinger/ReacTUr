@@ -1,5 +1,5 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core';
-import { Reactant } from '../../../dtos/reactant';
+import { ReactantDto } from '../../../dtos/reactant.dto';
 
 // Das RDKit Objekt vom globalen window scope laden
 declare var window: any;
@@ -17,7 +17,7 @@ interface SubstructureRule {
   standalone: false,
 })
 export class SubstructureSearchComponent {
-  @Input() availableReactants: Reactant[] = [];
+  @Input() availableReactants: ReactantDto[] = [];
   @Output() matchedReactants = new EventEmitter<string[]>();
 
   rules: SubstructureRule[] = [];

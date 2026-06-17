@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
-import { AdminService } from '../../../services/admin.service';
-import { KnownOption } from '../../../dtos/known-option';
+import { UserService } from '../../../services/user.service';
+import { KnownOptionDto } from '../../../dtos/selection-option.dto';
 import { NotificationService } from '../../../services/notification.service';
 
 type OptionCategory = 'type' | 'modality' | 'instrument' | 'solvent';
@@ -21,12 +21,12 @@ export class OptionManagementComponent implements OnInit {
   ];
 
   selectedCategory: OptionCategory = 'type';
-  options: KnownOption[] = [];
+  options: KnownOptionDto[] = [];
   newOptionValue: string = '';
   isLoading: boolean = false;
 
   constructor(
-    private adminService: AdminService,
+    private adminService: UserService,
     private notifications: NotificationService,
   ) {}
 
@@ -55,7 +55,7 @@ export class OptionManagementComponent implements OnInit {
     });
   }
 
-  toggleOptionStatus(option: KnownOption): void {
+  toggleOptionStatus(option: KnownOptionDto): void {
     const newStatus = !option.isActive;
     this.adminService.updateKnownOptionStatus(option.id, newStatus).subscribe({
       next: (updatedOption) => {

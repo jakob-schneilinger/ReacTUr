@@ -74,7 +74,7 @@
                         </p>
                         <small class="text-muted" *ngIf="!!reactant.chemicalName">{{ reactant.chemicalName }}</small>
                       </div>
-                      <span class="badge bg-secondary">{{ reactant.type1 }}</span>
+                      <span class="badge bg-secondary">{{ reactant.chemicalType.name }}</span>
                     </div>
                   }
                 </div>
@@ -88,7 +88,7 @@
 
       <div class="modal-footer">
         @if (hasWritePermission) {
-          <button type="button" class="btn primary" (click)="editExperiment(selectedExperiment?.id)">Edit Experiment</button>
+          <button type="button" class="btn primary" (click)="editExperiment(selectedExperiment?.uuid)">Edit Experiment</button>
         }
         <button type="button" class="btn" (click)="close.emit()">Close</button>
       </div>

@@ -1,4 +1,4 @@
-import { User } from "../dtos/user";
+import { UserDto } from "../dtos/user.dto";
 import { Injectable } from '@angular/core';
 import { OAuthService } from 'angular-oauth2-oidc';
 import { authConfig } from '../auth.config';
@@ -17,7 +17,7 @@ export class AuthService {
     this.initialLoginSequence = this.oauthService.loadDiscoveryDocumentAndTryLogin();
   }
 
-  hardcodedUser: User = {
+  hardcodedUser: UserDto = {
     id: '0',
     firstName: 'Jakob',
     lastName: 'Schneilinger',
@@ -35,7 +35,7 @@ export class AuthService {
   }
 
   public isLoggedIn(): boolean {
-    // return true;
+    return true;
     return this.oauthService.hasValidAccessToken();
   }
 
@@ -43,8 +43,8 @@ export class AuthService {
     return this.oauthService.getAccessToken();
   }
 
-  public getLoggedInUser(): User | null {
-    // return this.hardcodedUser;
+  public getLoggedInUser(): UserDto | null {
+    return this.hardcodedUser;
     if (!this.isLoggedIn()) {
       return null;
     }
@@ -62,7 +62,7 @@ export class AuthService {
   }
 
   public getUserRole(): string {
-    // return this.hardcodedUser.role ?? "USER";
+    return this.hardcodedUser.role ?? "USER";
     if (!this.isLoggedIn()) {
       return 'UNDEFINED';
     }

@@ -3,8 +3,8 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { AuthService } from '../../../services/auth.service';
 import { NotificationService } from '../../../services/notification.service';
 import { ExperimentService } from '../../../services/experiment.service';
-import { ExperimentData } from '../../../dtos/experiment';
-import { User } from '../../../dtos/user';
+import { ExperimentDataDto } from '../../../dtos/experiment.dto';
+import { UserDto } from '../../../dtos/user.dto';
 
 export type FormState = 'create' | 'edit';
 
@@ -24,7 +24,7 @@ export class ExperimentDetailsSiteComponent implements OnInit {
   ) {}
 
   state: FormState = 'create';
-  user: User | null = null;
+  user: UserDto | null = null;
   role: string = "USER";
 
   experiment: ExperimentData | undefined;

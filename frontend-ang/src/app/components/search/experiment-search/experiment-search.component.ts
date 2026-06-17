@@ -1,5 +1,5 @@
 import { Component, Output, EventEmitter, Input } from '@angular/core';
-import { Reactant } from '../../../dtos/reactant';
+import { ReactantDto } from '../../../dtos/reactant.dto';
 import { MOCK_REACTANTS } from '../../../mock/mock-experiments';
 
 @Component({
@@ -46,7 +46,7 @@ export class ExperimentSearchComponent {
   currentSub1: string[] = [];
   currentSub2: string[] = [];
 
-  availableReactants: Reactant[] = MOCK_REACTANTS; //TODO: do service call
+  availableReactants: ReactantDto[] = MOCK_REACTANTS; //TODO: do service call
 
   onReactantChange(num: 1 | 2, value: string) {
     if (num === 1) this.currentExact1 = value;

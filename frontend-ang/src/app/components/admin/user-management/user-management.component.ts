@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
-import { User } from '../../../dtos/user';
-import { AdminService } from 'src/app/services/admin.service';
+import { UserDto } from '../../../dtos/user.dto';
+import { UserService } from '../../../services/user.service';
 import { NotificationService } from '../../../services/notification.service';
 
 export type status = 'pending' | 'active' | 'deactivate';
@@ -20,10 +20,10 @@ export class UserManagementComponent implements OnInit {
     deactivated: false,
   };
 
-  users: User[] = [];
+  users: UserDto[] = [];
 
   constructor(
-    private adminService: AdminService,
+    private adminService: UserService,
     private notifications: NotificationService,
   ) {}
 
@@ -34,19 +34,19 @@ export class UserManagementComponent implements OnInit {
     });
   }
 
-  get pendingUsers(): User[] {
+  get pendingUsers(): UserDto[] {
     return this.filterUsers('PENDING');
   }
 
-  get activeUsers(): User[] {
+  get activeUsers(): UserDto[] {
     return this.filterUsers('ACTIVATED');
   }
 
-  get deactivatedUsers(): User[] {
+  get deactivatedUsers(): UserDto[] {
     return this.filterUsers('DEACTIVATED');
   }
 
-  private filterUsers(status: 'PENDING' | 'ACTIVATED' | 'DEACTIVATED'): User[] {
+  private filterUsers(status: 'PENDING' | 'ACTIVATED' | 'DEACTIVATED'): UserDto[] {
     return this.users.filter((user) => {
       const matchesStatus = user.status === status;
       const matchesSearch = this.searchTerm
@@ -64,7 +64,7 @@ export class UserManagementComponent implements OnInit {
     this.panels[panel] = !this.panels[panel];
   }
 
-  updateUserStatus(user: User, newStatus: 'ACTIVATED' | 'DEACTIVATED'): void {
+  updateUserStatus(user: UserDto, newStatus: 'ACTIVATED' | 'DEACTIVATED'): void {
     this.adminService.updateUserStatus(user.id, newStatus).subscribe({
       next: (updatedUser) => {
         this.users = this.users.map((u) => (u.id === updatedUser.id ? updatedUser : u));
@@ -76,7 +76,7 @@ export class UserManagementComponent implements OnInit {
     });
   }
 
-  updateUserRole(user: User, event: Event): void {
+  updateUserRole(user: UserDto, event: Event): void {
     const selectElement = event.target as HTMLSelectElement;
     const newRole = selectElement.value as 'USER' | 'SUPERVISOR';
     this.adminService.updateUserRole(user.id, newRole).subscribe(

@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { Reactant } from '../../../dtos/reactant';
+import { ReactantDto } from '../../../dtos/reactant.dto';
 import { ReactantService } from '../../../services/reactant.service';
 import { NotificationService } from '../../../services/notification.service';
 import { AuthService } from '../../../services/auth.service';
@@ -12,8 +12,8 @@ import { AuthService } from '../../../services/auth.service';
   standalone: false,
 })
 export class ReactantSiteComponent implements OnInit {
-  reactants: Reactant[] = [];
-  filteredReactants: Reactant[] = [];
+  reactants: ReactantDto[] = [];
+  filteredReactants: ReactantDto[] = [];
   searchTerm: string = '';
 
   role: string = 'USER';
@@ -23,7 +23,7 @@ export class ReactantSiteComponent implements OnInit {
   pendingReactantName: string | null = '';
 
   isViewModalOpen: boolean = false;
-  selectedReactantForView: Reactant | undefined = undefined;
+  selectedReactantForView: ReactantDto | undefined = undefined;
 
   isDrawModalOpen = false;
   currentSmilesForModal = '';
@@ -60,7 +60,7 @@ export class ReactantSiteComponent implements OnInit {
         reactant.shortName.toLowerCase().includes(term) ||
         reactant.smiles.toLowerCase().includes(term) ||
         (reactant.chemicalName && reactant.chemicalName.toLowerCase().includes(term)) ||
-        reactant.type1.toLowerCase().includes(term),
+        reactant.chemicalType.name.toLowerCase().includes(term),
     );
   }
 

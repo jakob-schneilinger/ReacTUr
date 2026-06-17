@@ -58,7 +58,7 @@
           <h5 class="fw-bold mb-0 text-truncate" [title]="reactant.shortName">
             {{ reactant.shortName }}
           </h5>
-          <span class="badge type-badge">{{ reactant.type1 }}</span>
+          <span class="badge type-badge">{{ reactant.chemicalType.name }}</span>
         </div>
 
         <div class="text-muted text-truncate pe-3 chemical-name" [title]="reactant.chemicalName || ''">

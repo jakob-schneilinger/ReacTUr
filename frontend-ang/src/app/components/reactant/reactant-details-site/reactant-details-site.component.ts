@@ -2,7 +2,7 @@ import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { NotificationService } from '../../../services/notification.service';
 import { ReactantService } from '../../../services/reactant.service';
-import { Reactant } from '../../../dtos/reactant';
+import { ReactantDto } from '../../../dtos/reactant.dto';
 
 export type FormState = 'create' | 'edit';
 
@@ -21,7 +21,7 @@ export class ReactantDetailsSiteComponent implements OnInit {
     private cd: ChangeDetectorRef,
   ) {}
 
-  reactant: Reactant | undefined;
+  reactant: ReactantDto | undefined;
   smiles: string = "";
   loadingStructures: boolean = true;
 
@@ -36,23 +36,27 @@ export class ReactantDetailsSiteComponent implements OnInit {
 
       this.route.params.subscribe({
         next: (params) => {
-          const shortName = params['name'];
-          if (!shortName) {
+          const reactantUuid = params['uuid'];
+          if (!reactantUuid) {
             this.notification.error('Missing Reactant', 'No Reactant found in route!');
             return;
           }
-          this.reactantService.getReactant(params['name']).subscribe({
+          this.reactantService.getReactantDetail(reactantUuid).subscribe({
             next: (reactant) => {
               this.reactant = reactant;
               console.log(reactant);
               this.loadingStructures = true;
-              this.reactantService.getReactantStructures(this.reactant.shortName).subscribe({
+              this.reactantService.getReactantStructures(reactantUuid).subscribe({
                 next: (files: File[]) => {
                   setTimeout(() => {
                     this.structures = files;
+                    //TODO: check if needed
+                    /*
                     if (this.reactant) {
                       this.reactant.structures = files;
                     }
+
+                     */
                     this.loadingStructures = false;
                     this.cd.markForCheck();
                   });
@@ -72,7 +76,7 @@ export class ReactantDetailsSiteComponent implements OnInit {
             error: (err) =>
               this.notification.error(
                 'Invalid Reactant',
-                `No Reactant found with this name: ${shortName}! Error: ${err}`,
+                `No Reactant found with this id! Error: ${err}`,
               ),
           });
         },

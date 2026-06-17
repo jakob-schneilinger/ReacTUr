@@ -1,5 +1,5 @@
 import { Component, Input, Output, EventEmitter, OnChanges, SimpleChanges } from '@angular/core';
-import { Experiment } from '../../../dtos/experiment';
+import { ExperimentDto } from '../../../dtos/experiment.dto';
 import { NotificationService } from '../../../services/notification.service';
 import { AuthService } from '../../../services/auth.service';
 
@@ -14,12 +14,12 @@ export type SearchState = 'initial' | 'no-results' | 'has-results';
 })
 export class SearchResultsComponent implements OnChanges {
   @Input() state: SearchState = 'initial';
-  @Input() experiments: Experiment[] = [];
+  @Input() experiments: ExperimentDto[] = [];
   @Output() getExport = new EventEmitter<number[]>();
 
   selectedIds = new Set<number>();
   isViewModalOpen:boolean = false;
-  selectedExperimentForView: Experiment | undefined;
+  selectedExperimentForView: ExperimentDto | undefined;
   hasWritePermission: boolean = false;
 
   constructor(

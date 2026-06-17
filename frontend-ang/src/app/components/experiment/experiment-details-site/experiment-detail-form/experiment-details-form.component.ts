@@ -3,7 +3,7 @@ import { FormBuilder, FormGroup, FormArray, Validators, ValidatorFn, AbstractCon
 import { Router } from '@angular/router';
 import { NotificationService } from '../../../../services/notification.service';
 import { AuthService } from '../../../../services/auth.service';
-import { User } from '../../../../dtos/user';
+import { UserDto } from '../../../../dtos/user.dto';
 
 export type FormState = 'create' | 'edit';
 
@@ -37,7 +37,7 @@ export class ExperimentDetailsFormComponent implements OnInit {
   activeInstrumentIndex = -1;
   activeModalityIndex = -1;
 
-  user: User | null = null
+  user: UserDto | null = null
 
   constructor(
     private fb: FormBuilder,

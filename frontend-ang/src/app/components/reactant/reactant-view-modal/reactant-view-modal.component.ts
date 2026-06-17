@@ -1,5 +1,5 @@
 import { Component, Input, Output, EventEmitter, OnInit, ChangeDetectorRef } from '@angular/core';
-import { Reactant } from '../../../dtos/reactant';
+import { ReactantDetailDto, ReactantDto } from '../../../dtos/reactant.dto';
 import { ReactantService } from '../../../services/reactant.service';
 import { NotificationService } from '../../../services/notification.service';
 import { Router } from '@angular/router';
@@ -11,7 +11,7 @@ import { Router } from '@angular/router';
   standalone: false,
 })
 export class ReactantViewModalComponent implements OnInit {
-  @Input() selectedReactant: Reactant | undefined;
+  @Input() selectedReactant: ReactantDetailDto | undefined;
   @Input() hasWritePermission: boolean = false;
   @Output() close = new EventEmitter<void>();
 
@@ -28,7 +28,7 @@ export class ReactantViewModalComponent implements OnInit {
     if (this.selectedReactant) {
       this.loadingStructures = true;
 
-      this.reactantService.getReactantStructures(this.selectedReactant.shortName).subscribe({
+      this.reactantService.getReactantStructures(this.selectedReactant).subscribe({
         next: (files: File[]) => {
           setTimeout(() => {
             if (this.selectedReactant) {
