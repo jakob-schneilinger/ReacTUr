@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { OptionService } from '../../../services/option.service';
 import { SelectionOptionDto } from '../../../dtos/selection-option.dto';
 import { NotificationService } from '../../../services/notification.service';
@@ -24,9 +24,12 @@ export class OptionManagementComponent implements OnInit {
   newOptionValue: string = '';
   isLoading: boolean = false;
 
+  private optionsCache = new Map<OptionCategory, SelectionOptionDto[]>();
+
   constructor(
     private optionService: OptionService,
     private notification: NotificationService,
+    private cdr: ChangeDetectorRef,
   ) {}
 
   ngOnInit(): void {
@@ -40,12 +43,19 @@ export class OptionManagementComponent implements OnInit {
     this.loadOptions();
   }
 
-  loadOptions(): void {
+  loadOptions(forceRefresh: boolean = false): void {
+    if (!forceRefresh && this.optionsCache.has(this.selectedCategory)) {
+      this.options = this.optionsCache.get(this.selectedCategory) || [];
+      return;
+    }
+
     this.isLoading = true;
     this.optionService.getOptions(this.selectedCategory).subscribe({
       next: (data) => {
         this.options = data;
+        this.optionsCache.set(this.selectedCategory, data);
         this.isLoading = false;
+        this.cdr.detectChanges();
       },
       error: (err) => {
         this.notification.error(
@@ -58,7 +68,7 @@ export class OptionManagementComponent implements OnInit {
   }
 
   toggleOptionStatus(option: SelectionOptionDto): void {
-    const newStatus = !option.archivedAt;
+    const newStatus = !!option.archivedAt;
     this.optionService.updateKnownOptionStatus(option.uuid, newStatus).subscribe({
       next: (updatedOption) => {
         option.archivedAt = updatedOption.archivedAt;
@@ -75,7 +85,7 @@ export class OptionManagementComponent implements OnInit {
 
     this.optionService.addKnownOption(this.selectedCategory, value).subscribe({
       next: (newOption) => {
-        this.loadOptions();
+        this.loadOptions(true);
         this.newOptionValue = '';
         this.notification.success('New option added successfully');
       },

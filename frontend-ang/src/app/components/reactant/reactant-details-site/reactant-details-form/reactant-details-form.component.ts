@@ -88,7 +88,6 @@ export class ReactantDetailsFormComponent implements OnInit, OnDestroy {
     });
 
     this.initForm();
-    this.setupFilters();
 
     if (!(window as any)['RDKit']) {
       this.rdkitModule = await initRDKitModule();
@@ -111,61 +110,11 @@ export class ReactantDetailsFormComponent implements OnInit, OnDestroy {
     return this.reactantForm.get('references') as FormArray;
   }
 
-  private setupFilters(): void {
-    this.filteredTypes = this.chemicalTypeNames;
-
-    this.reactantForm
-      .get('chemicalType')
-      ?.valueChanges.pipe(takeUntil(this.destroy$))
-      .subscribe((value) => {
-        const searchTerm = (value || '').toLowerCase();
-        this.filteredTypes = this.chemicalTypeNames.filter((s) =>
-          s.toLowerCase().includes(searchTerm),
-        );
-        this.activeTypesIndex = -1;
-      });
-  }
-
-  selectOption(controlName: string, value: string): void {
-    this.reactantForm.get(controlName)?.setValue(value);
-    if (controlName === 'chemicalType') this.showTypes = false;
-  }
-
-  onBlur(dropdownName: 'chemicalType'): void {
-    setTimeout(() => {
-      if (dropdownName === 'chemicalType') this.showTypes = false;
-    }, 200);
-  }
-
-  onKeyDown(event: KeyboardEvent, dropdown: 'chemicalType'): void {
-    let activeIndex: number;
-    let filteredList: string[];
-
-    activeIndex = this.activeTypesIndex;
-    filteredList = this.filteredTypes;
-
-    if (!filteredList.length) return;
-
-    if (event.key === 'ArrowDown') {
-      event.preventDefault();
-      activeIndex = activeIndex < filteredList.length - 1 ? activeIndex + 1 : activeIndex;
-    } else if (event.key === 'ArrowUp') {
-      event.preventDefault();
-      activeIndex = activeIndex > 0 ? activeIndex - 1 : 0;
-    } else if (event.key === 'Enter') {
-      if (activeIndex >= 0) {
-        event.preventDefault();
-        this.selectOption(dropdown, filteredList[activeIndex]);
-        activeIndex = -1;
-      }
-    }
-
-    if (dropdown === 'chemicalType') this.activeTypesIndex = activeIndex;
-  }
-
   ngOnChanges(changes: SimpleChanges): void {
-    if (this.reactantForm) {
-      if (changes['reactant'] && this.reactant) {
+    if (this.reactantForm && changes['reactant'] && this.reactant) {
+      const currentType = this.reactantForm.get('chemicalType')?.value;
+
+      if (currentType !== this.reactant.chemicalType.name) {
         this.reactantForm.patchValue({
           ...this.reactant,
           chemicalType: this.reactant.chemicalType.name,
@@ -175,27 +124,32 @@ export class ReactantDetailsFormComponent implements OnInit, OnDestroy {
   }
 
   private initForm(): void {
+    const initialType = this.reactant?.chemicalType?.name || '';
+
     this.reactantForm = this.fb.group({
       // Required Inputs
-      shortName: [{ value: '', disabled: this.isEditMode }, Validators.required],
-      smiles: ['', [Validators.required, this.smilesValidator()]],
-      chemicalType: ['', [Validators.required, this.inListValidator()]],
+      shortName: [
+        { value: this.reactant?.shortName || '', disabled: this.isEditMode },
+        Validators.required,
+      ],
+      smiles: [this.reactant?.smiles || '', [Validators.required, this.smilesValidator()]],
+      chemicalType: [initialType, [Validators.required, this.inListValidator()]],
 
       // Optional Inputs
-      chemicalName: [''],
-      additionalShortNames: this.fb.array([this.fb.control('')]),
-      casNumber: [''],
-      references: this.fb.array([this.fb.control('')]),
-      comment: [''],
+      chemicalName: [this.reactant?.chemicalName || ''],
+      casNumber: [this.reactant?.casNumber || ''],
+      comment: [this.reactant?.comment || ''],
+
+      additionalShortNames: this.fb.array([]),
+      references: this.fb.array([]),
     });
 
     if (this.reactant) {
       this.syncArray('additionalShortNames', this.reactant.additionalShortNames);
       this.syncArray('references', this.reactant.references);
-      this.reactantForm.patchValue({
-        ...this.reactant,
-        chemicalType: this.reactant.chemicalType.name,
-      });
+    } else {
+      this.additionalShortNames.push(this.fb.control(''));
+      this.references.push(this.fb.control(''));
     }
 
     this.reactantForm.get('smiles')?.valueChanges.subscribe((value: string) => {

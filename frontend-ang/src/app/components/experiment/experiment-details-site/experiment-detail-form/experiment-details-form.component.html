@@ -74,44 +74,31 @@
 
   <div class="input-group">
     <label>Solvent</label>
-    <div class="search-field position-relative">
+    <div class="search-field">
       <input
         type="text"
+        list="solventList"
         formControlName="solvent"
         [class.is-invalid]="isInvalid('solvent')"
         placeholder="Select or type..."
-        autocomplete="off"
-        (focus)="showSolvents = true"
-        (blur)="onBlur('solvent')"
-        (keydown)="onKeyDown($event, 'solvent')"/>
+        autocomplete="off" />
 
-      @if (showSolvents && filteredSolvents.length > 0) {
-        <ul class="dropdown-menu show w-100 shadow-sm"
-            style="position: absolute; top: 100%; left: 0; max-height: 200px; overflow-y: auto; z-index: 1050;">
-          @for (solvent of filteredSolvents; track solvent; let i = $index) {
-            <li>
-              <button
-                type="button"
-                class="dropdown-item dropdown-button"
-                [class.active]="i === activeSolventIndex"
-                (mousedown)="selectOption('solvent', solvent)"
-              >
-                {{ solvent }}
-              </button>
-            </li>
-          }
-        </ul>
-      }
+      <datalist id="solventList">
+        @for (solvent of knownSolvents; track solvent) {
+          <option [value]="solvent"></option>
+        }
+      </datalist>
 
       @if (experimentForm.get('solvent')?.value) {
         <span class="icon bi bi-x text-black clear-btn" (click)="clearControl('solvent')"></span>
       }
     </div>
-    @if (isInvalid('solvent')) {
+
+    @if (isInvalid('solvent') && !experimentForm.get('solvent')?.hasError('notInList')) {
       <div class="error-message">Solvent is required.</div>
     }
     @if (experimentForm.get('solvent')?.hasError('notInList')) {
-      <div class="error-message">Please select a valid option from the list.</div>
+      <div class="error-message">Please select a valid solvent from the list.</div>
     }
   </div>
 
@@ -151,77 +138,61 @@
 
   <div class="input-group">
     <label>Instrument</label>
-    <div class="search-field position-relative">
+    <div class="search-field">
       <input
         type="text"
+        list="instrumentList"
         formControlName="instrument"
         [class.is-invalid]="isInvalid('instrument')"
         placeholder="Select or type..."
-        autocomplete="off"
-        (focus)="showInstruments = true"
-        (blur)="onBlur('instrument')"
-        (keydown)="onKeyDown($event, 'instrument')" />
+        autocomplete="off" />
 
-      @if (showInstruments && filteredInstruments.length > 0) {
-        <ul class="dropdown-menu show w-100 shadow-sm"
-            style="position: absolute; top: 100%; left: 0; max-height: 200px; overflow-y: auto; z-index: 1050;">
-          @for (instrument of filteredInstruments; track instrument; let i = $index) {
-            <li>
-              <button type="button" class="dropdown-item dropdown-button" [class.active]="i === activeInstrumentIndex" (mousedown)="selectOption('instrument', instrument)">
-                {{ instrument }}
-              </button>
-            </li>
-          }
-        </ul>
-      }
+      <datalist id="instrumentList">
+        @for (instrument of knownInstruments; track instrument) {
+          <option [value]="instrument"></option>
+        }
+      </datalist>
 
       @if (experimentForm.get('instrument')?.value) {
         <span class="icon bi bi-x text-black clear-btn" (click)="clearControl('instrument')"></span>
       }
     </div>
-    @if (isInvalid('instrument')) {
-      <div class="error-message">Instrument invalid.</div>
+
+    @if (isInvalid('instrument') && !experimentForm.get('instrument')?.hasError('notInList')) {
+      <div class="error-message">Instrument is required.</div>
     }
     @if (experimentForm.get('instrument')?.hasError('notInList')) {
-      <div class="error-message">Please select a valid option from the list.</div>
+      <div class="error-message">Please select a valid instrument from the list.</div>
     }
   </div>
 
   <div class="input-group">
     <label>Modality</label>
-    <div class="search-field position-relative">
+    <div class="search-field">
       <input
         type="text"
+        list="modalityList"
         formControlName="modality"
         [class.is-invalid]="isInvalid('modality')"
         placeholder="Select or type..."
-        autocomplete="off"
-        (focus)="showModalities = true"
-        (blur)="onBlur('modality')"
-        (keydown)="onKeyDown($event, 'modality')"/>
+        autocomplete="off" />
 
-      @if (showModalities && filteredModalities.length > 0) {
-        <ul class="dropdown-menu show w-100 shadow-sm"
-            style="position: absolute; top: 100%; left: 0; max-height: 200px; overflow-y: auto; z-index: 1050;">
-          @for (modality of filteredModalities; track modality; let i = $index) {
-            <li>
-              <button type="button" class="dropdown-item dropdown-button" [class.active]="i === activeModalityIndex" (mousedown)="selectOption('modality', modality)">
-                {{ modality }}
-              </button>
-            </li>
-          }
-        </ul>
-      }
+      <datalist id="modalityList">
+        @for (modality of knownModalities; track modality) {
+          <option [value]="modality"></option>
+        }
+      </datalist>
 
       @if (experimentForm.get('modality')?.value) {
         <span class="icon bi bi-x text-black clear-btn" (click)="clearControl('modality')"></span>
       }
     </div>
-    @if (isInvalid('modality')) {
-      <div class="error-message">Modality invalid.</div>
+
+    @if (isInvalid('modality') && !experimentForm.get('modality')?.hasError('notInList')) {
+      <div class="error-message">Modality is required.</div>
     }
     @if (experimentForm.get('modality')?.hasError('notInList')) {
-      <div class="error-message">Please select a valid option from the list.</div>
+      <div class="error-message">Please select a valid modality from the list.</div>
     }
   </div>
 

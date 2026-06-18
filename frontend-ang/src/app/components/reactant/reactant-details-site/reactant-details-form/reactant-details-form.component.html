@@ -40,34 +40,27 @@
 
   <div class="input-group">
     <label>Type</label>
-    <div class="search-field position-relative">
+    <div class="search-field">
       <input
         type="text"
+        list="chemicalTypesList"
         formControlName="chemicalType"
         [class.is-invalid]="isInvalid('chemicalType')"
         placeholder="Select or type..."
-        autocomplete="off"
-        (focus)="showTypes = true"
-        (blur)="onBlur('chemicalType')"
-        (keydown)="onKeyDown($event, 'chemicalType')" />
+        autocomplete="off" />
 
-      @if (showTypes && filteredTypes.length > 0) {
-        <ul class="dropdown-menu show w-100 shadow-sm"
-            style="border: 2px solid lightgray; position: absolute; top: 100%; left: 0; max-height: 200px; overflow-y: auto; z-index: 1050;">
-          @for (type of filteredTypes; track type; let i = $index) {
-            <li>
-              <button type="button" class="dropdown-item dropdown-button" [class.active]="i === activeTypesIndex" (mousedown)="selectOption('chemicalType', type)">
-                {{ type }}
-              </button>
-            </li>
-          }
-        </ul>
-      }
+      <datalist id="chemicalTypesList">
+        @for (type of chemicalTypeNames; track type) {
+          <option [value]="type"></option>
+        }
+      </datalist>
+
       @if (reactantForm.get('chemicalType')?.value) {
         <span class="icon bi bi-x text-black clear-btn" (click)="clearControl('chemicalType')"></span>
       }
     </div>
-    @if (isInvalid('chemicalType')) {
+
+    @if (isInvalid('chemicalType') && !reactantForm.get('chemicalType')?.hasError('notInList')) {
       <div class="error-message">Type is required.</div>
     }
     @if (reactantForm.get('chemicalType')?.hasError('notInList')) {
