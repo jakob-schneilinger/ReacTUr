@@ -45,6 +45,8 @@ import { ExperimentViewModalComponent } from './components/experiment/experiment
 import { AdminSiteComponent } from './components/admin/admin-site/admin-site.component';
 import { UserManagementComponent } from './components/admin/user-management/user-management.component';
 import { OptionManagementComponent } from './components/admin/option-management/option-management.component';
+import { AppModalComponent } from './components/shared/modal/app-modal.component';
+import { AppConfirmModalComponent } from './components/shared/modal/confirm-modal.component';
 
 @NgModule({
   declarations: [
@@ -98,6 +100,8 @@ import { OptionManagementComponent } from './components/admin/option-management/
     CommonModule,
     DragAndDropDirective,
     HasRoleDirective,
+    AppModalComponent,
+    AppConfirmModalComponent,
   ],
   providers: [],
   bootstrap: [AppComponent],

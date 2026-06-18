@@ -20,32 +20,12 @@
   </div>
 </div>
 
-<!-- Delete File Modal -->
-<div
-  class="modal fade"
-  [ngClass]="{'show': isDeleteFileModalOpen}"
-  [style.display]="isDeleteFileModalOpen ? 'block' : 'none'"
-  tabindex="-1"
-  style="background-color: rgba(0,0,0,0.5);" >
-  <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content shadow">
-
-      <div class="modal-header border-0 pb-0">
-        <h5 class="modal-title text-danger">
-          <i class="bi bi-exclamation-triangle-fill me-2"></i> Remove File
-        </h5>
-        <button type="button" class="btn-close" (click)="cancelDelete()" aria-label="Close"></button>
-      </div>
-
-      <div class="modal-body py-4">
-        <p class="mb-0">Are you sure you want to permanently  remove <strong>{{ pendingFileName }}</strong> from the upload list?</p>
-      </div>
-
-      <div class="modal-footer border-0 pt-0">
-        <button type="button" class="" (click)="cancelDelete()">Cancel</button>
-        <button type="button" class="error-warning" (click)="executeDelete()">Permanently Remove</button>
-      </div>
-
-    </div>
-  </div>
-</div>
+<app-confirm-modal
+  [isOpen]="isDeleteFileModalOpen"
+  title="Remove File"
+  [message]="'Are you sure you want to permanently remove <strong>' + pendingFileName + '</strong> from the upload list?'"
+  confirmLabel="Permanently Remove"
+  confirmButtonClass="danger"
+  (confirm)="executeDelete()"
+  (cancel)="cancelDelete()">
+</app-confirm-modal>

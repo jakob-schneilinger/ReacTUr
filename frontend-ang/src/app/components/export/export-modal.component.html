@@ -17,11 +17,11 @@
             <div class="btn-group w-100 mb-4" role="group">
               <input type="radio" class="btn-check" name="btnradio" id="btnradio1"
                      [checked]="exportFormat === 'json'" (change)="toggleFormat('json')">
-              <label class="btn btn-outline-primary" for="btnradio1">JSON</label>
+              <label class="btn-outline-primary" for="btnradio1">JSON</label>
 
               <input type="radio" class="btn-check" name="btnradio" id="btnradio2"
                      [checked]="exportFormat === 'csv'" (change)="toggleFormat('csv')">
-              <label class="btn btn-outline-primary" for="btnradio2">CSV</label>
+              <label class="btn-outline-primary" for="btnradio2">CSV</label>
             </div>
 
             @if (exportFormat === "json") {

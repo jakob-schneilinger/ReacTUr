@@ -53,11 +53,6 @@ export class ReactantDetailsFormComponent implements OnInit, OnDestroy {
   chemicalTypes: ChemicalTypeDto[] = [];
   chemicalTypeNames: string[] = [];
 
-  filteredTypes: string[] = [];
-  showTypes = false;
-
-  activeTypesIndex = -1;
-
   rdkitModule: any;
 
   constructor(
@@ -153,7 +148,9 @@ export class ReactantDetailsFormComponent implements OnInit, OnDestroy {
     }
 
     this.reactantForm.get('smiles')?.valueChanges.subscribe((value: string) => {
-      this.smiles.emit(value);
+      if (value !== null) {
+        this.smiles.emit(value);
+      }
     });
   }
 
@@ -287,7 +284,7 @@ export class ReactantDetailsFormComponent implements OnInit, OnDestroy {
 
   executeCancel(): void {
     this.isCancelReactantModalOpen = false;
-    this.reactantForm.reset();
+    this.reactantForm.reset(undefined, { emitEvent: false });
     this.router.navigate(['/reactants']);
   }
 

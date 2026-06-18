@@ -1,0 +1,25 @@
+<app-modal
+  [isOpen]="isOpen"
+  [title]="title"
+  (close)="onCancel()">
+
+  <div body class="d-flex align-items-center">
+    @if (icon) {
+      <i class="bi {{ icon }} me-3 fs-3 text-{{ confirmButtonClass }}"></i>
+    }
+    <p class="mb-0" [innerHTML]="message"></p>
+  </div>
+
+  <ng-container footer>
+    <button type="button" (click)="onCancel()">
+      {{ cancelLabel }}
+    </button>
+    <button
+      type="button"
+      [class.primary]="confirmButtonClass === 'primary'"
+      [class.error-warning]="confirmButtonClass === 'danger'"
+      (click)="onConfirm()">
+      {{ confirmLabel }}
+    </button>
+  </ng-container>
+</app-modal>

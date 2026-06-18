@@ -21,7 +21,7 @@
       >
 
       <button
-        class="btn icon-btn text-secondary"
+        class="icon-btn text-secondary"
         type="button"
         (click)="openDraw()"
         title="Draw Molecule">
@@ -30,7 +30,7 @@
 
       @if (searchTerm) {
         <button
-          class="btn icon-btn text-danger"
+          class="icon-btn text-danger"
           type="button"
           (click)="searchTerm = ''; onSearch()"
           title="Clear Search">
@@ -39,11 +39,15 @@
       }
     </div>
 
-    @if (role != "USER") {
-      <button class="primary text-nowrap m-0" (click)="goToCreate()">
+    <div class="d-flex gap-2">
+      <button *appHasRole="['ADMIN']" class="text-nowrap m-0" (click)="showArchivedReactants(!showArchived)">
+        {{ showArchived ? 'Show Reactants' : 'Show Archived' }}
+      </button>
+
+      <button *appHasRole="['SUPERVISOR','ADMIN']" class="primary text-nowrap m-0" (click)="goToCreate()">
         <i class="bi bi-plus-lg me-1"></i> Add Reactant
       </button>
-    }
+    </div>
 
   </div>
 
@@ -69,7 +73,7 @@
           <div class="text-truncate me-2" [title]="reactant.smiles">
             {{ reactant.smiles }}
           </div>
-          <button class="btn btn-sm p-0 ms-auto copy-btn text-muted" (click)="copyToClipboard(reactant.smiles)" title="Copy SMILES">
+          <button class="btn-sm p-0 ms-auto copy-btn text-muted" (click)="copyToClipboard(reactant.smiles)" title="Copy SMILES">
             <i class="bi bi-clipboard"></i>
           </button>
         </div>
@@ -95,7 +99,7 @@
   <div class="row" *ngIf="filteredReactants.length === 0">
     <div class="col-12 text-center mt-5">
       <i class="bi bi-inbox text-muted" style="font-size: 3rem;"></i>
-      <h4 class="text-muted mt-3">No reactants found.</h4>
+      <h4 class="text-muted mt-3">{{ showArchived ? 'No archived reactants found.' : 'No reactants found.'}}</h4>
       <p class="text-muted" *ngIf="searchTerm">Try adjusting your search criteria.</p>
     </div>
   </div>
@@ -103,35 +107,15 @@
 </div>
 
 
-<!-- Archive Reactant Modal -->
-<div
-  class="modal fade"
-  [ngClass]="{'show': isArchiveReactantModalOpen}"
-  [style.display]="isArchiveReactantModalOpen ? 'block' : 'none'"
-  tabindex="-1"
-  style="background-color: rgba(0,0,0,0.5);" >
-  <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content shadow">
-
-      <div class="modal-header border-0 pb-0">
-        <h5 class="modal-title text-danger">
-          <i class="bi bi-exclamation-triangle-fill me-2"></i> Archive Reactant
-        </h5>
-        <button type="button" class="btn-close" (click)="cancelArchive()" aria-label="Close"></button>
-      </div>
-
-      <div class="modal-body py-4">
-        <p class="mb-0">Are you sure you want to permanently archive the reactant <strong>{{ pendingReactant?.shortName }}</strong>?</p>
-      </div>
-
-      <div class="modal-footer border-0 pt-0">
-        <button type="button" class="" (click)="cancelArchive()">Cancel</button>
-        <button type="button" class="error-warning" (click)="executeArchive()">Permanently Archive </button>
-      </div>
-
-    </div>
-  </div>
-</div>
+<app-confirm-modal
+  [isOpen]="isArchiveReactantModalOpen"
+  title="Archive Reactant"
+  [message]="'Are you sure you want to permanently archive the reactant <strong>' + pendingReactant?.shortName + '</strong>?'"
+  confirmLabel="Permanently Archive"
+  confirmButtonClass="danger"
+  (confirm)="executeArchive()"
+  (cancel)="cancelArchive()">
+</app-confirm-modal>
 
 @if (isViewModalOpen) {
   <app-reactant-view-modal

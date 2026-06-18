@@ -1,0 +1,35 @@
+@if (isOpen) {
+  <div
+    class="modal fade show"
+    [class.d-block]="isOpen"
+    tabindex="-1"
+    role="dialog"
+    (click)="onBackdropClick($event)">
+    <div
+      class="modal-dialog"
+      [class.modal-xl]="size === 'xl'"
+      [class.modal-lg]="size === 'lg'"
+      [class.modal-dialog-centered]="centered"
+      [class.modal-dialog-scrollable]="scrollable">
+      <div class="modal-content shadow">
+        @if (showHeader) {
+          <div class="modal-header">
+            <h5 class="modal-title">{{ title }}</h5>
+            <button type="button" class="btn-close" (click)="onClose()" aria-label="Close"></button>
+          </div>
+        }
+
+        <div class="modal-body">
+          <ng-content select="[body]"></ng-content>
+          <ng-content></ng-content>
+        </div>
+
+        @if (showFooter) {
+          <div class="modal-footer">
+            <ng-content select="[footer]"></ng-content>
+          </div>
+        }
+      </div>
+    </div>
+  </div>
+}

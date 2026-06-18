@@ -16,6 +16,11 @@ export class ReactantSiteComponent implements OnInit {
   filteredReactants: ReactantDto[] = [];
   searchTerm: string = '';
 
+  archivedReactants: ReactantDto[] = [];
+  showArchived: boolean = false;
+
+  activeReactants: ReactantDto[] = [];
+
   role: string = 'USER';
   hasWritePermission: boolean = false;
 
@@ -37,28 +42,52 @@ export class ReactantSiteComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
+    this.role = this.authService.getUserRole();
+    this.hasWritePermission = this.role != 'USER';
+    this.loadReactants()
+  }
+
+  private loadReactants() {
     this.reactantService.getAllReactants().subscribe({
       next: (value) => {
         this.reactants = value;
+        this.activeReactants = this.reactants;
         this.onSearch();
-        this.cdr.detectChanges();
+        this.cdr.markForCheck();
       },
       error: (err) =>
         this.notification.error('Reactants unavailable', err.message || err.error || err),
     });
 
-    this.role = this.authService.getUserRole();
-    this.hasWritePermission = this.role != 'USER';
+    if (this.role === 'ADMIN') {
+      this.reactantService.getArchivedReactants().subscribe({
+        next: (value) => {
+          this.archivedReactants = value;
+          this.cdr.markForCheck();
+        },
+        error: (err) =>
+          this.notification.error(
+            'Archived Reactants unavailable',
+            err.message || err.error || err,
+          ),
+      });
+    }
+  }
+
+  showArchivedReactants(show: boolean) {
+    this.showArchived = show;
+    this.activeReactants = show ? this.archivedReactants : this.reactants;
+    this.onSearch();
   }
 
   onSearch(): void {
     const term = this.searchTerm.toLowerCase().trim();
     if (!term) {
-      this.filteredReactants = [...this.reactants];
+      this.filteredReactants = [...this.activeReactants];
       return;
     }
 
-    this.filteredReactants = this.reactants.filter(
+    this.filteredReactants = this.activeReactants.filter(
       (reactant) =>
         reactant.shortName.toLowerCase().includes(term) ||
         reactant.smiles.toLowerCase().includes(term) ||
@@ -73,8 +102,6 @@ export class ReactantSiteComponent implements OnInit {
 
   viewDetails(uuid: string | undefined): void {
     if (!uuid) return;
-
-    console.log(uuid);
 
     const reactantToView = this.reactants.find((r) => r.uuid === uuid);
 
@@ -101,17 +128,24 @@ export class ReactantSiteComponent implements OnInit {
   }
 
   executeArchive() {
-    //TODO: call archive
     if (this.pendingReactant) {
-      const shortName = this.pendingReactant.uuid;
-      this.reactants = this.reactants.filter((r) => r.uuid !== this.pendingReactant?.uuid);
-      this.onSearch();
-      this.notification.success(
-        'Reactant Archived',
-        `The reactant "${shortName}" was successfully archived.`,
-      );
+      const shortName = this.pendingReactant.shortName;
+      this.reactantService.archiveReactant(this.pendingReactant.uuid).subscribe({
+        next: (value) => {
+          this.notification.success(
+            'Reactant Archived',
+            `The reactant "${shortName}" was successfully archived.`,
+          );
+          setTimeout(() => {
+            this.cancelArchive();
+            this.loadReactants();
+          });
+        },
+        error: (err) => {
+          this.notification.error('Archiving Failed', err.message);
+        }
+      })
     }
-    this.cancelArchive();
   }
 
   archiveReactant(reactant: ReactantDto | undefined): void {

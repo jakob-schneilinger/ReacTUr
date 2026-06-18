@@ -161,52 +161,23 @@
 
 </form>
 
-<div
-  class="modal fade"
-  [ngClass]="{'show': isArchiveReactantModalOpen}"
-  [style.display]="isArchiveReactantModalOpen ? 'block' : 'none'"
-  tabindex="-1"
-  style="background-color: rgba(0,0,0,0.5);" >
-  <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content shadow">
-      <div class="modal-header border-0 pb-0">
-        <h5 class="modal-title text-danger">
-          <i class="bi bi-exclamation-triangle-fill me-2"></i> Archive Reactant
-        </h5>
-        <button type="button" class="btn-close" (click)="closeModals()" aria-label="Close"></button>
-      </div>
-      <div class="modal-body py-4">
-        <p class="mb-0">Are you sure you want to permanently archive the reactant <strong>{{reactantForm.get("shortName")?.value}}</strong>?</p>
-      </div>
-      <div class="modal-footer border-0 pt-0">
-        <button type="button" class="" (click)="closeModals()">Cancel</button>
-        <button type="button" class="error-warning" (click)="executeArchive()">Permanently Archive</button>
-      </div>
-    </div>
-  </div>
-</div>
+<app-confirm-modal
+  [isOpen]="isArchiveReactantModalOpen"
+  title="Archive Reactant"
+  [message]="'Are you sure you want to permanently archive the reactant ' + reactantForm.get('shortName')?.value + '?'"
+  confirmLabel="Permanently Archive"
+  confirmButtonClass="danger"
+  (confirm)="executeArchive()"
+  (cancel)="closeModals()">
+</app-confirm-modal>
 
-<div
-  class="modal fade"
-  [ngClass]="{'show': isCancelReactantModalOpen}"
-  [style.display]="isCancelReactantModalOpen ? 'block' : 'none'"
-  tabindex="-1"
-  style="background-color: rgba(0,0,0,0.5);" >
-  <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content shadow">
-      <div class="modal-header border-0 pb-0">
-        <h5 class="modal-title text-danger">
-          <i class="bi bi-exclamation-triangle-fill me-2"></i> Unsaved Changes
-        </h5>
-        <button type="button" class="btn-close" (click)="closeModals()" aria-label="Close"></button>
-      </div>
-      <div class="modal-body py-4">
-        <p class="mb-0">You have unsaved changes. Are you sure you want to cancel? All progress will be lost.</p>
-      </div>
-      <div class="modal-footer border-0 pt-0">
-        <button type="button" class="" (click)="closeModals()">Continue Editing</button>
-        <button type="button" class="error-warning" (click)="executeCancel()">Discard Changes</button>
-      </div>
-    </div>
-  </div>
-</div>
+<app-confirm-modal
+  [isOpen]="isCancelReactantModalOpen"
+  title="Unsaved Changes"
+  message="You have unsaved changes. Are you sure you want to cancel? All progress will be lost."
+  confirmLabel="Discard Changes"
+  cancelLabel="Continue Editing"
+  confirmButtonClass="danger"
+  (confirm)="executeCancel()"
+  (cancel)="closeModals()">
+</app-confirm-modal>
