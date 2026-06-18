@@ -1,7 +1,7 @@
 import { Component } from "@angular/core";
 import { AuthService } from "../../../../services/auth.service";
-import { Router } from "@angular/router";
-import { UserDto } from '../../../../dtos/user.dto';
+import { Router } from '@angular/router';
+import { GetUserDto, UserDto } from '../../../../dtos/user.dto';
 
 @Component({
   selector: 'app-header',
@@ -20,7 +20,7 @@ export class HeaderComponent {
     return this.authService.isLoggedIn();
   }
 
-  get user(): UserDto | null {
+  get user(): GetUserDto | null {
     return this.authService.getLoggedInUser();
   }
 

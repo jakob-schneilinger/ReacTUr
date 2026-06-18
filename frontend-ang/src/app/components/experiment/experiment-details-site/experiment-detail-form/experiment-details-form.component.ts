@@ -3,7 +3,7 @@ import { FormBuilder, FormGroup, FormArray, Validators, ValidatorFn, AbstractCon
 import { Router } from '@angular/router';
 import { NotificationService } from '../../../../services/notification.service';
 import { AuthService } from '../../../../services/auth.service';
-import { UserDto } from '../../../../dtos/user.dto';
+import { GetUserDto } from '../../../../dtos/user.dto';
 
 export type FormState = 'create' | 'edit';
 
@@ -16,7 +16,7 @@ export type FormState = 'create' | 'edit';
 export class ExperimentDetailsFormComponent implements OnInit {
   @Input() formState: FormState = 'create';
 
-  isDeleteExperimentModalOpen = false;
+  isArchiveExperimentModalOpen = false;
   isCancelExperimentModalOpen = false;
 
   experimentForm!: FormGroup;
@@ -37,7 +37,7 @@ export class ExperimentDetailsFormComponent implements OnInit {
   activeInstrumentIndex = -1;
   activeModalityIndex = -1;
 
-  user: UserDto | null = null
+  user: GetUserDto | null = null;
 
   constructor(
     private fb: FormBuilder,
@@ -54,11 +54,11 @@ export class ExperimentDetailsFormComponent implements OnInit {
   }
 
   get fullName(): string {
-    return "" + this.user?.firstName + " " + this.user?.lastName;
+    return '' + this.user?.firstName + ' ' + this.user?.lastName;
   }
 
   get currentDate(): string {
-    return new Date().toISOString().split("T")[0]
+    return new Date().toISOString().split('T')[0];
   }
 
   private initForm(): void {
@@ -87,7 +87,6 @@ export class ExperimentDetailsFormComponent implements OnInit {
     });
 
     //TODO: if edit mode init form with existing data
-
   }
 
   private inListValidator(validOptions: string[]): ValidatorFn {
@@ -238,20 +237,20 @@ export class ExperimentDetailsFormComponent implements OnInit {
     this.router.navigate(['/search']);
   }
 
-  onDelete(): void {
-    this.isDeleteExperimentModalOpen = true;
+  onArchive(): void {
+    this.isArchiveExperimentModalOpen = true;
   }
 
-  executeDelete(): void {
-    this.isDeleteExperimentModalOpen = false;
-    // TODO: Call backend delete
-    this.notification.success('Experiment Deleted', 'Experiment was deleted successfully!');
+  executeArchive(): void {
+    this.isArchiveExperimentModalOpen = false;
+    // TODO: Call backend Archive
+    this.notification.success('Experiment Archived', 'Experiment was archived successfully!');
     this.experimentForm.reset();
     this.router.navigate(['/search']);
   }
 
   closeModals(): void {
     this.isCancelExperimentModalOpen = false;
-    this.isDeleteExperimentModalOpen = false;
+    this.isArchiveExperimentModalOpen = false;
   }
 }

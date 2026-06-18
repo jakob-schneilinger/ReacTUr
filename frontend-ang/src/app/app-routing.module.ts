@@ -22,7 +22,7 @@ export const routes: Routes = [
     data: { state: 'create'},
   },
   {
-    path: 'experiments/:id',
+    path: 'experiments/:uuid',
     component: ExperimentDetailsSiteComponent,
     canActivate: [AuthGuard, RoleGuard],
     data: { state: 'edit', roles: ['ADMIN', 'SUPERVISOR'] },
@@ -35,7 +35,7 @@ export const routes: Routes = [
     data: { state: 'create', roles: ['ADMIN', 'SUPERVISOR'] },
   },
   {
-    path: 'reactants/:name',
+    path: 'reactants/:uuid',
     component: ReactantDetailsSiteComponent,
     canActivate: [AuthGuard, RoleGuard],
     data: { state: 'edit', roles: ['ADMIN', 'SUPERVISOR'] },

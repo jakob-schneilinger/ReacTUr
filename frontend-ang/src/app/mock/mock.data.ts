@@ -3,7 +3,7 @@ import { GetUserDto } from '../dtos/user.dto';
 import { Role } from '../dtos/enums/role.enum';
 
 // Mock Users
-export const MOCK_USERS  = {
+export const MOCK_USERS = {
   CURIE: {
     uuid: 'u-1',
     firstName: 'Marie',
@@ -58,6 +58,22 @@ export const MOCK_USERS  = {
     lastName: 'Hoffman',
     email: 'felix@lab.com',
     role: Role.USER,
+    deactivatedAt: null,
+  },
+  PENDING1: {
+    uuid: 'u-8',
+    firstName: 'Pending1',
+    lastName: 'User1',
+    email: 'pending1@user1.com',
+    role: null,
+    deactivatedAt: null,
+  },
+  PENDING2: {
+    uuid: 'u-9',
+    firstName: 'Pending2',
+    lastName: 'User2',
+    email: 'pending2@user2.com',
+    role: null,
     deactivatedAt: null,
   },
 } satisfies Record<string, GetUserDto>;

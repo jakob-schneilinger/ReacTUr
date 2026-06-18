@@ -43,34 +43,34 @@
     <div class="search-field position-relative">
       <input
         type="text"
-        formControlName="type1"
-        [class.is-invalid]="isInvalid('type1')"
+        formControlName="chemicalType"
+        [class.is-invalid]="isInvalid('chemicalType')"
         placeholder="Select or type..."
         autocomplete="off"
         (focus)="showTypes = true"
-        (blur)="onBlur('type1')"
-        (keydown)="onKeyDown($event, 'type1')" />
+        (blur)="onBlur('chemicalType')"
+        (keydown)="onKeyDown($event, 'chemicalType')" />
 
       @if (showTypes && filteredTypes.length > 0) {
         <ul class="dropdown-menu show w-100 shadow-sm"
             style="border: 2px solid lightgray; position: absolute; top: 100%; left: 0; max-height: 200px; overflow-y: auto; z-index: 1050;">
           @for (type of filteredTypes; track type; let i = $index) {
             <li>
-              <button type="button" class="dropdown-item dropdown-button" [class.active]="i === activeTypesIndex" (mousedown)="selectOption('type1', type)">
+              <button type="button" class="dropdown-item dropdown-button" [class.active]="i === activeTypesIndex" (mousedown)="selectOption('chemicalType', type)">
                 {{ type }}
               </button>
             </li>
           }
         </ul>
       }
-      @if (reactantForm.get('type1')?.value) {
-        <span class="icon bi bi-x text-black clear-btn" (click)="clearControl('type1')"></span>
+      @if (reactantForm.get('chemicalType')?.value) {
+        <span class="icon bi bi-x text-black clear-btn" (click)="clearControl('chemicalType')"></span>
       }
     </div>
-    @if (isInvalid('type1')) {
+    @if (isInvalid('chemicalType')) {
       <div class="error-message">Type is required.</div>
     }
-    @if (reactantForm.get('type1')?.hasError('notInList')) {
+    @if (reactantForm.get('chemicalType')?.hasError('notInList')) {
       <div class="error-message">Please select a valid type from the list.</div>
     }
   </div>
@@ -163,31 +163,31 @@
   <div class="action-buttons mt-4">
     <button type="submit" class="form-button primary" *appHasRole="['SUPERVISOR','ADMIN']">Submit</button>
     <button type="button" class="form-button" (click)="onCancel()">Cancel</button>
-    <button type="button" class="form-button error" (click)="onDelete()" *appHasRole="['SUPERVISOR','ADMIN']" [hidden]="formState !== 'edit'">Remove</button>
+    <button type="button" class="form-button error" (click)="onArchive()" *appHasRole="['SUPERVISOR','ADMIN']" [hidden]="formState !== 'edit'">Archive</button>
   </div>
 
 </form>
 
 <div
   class="modal fade"
-  [ngClass]="{'show': isDeleteReactantModalOpen}"
-  [style.display]="isDeleteReactantModalOpen ? 'block' : 'none'"
+  [ngClass]="{'show': isArchiveReactantModalOpen}"
+  [style.display]="isArchiveReactantModalOpen ? 'block' : 'none'"
   tabindex="-1"
   style="background-color: rgba(0,0,0,0.5);" >
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content shadow">
       <div class="modal-header border-0 pb-0">
         <h5 class="modal-title text-danger">
-          <i class="bi bi-exclamation-triangle-fill me-2"></i> Remove Reactant
+          <i class="bi bi-exclamation-triangle-fill me-2"></i> Archive Reactant
         </h5>
         <button type="button" class="btn-close" (click)="closeModals()" aria-label="Close"></button>
       </div>
       <div class="modal-body py-4">
-        <p class="mb-0">Are you sure you want to remove the reactant <strong>{{reactantForm.get("shortName")?.value}}</strong>?</p>
+        <p class="mb-0">Are you sure you want to permanently archive the reactant <strong>{{reactantForm.get("shortName")?.value}}</strong>?</p>
       </div>
       <div class="modal-footer border-0 pt-0">
         <button type="button" class="" (click)="closeModals()">Cancel</button>
-        <button type="button" class="error-warning" (click)="executeDelete()">Yes, remove it</button>
+        <button type="button" class="error-warning" (click)="executeArchive()">Permanently Archive</button>
       </div>
     </div>
   </div>

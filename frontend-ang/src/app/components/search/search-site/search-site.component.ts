@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { AdvancedSearchDto } from '../../../dtos/metadata.dto';
-import { ExperimentDto } from '../../../dtos/experiment.dto';
+import { GetExperimentDto } from '../../../dtos/experiment.dto';
 import { ExperimentService } from '../../../services/experiment.service';
 import { SearchParametersDto } from '../../../dtos/search.dto';
 
@@ -14,7 +14,7 @@ declare var initRDKitModule: any;
 })
 export class SearchSiteComponent implements OnInit {
   currentSearchState: 'initial' | 'no-results' | 'has-results' = 'initial'; //TODO: Potential für ein Ladespinner dann status loading hinzufügen
-  foundExperiments: any[] = [];
+  foundExperiments: GetExperimentDto[] = [];
 
   rdkitModule: any;
   sketcher1: any;
@@ -28,7 +28,7 @@ export class SearchSiteComponent implements OnInit {
 
   isAdvancedSearchOpen: boolean = false;
   isExportModalOpen: boolean = false;
-  experimentsToExport: ExperimentDto[] = [];
+  experimentsToExport: GetExperimentDto[] = [];
 
   // Service injecten!
   constructor(private experimentService: ExperimentService) {}
@@ -104,8 +104,8 @@ export class SearchSiteComponent implements OnInit {
     });
   }
 
-  handleExport(selectedIds: number[]) {
-    this.experimentsToExport = this.foundExperiments.filter((exp) => selectedIds.includes(exp.id));
+  handleExport(selectedUuids: string[]) {
+    this.experimentsToExport = this.foundExperiments.filter((exp) => selectedUuids.includes(exp.uuid));
     this.isExportModalOpen = true;
   }
 }

@@ -1,9 +1,9 @@
-import { Component, OnInit } from '@angular/core';
-import { UserDto } from '../../../dtos/user.dto';
+import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
+import { GetUserDto } from '../../../dtos/user.dto';
 import { UserService } from '../../../services/user.service';
 import { NotificationService } from '../../../services/notification.service';
-
-export type status = 'pending' | 'active' | 'deactivate';
+import { Role } from '../../../dtos/enums/role.enum';
+import { OptionService } from '../../../services/option.service';
 
 @Component({
   selector: 'app-user-management',
@@ -20,77 +20,96 @@ export class UserManagementComponent implements OnInit {
     deactivated: false,
   };
 
-  users: UserDto[] = [];
+  allUsers: GetUserDto[] = [];
+
+  pendingUsers: GetUserDto[] = [];
+  activeUsers: GetUserDto[] = [];
+  deactivatedUsers: GetUserDto[] = [];
 
   constructor(
-    private adminService: UserService,
-    private notifications: NotificationService,
+    private userService: UserService,
+    private optionService: OptionService,
+    private notification: NotificationService,
+    private cdr: ChangeDetectorRef,
   ) {}
 
   ngOnInit(): void {
-    this.adminService.getAllUsers().subscribe({
-      next: (users) => (this.users = users),
-      error: (err) => this.notifications.error('Error fetching users', err),
+    this.userService.getAllUsers().subscribe({
+      next: (users) => {
+        this.allUsers = users.filter((user) => user.role !== Role.ADMIN);
+        this.updateFilteredLists();
+      },
+      error: (err) => this.notification.error('Error fetching users', err.message || err.error || err),
     });
   }
 
-  get pendingUsers(): UserDto[] {
-    return this.filterUsers('PENDING');
-  }
+  private updateFilteredLists(): void {
+    const search = this.searchTerm.toLowerCase();
 
-  get activeUsers(): UserDto[] {
-    return this.filterUsers('ACTIVATED');
-  }
-
-  get deactivatedUsers(): UserDto[] {
-    return this.filterUsers('DEACTIVATED');
-  }
-
-  private filterUsers(status: 'PENDING' | 'ACTIVATED' | 'DEACTIVATED'): UserDto[] {
-    return this.users.filter((user) => {
-      const matchesStatus = user.status === status;
-      const matchesSearch = this.searchTerm
-        ? user.firstName.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
-          user.lastName.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
-          user.email.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
-          user.role.toLowerCase().includes(this.searchTerm.toLowerCase())
-        : true;
-
-      return matchesStatus && matchesSearch;
+    const filteredBySearch = this.allUsers.filter((user) => {
+      if (!search) return true;
+      return (
+        user.firstName?.toLowerCase().includes(search) ||
+        user.lastName?.toLowerCase().includes(search) ||
+        user.email?.toLowerCase().includes(search) ||
+        user.role?.toLowerCase().includes(search)
+      );
     });
+
+    this.pendingUsers = filteredBySearch.filter((user) => !user.role && !user.deactivatedAt);
+    this.activeUsers = filteredBySearch.filter((user) => !!user.role && !user.deactivatedAt);
+    this.deactivatedUsers = filteredBySearch.filter((user) => !!user.deactivatedAt);
+
+    this.cdr.detectChanges();
   }
 
   togglePanel(panel: 'pending' | 'active' | 'deactivated'): void {
     this.panels[panel] = !this.panels[panel];
   }
 
-  updateUserStatus(user: UserDto, newStatus: 'ACTIVATED' | 'DEACTIVATED'): void {
-    this.adminService.updateUserStatus(user.id, newStatus).subscribe({
-      next: (updatedUser) => {
-        this.users = this.users.map((u) => (u.id === updatedUser.id ? updatedUser : u));
-        this.notifications.success('User status updated successfully');
+  updateUserStatus(user: GetUserDto, newStatus: 'ACTIVATED' | 'DEACTIVATED'): void {
+    const deactivate = newStatus === 'DEACTIVATED';
+
+    const obs = deactivate
+      ? this.userService.archiveUser(user.uuid)
+      : this.userService.restoreUser(user.uuid);
+
+    obs.subscribe({
+      next: () => {
+        user.deactivatedAt = deactivate ? new Date().toISOString() : null;
+
+        this.updateFilteredLists();
+        this.notification.success('User status updated successfully');
       },
       error: (err) => {
-        this.notifications.error('Error updating user status', err);
+        this.notification.error('Error updating user status', err.message || err.error || err);
       },
     });
   }
 
-  updateUserRole(user: UserDto, event: Event): void {
+  updateUserRole(user: GetUserDto, event: Event): void {
     const selectElement = event.target as HTMLSelectElement;
-    const newRole = selectElement.value as 'USER' | 'SUPERVISOR';
-    this.adminService.updateUserRole(user.id, newRole).subscribe(
-      (updatedUser) => {
-        this.users = this.users.map((u) => (u.id === updatedUser.id ? updatedUser : u));
-        this.notifications.success('User role updated successfully');
+    const newRole = selectElement.value as Role;
+
+    this.userService.updateUserRole(user.uuid, newRole).subscribe({
+      next: () => {
+        user.role = newRole;
+        this.updateFilteredLists();
+        this.notification.success('User role updated successfully');
       },
-      (err) => {
-        this.notifications.error('Error updating user role', err);
+      error: (err) => {
+        this.notification.error('Error updating user role', err.message || err.error || err);
       },
-    );
+    });
+  }
+
+  onSearchChange(value: string): void {
+    this.searchTerm = value;
+    this.updateFilteredLists();
   }
 
   clearUserSearch() {
     this.searchTerm = '';
+    this.updateFilteredLists();
   }
 }

@@ -37,13 +37,13 @@
             </tr>
             </thead>
             <tbody>
-              @for (option of options; track option.id) {
+              @for (option of options; track option.uuid) {
                 <tr>
                   <td class="fw-medium">
-                    <div [class.opacity-50]="!option.isActive">{{ option.value }} </div>
+                    <div [class.opacity-50]="!!option.archivedAt">{{ option.name }} </div>
                   </td>
                   <td>
-                    @if (option.isActive) {
+                    @if (!option.archivedAt) {
                       <span class="badge bg-success-subtle text-success border border-success-subtle">Active</span>
                     } @else {
                       <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle">Inactive</span>
@@ -52,9 +52,9 @@
                   <td class="text-end">
                     <button
                       class="compact px-3 py-1"
-                      [ngClass]="option.isActive ? 'error' : 'primary'"
+                      [ngClass]="!option.archivedAt ? 'error' : 'primary'"
                       (click)="toggleOptionStatus(option)">
-                      {{ option.isActive ? 'Deactivate' : 'Activate' }}
+                      {{ !option.archivedAt ? 'Deactivate' : 'Activate' }}
                     </button>
                   </td>
                 </tr>

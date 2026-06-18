@@ -22,7 +22,7 @@ export interface GetUserDto {
   firstName: string;
   lastName: string;
   email: string;
-  role: Role;
+  role: Role | null;
   deactivatedAt: string | null;
 }
 

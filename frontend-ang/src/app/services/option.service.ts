@@ -1,98 +1,106 @@
+import {
+  ChemicalTypeDto,
+  SolventDto,
+  InstrumentDto,
+  ModalityDto
+} from '../dtos/selection-option.dto';
+import {
+  MOCK_CHEM_TYPES,
+  MOCK_SOLVENTS,
+  MOCK_INSTRUMENTS,
+  MOCK_MODALITIES
+} from '../mock/mock.data';
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, of, throwError } from 'rxjs';
-import { UserDto } from '../dtos/user.dto';
-import { KnownOptionDto } from '../dtos/selection-option.dto';
-import { environment } from '../../environment/environment';
 import { Globals } from '../global/globals';
 import { AuthService } from './auth.service';
+import { delay, Observable, of, throwError } from 'rxjs';
+
+export interface BaseOptionDto {
+  uuid: string;
+  name: string;
+  archivedAt: string | null;
+}
+
+export type OptionCategory = 'type' | 'modality' | 'instrument' | 'solvent';
 
 @Injectable({
   providedIn: 'root',
 })
 export class OptionService {
-  private optionBaseUri = `${environment.apiUrl}`;
+  private optionBaseUri: string;
+
+  private mockData: Record<OptionCategory, BaseOptionDto[]> = {
+    type: Object.values(MOCK_CHEM_TYPES),
+    solvent: Object.values(MOCK_SOLVENTS),
+    instrument: Object.values(MOCK_INSTRUMENTS),
+    modality: Object.values(MOCK_MODALITIES),
+  };
 
   constructor(
     private httpClient: HttpClient,
     private globals: Globals,
     private authService: AuthService,
   ) {
-    // TODO: update url
     this.optionBaseUri = this.globals.backendUri;
   }
 
-  knownOptions: KnownOptionDto[] = [
-    { id: 1, category: 'type', value: 'type1', isActive: true },
-    { id: 2, category: 'type', value: 'type2', isActive: true },
-    { id: 3, category: 'type', value: 'type3', isActive: true },
-    { id: 4, category: 'modality', value: 'modality1', isActive: true },
-    { id: 5, category: 'modality', value: 'modality2', isActive: true },
-    { id: 6, category: 'modality', value: 'modality3', isActive: false },
-    { id: 7, category: 'instrument', value: 'instrument1', isActive: true },
-    { id: 8, category: 'instrument', value: 'instrument2', isActive: false },
-    { id: 9, category: 'instrument', value: 'instrument3', isActive: false },
-    { id: 10, category: 'instrument', value: 'instrument4', isActive: false },
-    { id: 11, category: 'solvent', value: 'solvent1', isActive: false },
-    { id: 12, category: 'solvent', value: 'solvent2', isActive: false },
-    { id: 13, category: 'solvent', value: 'solvent3', isActive: false },
-    { id: 14, category: 'solvent', value: 'solvent4', isActive: true },
-    { id: 15, category: 'solvent', value: 'solvent5', isActive: false },
-  ];
+  getOptions(category: OptionCategory): Observable<BaseOptionDto[]> {
+    return of([...this.mockData[category]]).pipe(delay(200));
 
-  getKnownOptions(
-    category: 'type' | 'modality' | 'instrument' | 'solvent',
-  ): Observable<KnownOptionDto[]> {
-    //TODO: remove when backend exists
-    const filteredOptions = this.knownOptions.filter((opt) => opt.category === category);
-    return of(filteredOptions);
-    return this.httpClient.get<KnownOptionDto[]>(`${this.optionBaseUri}/options/${category}`);
+    // TODO: Restore when backend exists
+    return this.httpClient.get<BaseOptionDto[]>(`${this.optionBaseUri}/options/${category}`);
   }
 
-  addKnownOption(
-    category: 'type' | 'modality' | 'instrument' | 'solvent',
-    value: string,
-  ): Observable<KnownOptionDto> {
-    //TODO: remove when backend exists
-    const option = {
-      id: this.knownOptions.length + 1,
-      category: category,
-      value: value,
-      isActive: true,
+  addKnownOption(category: OptionCategory, name: string): Observable<BaseOptionDto> {
+    const newOption: BaseOptionDto = {
+      uuid: `${category}-${Math.random().toString(36).substring(2, 9)}`,
+      name: name,
+      archivedAt: null,
     };
-    this.knownOptions.push(option);
-    return of(option);
-    const payload = { category, value, isActive: true };
-    return this.httpClient.post<KnownOptionDto>(`${this.optionBaseUri}/options`, payload);
+
+    this.mockData[category].push(newOption);
+    return of({ ...newOption }).pipe(delay(200));
+
+    // TODO: Restore when backend exists
+    const payload = { category, name, archivedAt: null };
+    return this.httpClient.post<BaseOptionDto>(`${this.optionBaseUri}/options`, payload);
   }
 
-  updateKnownOptionStatus(optionId: number, isActive: boolean): Observable<KnownOptionDto> {
-    //TODO: remove when backend exists, backend needs to check if not all options deactivated
-    const option = this.knownOptions.find((opt) => opt.id === optionId);
-    if (!option) {
-      return throwError(() => new Error(`Option with id ${optionId} not found.`));
-    }
+  updateKnownOptionStatus(uuid: string, isActive: boolean): Observable<BaseOptionDto> {
+    let foundCategory: OptionCategory | null = null;
+    let targetOption: BaseOptionDto | undefined;
 
-    const category = option.category;
-    option.isActive = isActive;
-
-    if (category === 'type') {
-      if (this.knownOptions.filter((opt) => opt.isActive && opt.category === 'type').length === 0) {
-        option.isActive = !isActive;
-        return throwError(() => new Error('Type must have at least ONE active option.'));
-      }
-    }
-    if (category === 'solvent') {
-      if (
-        this.knownOptions.filter((opt) => opt.isActive && opt.category === 'solvent').length === 0
-      ) {
-        option.isActive = !isActive;
-        return throwError(() => new Error('Solvent must have at least ONE active option.'));
+    for (const category of Object.keys(this.mockData) as OptionCategory[]) {
+      targetOption = this.mockData[category].find((opt) => opt.uuid === uuid);
+      if (targetOption) {
+        foundCategory = category;
+        break;
       }
     }
 
-    return of(option);
-    return this.httpClient.patch<KnownOptionDto>(`${this.optionBaseUri}/options/${optionId}/status`, {
+    if (!targetOption || !foundCategory) {
+      return throwError(() => new Error(`Option with uuid ${uuid} not found.`));
+    }
+
+    if (!isActive && (foundCategory === 'type' || foundCategory === 'solvent')) {
+      const activeItemsCount = this.mockData[foundCategory].filter(
+        (opt) => opt.archivedAt === null && opt.uuid !== uuid
+      ).length;
+
+      if (activeItemsCount === 0) {
+        return throwError(
+          () => new Error(`${foundCategory.toUpperCase()} must have at least ONE active option.`)
+        );
+      }
+    }
+
+    targetOption.archivedAt = isActive ? null : new Date().toISOString();
+
+    return of({ ...targetOption }).pipe(delay(200));
+
+    // TODO: Restore when backend exists
+    return this.httpClient.patch<BaseOptionDto>(`${this.optionBaseUri}/options/${uuid}/status`, {
       isActive,
     });
   }

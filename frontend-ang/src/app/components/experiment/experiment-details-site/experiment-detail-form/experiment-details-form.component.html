@@ -249,17 +249,17 @@
   <div class="action-buttons mt-4">
     <button type="submit" class="form-button primary" >Submit</button>
     <button type="button" class="form-button" (click)="onCancel()">Cancel</button>
-    <button type="button" class="form-button error" (click)="onDelete()">Delete</button>
+    <button type="button" class="form-button error" (click)="onArchive()">Archive</button>
   </div>
 
 </form>
 
 
-<!-- Delete Experiment Modal -->
+<!-- Archive Experiment Modal -->
 <div
   class="modal fade"
-  [ngClass]="{'show': isDeleteExperimentModalOpen}"
-  [style.display]="isDeleteExperimentModalOpen ? 'block' : 'none'"
+  [ngClass]="{'show': isArchiveExperimentModalOpen}"
+  [style.display]="isArchiveExperimentModalOpen ? 'block' : 'none'"
   tabindex="-1"
   style="background-color: rgba(0,0,0,0.5);" >
   <div class="modal-dialog modal-dialog-centered">
@@ -267,18 +267,18 @@
 
       <div class="modal-header border-0 pb-0">
         <h5 class="modal-title text-danger">
-          <i class="bi bi-exclamation-triangle-fill me-2"></i> Delete Experiment
+          <i class="bi bi-exclamation-triangle-fill me-2"></i> Archive Experiment
         </h5>
         <button type="button" class="btn-close" (click)="closeModals()" aria-label="Close"></button>
       </div>
 
       <div class="modal-body py-4">
-        <p class="mb-0">Are you sure you want to permanently delete this experiment? This action cannot be undone.</p>
+        <p class="mb-0">Are you sure you want to permanently archive this experiment? This action cannot be undone.</p>
       </div>
 
       <div class="modal-footer border-0 pt-0">
         <button type="button" class="" (click)="closeModals()">Cancel</button>
-        <button type="button" class="error-warning" (click)="executeDelete()">Permanently Delete</button>
+        <button type="button" class="error-warning" (click)="executeArchive()">Permanently Archive</button>
       </div>
 
     </div>

@@ -46,7 +46,7 @@ export class ReactantDetailsSiteComponent implements OnInit {
               this.reactant = reactant;
               console.log(reactant);
               this.loadingStructures = true;
-              this.reactantService.getReactantStructures(reactantUuid).subscribe({
+              this.reactantService.getReactantStructures(reactant).subscribe({
                 next: (files: File[]) => {
                   setTimeout(() => {
                     this.structures = files;
@@ -66,7 +66,7 @@ export class ReactantDetailsSiteComponent implements OnInit {
                     this.loadingStructures = false;
                     this.notification.error(
                       'Missing 3D File',
-                      `3D File(s) of Reactant not found! Error: ${err}`,
+                      `3D File(s) of Reactant not found! Error: ${err.message || err.error || err}`,
                     );
                     this.cd.markForCheck();
                   });
@@ -76,12 +76,15 @@ export class ReactantDetailsSiteComponent implements OnInit {
             error: (err) =>
               this.notification.error(
                 'Invalid Reactant',
-                `No Reactant found with this id! Error: ${err}`,
+                `No Reactant found with this name! Error: ${err.message || err.error || err}`,
               ),
           });
         },
         error: (err) =>
-          this.notification.error('Missing Reactant', `No Reactant found in route! Error: ${err}`),
+          this.notification.error(
+            'Missing Reactant',
+            `No Reactant found in route! Error: ${err.message || err.error || err}`,
+          ),
       });
     } else {
       this.state = 'create';

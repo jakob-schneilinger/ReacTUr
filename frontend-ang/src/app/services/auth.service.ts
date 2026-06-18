@@ -1,8 +1,9 @@
-import { UserDto } from "../dtos/user.dto";
+import { GetUserDto, UserDto } from '../dtos/user.dto';
 import { Injectable } from '@angular/core';
 import { OAuthService } from 'angular-oauth2-oidc';
 import { authConfig } from '../auth.config';
 import { Observable, of } from 'rxjs';
+import { MOCK_USERS } from '../mock/mock.data';
 
 @Injectable({
   providedIn: 'root',
@@ -10,21 +11,18 @@ import { Observable, of } from 'rxjs';
 export class AuthService {
   public initialLoginSequence: Promise<boolean>;
 
+  hardcodedUser: GetUserDto;
+
   constructor(private oauthService: OAuthService) {
     this.oauthService.configure(authConfig);
     this.oauthService.setupAutomaticSilentRefresh();
 
     this.initialLoginSequence = this.oauthService.loadDiscoveryDocumentAndTryLogin();
+
+    this.hardcodedUser = MOCK_USERS.CURIE;
   }
 
-  hardcodedUser: UserDto = {
-    id: '0',
-    firstName: 'Jakob',
-    lastName: 'Schneilinger',
-    email: 'jakob@schneilinger.com',
-    role: 'ADMIN',
-    status: 'ACTIVATED',
-  };
+
 
   public login() {
     this.oauthService.initCodeFlow();
@@ -43,7 +41,7 @@ export class AuthService {
     return this.oauthService.getAccessToken();
   }
 
-  public getLoggedInUser(): UserDto | null {
+  public getLoggedInUser(): GetUserDto | null {
     return this.hardcodedUser;
     if (!this.isLoggedIn()) {
       return null;
@@ -52,12 +50,12 @@ export class AuthService {
     if (!claims) return null;
 
     return {
-      id: claims['id'] ?? '-1',
+      uuid: claims['id'] ?? '-1',
       firstName: claims['given_name'],
       lastName: claims['family_name'],
       email: claims['email'],
       role: claims['role'] ?? 'USER', //TODO: get from keycloak
-      status: claims['status'] ?? 'ACCEPTED', //TODO: get from keycloak
+      deactivatedAt: claims['deactivated_at'] ?? '', //TODO: get from keycloak
     };
   }
 
@@ -79,7 +77,7 @@ export class AuthService {
   }
 
   // TODO: think about function, placement, parameters.
-  public hasExperimentPermission(id: number, email: string): Observable<boolean> {
+  public hasExperimentPermission(experimentUuid: string, userUuid: string): Observable<boolean> {
     return of(false);
   }
 }

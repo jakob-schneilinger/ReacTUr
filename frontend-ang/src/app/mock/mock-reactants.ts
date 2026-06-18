@@ -1,4 +1,5 @@
 import { ReactantDetailDto, ReactantDto } from '../dtos/reactant.dto';
+import { MOCK_CHEM_TYPES } from './mock.data';
 
 export const MOCK_REACTANTS: ReactantDetailDto[] = [
   {
@@ -10,11 +11,7 @@ export const MOCK_REACTANTS: ReactantDetailDto[] = [
     comment: 'Common polar protic solvent, highly flammable.',
     references: ['Doe et al., J. Org. Chem. 2020, 85, 1234'],
     uuid: 'reactant1',
-    chemicalType: {
-      name: 'Type 1',
-      uuid: 'type1',
-      archivedAt: null,
-    },
+    chemicalType: MOCK_CHEM_TYPES.ACID,
     archivedAt: null,
   },
   {
@@ -26,11 +23,7 @@ export const MOCK_REACTANTS: ReactantDetailDto[] = [
     comment: 'Widely used volatile solvent. Requires proper ventilation.',
     references: ["Smith, M. B. March's Advanced Organic Chemistry. 2020"],
     uuid: 'reactant2',
-    chemicalType: {
-      name: 'Type 2',
-      uuid: 'type2',
-      archivedAt: null,
-    },
+    chemicalType: MOCK_CHEM_TYPES.METAL,
     archivedAt: null,
   },
   {
@@ -43,11 +36,7 @@ export const MOCK_REACTANTS: ReactantDetailDto[] = [
     comment: 'Standard catalyst for Suzuki and Stille couplings. Light sensitive.',
     references: ['Miyaura, N.; Suzuki, A. Chem. Rev. 1995, 95, 2457'],
     uuid: 'reactant3',
-    chemicalType: {
-      name: 'Type 1',
-      uuid: 'type1',
-      archivedAt: null,
-    },
+    chemicalType: MOCK_CHEM_TYPES.ACID,
     archivedAt: null,
   },
   {
@@ -59,11 +48,7 @@ export const MOCK_REACTANTS: ReactantDetailDto[] = [
     comment: 'Used as an aryl halide partner in cross-coupling reactions.',
     references: ['Internal Lab Data - Project Alpha'],
     uuid: 'reactant4',
-    chemicalType: {
-      name: 'Type 3',
-      uuid: 'type3',
-      archivedAt: null,
-    },
+    chemicalType: MOCK_CHEM_TYPES.GAS,
     archivedAt: null,
   },
   {
@@ -75,11 +60,7 @@ export const MOCK_REACTANTS: ReactantDetailDto[] = [
     comment: 'Prone to anhydride formation (boroxines) upon drying.',
     references: ['Internal Lab Data - Project Alpha'],
     uuid: 'reactant5',
-    chemicalType: {
-      name: 'Type 2',
-      uuid: 'type2',
-      archivedAt: null,
-    },
+    chemicalType: MOCK_CHEM_TYPES.NON_METAL,
     archivedAt: null,
   },
   {
@@ -91,11 +72,7 @@ export const MOCK_REACTANTS: ReactantDetailDto[] = [
     comment: 'Common organic base used to neutralize acids formed during reactions.',
     references: ["Fieser and Fieser's Reagents for Organic Synthesis"],
     uuid: 'reactant6',
-    chemicalType: {
-      name: 'Type 1',
-      uuid: 'type1',
-      archivedAt: null,
-    },
+    chemicalType: MOCK_CHEM_TYPES.SOLVENT,
     archivedAt: null,
   },
   {
@@ -107,11 +84,7 @@ export const MOCK_REACTANTS: ReactantDetailDto[] = [
     comment: 'Nucleophilic catalyst for esterifications and amidations.',
     references: ['Steglich, W.; Neises, B. Angew. Chem. Int. Ed. 1978, 17, 522'],
     uuid: 'reactant7',
-    chemicalType: {
-      name: 'Type 1',
-      uuid: 'type1',
-      archivedAt: null,
-    },
+    chemicalType: MOCK_CHEM_TYPES.NON_METAL,
     archivedAt: null,
   },
   {
@@ -123,11 +96,7 @@ export const MOCK_REACTANTS: ReactantDetailDto[] = [
     comment: 'Strong organic acid, commonly used for Boc-deprotection.',
     references: ['Green, T. W.; Wuts, P. G. M. Protective Groups in Organic Synthesis'],
     uuid: 'reactant8',
-    chemicalType: {
-      name: 'Type 3',
-      uuid: 'type3',
-      archivedAt: null,
-    },
+    chemicalType: MOCK_CHEM_TYPES.HALOGEN,
     archivedAt: null,
   },
   {
@@ -139,11 +108,7 @@ export const MOCK_REACTANTS: ReactantDetailDto[] = [
     comment: 'Mild reducing agent, typically used in alcohol or water.',
     references: ['Chaikin, S. W.; Brown, W. G. J. Am. Chem. Soc. 1949, 71, 122'],
     uuid: 'reactant9',
-    chemicalType: {
-      name: 'Type 2',
-      uuid: 'type2',
-      archivedAt: null,
-    },
+    chemicalType: MOCK_CHEM_TYPES.GAS,
     archivedAt: null,
   },
   {
@@ -155,11 +120,7 @@ export const MOCK_REACTANTS: ReactantDetailDto[] = [
     comment: 'Polar aprotic solvent. Can form explosive peroxides on storage.',
     references: ['Armarego, W. L. F. Purification of Laboratory Chemicals'],
     uuid: 'reactant10',
-    chemicalType: {
-      name: 'Type 2',
-      uuid: 'type2',
-      archivedAt: null,
-    },
+    chemicalType: MOCK_CHEM_TYPES.HALOGEN,
     archivedAt: null,
   },
 ];

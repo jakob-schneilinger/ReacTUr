@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
-import { UserService } from '../../../services/user.service';
-import { KnownOptionDto } from '../../../dtos/selection-option.dto';
+import { OptionService } from '../../../services/option.service';
+import { SelectionOptionDto } from '../../../dtos/selection-option.dto';
 import { NotificationService } from '../../../services/notification.service';
 
 type OptionCategory = 'type' | 'modality' | 'instrument' | 'solvent';
@@ -12,7 +12,6 @@ type OptionCategory = 'type' | 'modality' | 'instrument' | 'solvent';
   standalone: false,
 })
 export class OptionManagementComponent implements OnInit {
-
   categories: { label: string; value: OptionCategory }[] = [
     { label: 'Type', value: 'type' },
     { label: 'Modality', value: 'modality' },
@@ -21,13 +20,13 @@ export class OptionManagementComponent implements OnInit {
   ];
 
   selectedCategory: OptionCategory = 'type';
-  options: KnownOptionDto[] = [];
+  options: SelectionOptionDto[] = [];
   newOptionValue: string = '';
   isLoading: boolean = false;
 
   constructor(
-    private adminService: UserService,
-    private notifications: NotificationService,
+    private optionService: OptionService,
+    private notification: NotificationService,
   ) {}
 
   ngOnInit(): void {
@@ -43,26 +42,30 @@ export class OptionManagementComponent implements OnInit {
 
   loadOptions(): void {
     this.isLoading = true;
-    this.adminService.getKnownOptions(this.selectedCategory).subscribe({
+    this.optionService.getOptions(this.selectedCategory).subscribe({
       next: (data) => {
         this.options = data;
         this.isLoading = false;
       },
       error: (err) => {
-        this.notifications.error(`Failed to load options for ${this.selectedCategory}`, err);
+        this.notification.error(
+          `Failed to load options for ${this.selectedCategory}`,
+          err.message || err.error || err,
+        );
         this.isLoading = false;
       },
     });
   }
 
-  toggleOptionStatus(option: KnownOptionDto): void {
-    const newStatus = !option.isActive;
-    this.adminService.updateKnownOptionStatus(option.id, newStatus).subscribe({
+  toggleOptionStatus(option: SelectionOptionDto): void {
+    const newStatus = !option.archivedAt;
+    this.optionService.updateKnownOptionStatus(option.uuid, newStatus).subscribe({
       next: (updatedOption) => {
-        option.isActive = updatedOption.isActive;
-        this.notifications.success('Option status updated successfully');
+        option.archivedAt = updatedOption.archivedAt;
+        this.notification.success('Option status updated successfully');
       },
-      error: (err) => this.notifications.error('Failed to update option', err),
+      error: (err) =>
+        this.notification.error('Failed to update option', err.message || err.error || err),
     });
   }
 
@@ -70,13 +73,14 @@ export class OptionManagementComponent implements OnInit {
     const value = this.newOptionValue.trim();
     if (!value) return;
 
-    this.adminService.addKnownOption(this.selectedCategory, value).subscribe({
+    this.optionService.addKnownOption(this.selectedCategory, value).subscribe({
       next: (newOption) => {
         this.loadOptions();
         this.newOptionValue = '';
-        this.notifications.success('New option added successfully');
+        this.notification.success('New option added successfully');
       },
-      error: (err) => this.notifications.error('Failed to add new option', err),
+      error: (err) =>
+        this.notification.error('Failed to add new option', err.message || err.error || err),
     });
   }
 }

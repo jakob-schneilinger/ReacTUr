@@ -3,7 +3,11 @@ import { ReactantDto } from '../../../dtos/reactant.dto';
 import { ReactantService } from '../../../services/reactant.service';
 import { NotificationService } from '../../../services/notification.service';
 import { Router } from '@angular/router';
-import { ExperimentDto, GetExperimentDto } from '../../../dtos/experiment.dto';
+import {
+  ExperimentAttachmentsDto,
+  ExperimentDto,
+  GetExperimentDto,
+} from '../../../dtos/experiment.dto';
 import { ExperimentService } from '../../../services/experiment.service';
 
 @Component({
@@ -57,11 +61,31 @@ export class ExperimentViewModalComponent implements OnInit {
     if (uuid) this.router.navigate(['/experiments', uuid]);
   }
 
+  loadFile(attachment: ExperimentAttachmentsDto): File {
+    //TODO: load file with attachment download url
+    return new File([], attachment.downloadUrl + ' -> ' + attachment.fileName, undefined);
+  }
+
   get headerText(): string {
     return (
       this.selectedExperiment?.reactantA.shortName +
       ' + ' +
       this.selectedExperiment?.reactantB.shortName
     );
+  }
+
+  get concentrationText(): string {
+    if (
+      this.selectedExperiment?.metadata.concentrationA &&
+      this.selectedExperiment.metadata.concentrationB
+    ) {
+      return (
+        this.selectedExperiment.metadata.concentrationA +
+        ' mM, ' +
+        this.selectedExperiment.metadata.concentrationB +
+        ' mM'
+      );
+    }
+    return '-- mM';
   }
 }

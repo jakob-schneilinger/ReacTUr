@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { ReactantDto } from '../../../dtos/reactant.dto';
 import { ReactantService } from '../../../services/reactant.service';
@@ -19,8 +19,8 @@ export class ReactantSiteComponent implements OnInit {
   role: string = 'USER';
   hasWritePermission: boolean = false;
 
-  isDeleteReactantModalOpen: boolean = false;
-  pendingReactantName: string | null = '';
+  isArchiveReactantModalOpen: boolean = false;
+  pendingReactant: ReactantDto | undefined = undefined;
 
   isViewModalOpen: boolean = false;
   selectedReactantForView: ReactantDto | undefined = undefined;
@@ -33,6 +33,7 @@ export class ReactantSiteComponent implements OnInit {
     private reactantService: ReactantService,
     private authService: AuthService,
     private notification: NotificationService,
+    private cdr: ChangeDetectorRef,
   ) {}
 
   ngOnInit(): void {
@@ -40,8 +41,10 @@ export class ReactantSiteComponent implements OnInit {
       next: (value) => {
         this.reactants = value;
         this.onSearch();
+        this.cdr.detectChanges();
       },
-      error: (err) => this.notification.error('Reactants unavailable', err),
+      error: (err) =>
+        this.notification.error('Reactants unavailable', err.message || err.error || err),
     });
 
     this.role = this.authService.getUserRole();
@@ -68,10 +71,12 @@ export class ReactantSiteComponent implements OnInit {
     this.router.navigate(['/reactants/create']);
   }
 
-  viewDetails(shortName: string | undefined): void {
-    if (!shortName) return;
+  viewDetails(uuid: string | undefined): void {
+    if (!uuid) return;
 
-    const reactantToView = this.reactants.find((r) => r.shortName === shortName);
+    console.log(uuid);
+
+    const reactantToView = this.reactants.find((r) => r.uuid === uuid);
 
     if (reactantToView) {
       this.selectedReactantForView = reactantToView;
@@ -86,33 +91,34 @@ export class ReactantSiteComponent implements OnInit {
     this.selectedReactantForView = undefined;
   }
 
-  editReactant(shortName: string | undefined): void {
-    if (shortName) this.router.navigate(['/reactants', shortName]);
+  editReactant(uuid: string | undefined): void {
+    if (uuid) this.router.navigate(['/reactants', uuid]);
   }
 
-  cancelDelete() {
-    this.isDeleteReactantModalOpen = false;
-    this.pendingReactantName = null;
+  cancelArchive() {
+    this.isArchiveReactantModalOpen = false;
+    this.pendingReactant = undefined;
   }
 
-  executeDelete() {
-    if (this.pendingReactantName !== null) {
-      const tempName = this.pendingReactantName;
-      this.reactants = this.reactants.filter((r) => r.shortName !== this.pendingReactantName);
+  executeArchive() {
+    //TODO: call archive
+    if (this.pendingReactant) {
+      const shortName = this.pendingReactant.uuid;
+      this.reactants = this.reactants.filter((r) => r.uuid !== this.pendingReactant?.uuid);
       this.onSearch();
       this.notification.success(
-        'Reactant Removed',
-        `The reactant "${tempName}" was successfully removed.`,
+        'Reactant Archived',
+        `The reactant "${shortName}" was successfully archived.`,
       );
     }
-    this.cancelDelete();
+    this.cancelArchive();
   }
 
-  deleteReactant(shortName: string | undefined): void {
-    if (!shortName) return;
+  archiveReactant(reactant: ReactantDto | undefined): void {
+    if (!reactant) return;
 
-    this.pendingReactantName = shortName;
-    this.isDeleteReactantModalOpen = true;
+    this.pendingReactant = reactant;
+    this.isArchiveReactantModalOpen = true;
   }
 
   copyToClipboard(text: string): void {
@@ -123,7 +129,7 @@ export class ReactantSiteComponent implements OnInit {
           this.notification.success('Success', 'SMILES copied to clipboard!');
         })
         .catch((err) => {
-          this.notification.error('Failed to copy text', err);
+          this.notification.error('Failed to copy text', err.message || err.error || err);
         });
     } else {
       const textArea = document.createElement('textarea');
@@ -136,7 +142,7 @@ export class ReactantSiteComponent implements OnInit {
   }
 
   openDraw() {
-    this.currentSmilesForModal = ""
+    this.currentSmilesForModal = '';
     this.isDrawModalOpen = true;
   }
 

@@ -12,7 +12,7 @@ export class DragAndDropComponent {
   @Input() allowedExtensions: string[] = [];
   @Input() maxFileSizeMB?: number;
 
-  constructor(private notificationService: NotificationService) {}
+  constructor(private notification: NotificationService) {}
 
   onFileDropped(files: FileList | File[]) {
     this.processFiles(files);
@@ -58,12 +58,12 @@ export class DragAndDropComponent {
 
     if (validFiles.length > 0) {
       this.filesSelected.emit(validFiles);
-      this.notificationService.success('Success', `${validFiles.length} file(s) added.`);
+      this.notification.success('Success', `${validFiles.length} file(s) added.`);
     }
   }
 
   onFileError(errorMessage: string) {
-    this.notificationService.error('Upload Error', errorMessage);
+    this.notification.error('Upload Error', errorMessage);
   }
 
   get acceptedExtensionsString(): string {

@@ -9,7 +9,8 @@
         type="text"
         class="search-input form-control border-start-0 ps-0"
         placeholder="Search users by name, email, or role..."
-        [(ngModel)]="searchTerm"
+        [ngModel]="searchTerm"
+        (ngModelChange)="onSearchChange($event)"
         [ngClass]="searchTerm ? 'border-end-0' : ''"
       />
       @if (searchTerm) {
@@ -90,24 +91,24 @@
         </tr>
         </thead>
         <tbody>
-          @for (user of userList; track user.id) {
+          @for (user of userList; track user.uuid) {
             <tr>
-              <td>{{ user.firstName }} {{ user.lastName }}</td>
-              <td>{{ user.email }}</td>
+              <td class="text-break">{{ user.firstName }} {{ user.lastName }}</td>
+              <td class="text-break">{{ user.email }}</td>
               <td>
-                @if (type === 'active') {
-                  <select class="form-select form-select-sm w-auto" [value]="user.role" (change)="updateUserRole(user, $event)">
-                    <option value="USER">User</option>
-                    <option value="SUPERVISOR">Supervisor</option>
+                @if (type === 'active' || type === 'pending') {
+                  <select class="form-select form-select-sm w-auto" [value]="user.role || ''" (change)="updateUserRole(user, $event)">
+                    <option value="" disabled selected>Select Role...</option>
+                    <option value="USER">USER</option>
+                    <option value="SUPERVISOR">SUPERVISOR</option>
                   </select>
                 } @else {
-                  <span class="text-muted">{{ user.role | titlecase }}</span>
+                  <span class="text-muted">{{ user.role ? user.role : '--' }}</span>
                 }
               </td>
               <td class="text-end">
                 <div class="d-flex justify-content-end gap-2">
                   @if (type === 'pending') {
-                    <button class="primary compact px-3 py-1" (click)="updateUserStatus(user, 'ACTIVATED')">Accept</button>
                     <button class="error compact px-3 py-1" (click)="updateUserStatus(user, 'DEACTIVATED')">Reject</button>
                   }
                   @if (type === 'active') {
@@ -125,6 +126,3 @@
     </div>
   }
 </ng-template>
-
-
-<!-- TODO: Add Modal if needed (deactivate, etc.) -->

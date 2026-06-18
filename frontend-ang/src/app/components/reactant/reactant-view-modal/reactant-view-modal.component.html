@@ -76,7 +76,7 @@
 
       <div class="modal-footer">
         @if (hasWritePermission) {
-          <button type="button" class="btn primary" (click)="editReactant(selectedReactant?.shortName)">Edit Reactant</button>
+          <button type="button" class="btn primary" (click)="editReactant(selectedReactant?.uuid)">Edit Reactant</button>
         }
         <button type="button" class="" (click)="this.close.emit()">Close</button>
       </div>

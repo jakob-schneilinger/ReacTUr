@@ -1,4 +1,12 @@
-import { Component, EventEmitter, Input, OnInit, Output, SimpleChanges } from '@angular/core';
+import {
+  Component,
+  EventEmitter,
+  Input,
+  OnDestroy,
+  OnInit,
+  Output,
+  SimpleChanges,
+} from '@angular/core';
 import {
   FormBuilder,
   FormGroup,
@@ -11,6 +19,10 @@ import {
 import { Router } from '@angular/router';
 import { NotificationService } from '../../../../services/notification.service';
 import { ReactantDetailDto, ReactantDto } from '../../../../dtos/reactant.dto';
+import { OptionService } from '../../../../services/option.service';
+import { ChemicalTypeDto } from '../../../../dtos/selection-option.dto';
+import { Subject, takeUntil } from 'rxjs';
+import { ReactantService } from '../../../../services/reactant.service';
 
 export type FormState = 'create' | 'edit';
 
@@ -25,19 +37,21 @@ declare var initRDKitModule: any;
   ],
   standalone: false,
 })
-export class ReactantDetailsFormComponent implements OnInit {
+export class ReactantDetailsFormComponent implements OnInit, OnDestroy {
+  private destroy$ = new Subject<void>();
   @Input() formState: FormState = 'edit';
   @Input() reactant?: ReactantDetailDto;
 
   @Output() smiles = new EventEmitter<string>();
 
-  isDeleteReactantModalOpen = false;
+  isArchiveReactantModalOpen = false;
   isCancelReactantModalOpen = false;
 
   reactantForm!: FormGroup;
 
   // TODO: fetch from backend
-  knownTypes = ['Solvent', 'Catalyst', 'Substrate', 'Reagent'];
+  chemicalTypes: ChemicalTypeDto[] = [];
+  chemicalTypeNames: string[] = [];
 
   filteredTypes: string[] = [];
   showTypes = false;
@@ -50,15 +64,36 @@ export class ReactantDetailsFormComponent implements OnInit {
     private fb: FormBuilder,
     private router: Router,
     private notification: NotificationService,
+    private optionService: OptionService,
+    private reactantService: ReactantService,
   ) {}
 
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+
   async ngOnInit(): Promise<void> {
+    this.optionService.getOptions('type').subscribe({
+      next: (params) => {
+        this.chemicalTypes = params;
+        this.chemicalTypeNames = this.chemicalTypes.map((t) => t.name);
+      },
+      error: (err) => {
+        this.notification.error(
+          'Type Loading Error',
+          `Please refresh page! Error: ${err.message || err.error || err}`,
+        );
+      },
+    });
+
     this.initForm();
     this.setupFilters();
 
     if (!(window as any)['RDKit']) {
       this.rdkitModule = await initRDKitModule();
       (window as any)['RDKit'] = this.rdkitModule;
+      this.reactantForm?.get('smiles')?.updateValueAndValidity();
     } else {
       this.rdkitModule = (window as any)['RDKit'];
     }
@@ -77,28 +112,32 @@ export class ReactantDetailsFormComponent implements OnInit {
   }
 
   private setupFilters(): void {
-    this.filteredTypes = [...this.knownTypes];
+    this.filteredTypes = this.chemicalTypeNames;
 
-    // Filter Solvents
-    this.reactantForm.get('type1')?.valueChanges.subscribe((value) => {
-      const searchTerm = (value || '').toLowerCase();
-      this.filteredTypes = this.knownTypes.filter((s) => s.toLowerCase().includes(searchTerm));
-      this.activeTypesIndex = -1;
-    });
+    this.reactantForm
+      .get('chemicalType')
+      ?.valueChanges.pipe(takeUntil(this.destroy$))
+      .subscribe((value) => {
+        const searchTerm = (value || '').toLowerCase();
+        this.filteredTypes = this.chemicalTypeNames.filter((s) =>
+          s.toLowerCase().includes(searchTerm),
+        );
+        this.activeTypesIndex = -1;
+      });
   }
 
   selectOption(controlName: string, value: string): void {
     this.reactantForm.get(controlName)?.setValue(value);
-    if (controlName === 'type1') this.showTypes = false;
+    if (controlName === 'chemicalType') this.showTypes = false;
   }
 
-  onBlur(dropdownName: 'type1'): void {
+  onBlur(dropdownName: 'chemicalType'): void {
     setTimeout(() => {
-      if (dropdownName === 'type1') this.showTypes = false;
+      if (dropdownName === 'chemicalType') this.showTypes = false;
     }, 200);
   }
 
-  onKeyDown(event: KeyboardEvent, dropdown: 'type1'): void {
+  onKeyDown(event: KeyboardEvent, dropdown: 'chemicalType'): void {
     let activeIndex: number;
     let filteredList: string[];
 
@@ -121,13 +160,16 @@ export class ReactantDetailsFormComponent implements OnInit {
       }
     }
 
-    if (dropdown === 'type1') this.activeTypesIndex = activeIndex;
+    if (dropdown === 'chemicalType') this.activeTypesIndex = activeIndex;
   }
 
   ngOnChanges(changes: SimpleChanges): void {
     if (this.reactantForm) {
       if (changes['reactant'] && this.reactant) {
-        this.reactantForm.patchValue(this.reactant);
+        this.reactantForm.patchValue({
+          ...this.reactant,
+          chemicalType: this.reactant.chemicalType.name,
+        });
       }
     }
   }
@@ -137,7 +179,7 @@ export class ReactantDetailsFormComponent implements OnInit {
       // Required Inputs
       shortName: [{ value: '', disabled: this.isEditMode }, Validators.required],
       smiles: ['', [Validators.required, this.smilesValidator()]],
-      type1: ['', [Validators.required, this.inListValidator(this.knownTypes)]],
+      chemicalType: ['', [Validators.required, this.inListValidator()]],
 
       // Optional Inputs
       chemicalName: [''],
@@ -150,7 +192,10 @@ export class ReactantDetailsFormComponent implements OnInit {
     if (this.reactant) {
       this.syncArray('additionalShortNames', this.reactant.additionalShortNames);
       this.syncArray('references', this.reactant.references);
-      this.reactantForm.patchValue(this.reactant);
+      this.reactantForm.patchValue({
+        ...this.reactant,
+        chemicalType: this.reactant.chemicalType.name,
+      });
     }
 
     this.reactantForm.get('smiles')?.valueChanges.subscribe((value: string) => {
@@ -207,11 +252,11 @@ export class ReactantDetailsFormComponent implements OnInit {
     };
   }
 
-  inListValidator(validOptions: string[]): ValidatorFn {
+  inListValidator(): ValidatorFn {
     return (control: AbstractControl): ValidationErrors | null => {
       if (!control.value) return null;
 
-      const isValid = validOptions.includes(control.value);
+      const isValid = this.chemicalTypeNames.includes(control.value);
 
       return isValid ? null : { notInList: { value: control.value } };
     };
@@ -292,23 +337,34 @@ export class ReactantDetailsFormComponent implements OnInit {
     this.router.navigate(['/reactants']);
   }
 
-  onDelete(): void {
-    this.isDeleteReactantModalOpen = true;
+  onArchive(): void {
+    this.isArchiveReactantModalOpen = true;
   }
 
-  executeDelete(): void {
-    this.isDeleteReactantModalOpen = false;
-    // TODO: Call backend delete
-    this.notification.success(
-      'Reactant Removed',
-      `The reactant "${this.reactantForm.get('shortName')?.value}" was successfully removed.`,
-    );
-    this.reactantForm.reset();
-    this.router.navigate(['/reactants']);
+  executeArchive(): void {
+    this.isArchiveReactantModalOpen = false;
+    // TODO: Call backend Archive
+    if (this.reactant) {
+      this.reactantService.archiveReactant(this.reactant.uuid).subscribe({
+        next: () => {
+          this.notification.success(
+            'Reactant Archived',
+            `The reactant "${this.reactantForm.get('shortName')?.value}" was successfully archived.`,
+          );
+          this.reactantForm.reset();
+          this.router.navigate(['/reactants']);
+        },
+        error: (err) =>
+          this.notification.error(
+            'Archive Failed',
+            `Archiving of Reactant "${this.reactantForm.get('shortName')?.value}" failed! Error: ${err.message || err.error || err}`,
+          ),
+      });
+    }
   }
 
   closeModals(): void {
     this.isCancelReactantModalOpen = false;
-    this.isDeleteReactantModalOpen = false;
+    this.isArchiveReactantModalOpen = false;
   }
 }

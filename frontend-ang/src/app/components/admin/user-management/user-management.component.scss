@@ -41,7 +41,7 @@
     }
 
     td, th {
-      padding: 1rem;
+      padding: 0.5rem;
       border-bottom: 1px solid $background;
     }
 
@@ -54,7 +54,17 @@
     @extend %shared-input;
     padding-top: 0.25rem;
     padding-bottom: 0.25rem;
+    padding-left: .5rem;
+    padding-right: 1.5rem;
+    min-width: 120px;
+
+    @media (max-width: 1100px) {
+      width: 10px !important;
+      min-width: 0 !important;
+    }
+
   }
+
 }
 
 .warning {

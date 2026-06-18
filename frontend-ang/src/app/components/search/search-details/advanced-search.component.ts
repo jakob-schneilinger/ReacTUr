@@ -20,7 +20,10 @@ export class AdvancedSearchComponent {
     }
   }
 
-  constructor(private userService: UserService, private notifications: NotificationService) {}
+  constructor(
+    private userService: UserService,
+    private notification: NotificationService,
+  ) {}
 
   dateDay: string = '';
   dateMonth: string = '';
@@ -42,8 +45,11 @@ export class AdvancedSearchComponent {
     let scientists: string[] = [];
     if (this.scientist !== '') {
       this.userService.getAllUsers().subscribe({
-        next: (users) => { scientists = users.map((u) => u.uuid); },
-        error: (err) => this.notifications.error("Error Fetching Users", err)
+        next: (users) => {
+          scientists = users.map((u) => u.uuid);
+        },
+        error: (err) =>
+          this.notification.error('Error Fetching Users', err.message || err.error || err),
       });
     }
 

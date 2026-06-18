@@ -24,7 +24,7 @@ export class NotificationsComponent implements OnInit {
   }
 
   constructor(
-    private not: NotificationService,
+    private notification: NotificationService,
     private globals: Globals,
     private cdr: ChangeDetectorRef
   ) {
@@ -75,7 +75,7 @@ export class NotificationsComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.not.notification$.subscribe({
+    this.notification.notification$.subscribe({
       next: (notification) => this.spawnNotification(notification),
       error: console.error,
     });

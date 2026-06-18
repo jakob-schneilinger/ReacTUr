@@ -61,7 +61,7 @@ export class ReactantViewModalComponent implements OnInit {
       : '-';
   }
 
-  editReactant(shortName: string | undefined): void {
-    if (shortName) this.router.navigate(['/reactants', shortName]);
+  editReactant(uuid: string | undefined): void {
+    if (uuid) this.router.navigate(['/reactants', uuid]);
   }
 }

@@ -125,8 +125,18 @@ export class ExperimentService {
     return of(results).pipe(delay(500));
   }
 
+  getExperimentData(experimentId: string): Observable<ExperimentDataDto> {
+    // TODO: Backend-Call:
+    // return this.httpClient.get<ExperimentData>(`${this.userBaseUri}/${experimentId}/data`);
+
+    const mockData = MOCK_EXPERIMENT_DATA.find((d) => d.experimentId === experimentId);
+    return of(mockData || { experimentId, measurements: [] });
+  }
+
   getBulkExperimentData(experimentIds: number[]): Observable<ExperimentDataDto[]> {
-    const mockData = MOCK_EXPERIMENT_DATA.filter((d) => experimentIds.includes(parseInt(d.experimentId)));
+    const mockData = MOCK_EXPERIMENT_DATA.filter((d) =>
+      experimentIds.includes(parseInt(d.experimentId)),
+    );
     return of(mockData).pipe(delay(800));
   }
 }

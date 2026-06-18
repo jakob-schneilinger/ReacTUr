@@ -1,5 +1,5 @@
 import { Component, Input, Output, EventEmitter, OnInit, ChangeDetectorRef } from '@angular/core';
-import { ExperimentDto } from '../../dtos/experiment.dto';
+import { GetExperimentDto } from '../../dtos/experiment.dto';
 import { ExperimentService } from '../../services/experiment.service';
 import { CdkDragDrop, moveItemInArray, transferArrayItem } from '@angular/cdk/drag-drop';
 
@@ -16,7 +16,7 @@ export interface ExportField {
   standalone: false
 })
 export class ExportModalComponent implements OnInit {
-  @Input() selectedExperiments: ExperimentDto[] = [];
+  @Input() selectedExperiments: GetExperimentDto[] = [];
   @Output() close = new EventEmitter<void>();
 
   exportFormat: 'json' | 'csv' = 'json';
@@ -42,7 +42,7 @@ export class ExportModalComponent implements OnInit {
   };
 
   availableFields: ExportField[] = [
-    { id: 'id', label: 'ID', category: 'core' },
+    { id: 'uuid', label: 'ID', category: 'core' },
     { id: 'reactants', label: 'Reactants', category: 'core' },
     { id: 'date', label: 'Date', category: 'core' },
     { id: 'scientist', label: 'Scientist', category: 'core' },
@@ -100,12 +100,12 @@ export class ExportModalComponent implements OnInit {
   private cd: ChangeDetectorRef,) {}
 
   ngOnInit() {
-    const idsToLoad = this.selectedExperiments.map(exp => exp.id);
+    const idsToLoad = this.selectedExperiments.map(exp => exp.uuid);
 
-    this.experimentService.getBulkExperimentData(idsToLoad).subscribe(heavyData => {
+    this.experimentService.getBulkExperimentData(idsToLoad.map(id => parseInt(id))).subscribe(heavyData => {
 
       this.fullExportData = this.selectedExperiments.map((exp) => {
-        const matchingHeavyData = heavyData.find((hd) => parseInt(hd.experimentId) === exp.id);
+        const matchingHeavyData = heavyData.find((hd) => hd.experimentId === exp.uuid);
         return {
           ...exp,
           measurements: matchingHeavyData ? matchingHeavyData.measurements : [],
