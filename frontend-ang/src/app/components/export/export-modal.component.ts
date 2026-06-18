@@ -102,7 +102,7 @@ export class ExportModalComponent implements OnInit {
   ngOnInit() {
     const idsToLoad = this.selectedExperiments.map(exp => exp.uuid);
 
-    this.experimentService.getBulkExperimentData(idsToLoad.map(id => parseInt(id))).subscribe(heavyData => {
+    this.experimentService.getBulkExperimentData(idsToLoad).subscribe(heavyData => {
 
       this.fullExportData = this.selectedExperiments.map((exp) => {
         const matchingHeavyData = heavyData.find((hd) => hd.experimentId === exp.uuid);
