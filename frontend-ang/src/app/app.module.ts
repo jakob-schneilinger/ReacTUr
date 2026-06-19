@@ -31,7 +31,7 @@ import {
   ReactantDetailsSiteComponent
 } from './components/reactant/reactant-details-site/reactant-details-site.component';
 import { ReactantViewModalComponent } from './components/reactant/reactant-view-modal/reactant-view-modal.component';
-import { ReactantStructureComponent } from './components/reactant/reactant-structure/reactant-structure.component';
+import { ReactantCardComponent } from './components/reactant/reactant-card/reactant-card.component';
 import {
   ReactantDetailsFormComponent
 } from './components/reactant/reactant-details-site/reactant-details-form/reactant-details-form.component';
@@ -47,6 +47,7 @@ import { UserManagementComponent } from './components/admin/user-management/user
 import { OptionManagementComponent } from './components/admin/option-management/option-management.component';
 import { AppModalComponent } from './components/shared/modal/app-modal.component';
 import { AppConfirmModalComponent } from './components/shared/modal/confirm-modal.component';
+import { ReactantStructureComponent } from './components/reactant/reactant-structure/reactant-structure.component';
 
 @NgModule({
   declarations: [
@@ -70,6 +71,8 @@ import { AppConfirmModalComponent } from './components/shared/modal/confirm-moda
     ReactantDetailsSiteComponent,
     ReactantViewModalComponent,
     ReactantStructureComponent,
+    ReactantCardComponent,
+    ReactantDetailsSiteComponent,
     ReactantDetailsFormComponent,
     FileUploadComponent,
     UploadedFileComponent,

@@ -1,4 +1,5 @@
 import {
+  ChangeDetectorRef,
   Component,
   EventEmitter,
   Input,
@@ -61,6 +62,7 @@ export class ReactantDetailsFormComponent implements OnInit, OnDestroy {
     private notification: NotificationService,
     private optionService: OptionService,
     private reactantService: ReactantService,
+    private cdr: ChangeDetectorRef,
   ) {}
 
   ngOnDestroy(): void {
@@ -73,6 +75,7 @@ export class ReactantDetailsFormComponent implements OnInit, OnDestroy {
       next: (params) => {
         this.chemicalTypes = params;
         this.chemicalTypeNames = this.chemicalTypes.map((t) => t.name);
+        this.cdr.markForCheck();
       },
       error: (err) => {
         this.notification.error(

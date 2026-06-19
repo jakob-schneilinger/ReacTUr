@@ -54,46 +54,18 @@
   <div class="divider"></div>
 
   <div class="d-flex flex-column gap-3 mt-4 reactants-container">
-    <div class="card reactant-card-horizontal shadow-sm" *ngFor="let reactant of filteredReactants">
-
-      <div class="card-body p-3 d-flex align-items-center">
-
-        <div class="d-flex align-items-center gap-2 pe-3 short-name">
-          <h5 class="fw-bold mb-0 text-truncate" [title]="reactant.shortName">
-            {{ reactant.shortName }}
-          </h5>
-          <span class="badge type-badge">{{ reactant.chemicalType.name }}</span>
-        </div>
-
-        <div class="text-muted text-truncate pe-3 chemical-name" [title]="reactant.chemicalName || ''">
-          {{ reactant.chemicalName || '--' }}
-        </div>
-
-        <div class="smiles-container d-flex align-items-center px-3 mx-2 flex-grow-1" >
-          <div class="text-truncate me-2" [title]="reactant.smiles">
-            {{ reactant.smiles }}
-          </div>
-          <button class="btn-sm p-0 ms-auto copy-btn text-muted" (click)="copyToClipboard(reactant.smiles)" title="Copy SMILES">
-            <i class="bi bi-clipboard"></i>
-          </button>
-        </div>
-
-        <div class="d-flex justify-content-end gap-2 ms-auto ps-3" [ngStyle]="{'min-width': hasWritePermission ? '125   px' : '47px'}">
-          <button class="compact" (click)="viewDetails(reactant.uuid)" title="View Details">
-            <i class="bi bi-file-earmark-text"></i>
-          </button>
-          @if (hasWritePermission) {
-            <button class="primary compact" (click)="editReactant(reactant.uuid)" title="Edit Reactant">
-              <i class="bi bi-pencil"></i>
-            </button>
-            <button class="error compact" (click)="archiveReactant(reactant)" title="Archive Reactant">
-              <i class="bi bi-trash"></i>
-            </button>
-          }
-        </div>
-
-      </div>
-    </div>
+    @for (reactant of filteredReactants; track reactant.uuid) {
+      <app-reactant-card
+        [reactant]="reactant"
+        [hasWritePermission]="hasWritePermission"
+        [isArchived]="showArchived"
+        (view)="viewDetails($event)"
+        (edit)="editReactant($event)"
+        (archive)="archiveReactant($event)"
+        (restore)="restoreReactant($event)"
+        (copySmiles)="copyToClipboard($event)">
+      </app-reactant-card>
+    }
   </div>
 
   <div class="row" *ngIf="filteredReactants.length === 0">

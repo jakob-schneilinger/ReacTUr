@@ -17,7 +17,7 @@ export const MOCK_USERS = {
     firstName: 'Albert',
     lastName: 'Einstein',
     email: 'albert@lab.com',
-    role: Role.USER,
+    role: Role.SUPERVISOR,
     deactivatedAt: null,
   },
   BOHR: {

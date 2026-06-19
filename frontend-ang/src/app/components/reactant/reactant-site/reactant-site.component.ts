@@ -44,16 +44,18 @@ export class ReactantSiteComponent implements OnInit {
   ngOnInit(): void {
     this.role = this.authService.getUserRole();
     this.hasWritePermission = this.role != 'USER';
-    this.loadReactants()
+    this.loadReactants();
   }
 
   private loadReactants() {
     this.reactantService.getAllReactants().subscribe({
       next: (value) => {
         this.reactants = value;
-        this.activeReactants = this.reactants;
-        this.onSearch();
-        this.cdr.markForCheck();
+        if (!this.showArchived) {
+          this.activeReactants = this.reactants;
+          this.onSearch();
+          this.cdr.markForCheck();
+        }
       },
       error: (err) =>
         this.notification.error('Reactants unavailable', err.message || err.error || err),
@@ -63,7 +65,11 @@ export class ReactantSiteComponent implements OnInit {
       this.reactantService.getArchivedReactants().subscribe({
         next: (value) => {
           this.archivedReactants = value;
-          this.cdr.markForCheck();
+          if (this.showArchived) {
+            this.activeReactants = this.archivedReactants;
+            this.onSearch();
+            this.cdr.markForCheck();
+          }
         },
         error: (err) =>
           this.notification.error(
@@ -143,8 +149,8 @@ export class ReactantSiteComponent implements OnInit {
         },
         error: (err) => {
           this.notification.error('Archiving Failed', err.message);
-        }
-      })
+        },
+      });
     }
   }
 
@@ -154,6 +160,27 @@ export class ReactantSiteComponent implements OnInit {
     this.pendingReactant = reactant;
     this.isArchiveReactantModalOpen = true;
   }
+
+  restoreReactant(reactant: ReactantDto | undefined): void {
+    //TODO: think about restore Modal. is it needed?
+    if (reactant) {
+      const shortName = reactant.shortName;
+      this.reactantService.restoreReactant(reactant.uuid).subscribe({
+        next: (value) => {
+          this.notification.success(
+            'Reactant Restored',
+            `The reactant "${shortName}" was successfully restored.`,
+          );
+          setTimeout(() => {
+            this.loadReactants();
+          });
+        },
+        error: (err) => {
+          this.notification.error('Restoring Failed', err.message);
+        },
+      });
+    }
+  };
 
   copyToClipboard(text: string): void {
     if (navigator.clipboard) {
