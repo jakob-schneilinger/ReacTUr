@@ -1,3 +1,5 @@
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { OptionService } from '../../../services/option.service';
 import { SelectionOptionDto } from '../../../dtos/selection-option.dto';
@@ -9,7 +11,8 @@ type OptionCategory = 'type' | 'modality' | 'instrument' | 'solvent';
   selector: 'app-option-management',
   templateUrl: './option-management.component.html',
   styleUrls: ['./option-management.component.scss'],
-  standalone: false,
+  standalone: true,
+  imports: [CommonModule, FormsModule],
 })
 export class OptionManagementComponent implements OnInit {
   categories: { label: string; value: OptionCategory }[] = [

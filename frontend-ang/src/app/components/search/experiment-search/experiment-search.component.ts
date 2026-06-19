@@ -1,3 +1,6 @@
+import { CommonModule } from '@angular/common';
+import { ReactantSelectorComponent } from '../../shared/reactant-selector/reactant-selector.component';
+import { SubstructureSearchComponent } from '../sub-structure-search/sub-structure-search.component';
 import { Component, Output, EventEmitter, Input } from '@angular/core';
 import { ReactantDto } from '../../../dtos/reactant.dto';
 import { MOCK_REACTANTS } from '../../../mock/mock-experiments';
@@ -6,7 +9,8 @@ import { MOCK_REACTANTS } from '../../../mock/mock-experiments';
   selector: 'app-experiment-search',
   templateUrl: './experiment-search.component.html',
   styleUrls: ['./experiment-search.component.scss'],
-  standalone: false,
+  standalone: true,
+  imports: [CommonModule, ReactantSelectorComponent, SubstructureSearchComponent],
 })
 export class ExperimentSearchComponent {
   @Output() searchChanged = new EventEmitter<{

@@ -1,3 +1,6 @@
+import { CommonModule } from '@angular/common';
+import { AppModalComponent } from '../../shared/modal/app-modal.component';
+import { UploadedFileComponent } from '../../shared/file-upload/uploaded-file/uploaded-file.component';
 import { Component, Input, Output, EventEmitter, OnInit, ChangeDetectorRef } from '@angular/core';
 import { NotificationService } from '../../../services/notification.service';
 import { Router } from '@angular/router';
@@ -11,7 +14,8 @@ import { ExperimentService } from '../../../services/experiment.service';
   selector: 'app-experiment-view-modal',
   templateUrl: './experiment-view-modal.component.html',
   styleUrls: ['./experiment-view-modal.component.scss'],
-  standalone: false,
+  standalone: true,
+  imports: [CommonModule, AppModalComponent, UploadedFileComponent],
 })
 export class ExperimentViewModalComponent implements OnInit {
   @Input() selectedExperiment: GetExperimentDto | undefined;

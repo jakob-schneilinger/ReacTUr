@@ -1,3 +1,5 @@
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { GetUserDto } from '../../../dtos/user.dto';
 import { UserService } from '../../../services/user.service';
@@ -9,7 +11,8 @@ import { OptionService } from '../../../services/option.service';
   selector: 'app-user-management',
   templateUrl: './user-management.component.html',
   styleUrls: ['./user-management.component.scss'],
-  standalone: false,
+  standalone: true,
+  imports: [CommonModule, FormsModule],
 })
 export class UserManagementComponent implements OnInit {
   searchTerm: string = '';

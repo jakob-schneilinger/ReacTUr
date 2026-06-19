@@ -1,3 +1,6 @@
+import { CommonModule } from '@angular/common';
+import { ReactiveFormsModule } from '@angular/forms';
+import { AppConfirmModalComponent } from '../../../shared/modal/confirm-modal.component';
 import { Component, Input, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, FormArray, Validators, ValidatorFn, AbstractControl, ValidationErrors } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -11,7 +14,8 @@ export type FormState = 'create' | 'edit';
   selector: 'app-experiment-details-form',
   templateUrl: './experiment-details-form.component.html',
   styleUrls: ['./experiment-details-form.component.scss'],
-  standalone: false,
+  standalone: true,
+  imports: [CommonModule, ReactiveFormsModule, AppConfirmModalComponent],
 })
 export class ExperimentDetailsFormComponent implements OnInit {
   @Input() formState: FormState = 'create';

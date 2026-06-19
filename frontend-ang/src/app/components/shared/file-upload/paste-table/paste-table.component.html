@@ -47,18 +47,18 @@
             Showing preview of the first <strong>{{ previewData.length }}</strong> rows.
             All <strong>{{ tableData.length }}</strong> rows are saved and ready for export.
           </div>
-          <table>
-            <tbody>
-              @for (row of previewData; track $index) {
-                <tr [class.header-row]="$index === 0">
-                  @for (cell of row; track $index) {
-                    <td>{{ cell }}</td>
-                  }
-                </tr>
-              }
-            </tbody>
-          </table>
         }
+        <table>
+          <tbody>
+            @for (row of previewData; track $index) {
+              <tr [class.header-row]="$index === 0">
+                @for (cell of row; track $index) {
+                  <td>{{ cell }}</td>
+                }
+              </tr>
+            }
+          </tbody>
+        </table>
       </div>
     }
 

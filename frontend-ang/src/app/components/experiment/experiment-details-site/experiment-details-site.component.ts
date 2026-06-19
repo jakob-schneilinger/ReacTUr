@@ -1,3 +1,7 @@
+import { CommonModule } from '@angular/common';
+import { LayoutComponent } from '../../shared/layout/layout.component';
+import { ExperimentDetailsFormComponent } from './experiment-detail-form/experiment-details-form.component';
+import { FileUploadComponent } from '../../shared/file-upload/file-upload.component';
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { AuthService } from '../../../services/auth.service';
@@ -12,7 +16,8 @@ export type FormState = 'create' | 'edit';
   selector: 'app-experiment-details-site',
   templateUrl: './experiment-details-site.component.html',
   styleUrls: ['./experiment-details-site.component.scss'],
-  standalone: false,
+  standalone: true,
+  imports: [CommonModule, LayoutComponent, ExperimentDetailsFormComponent, FileUploadComponent],
 })
 export class ExperimentDetailsSiteComponent implements OnInit {
   constructor(

@@ -1,3 +1,6 @@
+import { CommonModule } from '@angular/common';
+import { RouterModule } from '@angular/router';
+import { ExperimentViewModalComponent } from '../../experiment/experiment-view-modal/experiment-view-modal.component';
 import { Component, Input, Output, EventEmitter, OnChanges, SimpleChanges } from '@angular/core';
 import { GetExperimentDto } from '../../../dtos/experiment.dto';
 import { NotificationService } from '../../../services/notification.service';
@@ -10,7 +13,8 @@ export type SearchState = 'initial' | 'no-results' | 'has-results';
   selector: 'app-experiment-results',
   templateUrl: './search-results.component.html',
   styleUrls: ['./search-results.component.scss'],
-  standalone: false,
+  standalone: true,
+  imports: [CommonModule, RouterModule, ExperimentViewModalComponent],
 })
 export class SearchResultsComponent implements OnChanges {
   @Input() state: SearchState = 'initial';

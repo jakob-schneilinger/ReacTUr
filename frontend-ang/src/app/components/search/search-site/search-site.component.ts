@@ -1,3 +1,10 @@
+import { CommonModule } from '@angular/common';
+import { RouterModule } from '@angular/router';
+import { LayoutComponent } from '../../shared/layout/layout.component';
+import { ExperimentSearchComponent } from '../experiment-search/experiment-search.component';
+import { AdvancedSearchComponent } from '../search-details/advanced-search.component';
+import { SearchResultsComponent } from '../search-results/search-results.component';
+import { ExportModalComponent } from '../../export/export-modal.component';
 import { Component, OnInit } from '@angular/core';
 import { GetExperimentDto } from '../../../dtos/experiment.dto';
 import { ExperimentService } from '../../../services/experiment.service';
@@ -9,7 +16,16 @@ declare var initRDKitModule: any;
   selector: 'app-search-site',
   templateUrl: './search-site.component.html',
   styleUrls: ['./search-site.component.scss'],
-  standalone: false,
+  standalone: true,
+  imports: [
+    CommonModule,
+    RouterModule,
+    LayoutComponent,
+    ExperimentSearchComponent,
+    AdvancedSearchComponent,
+    SearchResultsComponent,
+    ExportModalComponent,
+  ],
 })
 export class SearchSiteComponent implements OnInit {
   currentSearchState: 'initial' | 'no-results' | 'has-results' = 'initial'; //TODO: Potential für ein Ladespinner dann status loading hinzufügen

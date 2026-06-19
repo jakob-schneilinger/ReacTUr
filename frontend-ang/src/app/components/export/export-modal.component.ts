@@ -1,7 +1,9 @@
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { CdkDropList, CdkDrag, CdkDragDrop, moveItemInArray, transferArrayItem } from '@angular/cdk/drag-drop';
 import { Component, Input, Output, EventEmitter, OnInit, ChangeDetectorRef } from '@angular/core';
 import { GetExperimentDto } from '../../dtos/experiment.dto';
 import { ExperimentService } from '../../services/experiment.service';
-import { CdkDragDrop, moveItemInArray, transferArrayItem } from '@angular/cdk/drag-drop';
 
 export interface ExportField {
   id: string;
@@ -13,7 +15,8 @@ export interface ExportField {
   selector: 'app-export-modal',
   templateUrl: './export-modal.component.html',
   styleUrls: ['./export-modal.component.scss'],
-  standalone: false
+  standalone: true,
+  imports: [CommonModule, FormsModule, CdkDropList, CdkDrag],
 })
 export class ExportModalComponent implements OnInit {
   @Input() selectedExperiments: GetExperimentDto[] = [];

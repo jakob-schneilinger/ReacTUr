@@ -1,3 +1,6 @@
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { DrawMolComponent } from '../draw-mol/draw-mol.component';
 import { Component, Input, Output, EventEmitter, OnInit } from '@angular/core';
 import { ReactantDto } from '../../../dtos/reactant.dto';
 
@@ -5,7 +8,8 @@ import { ReactantDto } from '../../../dtos/reactant.dto';
   selector: 'app-reactant-selector',
   templateUrl: './reactant-selector.component.html',
   styleUrls: ['./reactant-selector.component.scss'],
-  standalone: false,
+  standalone: true,
+  imports: [CommonModule, FormsModule, DrawMolComponent],
 })
 export class ReactantSelectorComponent implements OnInit {
   @Input() label: string = 'Reactant';

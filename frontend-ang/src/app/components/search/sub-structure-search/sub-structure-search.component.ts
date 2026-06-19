@@ -1,3 +1,6 @@
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { DrawMolComponent } from '../../shared/draw-mol/draw-mol.component';
 import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { ReactantDto } from '../../../dtos/reactant.dto';
 
@@ -14,7 +17,8 @@ interface SubstructureRule {
   selector: 'app-substructure-search',
   templateUrl: './sub-structure-search.component.html',
   styleUrls: ['./sub-structure-search.component.scss'],
-  standalone: false,
+  standalone: true,
+  imports: [CommonModule, FormsModule, DrawMolComponent],
 })
 export class SubstructureSearchComponent {
   @Input() availableReactants: ReactantDto[] = [];

@@ -1,3 +1,5 @@
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { Component, Output, EventEmitter, Input } from '@angular/core';
 import { SearchParametersDto } from '../../../dtos/search.dto';
 import { UserService } from '../../../services/user.service';
@@ -7,7 +9,8 @@ import { NotificationService } from '../../../services/notification.service';
   selector: 'app-advanced-search',
   templateUrl: './advanced-search.component.html',
   styleUrls: ['./advanced-search.component.scss'],
-  standalone: false,
+  standalone: true,
+  imports: [CommonModule, FormsModule],
 })
 export class AdvancedSearchComponent {
   @Output() searchChanged = new EventEmitter<SearchParametersDto>();
