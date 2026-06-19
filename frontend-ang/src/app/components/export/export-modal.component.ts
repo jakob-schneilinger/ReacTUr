@@ -116,7 +116,7 @@ export class ExportModalComponent implements OnInit {
       });
       this.isLoading = false;
       this.updatePreview();
-      this.cd.detectChanges();
+      this.cd.markForCheck();
     });
   }
 

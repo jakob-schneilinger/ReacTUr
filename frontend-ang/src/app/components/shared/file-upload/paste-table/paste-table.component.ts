@@ -38,7 +38,7 @@ export class PasteTableComponent {
           this.parsePastedData(pastedText);
         } finally {
           this.isLoading = false;
-          this.cdr.detectChanges();
+          this.cdr.markForCheck();
         }
       }, 50);
     }

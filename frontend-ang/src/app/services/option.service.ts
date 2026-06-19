@@ -39,14 +39,14 @@ export class OptionService {
     this.optionBaseUri = this.globals.backendUri;
   }
 
-  getOptions(category: OptionCategory): Observable<BaseOptionDto[]> {
+  getSelectionOptions(category: OptionCategory): Observable<BaseOptionDto[]> {
     return of([...this.mockData[category]]).pipe(delay(200));
 
     // TODO: Restore when backend exists
     return this.httpClient.get<BaseOptionDto[]>(`${this.optionBaseUri}/options/${category}`);
   }
 
-  addKnownOption(category: OptionCategory, name: string): Observable<BaseOptionDto> {
+  addSelectionOption(category: OptionCategory, name: string): Observable<BaseOptionDto> {
     const newOption: BaseOptionDto = {
       uuid: `${category}-${Math.random().toString(36).substring(2, 9)}`,
       name: name,
@@ -61,7 +61,7 @@ export class OptionService {
     return this.httpClient.post<BaseOptionDto>(`${this.optionBaseUri}/options`, payload);
   }
 
-  updateKnownOptionStatus(uuid: string, isActive: boolean): Observable<BaseOptionDto> {
+  updateSelectionOptionStatus(uuid: string, isActive: boolean): Observable<BaseOptionDto> {
     let foundCategory: OptionCategory | null = null;
     let targetOption: BaseOptionDto | undefined;
 

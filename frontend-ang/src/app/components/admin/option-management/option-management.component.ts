@@ -47,18 +47,20 @@ export class OptionManagementComponent implements OnInit {
   }
 
   loadOptions(forceRefresh: boolean = false): void {
-    if (!forceRefresh && this.optionsCache.has(this.selectedCategory)) {
-      this.options = this.optionsCache.get(this.selectedCategory) || [];
-      return;
+    if (!forceRefresh) {
+      if (this.optionsCache.has(this.selectedCategory)) {
+        this.options = this.optionsCache.get(this.selectedCategory) || [];
+        return;
+      }
+      this.isLoading = true;
     }
 
-    this.isLoading = true;
-    this.optionService.getOptions(this.selectedCategory).subscribe({
+    this.optionService.getSelectionOptions(this.selectedCategory).subscribe({
       next: (data) => {
         this.options = data;
         this.optionsCache.set(this.selectedCategory, data);
         this.isLoading = false;
-        this.cdr.detectChanges();
+        this.cdr.markForCheck();
       },
       error: (err) => {
         this.notification.error(
@@ -72,7 +74,7 @@ export class OptionManagementComponent implements OnInit {
 
   toggleOptionStatus(option: SelectionOptionDto): void {
     const newStatus = !!option.archivedAt;
-    this.optionService.updateKnownOptionStatus(option.uuid, newStatus).subscribe({
+    this.optionService.updateSelectionOptionStatus(option.uuid, newStatus).subscribe({
       next: (updatedOption) => {
         option.archivedAt = updatedOption.archivedAt;
         this.notification.success('Option status updated successfully');
@@ -86,11 +88,12 @@ export class OptionManagementComponent implements OnInit {
     const value = this.newOptionValue.trim();
     if (!value) return;
 
-    this.optionService.addKnownOption(this.selectedCategory, value).subscribe({
+    this.optionService.addSelectionOption(this.selectedCategory, value).subscribe({
       next: (newOption) => {
-        this.loadOptions(true);
         this.newOptionValue = '';
+        this.loadOptions(true);
         this.notification.success('New option added successfully');
+        this.cdr.markForCheck();
       },
       error: (err) =>
         this.notification.error('Failed to add new option', err.message || err.error || err),

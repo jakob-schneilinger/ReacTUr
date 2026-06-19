@@ -229,7 +229,7 @@ export class ReactantStructureComponent implements AfterViewInit, OnInit, OnChan
         const svg = mol.get_svg();
         this.svg2D = this.sanitizer.bypassSecurityTrustHtml(svg);
 
-        this.cd.detectChanges();
+        this.cd.markForCheck();
       } else {
         this.svg2D = null;
       }

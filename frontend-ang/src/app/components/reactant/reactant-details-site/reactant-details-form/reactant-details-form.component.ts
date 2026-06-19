@@ -85,7 +85,7 @@ export class ReactantDetailsFormComponent implements OnInit, OnDestroy {
   }
 
   async ngOnInit(): Promise<void> {
-    this.optionService.getOptions('type').subscribe({
+    this.optionService.getSelectionOptions('type').subscribe({
       next: (params) => {
         this.chemicalTypes = params;
         this.chemicalTypeNames = this.chemicalTypes.map((t) => t.name);

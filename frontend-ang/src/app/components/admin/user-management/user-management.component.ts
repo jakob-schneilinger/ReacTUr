@@ -63,7 +63,7 @@ export class UserManagementComponent implements OnInit {
     this.activeUsers = filteredBySearch.filter((user) => !!user.role && !user.deactivatedAt);
     this.deactivatedUsers = filteredBySearch.filter((user) => !!user.deactivatedAt);
 
-    this.cdr.detectChanges();
+    this.cdr.markForCheck();
   }
 
   togglePanel(panel: 'pending' | 'active' | 'deactivated'): void {
