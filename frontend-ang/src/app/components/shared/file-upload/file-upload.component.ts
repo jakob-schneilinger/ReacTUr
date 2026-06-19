@@ -1,3 +1,8 @@
+import { CommonModule } from '@angular/common';
+import { DragAndDropComponent } from './drag-and-drop/drag-and-drop.component';
+import { PasteTableComponent } from './paste-table/paste-table.component';
+import { UploadedFileComponent } from './uploaded-file/uploaded-file.component';
+import { AppConfirmModalComponent } from '../modal/confirm-modal.component';
 import {
   Component,
   EventEmitter,
@@ -16,7 +21,14 @@ import { ExperimentService } from '../../../services/experiment.service';
   selector: 'app-file-upload',
   templateUrl: './file-upload.component.html',
   styleUrls: ['./file-upload.component.scss'],
-  standalone: false,
+  standalone: true,
+  imports: [
+    CommonModule,
+    DragAndDropComponent,
+    PasteTableComponent,
+    UploadedFileComponent,
+    AppConfirmModalComponent
+  ],
 })
 export class FileUploadComponent implements OnInit, OnChanges {
   @Input() allowedExtensions: string[] = [];

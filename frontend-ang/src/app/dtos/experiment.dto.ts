@@ -1,6 +1,6 @@
 import { MetadataDto, GetMetadataDto, SaveMetadataDto } from './metadata.dto';
 import { ReactantDto } from './reactant.dto';
-import { GetUserDto, UserDto } from './user.dto';
+import { GetUserDto } from './user.dto';
 import { DetailsDto } from './details.dto';
 
 // old

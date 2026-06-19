@@ -1,11 +1,8 @@
 import { Component, Input, Output, EventEmitter, OnInit, ChangeDetectorRef } from '@angular/core';
-import { ReactantDto } from '../../../dtos/reactant.dto';
-import { ReactantService } from '../../../services/reactant.service';
 import { NotificationService } from '../../../services/notification.service';
 import { Router } from '@angular/router';
 import {
   ExperimentAttachmentsDto,
-  ExperimentDto,
   GetExperimentDto,
 } from '../../../dtos/experiment.dto';
 import { ExperimentService } from '../../../services/experiment.service';

@@ -16,7 +16,11 @@
 
   <div class="view-wrapper">
     <div class="viewer-container container-2d" [class.active-view]="viewMode === '2D'">
-      <div class="rdkit-svg-container" [innerHTML]="svg2D"></div>
+      @if (smiles === "") {
+        <p class="text-secondary">Add Smiles for 2D-Structure</p>
+      }
+      <div class="rdkit-svg-container" [innerHTML]="svg2D">
+      </div>
     </div>
 
     <div #viewerContainer class="viewer-container container-3d" [class.active-view]="viewMode === '3D'" [class.d-none]="!structure">

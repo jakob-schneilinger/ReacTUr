@@ -38,35 +38,14 @@
     }
   </div>
 
-  <div class="input-group">
-    <label>Type</label>
-    <div class="search-field">
-      <input
-        type="text"
-        list="chemicalTypesList"
-        formControlName="chemicalType"
-        [class.is-invalid]="isInvalid('chemicalType')"
-        placeholder="Select or type..."
-        autocomplete="off" />
-
-      <datalist id="chemicalTypesList">
-        @for (type of chemicalTypeNames; track type) {
-          <option [value]="type"></option>
-        }
-      </datalist>
-
-      @if (reactantForm.get('chemicalType')?.value) {
-        <span class="icon bi bi-x text-black clear-btn" (click)="clearControl('chemicalType')"></span>
-      }
-    </div>
-
-    @if (isInvalid('chemicalType') && !reactantForm.get('chemicalType')?.hasError('notInList')) {
-      <div class="error-message">Type is required.</div>
-    }
-    @if (reactantForm.get('chemicalType')?.hasError('notInList')) {
-      <div class="error-message">Please select a valid type from the list.</div>
-    }
-  </div>
+  <app-option-selector
+    label="Type"
+    [control]="chemicalTypeControl"
+    [options]="chemicalTypes"
+    datalistId="chemicalTypesList"
+    placeholder="Select or type..."
+    errorMessage="Please select a valid type from the list.">
+  </app-option-selector>
 
   <div class="divider-container">
     <div class="divider"></div>
@@ -84,29 +63,13 @@
     </div>
   </div>
 
-  <div class="input-group">
-    <label>Additional Short Names</label>
-    <div formArrayName="additionalShortNames" class="array-fields-container">
-      @for (control of additionalShortNames.controls; track $index) {
-        <div class="search-field">
-          <input
-            type="text"
-            [formControlName]="$index"
-            [id]="'additionalShortNames-' + $index"
-            placeholder="Value" />
-          @if (control.value) {
-            <span class="icon bi bi-x text-black clear-btn" (click)="clearArrayControl('additionalShortNames', $index)" title="Clear"></span>
-          }
-        </div>
-        @if (additionalShortNames.length > 1) {
-          <span class="icon bi bi-dash-circle text-danger" (click)="removeArrayField('additionalShortNames', $index)" title="Remove Field"></span>
-        }
-      }
-    </div>
-    <div class="add-field-btn" (click)="addArrayField('additionalShortNames')">
-      <i class="bi bi-plus-circle me-1"></i> Add short name
-    </div>
-  </div>
+  <app-dynamic-array-input
+    label="Additional Short Names"
+    [formArray]="additionalShortNames"
+    arrayName="additionalShortNames"
+    addButtonLabel="Add short name"
+    placeholder="Value">
+  </app-dynamic-array-input>
 
   <div class="input-group">
     <label>CAS Number</label>
@@ -118,30 +81,13 @@
     </div>
   </div>
 
-  <div class="input-group">
-    <label>Reference(s)</label>
-    <div formArrayName="references" class="array-fields-container">
-      @for (control of references.controls; track $index) {
-        <div class="search-field">
-          <input
-            type="text"
-            [formControlName]="$index"
-            [id]="'references-' + $index"
-            placeholder="Value" />
-          @if (control.value) {
-            <span class="icon bi bi-x text-black clear-btn" (click)="clearArrayControl('references', $index)" title="Clear"></span>
-          }
-        </div>
-        @if (references.length > 1) {
-          <span class="icon bi bi-dash-circle text-danger" (click)="removeArrayField('references', $index)" title="Remove Field"></span>
-        }
-      }
-    </div>
-
-    <div class="add-field-btn" (click)="addArrayField('references')">
-      <i class="bi bi-plus-circle me-1"></i> Add reference
-    </div>
-  </div>
+  <app-dynamic-array-input
+    label="Reference(s)"
+    [formArray]="references"
+    arrayName="references"
+    addButtonLabel="Add reference"
+    placeholder="Value">
+  </app-dynamic-array-input>
 
   <div class="input-group">
     <label>Comment</label>

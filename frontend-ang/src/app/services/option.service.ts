@@ -1,10 +1,4 @@
 import {
-  ChemicalTypeDto,
-  SolventDto,
-  InstrumentDto,
-  ModalityDto
-} from '../dtos/selection-option.dto';
-import {
   MOCK_CHEM_TYPES,
   MOCK_SOLVENTS,
   MOCK_INSTRUMENTS,

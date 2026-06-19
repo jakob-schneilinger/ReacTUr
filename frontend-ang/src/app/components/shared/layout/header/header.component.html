@@ -45,24 +45,19 @@
       <div id="profile" ngbDropdownToggle title="User Profile" class="bi bi-person"></div>
 
       <div ngbDropdownMenu>
-        <!-- logged in -->
-        <ng-container *ngIf="isLoggedIn; else loggedOutMenu">
+        @if (isLoggedIn) {
           <button ngbDropdownItem disabled>Hallo, {{ user?.firstName }}</button>
           <div class="dropdown-divider"></div>
           <button ngbDropdownItem (click)="logout()" class="text-danger logout-button">
             Logout
             <i id="logout_icon" title="Logout" class="bi bi-box-arrow-right"></i>
           </button>
-        </ng-container>
-
-        <!-- not logged in -->
-        <ng-template #loggedOutMenu>
+        } @else {
           <button ngbDropdownItem routerLink="/login">
             Login
             <i id="login_icon" title="Login" class="bi bi-box-arrow-right"></i>
           </button>
-        </ng-template>
-
+        }
       </div>
     </div>
     <div class="layout"></div>

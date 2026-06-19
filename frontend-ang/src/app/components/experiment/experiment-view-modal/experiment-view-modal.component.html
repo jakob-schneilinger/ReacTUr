@@ -4,90 +4,98 @@
   size="xl"
   (close)="close.emit()">
 
-  <div body class="container-fluid" *ngIf="selectedExperiment">
-    <div class="row">
+  @if (selectedExperiment) {
+    <div body class="container-fluid">
+      <div class="row">
 
-      <div class="col-md-6 pe-4">
-        <h6 class="border-bottom pb-2 mb-3 text-primary">Experiment Metadata</h6>
+        <div class="col-md-6 pe-4">
+          <h6 class="border-bottom pb-2 mb-3 text-primary">Experiment Metadata</h6>
 
-        <dl class="row" *ngIf="selectedExperiment.metadata as meta">
-          <dt class="col-sm-4">Date</dt>
-          <dd class="col-sm-8 text-break">{{ meta.date | date:'mediumDate' }}</dd>
+          @if (selectedExperiment.metadata; as meta) {
+            <dl class="row">
+              <dt class="col-sm-4">Date</dt>
+              <dd class="col-sm-8 text-break">{{ meta.date | date:'mediumDate' }}</dd>
 
-          <dt class="col-sm-4">Scientist</dt>
-          <dd class="col-sm-8 text-break">{{ meta.scientist.firstName }} {{ meta.scientist.lastName }}</dd>
+              <dt class="col-sm-4">Scientist</dt>
+              <dd class="col-sm-8 text-break">{{ meta.scientist.firstName }} {{ meta.scientist.lastName }}</dd>
 
-          <dt class="col-sm-4">Temperature</dt>
-          <dd class="col-sm-8 text-break">{{ meta.temperature }} &deg;C</dd>
+              <dt class="col-sm-4">Temperature</dt>
+              <dd class="col-sm-8 text-break">{{ meta.temperature }} &deg;C</dd>
 
-          <dt class="col-sm-4">Solvent</dt>
-          <dd class="col-sm-8 text-break">{{ meta.solvent.name }}</dd>
+              <dt class="col-sm-4">Solvent</dt>
+              <dd class="col-sm-8 text-break">{{ meta.solvent.name }}</dd>
 
-          <dt class="col-sm-4">Concentrations</dt>
-          <dd class="col-sm-8 text-break">{{ concentrationText }}</dd>
+              <dt class="col-sm-4">Concentrations</dt>
+              <dd class="col-sm-8 text-break">{{ concentrationText }}</dd>
 
-          <dt class="col-sm-4">Instrument</dt>
-          <dd class="col-sm-8 text-break">{{ meta.instrument?.name || '-' }}</dd>
+              <dt class="col-sm-4">Instrument</dt>
+              <dd class="col-sm-8 text-break">{{ meta.instrument?.name || '-' }}</dd>
 
-          <dt class="col-sm-4">Modality</dt>
-          <dd class="col-sm-8 text-break">{{ meta.modality?.name || '-' }}</dd>
+              <dt class="col-sm-4">Modality</dt>
+              <dd class="col-sm-8 text-break">{{ meta.modality?.name || '-' }}</dd>
 
-          <dt class="col-sm-4">Wavelength</dt>
-          <dd class="col-sm-8 text-break">{{ meta.wavelength ? meta.wavelength + ' nm' : '-' }}</dd>
+              <dt class="col-sm-4">Wavelength</dt>
+              <dd class="col-sm-8 text-break">{{ meta.wavelength ? meta.wavelength + ' nm' : '-' }}</dd>
 
-          <dt class="col-sm-4">Comment</dt>
-          <dd class="col-sm-8 text-break">{{ meta.comment || '-' }}</dd>
-        </dl>
-      </div>
-
-      <div class="col-md-6 border-start ps-4" style="min-height: 600px">
-
-        <h6 class="border-bottom pb-2 mb-3 text-primary">Files</h6>
-
-        @if (selectedExperiment.attachments) {
-          @for (attachment of selectedExperiment.attachments; track $index) {
-            <app-uploaded-file
-              [file]="loadFile(attachment)"
-              [removePossible]="false">
-            </app-uploaded-file>
+              <dt class="col-sm-4">Comment</dt>
+              <dd class="col-sm-8 text-break">{{ meta.comment || '-' }}</dd>
+            </dl>
           }
-        } @else {
-          <div class="text-muted small mb-4">No files attached.</div>
-        }
+        </div>
 
-        <h6 class="border-bottom pb-2 mb-3 mt-4 text-primary">Reactants</h6>
+        <div class="col-md-6 border-start ps-4" style="min-height: 600px">
 
-        @if (!selectedExperiment.reactantA && !selectedExperiment.reactantB) {
-          <div class="text-muted small">No reactants associated with this experiment.</div>
-        } @else {
-          <div class="list-group">
-            <div class="list-group-item d-flex flex-row justify-content-between align-items-center mb-2 border rounded">
-              <div class="d-flex flex-column justify-content-between">
-                <h6 class="mb-1 text-primary">{{ selectedExperiment.reactantA.shortName }}</h6>
-                <p class="mb-1 small text-truncate" title="{{ selectedExperiment.reactantA.smiles }}">
-                  <strong>SMILES:</strong> {{ selectedExperiment.reactantA.smiles }}
-                </p>
-                <small class="text-muted" *ngIf="!!selectedExperiment.reactantA.chemicalName">{{ selectedExperiment.reactantA.chemicalName }}</small>
+          <h6 class="border-bottom pb-2 mb-3 text-primary">Files</h6>
+
+          @if (selectedExperiment.attachments) {
+            @for (attachment of selectedExperiment.attachments; track $index) {
+              <app-uploaded-file
+                [file]="loadFile(attachment)"
+                [removePossible]="false">
+              </app-uploaded-file>
+            }
+          } @else {
+            <div class="text-muted small mb-4">No files attached.</div>
+          }
+
+          <h6 class="border-bottom pb-2 mb-3 mt-4 text-primary">Reactants</h6>
+
+          @if (!selectedExperiment.reactantA && !selectedExperiment.reactantB) {
+            <div class="text-muted small">No reactants associated with this experiment.</div>
+          } @else {
+            <div class="list-group">
+              <div class="list-group-item d-flex flex-row justify-content-between align-items-center mb-2 border rounded">
+                <div class="d-flex flex-column justify-content-between">
+                  <h6 class="mb-1 text-primary">{{ selectedExperiment.reactantA.shortName }}</h6>
+                  <p class="mb-1 small text-truncate" title="{{ selectedExperiment.reactantA.smiles }}">
+                    <strong>SMILES:</strong> {{ selectedExperiment.reactantA.smiles }}
+                  </p>
+                  @if (!!selectedExperiment.reactantA.chemicalName) {
+                    <small class="text-muted">{{ selectedExperiment.reactantA.chemicalName }}</small>
+                  }
+                </div>
+                <span class="badge bg-secondary">{{ selectedExperiment.reactantA.chemicalType.name }}</span>
               </div>
-              <span class="badge bg-secondary">{{ selectedExperiment.reactantA.chemicalType.name }}</span>
-            </div>
-            <div class="list-group-item d-flex flex-row justify-content-between align-items-center mb-2 border rounded">
-              <div class="d-flex flex-column justify-content-between">
-                <h6 class="mb-1 text-primary">{{ selectedExperiment.reactantB.shortName }}</h6>
-                <p class="mb-1 small text-truncate" title="{{ selectedExperiment.reactantB.smiles }}">
-                  <strong>SMILES:</strong> {{ selectedExperiment.reactantB.smiles }}
-                </p>
-                <small class="text-muted" *ngIf="!!selectedExperiment.reactantB.chemicalName">{{ selectedExperiment.reactantB.chemicalName }}</small>
+              <div class="list-group-item d-flex flex-row justify-content-between align-items-center mb-2 border rounded">
+                <div class="d-flex flex-column justify-content-between">
+                  <h6 class="mb-1 text-primary">{{ selectedExperiment.reactantB.shortName }}</h6>
+                  <p class="mb-1 small text-truncate" title="{{ selectedExperiment.reactantB.smiles }}">
+                    <strong>SMILES:</strong> {{ selectedExperiment.reactantB.smiles }}
+                  </p>
+                  @if (!!selectedExperiment.reactantB.chemicalName) {
+                    <small class="text-muted">{{ selectedExperiment.reactantB.chemicalName }}</small>
+                  }
+                </div>
+                <span class="badge bg-secondary">{{ selectedExperiment.reactantB.chemicalType.name }}</span>
               </div>
-              <span class="badge bg-secondary">{{ selectedExperiment.reactantB.chemicalType.name }}</span>
             </div>
-          </div>
-        }
+          }
+
+        </div>
 
       </div>
-
     </div>
-  </div>
+  }
 
   <ng-container footer>
     @if (hasWritePermission) {

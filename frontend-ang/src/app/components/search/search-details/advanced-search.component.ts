@@ -1,5 +1,4 @@
 import { Component, Output, EventEmitter, Input } from '@angular/core';
-import { AdvancedSearchDto } from '../../../dtos/metadata.dto';
 import { SearchParametersDto } from '../../../dtos/search.dto';
 import { UserService } from '../../../services/user.service';
 import { NotificationService } from '../../../services/notification.service';

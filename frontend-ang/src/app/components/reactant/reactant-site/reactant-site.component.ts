@@ -1,15 +1,33 @@
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { SearchInputComponent } from '../../shared/search-input/search-input.component';
+import { ReactantCardComponent } from '../reactant-card/reactant-card.component';
+import { AppConfirmModalComponent } from '../../shared/modal/confirm-modal.component';
+import { ReactantViewModalComponent } from '../reactant-view-modal/reactant-view-modal.component';
+import { DrawMolComponent } from '../../shared/draw-mol/draw-mol.component';
 import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { ReactantDto } from '../../../dtos/reactant.dto';
 import { ReactantService } from '../../../services/reactant.service';
 import { NotificationService } from '../../../services/notification.service';
 import { AuthService } from '../../../services/auth.service';
+import { HasRoleDirective } from '../../../directives/has-role.directive';
 
 @Component({
   selector: 'app-reactant-site',
   templateUrl: './reactant-site.component.html',
   styleUrls: ['./reactant-site.component.scss'],
-  standalone: false,
+  standalone: true,
+  imports: [
+    CommonModule,
+    FormsModule,
+    SearchInputComponent,
+    ReactantCardComponent,
+    AppConfirmModalComponent,
+    ReactantViewModalComponent,
+    DrawMolComponent,
+    HasRoleDirective,
+  ],
 })
 export class ReactantSiteComponent implements OnInit {
   reactants: ReactantDto[] = [];
@@ -203,7 +221,8 @@ export class ReactantSiteComponent implements OnInit {
   }
 
   openDraw() {
-    this.currentSmilesForModal = '';
+    //TODO: add RDKit check if current Search is SMILES
+    this.currentSmilesForModal = this.searchTerm;
     this.isDrawModalOpen = true;
   }
 

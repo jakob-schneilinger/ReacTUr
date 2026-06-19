@@ -4,68 +4,73 @@
   size="xl"
   (close)="close.emit()">
 
-  <div body class="container-fluid" *ngIf="selectedReactant">
-    <div class="row">
+  @if (selectedReactant) {
+    <div body class="container-fluid">
+      <div class="row">
 
-      <div class="col-md-6 pe-4">
-        <h6 class="border-bottom pb-2 mb-3 text-primary">Reactant Information</h6>
-        <dl class="row">
-          <dt class="col-sm-4">Short Name</dt>
-          <dd class="col-sm-8 text-break">{{ selectedReactant.shortName }}</dd>
+        <div class="col-md-6 pe-4">
+          <h6 class="border-bottom pb-2 mb-3 text-primary">Reactant Information</h6>
+          <dl class="row">
+            <dt class="col-sm-4">Short Name</dt>
+            <dd class="col-sm-8 text-break">{{ selectedReactant.shortName }}</dd>
 
-          <dt class="col-sm-4">Type</dt>
-          <dd class="col-sm-8 text-break">{{ selectedReactant.chemicalType.name }}</dd>
+            <dt class="col-sm-4">Type</dt>
+            <dd class="col-sm-8 text-break">{{ selectedReactant.chemicalType.name }}</dd>
 
-          <dt class="col-sm-4">SMILES</dt>
-          <dd class="col-sm-8 text-break">{{ selectedReactant.smiles }}</dd>
+            <dt class="col-sm-4">SMILES</dt>
+            <dd class="col-sm-8 text-break">{{ selectedReactant.smiles }}</dd>
 
-          <dt class="col-sm-4">Chemical Name</dt>
-          <dd class="col-sm-8 text-break">{{ selectedReactant.chemicalName || '-' }}</dd>
+            <dt class="col-sm-4">Chemical Name</dt>
+            <dd class="col-sm-8 text-break">{{ selectedReactant.chemicalName || '-' }}</dd>
 
-          <dt class="col-sm-4">Additional Names</dt>
-          <dd class="col-sm-8 text-break">{{ additionalNames }}</dd>
+            <dt class="col-sm-4">Additional Names</dt>
+            <dd class="col-sm-8 text-break">{{ additionalNames }}</dd>
 
-          <dt class="col-sm-4">CAS Number</dt>
-          <dd class="col-sm-8 text-break">{{ selectedReactant.casNumber || '-' }}</dd>
+            <dt class="col-sm-4">CAS Number</dt>
+            <dd class="col-sm-8 text-break">{{ selectedReactant.casNumber || '-' }}</dd>
 
-          <dt class="col-sm-4">Comment</dt>
-          <dd class="col-sm-8 text-break">{{ selectedReactant.comment || '-' }}</dd>
+            <dt class="col-sm-4">Comment</dt>
+            <dd class="col-sm-8 text-break">{{ selectedReactant.comment || '-' }}</dd>
 
-          <dt class="col-sm-4">References</dt>
-          <dd class="col-sm-8 text-break">{{ references }}</dd>
-        </dl>
-      </div>
+            <dt class="col-sm-4">References</dt>
+            <dd class="col-sm-8 text-break">{{ references }}</dd>
+          </dl>
+        </div>
 
-      <div class="col-md-6 border-start ps-4" style="min-height: 600px">
-        <h6 class="border-bottom pb-2 mb-3 text-primary">Reactant Structure</h6>
+        <div class="col-md-6 border-start ps-4" style="min-height: 600px">
+          <h6 class="border-bottom pb-2 mb-3 text-primary">Reactant Structure</h6>
 
-        @if (loadingStructures || !selectedReactant.structures || selectedReactant.structures.length === 0) {
-          <app-reactant-structure
-            [loading]="loadingStructures"
-            [smiles]="selectedReactant.smiles || ''">
-          </app-reactant-structure>
-        } @else {
-          @for (structure of selectedReactant.structures; track $index) {
+          @if (loadingStructures || !selectedReactant.structures || selectedReactant.structures.length === 0) {
             <app-reactant-structure
-              [structure]="structure"
+              [loading]="loadingStructures"
               [smiles]="selectedReactant.smiles || ''">
             </app-reactant-structure>
+          } @else {
+            @for (structure of selectedReactant.structures; track $index) {
+              <app-reactant-structure
+                [structure]="structure"
+                [smiles]="selectedReactant.smiles || ''">
+              </app-reactant-structure>
+            }
           }
-        }
 
-        <h6 class="border-bottom pb-2 mb-3 mt-4 text-primary">Attached Files</h6>
+          <h6 class="border-bottom pb-2 mb-3 mt-4 text-primary">Attached Files</h6>
 
-        <app-uploaded-file
-          *ngFor="let file of selectedReactant.structures;"
-          [file]="file"
-          [removePossible]="false">
-        </app-uploaded-file>
+          @for (file of selectedReactant.structures; track $index) {
+            <app-uploaded-file
+              [file]="file"
+              [removePossible]="false">
+            </app-uploaded-file>
+          }
 
-        <div *ngIf="!selectedReactant.structures || selectedReactant.structures.length === 0" class="text-muted small">No structural files attached.</div>
+          @if (!selectedReactant.structures || selectedReactant.structures.length === 0) {
+            <div class="text-muted small">No structural files attached.</div>
+          }
+        </div>
+
       </div>
-
     </div>
-  </div>
+  }
 
   <ng-container footer>
     @if (hasWritePermission) {

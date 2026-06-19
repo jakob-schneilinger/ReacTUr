@@ -83,11 +83,7 @@ export class SearchResultsComponent implements OnChanges {
     const user = this.authService.getLoggedInUser();
 
     if (!user) return;
-    if (this.authService.hasExperimentPermission(uuid, user.uuid)) {
-      this.hasWritePermission = true;
-    } else {
-      this.hasWritePermission = false;
-    }
+    this.hasWritePermission = !!this.authService.hasExperimentPermission(uuid, user.uuid);
 
     const experimentToView = this.experiments.find((exp) => exp.uuid === uuid);
 

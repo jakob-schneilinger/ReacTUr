@@ -1,4 +1,4 @@
-import { ReactantDetailDto, ReactantDto } from '../dtos/reactant.dto';
+import { ReactantDetailDto } from '../dtos/reactant.dto';
 import { MOCK_CHEM_TYPES } from './mock.data';
 
 export const MOCK_REACTANTS: ReactantDetailDto[] = [

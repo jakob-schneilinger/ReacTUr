@@ -12,11 +12,12 @@
   </app-drag-and-drop>
 
   <div class="file-list mt-4">
-    <app-uploaded-file
-      *ngFor="let file of files; let i = index"
-      [file]="file"
-      (remove)="confirmRemoveFile(i)">
-    </app-uploaded-file>
+    @for (file of files; track $index) {
+      <app-uploaded-file
+        [file]="file"
+        (remove)="confirmRemoveFile($index)">
+      </app-uploaded-file>
+    }
   </div>
 </div>
 

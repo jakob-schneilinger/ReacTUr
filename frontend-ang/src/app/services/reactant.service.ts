@@ -152,4 +152,8 @@ export class ReactantService {
       }),
     );
   }
+
+  loadReactantStructures(reactant: ReactantDetailDto | ReactantDto): Observable<File[]> {
+    return this.getReactantStructures(reactant);
+  }
 }

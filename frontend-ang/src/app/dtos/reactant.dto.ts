@@ -1,7 +1,6 @@
 //TODO: overthink interface
 import { ChemicalTypeDto } from './selection-option.dto';
 import { DetailsDto } from './details.dto';
-import { GetUserDto } from './user.dto';
 
 // old
 export interface ReactantDtoOld {

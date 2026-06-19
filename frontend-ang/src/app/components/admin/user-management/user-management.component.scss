@@ -52,10 +52,7 @@
 
   select.form-select {
     @extend %shared-input;
-    padding-top: 0.25rem;
-    padding-bottom: 0.25rem;
-    padding-left: .5rem;
-    padding-right: 1.5rem;
+    padding: 0.25rem 1.5rem 0.25rem .5rem;
     min-width: 120px;
 
     @media (max-width: 1100px) {

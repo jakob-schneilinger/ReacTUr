@@ -1,10 +1,13 @@
-import { ChangeDetectorRef, Component, EventEmitter, OnInit, Output } from '@angular/core';
+import { ChangeDetectorRef, Component, EventEmitter, Output } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-paste-table',
   templateUrl: './paste-table.component.html',
   styleUrls: ['./paste-table.component.scss'],
-  standalone: false,
+  standalone: true,
+  imports: [CommonModule, FormsModule],
 })
 export class PasteTableComponent {
   @Output() fileGenerated = new EventEmitter<File>();

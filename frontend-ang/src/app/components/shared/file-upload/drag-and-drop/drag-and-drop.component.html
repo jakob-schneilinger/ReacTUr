@@ -17,6 +17,8 @@
   </div>
   <p class="text-muted small mb-0">
     Supports: {{acceptedExtensionsText}}
-    <span *ngIf="maxFileSizeMB"> (Max: {{maxFileSizeMB}}MB)</span>
+    @if (maxFileSizeMB) {
+      <span> (Max: {{maxFileSizeMB}}MB)</span>
+    }
   </p>
 </div>

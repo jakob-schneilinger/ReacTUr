@@ -98,55 +98,6 @@
       }
     }
   }
-
-  textarea {
-    border-radius: 8px;
-    resize: vertical;
-    min-height: 80px;
-    font-family: inherit;
-    overflow-y: auto;
-
-    scrollbar-gutter: stable;
-    scrollbar-width: thin;
-    scrollbar-color: #c1c1c1 transparent;
-  }
-
-  textarea ~ .clear-btn {
-    right: 12px;
-    top: 10px !important;
-  }
-
-  &.date-field input[type="date"] {
-    padding-right: 1.2rem;
-
-    &::-webkit-calendar-picker-indicator {
-      cursor: pointer;
-    }
-  }
-
-  .icon {
-    position: absolute;
-    right: 15px;
-    font-size: 1rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-
-  .bi-search {
-    color: $light_gray;
-    pointer-events: none;
-  }
-
-  .clear-btn {
-    cursor: pointer;
-    font-size: 1.25rem;
-    z-index: 2;
-
-    &:hover {
-      color: $error !important;
-    }
-  }
 }
 
 .divider-container {

@@ -30,74 +30,77 @@
       </div>
 
       <div class="cards-grid">
-      <div class="experiment-card"
-           *ngFor="let exp of experiments"
-           [class.selected-card]="isSelected(exp.uuid)">
+        @for (exp of experiments; track exp.uuid) {
+          <div class="experiment-card" [class.selected-card]="isSelected(exp.uuid)">
 
-        <!-- Header Section -->
-        <div class="card-header">
-          <h3>{{ exp.reactantA.shortName}} + {{ exp.reactantB.shortName}}</h3>
-          <a [routerLink]="['/scientist', exp.metadata.scientist.uuid]" class="scientist-badge"> <!-- TODO: Change router link when it exists-->
-            <i class="bi bi-person"></i> {{ exp.metadata.scientist.firstName }} {{ exp.metadata.scientist.lastName }}
-          </a>
-        </div>
+            <!-- Header Section -->
+            <div class="card-header">
+              <h3>{{ exp.reactantA.shortName}} + {{ exp.reactantB.shortName}}</h3>
+              <a [routerLink]="['/scientist', exp.metadata.scientist.uuid]" class="scientist-badge"> <!-- TODO: Change router link when it exists-->
+                <i class="bi bi-person"></i> {{ exp.metadata.scientist.firstName }} {{ exp.metadata.scientist.lastName }}
+              </a>
+            </div>
 
-        <!-- Metadata Grid -->
-        <div class="metadata-groups">
+            <!-- Metadata Grid -->
+            <div class="metadata-groups">
 
-          <!-- Mandatory Metadata -->
-          <div class="meta-group">
-            <h4 class="group-title">Core Parameters</h4>
-            <div class="group-content">
-              <div class="detail-item"><strong>Date:</strong> {{ exp.metadata.date | date:'shortDate' }}</div>
-              <div class="detail-item"><strong>Solvent:</strong> {{ exp.metadata.solvent.name }}</div>
-              <div class="detail-item"><strong>Temp:</strong> {{ exp.metadata.temperature }} °C</div>
-              <div class="detail-item"><strong>Conc. {{ exp.reactantA.shortName}}:</strong> {{ exp.metadata.concentrationA }} mM</div>
-              <div class="detail-item"><strong>Conc. {{ exp.reactantB.shortName}}:</strong> {{ exp.metadata.concentrationB }} mM</div>
+              <!-- Mandatory Metadata -->
+              <div class="meta-group">
+                <h4 class="group-title">Core Parameters</h4>
+                <div class="group-content">
+                  <div class="detail-item"><strong>Date:</strong> {{ exp.metadata.date | date:'shortDate' }}</div>
+                  <div class="detail-item"><strong>Solvent:</strong> {{ exp.metadata.solvent.name }}</div>
+                  <div class="detail-item"><strong>Temp:</strong> {{ exp.metadata.temperature }} °C</div>
+                  <div class="detail-item"><strong>Conc. {{ exp.reactantA.shortName}}:</strong> {{ exp.metadata.concentrationA }} mM</div>
+                  <div class="detail-item"><strong>Conc. {{ exp.reactantB.shortName}}:</strong> {{ exp.metadata.concentrationB }} mM</div>
+                </div>
+              </div>
+
+              <!-- Optional Metadata -->
+              <div class="meta-group" *ngIf="exp.metadata.instrument || exp.metadata.modality || exp.metadata.wavelength">
+                <h4 class="group-title">Additional Information</h4>
+                <div class="group-content">
+                  <div class="detail-item" *ngIf="exp.metadata.instrument"><strong>Instrument:</strong> {{ exp.metadata.instrument.name }}</div>
+                  <div class="detail-item" *ngIf="exp.metadata.modality"><strong>Modality:</strong> {{ exp.metadata.modality.name }}</div>
+                  <div class="detail-item" *ngIf="exp.metadata.wavelength != null"><strong>Wavelength:</strong> {{ exp.metadata.wavelength }} nm</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Comments Section -->
+            @if (exp.metadata.comment) {
+              <div class="comment-section">
+                <strong>Notes:</strong> {{ exp.metadata.comment }}
+              </div>
+            }
+
+            <!-- Footer -->
+            <div class="card-footer">
+              <button class="btn-custom btn-view" (click)="viewDetails(exp.uuid)">
+                View details
+              </button>
+
+              <!-- Buttons -->
+              <button type="button"
+                      class="btn-custom"
+                      [ngClass]="isSelected(exp.uuid) ? 'btn-remove' : 'btn-add'"
+                      (click)="toggleSelection(exp.uuid)">
+                <i class="bi" [ngClass]="isSelected(exp.uuid) ? 'bi-dash-lg' : 'bi-plus-lg'"></i>
+                {{ isSelected(exp.uuid) ? 'Remove' : 'Add' }}
+              </button>
             </div>
           </div>
-
-          <!-- Optional Metadata -->
-          <div class="meta-group" *ngIf="exp.metadata.instrument || exp.metadata.modality || exp.metadata.wavelength">
-            <h4 class="group-title">Additional Information</h4>
-            <div class="group-content">
-              <div class="detail-item" *ngIf="exp.metadata.instrument"><strong>Instrument:</strong> {{ exp.metadata.instrument.name }}</div>
-              <div class="detail-item" *ngIf="exp.metadata.modality"><strong>Modality:</strong> {{ exp.metadata.modality.name }}</div>
-              <div class="detail-item" *ngIf="exp.metadata.wavelength != null"><strong>Wavelength:</strong> {{ exp.metadata.wavelength }} nm</div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Comments Section -->
-        <div class="comment-section" *ngIf="exp.metadata.comment">
-          <strong>Notes:</strong> {{ exp.metadata.comment }}
-        </div>
-
-        <!-- Footer -->
-        <div class="card-footer">
-          <button class="btn-custom btn-view" (click)="viewDetails(exp.uuid)">
-            View details
-          </button>
-
-          <!-- Buttons -->
-          <button type="button"
-                  class="btn-custom"
-                  [ngClass]="isSelected(exp.uuid) ? 'btn-remove' : 'btn-add'"
-                  (click)="toggleSelection(exp.uuid)">
-            <i class="bi" [ngClass]="isSelected(exp.uuid) ? 'bi-dash-lg' : 'bi-plus-lg'"></i>
-            {{ isSelected(exp.uuid) ? 'Remove' : 'Add' }}
-          </button>
-        </div>
-      </div>
+        }
     </div>
   }
 
 </div>
 
 
-<app-experiment-view-modal
-  *ngIf="isViewModalOpen"
-  [selectedExperiment]="selectedExperimentForView"
-  [hasWritePermission]="hasWritePermission"
-  (close)="closeViewModal()">
-</app-experiment-view-modal>
+@if (isViewModalOpen) {
+  <app-experiment-view-modal
+    [selectedExperiment]="selectedExperimentForView"
+    [hasWritePermission]="hasWritePermission"
+    (close)="closeViewModal()">
+  </app-experiment-view-modal>
+}

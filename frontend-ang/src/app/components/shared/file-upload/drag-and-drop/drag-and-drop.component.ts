@@ -1,11 +1,14 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { NotificationService } from '../../../../services/notification.service';
+import { DragAndDropDirective } from '../../../../directives/drag-and-drop.directive';
 
 @Component({
   selector: 'app-drag-and-drop',
   templateUrl: './drag-and-drop.component.html',
   styleUrls: ['./drag-and-drop.component.scss'],
-  standalone: false,
+  standalone: true,
+  imports: [CommonModule, DragAndDropDirective],
 })
 export class DragAndDropComponent {
   @Output() filesSelected = new EventEmitter<File[]>();

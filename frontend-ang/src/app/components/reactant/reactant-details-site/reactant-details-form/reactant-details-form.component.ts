@@ -1,3 +1,9 @@
+import { CommonModule } from '@angular/common';
+import { ReactiveFormsModule, FormControl } from '@angular/forms';
+import { DynamicArrayInputComponent } from '../../../shared/dynamic-array-input/dynamic-array-input.component';
+import { OptionSelectorComponent } from '../../../shared/option-selector/option-selector.component';
+import { AppConfirmModalComponent } from '../../../shared/modal/confirm-modal.component';
+import { HasRoleDirective } from '../../../../directives/has-role.directive';
 import {
   ChangeDetectorRef,
   Component,
@@ -19,10 +25,10 @@ import {
 } from '@angular/forms';
 import { Router } from '@angular/router';
 import { NotificationService } from '../../../../services/notification.service';
-import { ReactantDetailDto, ReactantDto } from '../../../../dtos/reactant.dto';
+import { ReactantDetailDto } from '../../../../dtos/reactant.dto';
 import { OptionService } from '../../../../services/option.service';
 import { ChemicalTypeDto } from '../../../../dtos/selection-option.dto';
-import { Subject, takeUntil } from 'rxjs';
+import { Subject } from 'rxjs';
 import { ReactantService } from '../../../../services/reactant.service';
 
 export type FormState = 'create' | 'edit';
@@ -36,7 +42,15 @@ declare var initRDKitModule: any;
     './reactant-details-form.component.scss',
     '../../../experiment/experiment-details-site/experiment-detail-form/experiment-details-form.component.scss',
   ],
-  standalone: false,
+  standalone: true,
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    DynamicArrayInputComponent,
+    OptionSelectorComponent,
+    AppConfirmModalComponent,
+    HasRoleDirective,
+  ],
 })
 export class ReactantDetailsFormComponent implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
@@ -106,6 +120,10 @@ export class ReactantDetailsFormComponent implements OnInit, OnDestroy {
 
   get references(): FormArray {
     return this.reactantForm.get('references') as FormArray;
+  }
+
+  get chemicalTypeControl(): FormControl {
+    return this.reactantForm.get('chemicalType') as FormControl;
   }
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -220,44 +238,14 @@ export class ReactantDetailsFormComponent implements OnInit, OnDestroy {
     const formArray = this.reactantForm.get(arrayName) as FormArray;
     formArray.clear();
     if (data && data.length > 0) {
-      data.forEach((item) => formArray.push(this.fb.control(item)));
+      data.forEach((item) => formArray.push(this.fb.control(item, Validators.required)));
     } else {
-      formArray.push(this.fb.control(''));
+      formArray.push(this.fb.control('', Validators.required));
     }
   }
 
   clearControl(controlName: string): void {
     this.reactantForm.get(controlName)?.setValue('');
-    this.reactantForm.markAsDirty();
-  }
-
-  clearArrayControl(arrayName: 'additionalShortNames' | 'references', index: number): void {
-    const array = this.reactantForm.get(arrayName) as FormArray;
-    array.at(index).setValue('');
-    this.reactantForm.markAsDirty();
-  }
-
-  addArrayField(arrayName: 'additionalShortNames' | 'references'): void {
-    const array = this.reactantForm.get(arrayName) as FormArray;
-    array.push(this.fb.control(''));
-    this.reactantForm.markAsDirty();
-
-    setTimeout(() => {
-      const newIndex = array.length - 1;
-      const inputId = `${arrayName}-${newIndex}`;
-      const inputElement = document.getElementById(inputId);
-      if (inputElement) {
-        inputElement.focus();
-      }
-    });
-  }
-
-  removeArrayField(arrayName: 'additionalShortNames' | 'references', index: number): void {
-    const array = this.reactantForm.get(arrayName) as FormArray;
-    array.removeAt(index);
-    if (array.length === 0) {
-      array.push(this.fb.control(''));
-    }
     this.reactantForm.markAsDirty();
   }
 

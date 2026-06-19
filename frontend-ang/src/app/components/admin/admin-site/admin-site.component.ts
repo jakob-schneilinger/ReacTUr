@@ -1,7 +1,5 @@
-import { Component, OnInit } from '@angular/core';
-import { AdvancedSearchDto } from '../../../dtos/metadata.dto';
-import { ExperimentDto } from '../../../dtos/experiment.dto';
-import { ExperimentService } from '../../../services/experiment.service';
+import { Component } from '@angular/core';
+
 
 
 @Component({

@@ -25,30 +25,42 @@
     (paste)="onPaste($event)"
     [class.has-data]="tableData.length > 0">
 
-    <div class="table-placeholder text-center text-muted" *ngIf="isLoading">
-      <div class="spinner-border text-primary" role="status">
-        <span class="visually-hidden">Loading...</span>
+    @if (isLoading) {
+      <div class="table-placeholder text-center text-muted">
+        <div class="spinner-border text-primary" role="status">
+          <span class="visually-hidden">Loading...</span>
+        </div>
+        <p class="mb-0">Processing data, please wait...</p>
       </div>
-      <p class="mb-0">Processing data, please wait...</p>
-    </div>
+    }
 
-    <div class="table-placeholder" *ngIf="tableData.length === 0 && !isLoading">
-      <p>Click here and press <strong>Ctrl+V</strong> (or Cmd+V) to paste data from Excel/Prism/Sheets.</p>
-    </div>
-
-    <div class="table-wrapper" *ngIf="tableData.length > 0 && !isLoading">
-      <div class="alert alert-info py-1 px-2 mb-2 small text-center" *ngIf="tableData.length > previewData.length">
-        Showing preview of the first <strong>{{ previewData.length }}</strong> rows.
-        All <strong>{{ tableData.length }}</strong> rows are saved and ready for export.
+    @if (tableData.length === 0 && !isLoading) {
+      <div class="table-placeholder">
+        <p>Click here and press <strong>Ctrl+V</strong> (or Cmd+V) to paste data from Excel/Prism/Sheets.</p>
       </div>
-      <table>
-        <tbody>
-        <tr *ngFor="let row of previewData; let i = index" [class.header-row]="i === 0">
-          <td *ngFor="let cell of row">{{ cell }}</td>
-        </tr>
-        </tbody>
-      </table>
-    </div>
+    }
+
+    @if (tableData.length > 0 && !isLoading) {
+      <div class="table-wrapper">
+        @if (tableData.length > previewData.length) {
+          <div class="alert alert-info py-1 px-2 mb-2 small text-center">
+            Showing preview of the first <strong>{{ previewData.length }}</strong> rows.
+            All <strong>{{ tableData.length }}</strong> rows are saved and ready for export.
+          </div>
+          <table>
+            <tbody>
+              @for (row of previewData; track $index) {
+                <tr [class.header-row]="$index === 0">
+                  @for (cell of row; track $index) {
+                    <td>{{ cell }}</td>
+                  }
+                </tr>
+              }
+            </tbody>
+          </table>
+        }
+      </div>
+    }
 
   </div>
 </div>

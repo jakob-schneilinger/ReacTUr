@@ -1,0 +1,24 @@
+<div class="input-group">
+  <label>{{ label }}</label>
+  <div class="search-field">
+    <input
+      type="text"
+      list="chemicalTypesList"
+      [formControl]="control"
+      [placeholder]="placeholder"
+      [class.is-invalid]="control.invalid && control.touched"
+      autocomplete="off"
+    />
+    <datalist [id]="datalistId">
+      @for (option of options; track option.uuid || option.id || $index) {
+        <option [value]="option.name"></option>
+      }
+    </datalist>
+    @if (control.value) {
+      <span class="icon bi bi-x text-black clear-btn" (click)="clearControl()" title="Clear"></span>
+    }
+  </div>
+  @if (control.invalid && control.touched) {
+    <div class="error-message">{{ errorMessage }}</div>
+  }
+</div>

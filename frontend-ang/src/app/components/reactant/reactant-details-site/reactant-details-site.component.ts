@@ -1,8 +1,14 @@
-import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { LayoutComponent } from '../../shared/layout/layout.component';
+import { ReactantDetailsFormComponent } from './reactant-details-form/reactant-details-form.component';
+import { ReactantStructureComponent } from '../reactant-structure/reactant-structure.component';
+import { FileUploadComponent } from '../../shared/file-upload/file-upload.component';
+import { ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { NotificationService } from '../../../services/notification.service';
 import { ReactantService } from '../../../services/reactant.service';
 import { ReactantDto } from '../../../dtos/reactant.dto';
+import { filter, map, Subject, switchMap, takeUntil } from 'rxjs';
 
 export type FormState = 'create' | 'edit';
 
@@ -10,9 +16,23 @@ export type FormState = 'create' | 'edit';
   selector: 'app-reactant-details-site',
   templateUrl: './reactant-details-site.component.html',
   styleUrls: ['./reactant-details-site.component.scss'],
-  standalone: false,
+  standalone: true,
+  imports: [
+    CommonModule,
+    LayoutComponent,
+    ReactantDetailsFormComponent,
+    ReactantStructureComponent,
+    FileUploadComponent
+  ],
 })
-export class ReactantDetailsSiteComponent implements OnInit {
+export class ReactantDetailsSiteComponent implements OnInit, OnDestroy {
+  private destroy$ = new Subject<void>();
+  reactant: ReactantDto | undefined;
+  smiles: string = "";
+  loadingStructures: boolean = true;
+  state: FormState = 'create';
+  structures: File[] = [];
+
   constructor(
     private router: Router,
     private route: ActivatedRoute,
@@ -21,74 +41,45 @@ export class ReactantDetailsSiteComponent implements OnInit {
     private cd: ChangeDetectorRef,
   ) {}
 
-  reactant: ReactantDto | undefined;
-  smiles: string = "";
-  loadingStructures: boolean = true;
-
-  state: FormState = 'create';
-
-  structures: File[] = [];
-
   ngOnInit() {
-    const state = this.route.snapshot.data['state'];
-    if (state != 'create') {
-      this.state = state;
+    this.state = this.route.snapshot.data['state'] || 'create';
 
-      this.route.params.subscribe({
-        next: (params) => {
-          const reactantUuid = params['uuid'];
-          if (!reactantUuid) {
-            this.notification.error('Missing Reactant', 'No Reactant found in route!');
-            return;
-          }
-          this.reactantService.getReactantDetail(reactantUuid).subscribe({
-            next: (reactant) => {
-              this.reactant = reactant;
-              console.log(reactant);
-              this.loadingStructures = true;
-              this.reactantService.getReactantStructures(reactant).subscribe({
-                next: (files: File[]) => {
-                  setTimeout(() => {
-                    this.structures = files;
-                    //TODO: check if needed
-                    /*
-                    if (this.reactant) {
-                      this.reactant.structures = files;
-                    }
-
-                     */
-                    this.loadingStructures = false;
-                    this.cd.markForCheck();
-                  });
-                },
-                error: (err) => {
-                  setTimeout(() => {
-                    this.loadingStructures = false;
-                    this.notification.error(
-                      'Missing 3D File',
-                      `3D File(s) of Reactant not found! Error: ${err.message || err.error || err}`,
-                    );
-                    this.cd.markForCheck();
-                  });
-                },
-              });
-            },
-            error: (err) =>
-              this.notification.error(
-                'Invalid Reactant',
-                `No Reactant found with this name! Error: ${err.message || err.error || err}`,
-              ),
-          });
-        },
-        error: (err) =>
-          this.notification.error(
-            'Missing Reactant',
-            `No Reactant found in route! Error: ${err.message || err.error || err}`,
-          ),
-      });
+    if (this.state === 'edit') {
+      this.loadReactantData();
     } else {
-      this.state = 'create';
+      this.loadingStructures = false;
     }
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+
+  private loadReactantData() {
+    this.route.params.pipe(
+      map(params => params['uuid']),
+      filter(uuid => !!uuid),
+      switchMap(uuid => this.reactantService.getReactantDetail(uuid)),
+      switchMap(reactant => {
+        this.reactant = reactant;
+        this.loadingStructures = true;
+        this.cd.markForCheck();
+        return this.reactantService.loadReactantStructures(reactant);
+      }),
+      takeUntil(this.destroy$)
+    ).subscribe({
+      next: (files) => {
+        this.structures = files;
+        this.loadingStructures = false;
+        this.cd.markForCheck();
+      },
+      error: (err) => {
+        this.loadingStructures = false;
+        this.notification.error('Error', err.message || 'Failed to load reactant data');
+        this.cd.markForCheck();
+      }
+    });
   }
 
   get isEditMode(): boolean {
@@ -100,7 +91,6 @@ export class ReactantDetailsSiteComponent implements OnInit {
   }
 
   updateSmiles(smiles: string) {
-    this.loadingStructures = !smiles;
     this.smiles = smiles;
     if (this.reactant) {
       this.reactant.smiles = smiles;

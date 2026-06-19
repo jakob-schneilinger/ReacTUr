@@ -1,5 +1,4 @@
 import {
-  ExperimentDto,
   ExperimentDataDto,
   MeasurementDto,
   GetExperimentDto,
@@ -12,7 +11,6 @@ import {
   MOCK_SOLVENTS,
   MOCK_USERS,
 } from './mock.data';
-import { ModalityDto } from '../dtos/selection-option.dto';
 
 export const MOCK_REACTANTS: ReactantDto[] = [
   {

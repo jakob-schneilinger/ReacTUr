@@ -1,8 +1,6 @@
 import { Component, OnInit } from "@angular/core";
-import { UntypedFormBuilder, UntypedFormGroup, Validators } from "@angular/forms";
+import { UntypedFormBuilder, UntypedFormGroup } from "@angular/forms";
 import { ActivatedRoute, Router } from "@angular/router";
-import { map, switchMap } from "rxjs";
-import { GetUserDto, UserUpdateDto } from "../../dtos/user.dto";
 import { Globals } from "../../global/globals";
 
 @Component({

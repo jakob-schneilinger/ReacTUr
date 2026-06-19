@@ -1,3 +1,4 @@
+import { CommonModule } from '@angular/common';
 import {
   AfterViewInit,
   Component,
@@ -21,7 +22,8 @@ declare var initRDKitModule: any;
   selector: 'app-reactant-structure',
   templateUrl: './reactant-structure.component.html',
   styleUrls: ['./reactant-structure.component.scss'],
-  standalone: false,
+  standalone: true,
+  imports: [CommonModule],
 })
 export class ReactantStructureComponent implements AfterViewInit, OnInit, OnChanges, OnDestroy {
   @Input() structure: File | undefined;
@@ -42,7 +44,7 @@ export class ReactantStructureComponent implements AfterViewInit, OnInit, OnChan
     private ngZone: NgZone,
     private notification: NotificationService,
     private sanitizer: DomSanitizer,
-    private cd: ChangeDetectorRef
+    private cd: ChangeDetectorRef,
   ) {}
 
   async ngOnInit(): Promise<void> {
@@ -76,7 +78,7 @@ export class ReactantStructureComponent implements AfterViewInit, OnInit, OnChan
     if (changes['structure'] && this.structure && !changes['structure'].isFirstChange()) {
       this.renderModel();
     }
-    if (changes['smiles'] && this.smiles && !changes['smiles'].isFirstChange()) {
+    if (changes['smiles'] && !changes['smiles'].isFirstChange()) {
       this.render2DModel();
     }
     if (changes['loading'] && !this.loading) {
@@ -217,6 +219,7 @@ export class ReactantStructureComponent implements AfterViewInit, OnInit, OnChan
 
   private render2DModel(): void {
     if (!this.smiles || !this.rdkitModule) {
+      this.svg2D = null;
       return;
     }
 
@@ -227,11 +230,11 @@ export class ReactantStructureComponent implements AfterViewInit, OnInit, OnChan
         this.svg2D = this.sanitizer.bypassSecurityTrustHtml(svg);
 
         this.cd.detectChanges();
-
-        mol.delete();
+      } else {
+        this.svg2D = null;
       }
+      mol.delete();
     } catch (error) {
-      console.log('Error rendering 2D structure with RDKit:', error);
       this.notification.error('2D Render Error', 'Could not generate 2D structure from SMILES.');
     }
   }

@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { delay, Observable, of, throwError } from 'rxjs';
+import { delay, Observable, of } from 'rxjs';
 import { Globals } from '../global/globals';
 import { AuthService } from './auth.service';
 import { GetUserDto, SetRoleDto } from '../dtos/user.dto';
