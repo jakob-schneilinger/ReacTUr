@@ -10,6 +10,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -47,11 +49,17 @@ public class ExperimentEndpoint {
      * @return
      */
     @PostMapping
-    public ResponseEntity<GetExperimentDto> createExperiment(@Valid @RequestBody SaveExperimentDto experimentDto) {
-        log.info("POST /api/experiment. ReactantA: {}, ReactantB: {}",
-          experimentDto.reactantA(), experimentDto.reactantB());
+    public ResponseEntity<GetExperimentDto> createExperiment(
+      @Valid @RequestBody SaveExperimentDto experimentDto,
+      @AuthenticationPrincipal Jwt jwt  // Authentication data should come from the token, not from the user's request
+    ) {
 
-        GetExperimentDto createdExperiment = experimentService.createExperiment(experimentDto);
+        String userId = jwt.getSubject();
+
+        log.info("POST /api/experiment called by User ID: {}. ReactantA: {}, ReactantB: {}",
+          userId, experimentDto.reactantA(), experimentDto.reactantB());
+
+        GetExperimentDto createdExperiment = experimentService.createExperiment(experimentDto, userId);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(createdExperiment);
     }

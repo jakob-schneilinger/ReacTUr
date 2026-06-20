@@ -1,7 +1,6 @@
-package com.reactur.backend.rest;
+package com.reactur.backend.endpoints;
 
 import com.reactur.backend.dtos.ExperimentDtos.*;
-import com.reactur.backend.endpoints.ExperimentEndpoint;
 import com.reactur.backend.security.SecurityConfig;
 import com.reactur.backend.services.ExperimentService;
 import com.reactur.backend.repositories.UserRepository;
@@ -56,7 +55,7 @@ class ExperimentEndpointTest {
 
     SaveMetadataDto validMetadata = new SaveMetadataDto(
       LocalDate.now().minusDays(1), // Yesterday (Valid)
-      UUID.randomUUID(),            // Scientist ID
+      // UUID.randomUUID(),            // Scientist ID
       25.0,                         // Temperature
       UUID.randomUUID(),            // Solvent ID
       1.5,                          // Concentration A (Positive)
@@ -80,7 +79,7 @@ class ExperimentEndpointTest {
     );
 
     // ## Mocking of the service layer to accept the DTO and return the expected answer
-    Mockito.when(experimentService.createExperiment(Mockito.any(SaveExperimentDto.class)))
+    Mockito.when(experimentService.createExperiment(Mockito.any(SaveExperimentDto.class), Mockito.anyString()))
       .thenReturn(expectedResponseDto);
 
 
@@ -105,7 +104,10 @@ class ExperimentEndpointTest {
     // ## Extra check: Making sure that the service got the right DTO, that nothing got accidentally changed
     ArgumentCaptor<SaveExperimentDto> dtoCaptor = ArgumentCaptor.forClass(SaveExperimentDto.class);
 
-    Mockito.verify(experimentService).createExperiment(dtoCaptor.capture());
+    Mockito.verify(experimentService).createExperiment(
+      dtoCaptor.capture(),
+      Mockito.eq("mock-keycloak-id-123")
+    );
     SaveExperimentDto capturedDto = dtoCaptor.getValue();
 
     org.junit.jupiter.api.Assertions.assertNotNull(capturedDto, "The captured DTO should not be null");
@@ -119,8 +121,16 @@ class ExperimentEndpointTest {
   void createExperiment_whenReactantAIsMissing_returns400BadRequest() throws Exception {
 
     SaveMetadataDto validMetadata = new SaveMetadataDto(
-      LocalDate.now(), UUID.randomUUID(), 25.0, UUID.randomUUID(),
-      1.5, 2.0, UUID.randomUUID(), UUID.randomUUID(), 450.0, "Test"
+      LocalDate.now(),
+      // UUID.randomUUID(),
+      25.0,
+      UUID.randomUUID(),
+      1.5,
+      2.0,
+      UUID.randomUUID(),
+      UUID.randomUUID(),
+      450.0,
+      "Test"
     );
     MeasurementDataDto validMeasurement = new MeasurementDataDto(
       1.2, 5.5, 0.1, false

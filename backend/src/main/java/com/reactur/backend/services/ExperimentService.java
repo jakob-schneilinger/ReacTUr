@@ -8,5 +8,7 @@ import org.springframework.stereotype.Service;
 public interface ExperimentService {
 
   // TODO: JavaDOC
-  GetExperimentDto createExperiment(SaveExperimentDto experimentDto);
+  GetExperimentDto createExperiment(SaveExperimentDto experimentDto, String userId);
+
 }
+

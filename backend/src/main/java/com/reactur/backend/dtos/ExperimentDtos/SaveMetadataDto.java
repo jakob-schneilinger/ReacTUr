@@ -14,7 +14,6 @@ import java.util.UUID;
  * DTO for creating or updating experimental metadata.
  *
  * @param date           The date the experiment was conducted.
- * @param scientist      The UUID of the scientist responsible.
  * @param temperature    The temperature during the experiment in °C.
  * @param solvent        The UUID of the solvent used.
  * @param concentrationA The concentration of reactant A.
@@ -29,10 +28,15 @@ public record SaveMetadataDto(
   @PastOrPresent(message = "Experiment date cannot be in the future")
   LocalDate date,
 
+  /* TODO: Remove from frontend: It's better, easier, more secure and more consistent(apparently)
+      just to pull from the token who this person is, rather than trusting the user-crafter parameter (we would
+      need to verify it anyways, so...)
+
   // TODO (Architecture): Consider removing this and pulling from SecurityContext instead.
   //  If kept: TODO (Frontend): Ensure Angular sends a UUID, not the String fullName.
   @NotNull(message = "Scientist ID is required")
   UUID scientist,
+   */
 
   @NotNull(message = "Temperature is required")
   @Min(value = -273, message = "Temperature cannot be below absolute zero") // Syntactic chemistry check
