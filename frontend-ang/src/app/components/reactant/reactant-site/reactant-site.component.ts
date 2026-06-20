@@ -12,6 +12,8 @@ import { ReactantService } from '../../../services/reactant.service';
 import { NotificationService } from '../../../services/notification.service';
 import { AuthService } from '../../../services/auth.service';
 import { HasRoleDirective } from '../../../directives/has-role.directive';
+import { TRANSLOCO_IMPORTS } from '../../../global/transloco-imports';
+import { TranslocoService } from '@jsverse/transloco';
 
 @Component({
   selector: 'app-reactant-site',
@@ -27,6 +29,7 @@ import { HasRoleDirective } from '../../../directives/has-role.directive';
     ReactantViewModalComponent,
     DrawMolComponent,
     HasRoleDirective,
+    TRANSLOCO_IMPORTS,
   ],
 })
 export class ReactantSiteComponent implements OnInit {
@@ -57,6 +60,7 @@ export class ReactantSiteComponent implements OnInit {
     private authService: AuthService,
     private notification: NotificationService,
     private cdr: ChangeDetectorRef,
+    private transloco: TranslocoService
   ) {}
 
   ngOnInit(): void {
@@ -76,7 +80,10 @@ export class ReactantSiteComponent implements OnInit {
         }
       },
       error: (err) =>
-        this.notification.error('Reactants unavailable', err.message || err.error || err),
+        this.notification.error(
+          this.transloco.translate('reactants.notifications.fetchError'),
+          err.message || err.error || err,
+        ),
     });
 
     if (this.role === 'ADMIN') {
@@ -91,7 +98,7 @@ export class ReactantSiteComponent implements OnInit {
         },
         error: (err) =>
           this.notification.error(
-            'Archived Reactants unavailable',
+            this.transloco.translate('reactants.notifications.fetchArchivedError'),
             err.message || err.error || err,
           ),
       });
@@ -133,7 +140,10 @@ export class ReactantSiteComponent implements OnInit {
       this.selectedReactantForView = reactantToView;
       this.isViewModalOpen = true;
     } else {
-      this.notification.error('Error', 'Reactant details could not be found.');
+      this.notification.error(
+        this.transloco.translate('reactants.notifications.notFoundTitle'),
+        this.transloco.translate('reactants.notifications.notFoundMessage'),
+      );
     }
   }
 
@@ -157,8 +167,8 @@ export class ReactantSiteComponent implements OnInit {
       this.reactantService.archiveReactant(this.pendingReactant.uuid).subscribe({
         next: (value) => {
           this.notification.success(
-            'Reactant Archived',
-            `The reactant "${shortName}" was successfully archived.`,
+            this.transloco.translate('reactants.notifications.archivedTitle'),
+            this.transloco.translate('reactants.notifications.archivedMessage', { name: shortName }),
           );
           setTimeout(() => {
             this.cancelArchive();
@@ -166,8 +176,11 @@ export class ReactantSiteComponent implements OnInit {
           });
         },
         error: (err) => {
-          this.notification.error('Archiving Failed', err.message);
-        },
+          this.notification.error(
+            this.transloco.translate('reactants.notifications.archiveFailed'),
+            err.message
+          );
+        }
       });
     }
   }
@@ -186,29 +199,40 @@ export class ReactantSiteComponent implements OnInit {
       this.reactantService.restoreReactant(reactant.uuid).subscribe({
         next: (value) => {
           this.notification.success(
-            'Reactant Restored',
-            `The reactant "${shortName}" was successfully restored.`,
+            this.transloco.translate('reactants.notifications.restoredTitle'),
+            this.transloco.translate('reactants.notifications.restoredMessage', {
+              name: shortName,
+            }),
           );
           setTimeout(() => {
             this.loadReactants();
           });
         },
         error: (err) => {
-          this.notification.error('Restoring Failed', err.message);
-        },
+          this.notification.error(
+            this.transloco.translate('reactants.notifications.restoreFailed'),
+            err.message,
+          );
+        }
       });
     }
-  };
+  }
 
   copyToClipboard(text: string): void {
     if (navigator.clipboard) {
       navigator.clipboard
         .writeText(text)
         .then(() => {
-          this.notification.success('Success', 'SMILES copied to clipboard!');
+          this.notification.success(
+            this.transloco.translate('reactants.notifications.copySuccessTitle'),
+            this.transloco.translate('reactants.notifications.copySuccessMessage'),
+          );
         })
         .catch((err) => {
-          this.notification.error('Failed to copy text', err.message || err.error || err);
+          this.notification.error(
+            this.transloco.translate('reactants.notifications.copyFailed'),
+            err.message || err.error || err,
+          );
         });
     } else {
       const textArea = document.createElement('textarea');

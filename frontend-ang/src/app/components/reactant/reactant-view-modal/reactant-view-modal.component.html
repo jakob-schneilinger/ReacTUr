@@ -1,6 +1,6 @@
 <app-modal
   [isOpen]="true"
-  [title]="selectedReactant?.shortName || 'Reactant Details'"
+  [title]="selectedReactant?.shortName || ('reactants.viewModal.title' | transloco)"
   size="xl"
   (close)="close.emit()">
 
@@ -9,36 +9,36 @@
       <div class="row">
 
         <div class="col-md-6 pe-4">
-          <h6 class="border-bottom pb-2 mb-3 text-primary">Reactant Information</h6>
+          <h6 class="border-bottom pb-2 mb-3 text-primary">{{ 'reactants.viewModal.sections.information' | transloco }}</h6>
           <dl class="row">
-            <dt class="col-sm-4">Short Name</dt>
+            <dt class="col-sm-4">{{ 'reactants.viewModal.labels.shortName' | transloco }}</dt>
             <dd class="col-sm-8 text-break">{{ selectedReactant.shortName }}</dd>
 
-            <dt class="col-sm-4">Type</dt>
+            <dt class="col-sm-4">{{ 'reactants.viewModal.labels.type' | transloco }}</dt>
             <dd class="col-sm-8 text-break">{{ selectedReactant.chemicalType.name }}</dd>
 
-            <dt class="col-sm-4">SMILES</dt>
+            <dt class="col-sm-4">{{ 'reactants.viewModal.labels.smiles' | transloco }}</dt>
             <dd class="col-sm-8 text-break">{{ selectedReactant.smiles }}</dd>
 
-            <dt class="col-sm-4">Chemical Name</dt>
+            <dt class="col-sm-4">{{ 'reactants.viewModal.labels.chemicalName' | transloco }}</dt>
             <dd class="col-sm-8 text-break">{{ selectedReactant.chemicalName || '-' }}</dd>
 
-            <dt class="col-sm-4">Additional Names</dt>
+            <dt class="col-sm-4">{{ 'reactants.viewModal.labels.additionalNames' | transloco }}</dt>
             <dd class="col-sm-8 text-break">{{ additionalNames }}</dd>
 
-            <dt class="col-sm-4">CAS Number</dt>
+            <dt class="col-sm-4">{{ 'reactants.viewModal.labels.casNumber' | transloco }}</dt>
             <dd class="col-sm-8 text-break">{{ selectedReactant.casNumber || '-' }}</dd>
 
-            <dt class="col-sm-4">Comment</dt>
+            <dt class="col-sm-4">{{ 'reactants.viewModal.labels.comment' | transloco }}</dt>
             <dd class="col-sm-8 text-break">{{ selectedReactant.comment || '-' }}</dd>
 
-            <dt class="col-sm-4">References</dt>
+            <dt class="col-sm-4">{{ 'reactants.viewModal.labels.references' | transloco }}</dt>
             <dd class="col-sm-8 text-break">{{ references }}</dd>
           </dl>
         </div>
 
         <div class="col-md-6 border-start ps-4" style="min-height: 600px">
-          <h6 class="border-bottom pb-2 mb-3 text-primary">Reactant Structure</h6>
+          <h6 class="border-bottom pb-2 mb-3 text-primary">{{ 'reactants.viewModal.sections.structure' | transloco }}</h6>
 
           @if (loadingStructures || !selectedReactant.structures || selectedReactant.structures.length === 0) {
             <app-reactant-structure
@@ -54,7 +54,7 @@
             }
           }
 
-          <h6 class="border-bottom pb-2 mb-3 mt-4 text-primary">Attached Files</h6>
+          <h6 class="border-bottom pb-2 mb-3 mt-4 text-primary">{{ 'reactants.viewModal.sections.attachedFiles' | transloco }}</h6>
 
           @for (file of selectedReactant.structures; track $index) {
             <app-uploaded-file
@@ -64,7 +64,7 @@
           }
 
           @if (!selectedReactant.structures || selectedReactant.structures.length === 0) {
-            <div class="text-muted small">No structural files attached.</div>
+            <div class="text-muted small">{{ 'reactants.viewModal.emptyFiles' | transloco }}</div>
           }
         </div>
 
@@ -74,8 +74,8 @@
 
   <ng-container footer>
     @if (hasWritePermission) {
-      <button type="button" class="primary" (click)="editReactant(selectedReactant?.uuid)">Edit Reactant</button>
+      <button type="button" class="primary" (click)="editReactant(selectedReactant?.uuid)">{{ 'reactants.viewModal.buttons.edit' | transloco }}</button>
     }
-    <button type="button" (click)="this.close.emit()">Close</button>
+    <button type="button" (click)="this.close.emit()">{{ 'reactants.viewModal.buttons.close' | transloco }}</button>
   </ng-container>
 </app-modal>

@@ -7,13 +7,21 @@ import { ReactantService } from '../../../services/reactant.service';
 import { NotificationService } from '../../../services/notification.service';
 import { Router } from '@angular/router';
 import { UploadedFileComponent } from '../../shared/file-upload/uploaded-file/uploaded-file.component';
+import { TRANSLOCO_IMPORTS } from '../../../global/transloco-imports';
+import { TranslocoService } from '@jsverse/transloco';
 
 @Component({
   selector: 'app-reactant-view-modal',
   templateUrl: './reactant-view-modal.component.html',
   styleUrls: ['./reactant-view-modal.component.scss'],
   standalone: true,
-  imports: [CommonModule, AppModalComponent, ReactantStructureComponent, UploadedFileComponent],
+  imports: [
+    CommonModule,
+    AppModalComponent,
+    ReactantStructureComponent,
+    UploadedFileComponent,
+    TRANSLOCO_IMPORTS,
+  ],
 })
 export class ReactantViewModalComponent implements OnInit {
   @Input() selectedReactant: ReactantDetailDto | undefined;
@@ -27,6 +35,7 @@ export class ReactantViewModalComponent implements OnInit {
     private reactantService: ReactantService,
     private notification: NotificationService,
     private cd: ChangeDetectorRef,
+    private transloco: TranslocoService,
   ) {}
 
   ngOnInit() {
@@ -43,7 +52,10 @@ export class ReactantViewModalComponent implements OnInit {
         },
         error: (err) => {
           this.loadingStructures = false;
-          this.notification.error('Missing 3D File', '3D File(s) of Reactant not found!');
+          this.notification.error(
+            this.transloco.translate('reactants.viewModal.notifications.missing3dFileTitle'),
+            this.transloco.translate('reactants.viewModal.notifications.missing3dFileMessage'),
+          );
           this.cd.markForCheck();
         },
       });

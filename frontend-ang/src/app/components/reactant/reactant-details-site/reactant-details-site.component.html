@@ -4,7 +4,7 @@
 
     <!-- Linke Spalte -->
     <div leftContent>
-      <h2>{{isEditMode ? reactant?.shortName : "Add new Reactant" }}</h2>
+      <h2>{{ isEditMode ? reactant?.shortName : ('reactants.details.addNew' | transloco) }}</h2>
       <app-reactant-details-form [formState]="state" [reactant]="reactant" (smiles)="updateSmiles($event)">
 
       </app-reactant-details-form>
@@ -28,7 +28,7 @@
       <app-file-upload
         [showTable]="false"
         [allowedExtensions]="['xyz']"
-        [existingFiles] = structures
+        [existingFiles]="structures"
         [maxFileSizeMB]="20"
         [maxFiles]="1"
         (filesChanged)="handleUploadedFiles($event)" >

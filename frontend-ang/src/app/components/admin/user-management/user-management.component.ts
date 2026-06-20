@@ -5,8 +5,8 @@ import { GetUserDto } from '../../../dtos/user.dto';
 import { UserService } from '../../../services/user.service';
 import { NotificationService } from '../../../services/notification.service';
 import { Role } from '../../../dtos/enums/role.enum';
-import { OptionService } from '../../../services/option.service';
 import { TRANSLOCO_IMPORTS } from '../../../global/transloco-imports';
+import { TranslocoService } from '@jsverse/transloco';
 
 @Component({
   selector: 'app-user-management',
@@ -32,9 +32,9 @@ export class UserManagementComponent implements OnInit {
 
   constructor(
     private userService: UserService,
-    private optionService: OptionService,
     private notification: NotificationService,
     private cdr: ChangeDetectorRef,
+    private transloco: TranslocoService,
   ) {}
 
   ngOnInit(): void {
@@ -44,7 +44,10 @@ export class UserManagementComponent implements OnInit {
         this.updateFilteredLists();
       },
       error: (err) =>
-        this.notification.error('Error fetching users', err.message || err.error || err),
+        this.notification.error(
+          this.transloco.translate('admin.user.notifications.fetchError'),
+          err.message || err.error || err,
+        ),
     });
   }
 
@@ -84,10 +87,15 @@ export class UserManagementComponent implements OnInit {
         user.deactivatedAt = deactivate ? new Date().toISOString() : null;
 
         this.updateFilteredLists();
-        this.notification.success('User status updated successfully');
+        this.notification.success(
+          this.transloco.translate('admin.user.notifications.statusUpdated'),
+        );
       },
       error: (err) => {
-        this.notification.error('Error updating user status', err.message || err.error || err);
+        this.notification.error(
+          this.transloco.translate('admin.user.notifications.statusError'),
+          err.message || err.error || err,
+        );
       },
     });
   }
@@ -100,10 +108,13 @@ export class UserManagementComponent implements OnInit {
       next: () => {
         user.role = newRole;
         this.updateFilteredLists();
-        this.notification.success('User role updated successfully');
+        this.notification.success(this.transloco.translate('admin.user.notifications.roleUpdated'));
       },
       error: (err) => {
-        this.notification.error('Error updating user role', err.message || err.error || err);
+        this.notification.error(
+          this.transloco.translate('admin.user.notifications.roleError'),
+          err.message || err.error || err,
+        );
       },
     });
   }

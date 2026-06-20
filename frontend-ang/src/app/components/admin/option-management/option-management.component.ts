@@ -5,6 +5,7 @@ import { OptionService } from '../../../services/option.service';
 import { SelectionOptionDto } from '../../../dtos/selection-option.dto';
 import { NotificationService } from '../../../services/notification.service';
 import { TRANSLOCO_IMPORTS } from '../../../global/transloco-imports';
+import { TranslocoService } from '@jsverse/transloco';
 
 type OptionCategory = 'type' | 'modality' | 'instrument' | 'solvent';
 
@@ -34,6 +35,7 @@ export class OptionManagementComponent implements OnInit {
     private optionService: OptionService,
     private notification: NotificationService,
     private cdr: ChangeDetectorRef,
+    private transloco: TranslocoService,
   ) {}
 
   ngOnInit(): void {
@@ -65,7 +67,9 @@ export class OptionManagementComponent implements OnInit {
       },
       error: (err) => {
         this.notification.error(
-          `Failed to load options for ${this.selectedCategory}`,
+          this.transloco.translate('admin.option.notifications.loadError', {
+            category: this.selectedCategory,
+          }),
           err.message || err.error || err,
         );
         this.isLoading = false;
@@ -78,10 +82,15 @@ export class OptionManagementComponent implements OnInit {
     this.optionService.updateSelectionOptionStatus(option.uuid, newStatus).subscribe({
       next: (updatedOption) => {
         option.archivedAt = updatedOption.archivedAt;
-        this.notification.success('Option status updated successfully');
+        this.notification.success(
+          this.transloco.translate('admin.option.notifications.statusUpdated'),
+        );
       },
       error: (err) =>
-        this.notification.error('Failed to update option', err.message || err.error || err),
+        this.notification.error(
+          this.transloco.translate('admin.option.notifications.statusError'),
+          err.message || err.error || err,
+        ),
     });
   }
 
@@ -93,11 +102,16 @@ export class OptionManagementComponent implements OnInit {
       next: (newOption) => {
         this.newOptionValue = '';
         this.loadOptions(true);
-        this.notification.success('New option added successfully');
+        this.notification.success(
+          this.transloco.translate('admin.option.notifications.addSuccess'),
+        );
         this.cdr.markForCheck();
       },
       error: (err) =>
-        this.notification.error('Failed to add new option', err.message || err.error || err),
+        this.notification.error(
+          this.transloco.translate('admin.option.notifications.addError'),
+          err.message || err.error || err,
+        ),
     });
   }
 }

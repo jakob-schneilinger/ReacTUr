@@ -2,61 +2,61 @@
 
   <div class="divider-container">
     <div class="divider"></div>
-    <span class="divider-label">Required</span>
+    <span class="divider-label">{{ 'reactants.details.form.sections.required' | transloco }}</span>
     <div class="divider"></div>
   </div>
 
   <div class="input-group">
-    <label>Short Name</label>
+    <label>{{ 'reactants.details.form.labels.shortName' | transloco }}</label>
     <div class="search-field">
-      <input type="text" formControlName="shortName" [class.is-invalid]="isInvalid('shortName')" placeholder="Value" />
+      <input type="text" formControlName="shortName" [class.is-invalid]="isInvalid('shortName')" [placeholder]="'reactants.details.form.placeholders.value' | transloco" />
       @if (reactantForm.get('shortName')?.value && !isEditMode) {
         <span class="icon bi bi-x text-black clear-btn" (click)="clearControl('shortName')"></span>
       }
     </div>
     @if (isInvalid('shortName')) {
-      <div class="error-message">Short Name is required.</div>
+      <div class="error-message">{{ 'reactants.details.form.errors.shortNameRequired' | transloco }}</div>
     }
   </div>
 
   <div class="input-group">
-    <label>SMILES</label>
+    <label>{{ 'reactants.details.form.labels.smiles' | transloco }}</label>
     <div class="search-field">
-      <input type="text" formControlName="smiles" [class.is-invalid]="isInvalid('smiles')" placeholder="Value" />
+      <input type="text" formControlName="smiles" [class.is-invalid]="isInvalid('smiles')" [placeholder]="'reactants.details.form.placeholders.value' | transloco" />
       @if (reactantForm.get('smiles')?.value) {
         <span class="icon bi bi-x text-black clear-btn" (click)="clearControl('smiles')"></span>
       }
     </div>
     @if (isInvalid('smiles')) {
-      <div class="error-message">SMILES string is required.</div>
+      <div class="error-message">{{ 'reactants.details.form.errors.smilesRequired' | transloco }}</div>
     }
     @if (reactantForm.get('smiles')?.hasError('syntaxError')) {
-      <div class="error-message">SMILES format is invalid. Please check syntax.</div>
+      <div class="error-message">{{ 'reactants.details.form.errors.smilesSyntax' | transloco }}</div>
     }
     @if (reactantForm.get('smiles')?.hasError('sanitizationError')) {
-      <div class="error-message">SMILES format is invalid. Molecule structure failed RDKit sanitization.</div>
+      <div class="error-message">{{ 'reactants.details.form.errors.smilesSanitization' | transloco }}</div>
     }
   </div>
 
   <app-option-selector
-    label="Type"
+    [label]="'reactants.details.form.labels.type' | transloco"
     [control]="chemicalTypeControl"
     [options]="chemicalTypes"
     datalistId="chemicalTypesList"
-    placeholder="Select or type..."
-    errorMessage="Please select a valid type from the list.">
+    [placeholder]="'reactants.details.form.placeholders.selectOrType' | transloco"
+    [errorMessage]="'reactants.details.form.errors.invalidType' | transloco">
   </app-option-selector>
 
   <div class="divider-container">
     <div class="divider"></div>
-    <span class="divider-label">Optional</span>
+    <span class="divider-label">{{ 'reactants.details.form.sections.optional' | transloco }}</span>
     <div class="divider"></div>
   </div>
 
   <div class="input-group">
-    <label>Chemical Name</label>
+    <label>{{ 'reactants.details.form.labels.chemicalName' | transloco }}</label>
     <div class="search-field">
-      <input type="text" formControlName="chemicalName" placeholder="Value" />
+      <input type="text" formControlName="chemicalName" [placeholder]="'reactants.details.form.placeholders.value' | transloco" />
       @if (reactantForm.get('chemicalName')?.value) {
         <span class="icon bi bi-x text-black clear-btn" (click)="clearControl('chemicalName')"></span>
       }
@@ -64,17 +64,17 @@
   </div>
 
   <app-dynamic-array-input
-    label="Additional Short Names"
+    [label]="'reactants.details.form.labels.additionalShortNames' | transloco"
     [formArray]="additionalShortNames"
     arrayName="additionalShortNames"
-    addButtonLabel="Add short name"
-    placeholder="Value">
+    [addButtonLabel]="'reactants.details.form.buttons.addShortName' | transloco"
+    [placeholder]="'reactants.details.form.placeholders.value' | transloco">
   </app-dynamic-array-input>
 
   <div class="input-group">
-    <label>CAS Number</label>
+    <label>{{ 'reactants.details.form.labels.casNumber' | transloco }}</label>
     <div class="search-field">
-      <input type="text" formControlName="casNumber" placeholder="Value" />
+      <input type="text" formControlName="casNumber" [placeholder]="'reactants.details.form.placeholders.value' | transloco" />
       @if (reactantForm.get('casNumber')?.value) {
         <span class="icon bi bi-x text-black clear-btn" (click)="clearControl('casNumber')"></span>
       }
@@ -82,17 +82,17 @@
   </div>
 
   <app-dynamic-array-input
-    label="Reference(s)"
+    [label]="'reactants.details.form.labels.references' | transloco"
     [formArray]="references"
     arrayName="references"
-    addButtonLabel="Add reference"
-    placeholder="Value">
+    [addButtonLabel]="'reactants.details.form.buttons.addReference' | transloco"
+    [placeholder]="'reactants.details.form.placeholders.value' | transloco">
   </app-dynamic-array-input>
 
   <div class="input-group">
-    <label>Comment</label>
+    <label>{{ 'reactants.details.form.labels.comment' | transloco }}</label>
     <div class="search-field align-items-start">
-      <textarea formControlName="comment" placeholder="Add additional details..." rows="3"></textarea>
+      <textarea formControlName="comment" [placeholder]="'reactants.details.form.placeholders.comment' | transloco" rows="3"></textarea>
       @if (reactantForm.get('comment')?.value) {
         <span class="icon bi bi-x text-black clear-btn" (click)="clearControl('comment')" style="top: 8px;"></span>
       }
@@ -100,18 +100,18 @@
   </div>
 
   <div class="action-buttons mt-4">
-    <button type="submit" class="form-button primary" *appHasRole="['SUPERVISOR','ADMIN']">Submit</button>
-    <button type="button" class="form-button" (click)="onCancel()">Cancel</button>
-    <button type="button" class="form-button error" (click)="onArchive()" *appHasRole="['SUPERVISOR','ADMIN']" [hidden]="formState !== 'edit'">Archive</button>
+    <button type="submit" class="form-button primary" *appHasRole="['SUPERVISOR','ADMIN']">{{ 'reactants.details.form.buttons.submit' | transloco }}</button>
+    <button type="button" class="form-button" (click)="onCancel()">{{ 'reactants.details.form.buttons.cancel' | transloco }}</button>
+    <button type="button" class="form-button error" (click)="onArchive()" *appHasRole="['SUPERVISOR','ADMIN']" [hidden]="formState !== 'edit'">{{ 'reactants.details.form.buttons.archive' | transloco }}</button>
   </div>
 
 </form>
 
 <app-confirm-modal
   [isOpen]="isArchiveReactantModalOpen"
-  title="Archive Reactant"
-  [message]="'Are you sure you want to permanently archive the reactant ' + reactantForm.get('shortName')?.value + '?'"
-  confirmLabel="Permanently Archive"
+  [title]="'reactants.details.modals.archive.title' | transloco"
+  [message]="'reactants.details.modals.archive.message' | transloco: { name: reactantForm.get('shortName')?.value }"
+  [confirmLabel]="'reactants.details.modals.archive.confirm' | transloco"
   confirmButtonClass="danger"
   (confirm)="executeArchive()"
   (cancel)="closeModals()">
@@ -119,10 +119,10 @@
 
 <app-confirm-modal
   [isOpen]="isCancelReactantModalOpen"
-  title="Unsaved Changes"
-  message="You have unsaved changes. Are you sure you want to cancel? All progress will be lost."
-  confirmLabel="Discard Changes"
-  cancelLabel="Continue Editing"
+  [title]="'reactants.details.modals.cancel.title' | transloco"
+  [message]="'reactants.details.modals.cancel.message' | transloco"
+  [confirmLabel]="'reactants.details.modals.cancel.confirm' | transloco"
+  [cancelLabel]="'reactants.details.modals.cancel.cancelBtn' | transloco"
   confirmButtonClass="danger"
   (confirm)="executeCancel()"
   (cancel)="closeModals()">

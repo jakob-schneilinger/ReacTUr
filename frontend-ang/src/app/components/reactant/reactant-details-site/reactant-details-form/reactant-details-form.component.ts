@@ -30,6 +30,8 @@ import { OptionService } from '../../../../services/option.service';
 import { ChemicalTypeDto } from '../../../../dtos/selection-option.dto';
 import { Subject } from 'rxjs';
 import { ReactantService } from '../../../../services/reactant.service';
+import { TRANSLOCO_IMPORTS } from '../../../../global/transloco-imports';
+import { TranslocoService } from '@jsverse/transloco';
 
 export type FormState = 'create' | 'edit';
 
@@ -50,6 +52,7 @@ declare var initRDKitModule: any;
     OptionSelectorComponent,
     AppConfirmModalComponent,
     HasRoleDirective,
+    TRANSLOCO_IMPORTS
   ],
 })
 export class ReactantDetailsFormComponent implements OnInit, OnDestroy {
@@ -77,6 +80,7 @@ export class ReactantDetailsFormComponent implements OnInit, OnDestroy {
     private optionService: OptionService,
     private reactantService: ReactantService,
     private cdr: ChangeDetectorRef,
+    private transloco: TranslocoService,
   ) {}
 
   ngOnDestroy(): void {
@@ -93,8 +97,10 @@ export class ReactantDetailsFormComponent implements OnInit, OnDestroy {
       },
       error: (err) => {
         this.notification.error(
-          'Type Loading Error',
-          `Please refresh page! Error: ${err.message || err.error || err}`,
+          this.transloco.translate('reactants.details.notifications.typeLoadErrorTitle'),
+          this.transloco.translate('reactants.details.notifications.typeLoadErrorMessage', {
+            error: err.message || err.error || err,
+          }),
         );
       },
     });
@@ -257,8 +263,11 @@ export class ReactantDetailsFormComponent implements OnInit, OnDestroy {
   onSubmit(): void {
     if (this.reactantForm.valid) {
       const formValue = this.reactantForm.getRawValue();
-      // TODO: send to backend (create or edit based on formState)
-      this.notification.success('Reactant Saved', 'Reactant was saved successfully!');
+      // TODO: send to backend
+      this.notification.success(
+        this.transloco.translate('reactants.details.notifications.savedTitle'),
+        this.transloco.translate('reactants.details.notifications.savedMessage'),
+      );
       this.reactantForm.markAsPristine();
     } else {
       this.reactantForm.markAllAsTouched();
@@ -290,16 +299,21 @@ export class ReactantDetailsFormComponent implements OnInit, OnDestroy {
       this.reactantService.archiveReactant(this.reactant.uuid).subscribe({
         next: () => {
           this.notification.success(
-            'Reactant Archived',
-            `The reactant "${this.reactantForm.get('shortName')?.value}" was successfully archived.`,
+            this.transloco.translate('reactants.details.notifications.archivedTitle'),
+            this.transloco.translate('reactants.details.notifications.archivedMessage', {
+              name: this.reactantForm.get('shortName')?.value,
+            }),
           );
           this.reactantForm.reset();
           this.router.navigate(['/reactants']);
         },
         error: (err) =>
           this.notification.error(
-            'Archive Failed',
-            `Archiving of Reactant "${this.reactantForm.get('shortName')?.value}" failed! Error: ${err.message || err.error || err}`,
+            this.transloco.translate('reactants.details.notifications.archiveFailedTitle'),
+            this.transloco.translate('reactants.details.notifications.archiveFailedMessage', {
+              name: this.reactantForm.get('shortName')?.value,
+              error: err.message || err.error || err,
+            }),
           ),
       });
     }

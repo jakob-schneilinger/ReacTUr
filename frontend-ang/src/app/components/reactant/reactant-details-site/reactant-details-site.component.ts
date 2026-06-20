@@ -9,6 +9,8 @@ import { NotificationService } from '../../../services/notification.service';
 import { ReactantService } from '../../../services/reactant.service';
 import { ReactantDto } from '../../../dtos/reactant.dto';
 import { filter, map, Subject, switchMap, takeUntil } from 'rxjs';
+import { TRANSLOCO_IMPORTS } from '../../../global/transloco-imports';
+import { TranslocoService } from '@jsverse/transloco';
 
 export type FormState = 'create' | 'edit';
 
@@ -22,13 +24,14 @@ export type FormState = 'create' | 'edit';
     LayoutComponent,
     ReactantDetailsFormComponent,
     ReactantStructureComponent,
-    FileUploadComponent
+    FileUploadComponent,
+    TRANSLOCO_IMPORTS
   ],
 })
 export class ReactantDetailsSiteComponent implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
   reactant: ReactantDto | undefined;
-  smiles: string = "";
+  smiles: string = '';
   loadingStructures: boolean = true;
   state: FormState = 'create';
   structures: File[] = [];
@@ -39,6 +42,7 @@ export class ReactantDetailsSiteComponent implements OnInit, OnDestroy {
     private notification: NotificationService,
     private reactantService: ReactantService,
     private cd: ChangeDetectorRef,
+    private transloco: TranslocoService,
   ) {}
 
   ngOnInit() {
@@ -57,29 +61,34 @@ export class ReactantDetailsSiteComponent implements OnInit, OnDestroy {
   }
 
   private loadReactantData() {
-    this.route.params.pipe(
-      map(params => params['uuid']),
-      filter(uuid => !!uuid),
-      switchMap(uuid => this.reactantService.getReactantDetail(uuid)),
-      switchMap(reactant => {
-        this.reactant = reactant;
-        this.loadingStructures = true;
-        this.cd.markForCheck();
-        return this.reactantService.loadReactantStructures(reactant);
-      }),
-      takeUntil(this.destroy$)
-    ).subscribe({
-      next: (files) => {
-        this.structures = files;
-        this.loadingStructures = false;
-        this.cd.markForCheck();
-      },
-      error: (err) => {
-        this.loadingStructures = false;
-        this.notification.error('Error', err.message || 'Failed to load reactant data');
-        this.cd.markForCheck();
-      }
-    });
+    this.route.params
+      .pipe(
+        map((params) => params['uuid']),
+        filter((uuid) => !!uuid),
+        switchMap((uuid) => this.reactantService.getReactantDetail(uuid)),
+        switchMap((reactant) => {
+          this.reactant = reactant;
+          this.loadingStructures = true;
+          this.cd.markForCheck();
+          return this.reactantService.loadReactantStructures(reactant);
+        }),
+        takeUntil(this.destroy$),
+      )
+      .subscribe({
+        next: (files) => {
+          this.structures = files;
+          this.loadingStructures = false;
+          this.cd.markForCheck();
+        },
+        error: (err) => {
+          this.loadingStructures = false;
+          this.notification.error(
+            this.transloco.translate('reactants.details.notifications.errorTitle'),
+            err.message || this.transloco.translate('reactants.details.notifications.loadError'),
+          );
+          this.cd.markForCheck();
+        },
+      });
   }
 
   get isEditMode(): boolean {

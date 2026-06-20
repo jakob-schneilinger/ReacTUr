@@ -14,6 +14,8 @@ import {
 } from '@angular/core';
 import { NotificationService } from '../../../services/notification.service';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
+import { TRANSLOCO_IMPORTS } from '../../../global/transloco-imports';
+import { TranslocoService } from '@jsverse/transloco';
 
 declare var $3Dmol: any;
 declare var initRDKitModule: any;
@@ -23,7 +25,7 @@ declare var initRDKitModule: any;
   templateUrl: './reactant-structure.component.html',
   styleUrls: ['./reactant-structure.component.scss'],
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, TRANSLOCO_IMPORTS],
 })
 export class ReactantStructureComponent implements AfterViewInit, OnInit, OnChanges, OnDestroy {
   @Input() structure: File | undefined;
@@ -45,6 +47,7 @@ export class ReactantStructureComponent implements AfterViewInit, OnInit, OnChan
     private notification: NotificationService,
     private sanitizer: DomSanitizer,
     private cd: ChangeDetectorRef,
+    private transloco: TranslocoService,
   ) {}
 
   async ngOnInit(): Promise<void> {
@@ -171,8 +174,8 @@ export class ReactantStructureComponent implements AfterViewInit, OnInit, OnChan
 
       if (xyzDataString.trim().startsWith('<')) {
         this.notification.error(
-          'File Format Error',
-          'Expected XYZ data but received HTML/XML format. Check file content!',
+          this.transloco.translate('reactants.structure.notifications.fileFormatErrorTitle'),
+          this.transloco.translate('reactants.structure.notifications.fileFormatErrorMessage'),
         );
         return;
       }
@@ -187,8 +190,8 @@ export class ReactantStructureComponent implements AfterViewInit, OnInit, OnChan
           this.viewer.clear();
           this.ngZone.run(() => {
             this.notification.error(
-              'Invalid XYZ file',
-              'The uploaded XYZ file contains no valid chemical structure. Check file content!',
+              this.transloco.translate('reactants.structure.notifications.invalidXyzTitle'),
+              this.transloco.translate('reactants.structure.notifications.invalidXyzMessage'),
             );
           });
           return;
@@ -235,7 +238,10 @@ export class ReactantStructureComponent implements AfterViewInit, OnInit, OnChan
       }
       mol.delete();
     } catch (error) {
-      this.notification.error('2D Render Error', 'Could not generate 2D structure from SMILES.');
+      this.notification.error(
+        this.transloco.translate('reactants.structure.notifications.render2dErrorTitle'),
+        this.transloco.translate('reactants.structure.notifications.render2dErrorMessage'),
+      );
     }
   }
 }

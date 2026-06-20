@@ -8,7 +8,7 @@
       <span class="badge type-badge">{{ reactant.chemicalType.name }}</span>
 
       @if (isArchived) {
-        <span class="badge bg-secondary">Archived</span>
+        <span class="badge bg-secondary">{{ 'reactants.badges.archived' | transloco }}</span>
       }
     </div>
 
@@ -20,7 +20,7 @@
       <div class="text-truncate me-2" [title]="reactant.smiles">
         {{ reactant.smiles }}
       </div>
-      <button class="btn-sm p-0 ms-auto copy-btn text-muted" (click)="copySmiles.emit(reactant.smiles)" title="Copy SMILES">
+      <button class="btn-sm p-0 ms-auto copy-btn text-muted" (click)="copySmiles.emit(reactant.smiles)" [title]="'reactants.actions.copySmiles' | transloco">
         <i class="bi bi-clipboard"></i>
       </button>
     </div>
@@ -28,19 +28,19 @@
     <div class="d-flex justify-content-end gap-2 ms-auto ps-3"
          [ngStyle]="{'min-width': hasWritePermission ? (isArchived ? '85px' : '125x') : '45px'}">
 
-      <button class="compact" (click)="view.emit(reactant.uuid)" title="View Details">
+      <button class="compact" (click)="view.emit(reactant.uuid)" [title]="'reactants.actions.viewDetails' | transloco">
         <i class="bi bi-file-earmark-text"></i>
       </button>
 
       @if (!isArchived) {
-        <button class="primary compact" *appHasRole="['SUPERVISOR', 'ADMIN']" (click)="edit.emit(reactant.uuid)" title="Edit Reactant">
+        <button class="primary compact" *appHasRole="['SUPERVISOR', 'ADMIN']" (click)="edit.emit(reactant.uuid)" [title]="'reactants.actions.editReactant' | transloco">
           <i class="bi bi-pencil"></i>
         </button>
-        <button class="error compact" *appHasRole="['ADMIN']" (click)="archive.emit(reactant)" title="Archive Reactant">
+        <button class="error compact" *appHasRole="['ADMIN']" (click)="archive.emit(reactant)" [title]="'reactants.actions.archiveReactant' | transloco">
           <i class="bi bi-trash"></i>
         </button>
       } @else {
-        <button class="primary compact" *appHasRole="['ADMIN']" (click)="restore.emit(reactant)" title="Restore Reactant">
+        <button class="primary compact" *appHasRole="['ADMIN']" (click)="restore.emit(reactant)" [title]="'reactants.actions.restoreReactant' | transloco">
           <i class="bi bi-arrow-counterclockwise"></i>
         </button>
       }

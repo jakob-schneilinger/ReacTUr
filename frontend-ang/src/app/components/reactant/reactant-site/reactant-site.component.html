@@ -2,7 +2,7 @@
 
   <div class="row mb-3">
     <div class="col-12">
-      <h2 class="mb-0">Reactants</h2>
+      <h2 class="mb-0">{{ 'reactants.title' | transloco }}</h2>
     </div>
   </div>
 
@@ -13,17 +13,17 @@
       (search)="onSearch()"
       (openDraw)="openDraw()"
       [showDrawButton]="true"
-      placeholder="Search by name, SMILES, or type..."
+      [placeholder]="'reactants.searchPlaceholder' | transloco"
       style="width: 500px; display: block;">
     </app-search-input>
 
     <div class="d-flex gap-2">
       <button *appHasRole="['ADMIN']" class="text-nowrap m-0" (click)="showArchivedReactants(!showArchived)">
-        {{ showArchived ? 'Show Reactants' : 'Show Archived' }}
+        {{ showArchived ? ('reactants.actions.showReactants' | transloco) : ('reactants.actions.showArchived' | transloco) }}
       </button>
 
       <button *appHasRole="['SUPERVISOR','ADMIN']" class="primary text-nowrap m-0" (click)="goToCreate()">
-        <i class="bi bi-plus-lg me-1"></i> Add Reactant
+        <i class="bi bi-plus-lg me-1"></i> {{ 'reactants.actions.addReactant' | transloco }}
       </button>
     </div>
 
@@ -50,9 +50,9 @@
     <div class="row">
       <div class="col-12 text-center mt-5">
         <i class="bi bi-inbox text-muted" style="font-size: 3rem;"></i>
-        <h4 class="text-muted mt-3">{{ showArchived ? 'No archived reactants found.' : 'No reactants found.'}}</h4>
+        <h4 class="text-muted mt-3">{{ showArchived ? ('reactants.empty.noArchived' | transloco) : ('reactants.empty.noReactants' | transloco)}}</h4>
         @if (searchTerm) {
-          <p class="text-muted">Try adjusting your search criteria.</p>
+          <p class="text-muted">{{ 'reactants.empty.adjustSearch' | transloco }}</p>
         }
       </div>
     </div>
@@ -60,12 +60,11 @@
 
 </div>
 
-
 <app-confirm-modal
   [isOpen]="isArchiveReactantModalOpen"
-  title="Archive Reactant"
-  [message]="'Are you sure you want to permanently archive the reactant <strong>' + pendingReactant?.shortName + '</strong>?'"
-  confirmLabel="Permanently Archive"
+  [title]="'reactants.modals.archive.title' | transloco"
+  [message]="'reactants.modals.archive.message' | transloco: { name: pendingReactant?.shortName }"
+  [confirmLabel]="'reactants.modals.archive.confirm' | transloco"
   confirmButtonClass="danger"
   (confirm)="executeArchive()"
   (cancel)="cancelArchive()">
