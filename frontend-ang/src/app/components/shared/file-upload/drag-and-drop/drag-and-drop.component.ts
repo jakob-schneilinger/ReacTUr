@@ -14,6 +14,7 @@ export class DragAndDropComponent {
   @Output() filesSelected = new EventEmitter<File[]>();
   @Input() allowedExtensions: string[] = [];
   @Input() maxFileSizeMB?: number;
+  @Input() maxFiles: number = 0;
 
   constructor(private notification: NotificationService) {}
 
@@ -61,7 +62,6 @@ export class DragAndDropComponent {
 
     if (validFiles.length > 0) {
       this.filesSelected.emit(validFiles);
-      this.notification.success('Success', `${validFiles.length} file(s) added.`);
     }
   }
 

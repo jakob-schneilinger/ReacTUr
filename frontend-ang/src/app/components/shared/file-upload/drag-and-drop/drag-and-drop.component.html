@@ -18,7 +18,13 @@
   <p class="text-muted small mb-0">
     Supports: {{acceptedExtensionsText}}
     @if (maxFileSizeMB) {
-      <span> (Max: {{maxFileSizeMB}}MB)</span>
+      <span> (Max: {{maxFileSizeMB}}MB</span>
+      @if (maxFiles > 0) {
+        <span>, {{maxFiles}} {{maxFiles === 1 ? 'file' : 'files'}}</span>
+      }
+      <span>)</span>
+    } @else if (maxFiles > 0) {
+      <span> (Max: {{maxFiles}} {{maxFiles === 1 ? 'file' : 'files'}})</span>
     }
   </p>
 </div>

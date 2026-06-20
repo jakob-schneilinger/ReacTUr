@@ -8,7 +8,8 @@
   <app-drag-and-drop
     (filesSelected)="addFiles($event)"
     [allowedExtensions]="allowedExtensions"
-    [maxFileSizeMB]="maxFileSizeMB" >
+    [maxFileSizeMB]="maxFileSizeMB"
+    [maxFiles]="maxFiles" >
   </app-drag-and-drop>
 
   <div class="file-list mt-4">
