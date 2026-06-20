@@ -1,7 +1,9 @@
 package com.reactur.backend.entities.ExperimentEntities;
 
 import com.reactur.backend.entities.SelectionOptions.Instrument;
+import com.reactur.backend.entities.SelectionOptions.Modality;
 import com.reactur.backend.entities.SelectionOptions.Solvent;
+import com.reactur.backend.entities.User;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -36,11 +38,12 @@ public class Metadata {
     @Column(name = "date", nullable = false)
     private LocalDate date;
 
-    @Column(name = "scientist", nullable = false)
-    private String scientist;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "scientist_id", nullable = false)
+    private User scientist;
 
     @Column(name = "temperature")
-    private Float temperature;
+    private Double temperature;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "solvent_id")
@@ -51,10 +54,17 @@ public class Metadata {
     private Instrument instrument;
 
     @Column(name = "concentration_a")
-    private Float concentrationA;
+    private Double concentrationA;
 
     @Column(name = "concentration_b")
-    private Float concentrationB;
+    private Double concentrationB;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "modality_id")
+    private Modality modality;
+
+    @Column(name = "wavelength")
+    private Double wavelength;
 
     @Column(name = "comment", columnDefinition = "TEXT")
     private String comment;
