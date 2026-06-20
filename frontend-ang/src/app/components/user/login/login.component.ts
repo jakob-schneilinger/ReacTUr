@@ -2,13 +2,14 @@ import { CommonModule } from '@angular/common';
 import { Component, OnInit } from "@angular/core";
 import { ActivatedRoute } from "@angular/router";
 import { AuthService } from "../../../services/auth.service";
+import { TRANSLOCO_IMPORTS } from '../../../global/transloco-imports';
 
 @Component({
   selector: 'app-login',
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.scss', '../auth.scss'],
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, TRANSLOCO_IMPORTS],
 })
 export class LoginComponent implements OnInit {
   gotoAfterSuccess: string = '/';

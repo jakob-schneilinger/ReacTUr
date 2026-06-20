@@ -8,7 +8,7 @@
       <input
         type="text"
         class="search-input form-control border-start-0 ps-0"
-        placeholder="Search users by name, email, or role..."
+        [placeholder]="'admin.userSearchPlaceholder' | transloco"
         [ngModel]="searchTerm"
         (ngModelChange)="onSearchChange($event)"
         [ngClass]="searchTerm ? 'border-end-0' : ''"
@@ -27,7 +27,7 @@
       <div class="card-header bg-white d-flex justify-content-between align-items-center cursor-pointer"
            (click)="togglePanel('pending')">
         <h6 class="mb-0 fw-bold d-flex align-items-center gap-2">
-          Pending Approvals
+          {{'admin.userPendingTitle' | transloco}}
           <span class="badge warning text-dark">{{ pendingUsers.length }}</span>
         </h6>
         <i class="bi" [ngClass]="panels.pending ? 'bi-chevron-up' : 'bi-chevron-down'"></i>
@@ -43,7 +43,7 @@
       <div class="card-header bg-white d-flex justify-content-between align-items-center cursor-pointer"
            (click)="togglePanel('active')">
         <h6 class="mb-0 fw-bold d-flex align-items-center gap-2">
-          Active Users
+          {{'admin.userActiveTitle' | transloco}}
           <span class="badge bg-success">{{ activeUsers.length }}</span>
         </h6>
         <i class="bi" [ngClass]="panels.active ? 'bi-chevron-up' : 'bi-chevron-down'"></i>
@@ -59,7 +59,7 @@
       <div class="card-header bg-white text-muted d-flex justify-content-between align-items-center cursor-pointer"
            (click)="togglePanel('deactivated')">
         <h6 class="mb-0 fw-bold d-flex align-items-center gap-2">
-          Deactivated Users
+          {{'admin.userDeactivatedTitle' | transloco}}
           <span class="badge bg-secondary">{{ deactivatedUsers.length }}</span>
         </h6>
         <i class="bi" [ngClass]="panels.deactivated ? 'bi-chevron-up' : 'bi-chevron-down'"></i>
@@ -77,17 +77,17 @@
 <ng-template #userTable let-userList let-type="type">
   @if (userList.length === 0) {
     <div class="p-4 text-center text-muted">
-      No users found in this category.
+      {{'admin.userTableNoUsersFound' | transloco}}
     </div>
   } @else {
     <div class="table-responsive">
       <table class="table table-hover mb-0 align-middle">
         <thead class="table-light">
         <tr>
-          <th>Name</th>
-          <th>Email</th>
-          <th>Role</th>
-          <th class="text-end">Actions</th>
+          <th>{{'admin.userTableHeaderName' | transloco}}</th>
+          <th>{{'admin.userTableHeaderEmail' | transloco}}</th>
+          <th>{{'admin.userTableHeaderRole' | transloco}}</th>
+          <th class="text-end">{{'admin.userTableHeaderAction' | transloco}}</th>
         </tr>
         </thead>
         <tbody>
@@ -98,24 +98,24 @@
               <td>
                 @if (type === 'active' || type === 'pending') {
                   <select class="form-select form-select-sm w-auto" [value]="user.role || ''" (change)="updateUserRole(user, $event)">
-                    <option value="" disabled selected>Select Role...</option>
-                    <option value="USER">USER</option>
-                    <option value="SUPERVISOR">SUPERVISOR</option>
+                    <option value="" disabled selected>{{'admin.userTableRolePlaceholder' | transloco}}</option>
+                    <option value="USER">{{'userRoles.user' | transloco}}</option>
+                    <option value="SUPERVISOR">{{'userRoles.supervisor' | transloco}}</option>
                   </select>
                 } @else {
-                  <span class="text-muted">{{ user.role ? user.role : '--' }}</span>
+                  <span class="text-muted">{{ user.role === Role.USER ? ('userRoles.user' | transloco) : (user.role === Role.SUPERVISOR ? ('userRoles.supervisor' | transloco) : '--') }}</span>
                 }
               </td>
               <td class="text-end">
                 <div class="d-flex justify-content-end gap-2">
                   @if (type === 'pending') {
-                    <button class="error compact px-3 py-1" (click)="updateUserStatus(user, 'DEACTIVATED')">Reject</button>
+                    <button class="error compact px-3 py-1" (click)="updateUserStatus(user, 'DEACTIVATED')">{{'admin.userTableActionReject' | transloco}}</button>
                   }
                   @if (type === 'active') {
-                    <button class="error compact px-3 py-1" (click)="updateUserStatus(user, 'DEACTIVATED')">Deactivate</button>
+                    <button class="error compact px-3 py-1" (click)="updateUserStatus(user, 'DEACTIVATED')">{{'admin.userTableActionDeactivate' | transloco}}</button>
                   }
                   @if (type === 'deactivated') {
-                    <button class="primary compact px-3 py-1" (click)="updateUserStatus(user, 'ACTIVATED')">Reactivate</button>
+                    <button class="primary compact px-3 py-1" (click)="updateUserStatus(user, 'ACTIVATED')">{{'admin.userTableActionReactivate' | transloco}}</button>
                   }
                 </div>
               </td>

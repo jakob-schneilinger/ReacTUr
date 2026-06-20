@@ -4,6 +4,7 @@ import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { OptionService } from '../../../services/option.service';
 import { SelectionOptionDto } from '../../../dtos/selection-option.dto';
 import { NotificationService } from '../../../services/notification.service';
+import { TRANSLOCO_IMPORTS } from '../../../global/transloco-imports';
 
 type OptionCategory = 'type' | 'modality' | 'instrument' | 'solvent';
 
@@ -12,14 +13,14 @@ type OptionCategory = 'type' | 'modality' | 'instrument' | 'solvent';
   templateUrl: './option-management.component.html',
   styleUrls: ['./option-management.component.scss'],
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, TRANSLOCO_IMPORTS],
 })
 export class OptionManagementComponent implements OnInit {
   categories: { label: string; value: OptionCategory }[] = [
-    { label: 'Type', value: 'type' },
-    { label: 'Modality', value: 'modality' },
-    { label: 'Instrument', value: 'instrument' },
-    { label: 'Solvent', value: 'solvent' },
+    { label: 'selectionOptions.type', value: 'type' },
+    { label: 'selectionOptions.modality', value: 'modality' },
+    { label: 'selectionOptions.instrument', value: 'instrument' },
+    { label: 'selectionOptions.solvent', value: 'solvent' },
   ];
 
   selectedCategory: OptionCategory = 'type';

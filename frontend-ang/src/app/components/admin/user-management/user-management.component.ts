@@ -6,13 +6,14 @@ import { UserService } from '../../../services/user.service';
 import { NotificationService } from '../../../services/notification.service';
 import { Role } from '../../../dtos/enums/role.enum';
 import { OptionService } from '../../../services/option.service';
+import { TRANSLOCO_IMPORTS } from '../../../global/transloco-imports';
 
 @Component({
   selector: 'app-user-management',
   templateUrl: './user-management.component.html',
   styleUrls: ['./user-management.component.scss'],
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, TRANSLOCO_IMPORTS],
 })
 export class UserManagementComponent implements OnInit {
   searchTerm: string = '';
@@ -42,7 +43,8 @@ export class UserManagementComponent implements OnInit {
         this.allUsers = users.filter((user) => user.role !== Role.ADMIN);
         this.updateFilteredLists();
       },
-      error: (err) => this.notification.error('Error fetching users', err.message || err.error || err),
+      error: (err) =>
+        this.notification.error('Error fetching users', err.message || err.error || err),
     });
   }
 
@@ -115,4 +117,6 @@ export class UserManagementComponent implements OnInit {
     this.searchTerm = '';
     this.updateFilteredLists();
   }
+
+  protected readonly Role = Role;
 }

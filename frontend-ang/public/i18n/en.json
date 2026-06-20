@@ -1,0 +1,60 @@
+{
+  "header": {
+    "title": "ReacTUr",
+    "logoAlt": "ReacTUr Logo",
+    "search": "Search",
+    "createExperiment": "Create Experiment",
+    "reactants": "Reactants",
+    "admin": "Admin",
+    "userProfile": "User Profile",
+    "greetings": "Hello",
+    "logout": "Logout",
+    "login": "Login"
+  },
+  "login": {
+    "title": "ReacTUr",
+    "login": "Login",
+    "loginInstruction": "Please log in with your TU account to continue.",
+    "loginButton": "Login with TU SSO"
+  },
+  "admin": {
+    "userTitle": "User Management",
+    "userSearchPlaceholder": "Search users by name, email, or role...",
+    "userPendingTitle": "Pending Approvals",
+    "userActiveTitle": "Active Users",
+    "userDeactivatedTitle": "Deactivated Users",
+    "userTableHeaderName": "NAME",
+    "userTableHeaderEmail": "EMAIL",
+    "userTableHeaderRole": "ROLE",
+    "userTableHeaderAction": "ACTION",
+    "userTableRolePlaceholder": "Select Role...",
+    "userTableActionReject": "Reject",
+    "userTableActionDeactivate": "Deactivate",
+    "userTableActionReactivate": "Reactivate",
+    "userTableNoUsersFound": "No users found in this category.",
+
+    "optionTitle": "System Configuration",
+    "optionTableHeaderValue": "VALUE",
+    "optionTableHeaderStatus": "STATUS",
+    "optionTableHeaderAction": "ACTION",
+    "optionTableStatusActive": "Active",
+    "optionTableStatusInactive": "Inactive",
+    "optionTableActionDeactivate": "Deactivate",
+    "optionTableActionActivate": "Activate",
+    "optionAddPlaceholder": "Type to add a new option...",
+    "optionAddButton": "Add",
+    "optionTableLoadingOptions": "Loading options...",
+    "optionTableNoOptionsFound": "No options found in this category."
+  },
+  "selectionOptions": {
+    "type": "Type",
+    "modality": "Modality",
+    "instrument": "Instrument",
+    "solvent": "Solvent"
+  },
+  "userRoles": {
+    "user": "USER",
+    "supervisor": "SUPERVISOR",
+    "admin": "ADMIN"
+  }
+}

@@ -145,12 +145,12 @@
   padding: 0.75rem 1.25rem;
   cursor: pointer;
   color: $light_black;
+  background-color: $background;
   font-weight: 500;
   transition: background-color 0.2s ease, color 0.2s ease;
 
   &:hover {
-    background-color: rgba($primary, 0.1);
-    color: $primary;
+    background-color: $light_gray !important;
   }
 }
 

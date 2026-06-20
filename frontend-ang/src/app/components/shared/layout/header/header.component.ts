@@ -5,6 +5,7 @@ import { Router, RouterModule } from '@angular/router';
 import { GetUserDto } from '../../../../dtos/user.dto';
 import { HasRoleDirective } from '../../../../directives/has-role.directive';
 import { NgbDropdown, NgbDropdownItem, NgbDropdownMenu, NgbDropdownToggle } from '@ng-bootstrap/ng-bootstrap';
+import { TRANSLOCO_IMPORTS } from '../../../../global/transloco-imports';
 
 @Component({
   selector: 'app-header',
@@ -20,6 +21,7 @@ import { NgbDropdown, NgbDropdownItem, NgbDropdownMenu, NgbDropdownToggle } from
     NgbDropdownToggle,
     NgbDropdownMenu,
     NgbDropdownItem,
+    TRANSLOCO_IMPORTS
   ],
 })
 export class HeaderComponent {
