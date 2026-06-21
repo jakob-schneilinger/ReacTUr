@@ -64,10 +64,14 @@
   }
 
   &.date-field input[type="date"] {
-    padding-right: 1.2rem;
+    position: relative;
 
     &::-webkit-calendar-picker-indicator {
+      position: absolute;
+      right: 15px;
+      transition: right 0.2s ease-in-out;
       cursor: pointer;
+      background-color: transparent;
     }
   }
 
@@ -80,12 +84,34 @@
     justify-content: center;
   }
 
+  .unit-label {
+    position: absolute;
+    right: 15px;
+    transition: right 0.2s ease-in-out;
+    pointer-events: none;
+  }
+
+  &.has-value {
+    input {
+      padding-right: 4.5rem;
+    }
+
+    .unit-label {
+      right: 40px;
+    }
+
+    input[type="date"]::-webkit-calendar-picker-indicator {
+      right: 40px;
+    }
+  }
+
   .bi-search {
     color: $light_gray;
     pointer-events: none;
   }
 
   .clear-btn {
+    right: 15px !important;
     cursor: pointer;
     font-size: 1.25rem;
     z-index: 2;

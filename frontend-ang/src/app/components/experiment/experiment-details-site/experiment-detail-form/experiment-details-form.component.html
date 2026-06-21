@@ -8,25 +8,29 @@
     </div>
   }
 
-  <div formArrayName="reactants">
-    @for (control of reactantsControls; track $index) {
-      <div class="input-group">
-        <label>Reactants {{$index + 1}} (Structure or Substructure)</label>
-        <div class="search-field">
-          <input
-            type="text"
-            [formControlName]="$index"
-            placeholder="Value"
-            [class.is-invalid]="isReactantInvalid($index)"/>
+  <div class="input-group">
+    <label>Reactant A</label>
+    <div class="search-field">
+      <input type="text" formControlName="reactantA" [class.is-invalid]="isInvalid('reactantA')" placeholder="Value" />
+      @if (experimentForm.get('reactantA')?.value && formState === 'create') {
+        <span class="icon bi bi-x text-black clear-btn" (click)="clearControl('reactantA')"></span>
+      }
+    </div>
+    @if (isInvalid('reactantA')) {
+      <div class="error-message">Reactant A is required.</div>
+    }
+  </div>
 
-          @if (control.value && formState === 'create') {
-            <span class="icon bi bi-x text-black clear-btn" (click)="clearReactant($index)"></span>
-          }
-        </div>
-        @if (isReactantInvalid($index)) {
-          <div class="error-message">Reactant {{$index + 1}} is required.</div>
-        }
-      </div>
+  <div class="input-group">
+    <label>Reactant B</label>
+    <div class="search-field">
+      <input type="text" formControlName="reactantB" [class.is-invalid]="isInvalid('reactantB')" placeholder="Value" />
+      @if (experimentForm.get('reactantB')?.value && formState === 'create') {
+        <span class="icon bi bi-x text-black clear-btn" (click)="clearControl('reactantB')"></span>
+      }
+    </div>
+    @if (isInvalid("reactantB")) {
+      <div class="error-message">Reactant B is required.</div>
     }
   </div>
 
@@ -40,8 +44,11 @@
 
   <div class="input-group">
     <label>Date</label>
-    <div class="search-field date-field">
-      <input type="date" formControlName="date" [class.is-invalid]="isInvalid('date')"/>
+    <div class="search-field date-field" [class.has-value]="experimentForm.get('date')?.value">
+      <input type="date" [title]="'experiments.details.form.dateTitle' | transloco" formControlName="date" [class.is-invalid]="isInvalid('date')"/>
+      @if (experimentForm.get('date')?.value) {
+        <span class="icon bi bi-x text-black clear-btn" (click)="clearControl('date')"></span>
+      }
     </div>
     @if (isInvalid('date')) {
       <div class="error-message">Date is required.</div>
@@ -63,9 +70,12 @@
 
   <div class="input-group">
     <label>Temperature</label>
-    <div class="search-field">
+    <div class="search-field" [class.has-value]="experimentForm.get('temperature')?.value">
       <input type="number" formControlName="temperature" [class.is-invalid]="isInvalid('temperature')" placeholder="Value" />
-      <span class="icon text-dark">°C</span>
+      <span class="icon unit-label text-dark">°C</span>
+      @if (experimentForm.get('temperature')?.value) {
+        <span class="icon bi bi-x text-black clear-btn" (click)="clearControl('temperature')"></span>
+      }
     </div>
     @if (isInvalid('temperature')) {
       <div class="error-message">Temperature is required.</div>
@@ -104,9 +114,12 @@
 
   <div class="input-group">
     <label>Concentration Reactant 1</label>
-    <div class="search-field">
+    <div class="search-field" [class.has-value]="experimentForm.get('concentrationA')?.value">
       <input type="number" formControlName="concentrationA" [class.is-invalid]="isInvalid('concentrationA')" placeholder="Value" />
-      <span class="icon text-dark">mM</span>
+      <span class="icon unit-label text-dark">mM</span>
+      @if (experimentForm.get('concentrationA')?.value) {
+        <span class="icon bi bi-x text-black clear-btn" (click)="clearControl('concentrationA')"></span>
+      }
     </div>
     @if (isInvalid('concentrationA')) {
       <div class="error-message">
@@ -118,9 +131,12 @@
 
   <div class="input-group">
     <label>Concentration Reactant 2</label>
-    <div class="search-field">
+    <div class="search-field" [class.has-value]="experimentForm.get('concentrationB')?.value">
       <input type="number" formControlName="concentrationB" [class.is-invalid]="isInvalid('concentrationB')" placeholder="Value" />
-      <span class="icon text-dark">mM</span>
+      <span class="icon unit-label text-dark">mM</span>
+      @if (experimentForm.get('concentrationB')?.value) {
+        <span class="icon bi bi-x text-black clear-btn" (click)="clearControl('concentrationB')"></span>
+      }
     </div>
     @if (isInvalid('concentrationB')) {
       <div class="error-message">
@@ -129,7 +145,6 @@
       </div>
     }
   </div>
-
   <div class="divider-container">
     <div class="divider"></div>
     <span class="divider-label">Optional</span>
@@ -157,10 +172,6 @@
         <span class="icon bi bi-x text-black clear-btn" (click)="clearControl('instrument')"></span>
       }
     </div>
-
-    @if (isInvalid('instrument') && !experimentForm.get('instrument')?.hasError('notInList')) {
-      <div class="error-message">Instrument is required.</div>
-    }
     @if (experimentForm.get('instrument')?.hasError('notInList')) {
       <div class="error-message">Please select a valid instrument from the list.</div>
     }
@@ -187,10 +198,6 @@
         <span class="icon bi bi-x text-black clear-btn" (click)="clearControl('modality')"></span>
       }
     </div>
-
-    @if (isInvalid('modality') && !experimentForm.get('modality')?.hasError('notInList')) {
-      <div class="error-message">Modality is required.</div>
-    }
     @if (experimentForm.get('modality')?.hasError('notInList')) {
       <div class="error-message">Please select a valid modality from the list.</div>
     }
@@ -198,9 +205,12 @@
 
   <div class="input-group">
     <label>Wavelength</label>
-    <div class="search-field">
+    <div class="search-field" [class.has-value]="experimentForm.get('wavelength')?.value">
       <input type="number" formControlName="wavelength" [class.is-invalid]="isInvalid('wavelength')" placeholder="Value" />
-      <span class="icon text-dark">nm</span>
+      <span class="icon unit-label text-dark">nm</span>
+      @if (experimentForm.get('wavelength')?.value) {
+        <span class="icon bi bi-x text-black clear-btn" (click)="clearControl('wavelength')"></span>
+      }
     </div>
     @if (isInvalid('wavelength')) {
       <div class="error-message">Wavelength invalid.</div>

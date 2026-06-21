@@ -5,9 +5,18 @@
     <!-- Linke Spalte -->
     <div leftContent>
       <h2>{{experimentTitle}}</h2>
-      <app-experiment-details-form class="experiment-details-form" [formState]="formState">
 
-      </app-experiment-details-form>
+      @if (formState === 'create' || experiment) {
+        <app-experiment-details-form
+          class="experiment-details-form"
+          [formState]="formState"
+          [experiment]="experiment">
+        </app-experiment-details-form>
+      } @else {
+        <div class="loading-state">
+          <p>Loading experiment details...</p>
+        </div>
+      }
     </div>
 
     <!-- Rechte Spalte -->

@@ -2,13 +2,14 @@ import { CommonModule } from '@angular/common';
 import { LayoutComponent } from '../../shared/layout/layout.component';
 import { ExperimentDetailsFormComponent } from './experiment-detail-form/experiment-details-form.component';
 import { FileUploadComponent } from '../../shared/file-upload/file-upload.component';
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { AuthService } from '../../../services/auth.service';
 import { NotificationService } from '../../../services/notification.service';
 import { ExperimentService } from '../../../services/experiment.service';
-import { ExperimentDataDto } from '../../../dtos/experiment.dto';
+import { GetExperimentDto } from '../../../dtos/experiment.dto';
 import { GetUserDto } from '../../../dtos/user.dto';
+import { TranslocoService } from '@jsverse/transloco';
 
 export type FormState = 'create' | 'edit';
 
@@ -26,13 +27,15 @@ export class ExperimentDetailsSiteComponent implements OnInit {
     private route: ActivatedRoute,
     private notification: NotificationService,
     private experimentService: ExperimentService,
+    private cdr: ChangeDetectorRef,
+    private transloco: TranslocoService,
   ) {}
 
   state: FormState = 'create';
   user: GetUserDto | null = null;
   role: string = 'USER';
 
-  experiment: ExperimentDataDto | undefined;
+  experiment: GetExperimentDto | undefined;
 
   get formState() {
     return this.state;
@@ -40,11 +43,11 @@ export class ExperimentDetailsSiteComponent implements OnInit {
 
   get experimentTitle() {
     if (this.state === 'create') {
-      return 'Create new Experiment';
+      return this.transloco.translate('experiments.details.createNew');
     } else if (this.state === 'edit') {
-      return 'Edit Experiment';
+      return this.transloco.translate('experiments.details.editExisting');
     } else {
-      return 'View Experiment';
+      return this.transloco.translate('experiments.details.viewExisting');
     }
   }
 
@@ -61,8 +64,8 @@ export class ExperimentDetailsSiteComponent implements OnInit {
       const experimentUuid = this.route.snapshot.paramMap.get('uuid');
       if (!experimentUuid) {
         this.notification.error(
-          'Invalid Experiment URL',
-          'Please navigate to experiments/create or experiments/:uuid with a valid uuid!',
+          this.transloco.translate('experiments.details.notifications.errorTitle'),
+          this.transloco.translate('experiments.details.notifications.loadError'),
         );
         this.router.navigate(['/search'], { skipLocationChange: true });
         return;
@@ -79,19 +82,30 @@ export class ExperimentDetailsSiteComponent implements OnInit {
                 : console.warn('User does not have permission to edit experiment'),
             error: (err) =>
               this.notification.error(
-                'Permission Error',
-                `Permission Error for this Experiment! Error: ${err.message || err.error || err}`,
+                this.transloco.translate('experiments.details.notifications.permissionErrorTitle'),
+                this.transloco.translate(
+                  'experiments.details.notifications.permissionErrorMessage',
+                  {
+                    error: err.message || err.error || err,
+                  },
+                ),
               ),
           });
         }
       }
-      this.experimentService.getExperimentData(experimentUuid).subscribe({
-        next: (value: any) => (this.experiment = value),
-        error: (err: any) =>
+      this.experimentService.getExperiment(experimentUuid).subscribe({
+        next: (value: GetExperimentDto) => {
+          this.experiment = value
+          this.cdr.markForCheck()
+        },
+        error: (err: any) => {
           this.notification.error(
-            'Invalid Id',
-            `No experiment found for this uuid: ${experimentUuid}! Error: ${err.message || err.error || err}`,
-          ),
+            this.transloco.translate('experiments.details.notifications.errorTitle'),
+            this.transloco.translate('experiments.details.notifications.loadExpError', {
+              error: err.message || err.error || err,
+            }),
+          )
+        }
       });
       //TODO: load experiment data from backend
     } else {
