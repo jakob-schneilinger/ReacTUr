@@ -274,10 +274,12 @@
           "solventRequired": "Solvent is required.",
           "concentrationARequired": "Concentration A is required.",
           "concentrationBRequired": "Concentration B is required.",
+          "concentrationNegative": "Concentration can not be negative.",
           "invalidSolvent": "Please select a valid solvent from the list.",
           "invalidInstrument": "Please select a valid instrument from the list.",
           "invalidModality": "Please select a valid modality from the list.",
-          "wavelengthInvalid": "Wavelength invalid."
+          "wavelengthInvalid": "Wavelength invalid.",
+          "wavelengthNegative": "Wavelength can not be negative."
         },
         "dateTitle": "Show date selection"
       },

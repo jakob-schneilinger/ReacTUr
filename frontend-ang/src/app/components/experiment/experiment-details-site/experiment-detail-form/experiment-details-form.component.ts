@@ -169,7 +169,7 @@ export class ExperimentDetailsFormComponent implements OnInit, OnDestroy, OnChan
       // Optional Metadata
       instrument: ['', [this.inListValidator(this.knownInstruments)]],
       modality: ['', [this.inListValidator(this.knownModalities)]],
-      wavelength: [''],
+      wavelength: ['', Validators.min(0)],
       comment: [''],
     });
 
@@ -220,13 +220,13 @@ export class ExperimentDetailsFormComponent implements OnInit, OnDestroy, OnChan
     });
   }
 
-  clearReactant(index: number): void {
-    const reactantsArray = this.experimentForm.get('reactants') as FormArray;
-    reactantsArray.at(index).setValue('');
-  }
-
   clearControl(controlName: string): void {
-    this.experimentForm.get(controlName)?.setValue('');
+    const control = this.experimentForm.get(controlName);
+    if (control) {
+      control.setValue('');
+      control.markAsTouched();
+      control.markAsDirty();
+    }
   }
 
   isInvalid(controlName: string): boolean {
