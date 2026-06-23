@@ -16,10 +16,10 @@ import java.util.UUID;
  */
 public record SaveExperimentDto(
   @NotNull(message = "Reactant A is required")
-  UUID reactantA, // TODO (Semantic - Service Layer): Verify this UUID actually exists in the Reactant DB table.
+  UUID reactantA,  // (Semantic - Service Layer): Verify this UUID actually exists in the Reactant DB table.
 
   @NotNull(message = "Reactant B is required")
-  UUID reactantB, // TODO (Semantic - Service Layer): Verify this UUID actually exists in the Reactant DB table.
+  UUID reactantB,  // (Semantic - Service Layer): Verify this UUID actually exists in the Reactant DB table.
 
   @Valid
   @NotNull(message = "Metadata is required")

@@ -44,7 +44,7 @@ public record SaveMetadataDto(
 
   // TODO (Frontend): Ensure Angular sends the Solvent's UUID from the DB, not the string "Water".
   @NotNull(message = "Solvent is required")
-  UUID solvent, // TODO (Semantic - Service Layer): Verify Solvent UUID exists in the database.
+  UUID solvent, // (Semantic - Service Layer): Verify Solvent UUID exists in the database.
 
   @NotNull(message = "Concentration A is required")
   @PositiveOrZero(message = "Concentration cannot be negative")
@@ -55,10 +55,10 @@ public record SaveMetadataDto(
   Double concentrationB,
 
   // TODO (Architecture): Resolve contradiction - Frontend UI says Optional, TS says Required.
-  UUID instrument, // TODO (Semantic - Service Layer): Verify Instrument UUID exists in the database.
+  UUID instrument, // (Semantic - Service Layer): Verify Instrument UUID exists in the database.
 
   // TODO (Architecture): Resolve contradiction - Frontend UI says Optional, TS says Required.
-  UUID modality, // TODO (Semantic - Service Layer): Verify Modality UUID exists in the database.
+  UUID modality, // (Semantic - Service Layer): Verify Modality UUID exists in the database.
 
   @Positive(message = "Wavelength must be positive")
   Double wavelength,

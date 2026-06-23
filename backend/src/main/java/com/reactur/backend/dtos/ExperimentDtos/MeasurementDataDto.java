@@ -17,7 +17,7 @@ public record MeasurementDataDto(
   @JsonProperty("pFO_rateConstant")
   Double pFO_rateConstant,
 
-  // TODO: Some sanity checks four boundaries?
+  // TODO: Some sanity checks for boundaries?
   @NotNull(message = "Rate constant is required")
   Double rateConstant,
 
