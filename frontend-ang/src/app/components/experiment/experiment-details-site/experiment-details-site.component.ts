@@ -1,10 +1,15 @@
-import { Component, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { LayoutComponent } from '../../shared/layout/layout.component';
+import { ExperimentDetailsFormComponent } from './experiment-detail-form/experiment-details-form.component';
+import { FileUploadComponent } from '../../shared/file-upload/file-upload.component';
+import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { AuthService } from '../../../services/auth.service';
 import { NotificationService } from '../../../services/notification.service';
 import { ExperimentService } from '../../../services/experiment.service';
-import { ExperimentData } from '../../../dtos/experiment';
-import { User } from '../../../dtos/user';
+import { GetExperimentDto } from '../../../dtos/experiment.dto';
+import { GetUserDto } from '../../../dtos/user.dto';
+import { TranslocoService } from '@jsverse/transloco';
 
 export type FormState = 'create' | 'edit';
 
@@ -12,7 +17,8 @@ export type FormState = 'create' | 'edit';
   selector: 'app-experiment-details-site',
   templateUrl: './experiment-details-site.component.html',
   styleUrls: ['./experiment-details-site.component.scss'],
-  standalone: false,
+  standalone: true,
+  imports: [CommonModule, LayoutComponent, ExperimentDetailsFormComponent, FileUploadComponent],
 })
 export class ExperimentDetailsSiteComponent implements OnInit {
   constructor(
@@ -21,14 +27,15 @@ export class ExperimentDetailsSiteComponent implements OnInit {
     private route: ActivatedRoute,
     private notification: NotificationService,
     private experimentService: ExperimentService,
+    private cdr: ChangeDetectorRef,
+    private transloco: TranslocoService,
   ) {}
 
   state: FormState = 'create';
-  user: User | null = null;
-  role: string = "USER";
+  user: GetUserDto | null = null;
+  role: string = 'USER';
 
-  experiment: ExperimentData | undefined;
-
+  experiment: GetExperimentDto | undefined;
 
   get formState() {
     return this.state;
@@ -36,11 +43,11 @@ export class ExperimentDetailsSiteComponent implements OnInit {
 
   get experimentTitle() {
     if (this.state === 'create') {
-      return "Create new Experiment"
+      return this.transloco.translate('experiments.details.createNew');
     } else if (this.state === 'edit') {
-      return "Edit Experiment"
+      return this.transloco.translate('experiments.details.editExisting');
     } else {
-      return "View Experiment"
+      return this.transloco.translate('experiments.details.viewExisting');
     }
   }
 
@@ -54,43 +61,54 @@ export class ExperimentDetailsSiteComponent implements OnInit {
         }
       }
       this.state = state;
-      const idString = this.route.snapshot.paramMap.get('id');
-      if (!idString) {
+      const experimentUuid = this.route.snapshot.paramMap.get('uuid');
+      if (!experimentUuid) {
         this.notification.error(
-          'Invalid Experiment URL',
-          'Please navigate to experiments/create or experiments/:id with a valid id!',
+          this.transloco.translate('experiments.details.notifications.errorTitle'),
+          this.transloco.translate('experiments.details.notifications.loadError'),
         );
         this.router.navigate(['/search'], { skipLocationChange: true });
         return;
       }
-      const id = parseInt(idString);
-      console.log("Test")
       if (this.role != 'ADMIN') {
         console.log('Test1');
         if (this.user?.email) {
           console.log('Test2');
           // TODO: check role and permissions, switch to 'view' if not enough permission
-          this.authService.hasExperimentPermission(id, this.user?.email).subscribe({
+          this.authService.hasExperimentPermission(experimentUuid, this.user?.uuid).subscribe({
             next: (hasPermission) =>
               hasPermission
                 ? console.log('User has permission to edit experiment')
                 : console.warn('User does not have permission to edit experiment'),
             error: (err) =>
               this.notification.error(
-                'Permission Error',
-                `Permission Error for this Experiment! Error: ${err}`,
+                this.transloco.translate('experiments.details.notifications.permissionErrorTitle'),
+                this.transloco.translate(
+                  'experiments.details.notifications.permissionErrorMessage',
+                  {
+                    error: err.message || err.error || err,
+                  },
+                ),
               ),
           });
         }
       }
-      this.experimentService.getExperimentData(id).subscribe({
-        next: value => this.experiment = value,
-        error: err => this.notification.error("Invalid Id", `No experiment found for this id: ${id}! Error: ${err}`)
+      this.experimentService.getExperiment(experimentUuid).subscribe({
+        next: (value: GetExperimentDto) => {
+          this.experiment = value
+          this.cdr.markForCheck()
+        },
+        error: (err: any) => {
+          this.notification.error(
+            this.transloco.translate('experiments.details.notifications.errorTitle'),
+            this.transloco.translate('experiments.details.notifications.loadExpError', {
+              error: err.message || err.error || err,
+            }),
+          )
         }
-      )
+      });
       //TODO: load experiment data from backend
-    }
-    else {
+    } else {
       this.state = 'create';
     }
   }

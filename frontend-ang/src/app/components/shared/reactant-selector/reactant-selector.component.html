@@ -13,7 +13,7 @@
           placeholder="Search by name, SMILES, or type..." />
 
         <button
-          class="btn icon-btn text-secondary"
+          class="icon-btn text-secondary"
           type="button"
           (click)="openDraw()"
           title="Draw Molecule">
@@ -22,7 +22,7 @@
 
         @if (searchTerm) {
           <button
-            class="btn icon-btn text-danger me-1"
+            class="icon-btn text-danger me-1"
             type="button"
             (click)="clearReactant()"
             title="Clear Search">
@@ -37,7 +37,7 @@
             <button type="button" class="list-group-item custom-dropdown-item border-0" (click)="selectReactant(item)">
               <div class="d-flex w-100 justify-content-between align-items-center mb-1">
                 <span class="reactant-name">{{ item.shortName }}</span>
-                <span class="badge bg-secondary reactant-type">{{ item.type1 }}</span>
+                <span class="badge bg-secondary reactant-type">{{ item.chemicalType.name }}</span>
               </div>
               <span class="reactant-smiles text-break">{{ item.smiles }}</span>
             </button>
@@ -53,7 +53,7 @@
         <div class="d-flex flex-column">
           <span class="reactant-title text-primary">{{ selectedReactant.shortName }}</span>
           <div class="d-flex align-items-center mt-1 gap-2">
-            <span class="badge rounded-pill bg-secondary bg-opacity-75">{{ selectedReactant.type1 }}</span>
+            <span class="badge rounded-pill bg-secondary bg-opacity-75">{{ selectedReactant.chemicalType.name }}</span>
             <code class="text-muted bg-light px-2 rounded">{{ selectedReactant.smiles }}</code>
           </div>
         </div>

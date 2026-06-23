@@ -50,10 +50,10 @@ h1 {
 
 /* TODO: update button style */
 button {
-  padding: 0.25rem;
+  padding: 0.5rem;
   border-radius: 4px;
 
-  border: 4px solid transparent;
+  border: none;
   background-color: $light_gray;
   color: white;
 
@@ -63,29 +63,44 @@ button {
   }
 
   &.compact {
-    border: none;
     padding: 0.25rem;
   }
 
   &.primary {
     color: white;
     background-color: $primary;
-    border-color: $primary;
 
     &:hover:not([disabled]) {
       background-color: $primary_hover;
-      border-color: $primary_hover;
     }
   }
 
   &.error {
-    color: white;
-    background-color: $error;
-    border-color: $error;
+    color: $light_gray_hover;
+    background-color: $white_gray;
 
     &:hover {
-      background-color: color.adjust($error, $lightness: -5%);
-      border-color: color.adjust($error, $lightness: -5%);
+      background-color: $error_light;
+    }
+  }
+
+  &.error-warning {
+    color: white;
+    background-color: $error;
+
+    &:hover {
+      background-color: $error_hover;
+    }
+  }
+
+  &.plain {
+    color: $light_gray;
+    background-color: white;
+
+    &:hover {
+      color: $light_gray_hover;
+      background-color: $background;
+
     }
   }
 }

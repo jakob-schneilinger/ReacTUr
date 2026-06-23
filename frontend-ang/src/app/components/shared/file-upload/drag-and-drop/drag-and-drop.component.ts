@@ -1,18 +1,22 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { NotificationService } from '../../../../services/notification.service';
+import { DragAndDropDirective } from '../../../../directives/drag-and-drop.directive';
 
 @Component({
   selector: 'app-drag-and-drop',
   templateUrl: './drag-and-drop.component.html',
   styleUrls: ['./drag-and-drop.component.scss'],
-  standalone: false,
+  standalone: true,
+  imports: [CommonModule, DragAndDropDirective],
 })
 export class DragAndDropComponent {
   @Output() filesSelected = new EventEmitter<File[]>();
   @Input() allowedExtensions: string[] = [];
   @Input() maxFileSizeMB?: number;
+  @Input() maxFiles: number = 0;
 
-  constructor(private notificationService: NotificationService) {}
+  constructor(private notification: NotificationService) {}
 
   onFileDropped(files: FileList | File[]) {
     this.processFiles(files);
@@ -58,12 +62,11 @@ export class DragAndDropComponent {
 
     if (validFiles.length > 0) {
       this.filesSelected.emit(validFiles);
-      this.notificationService.success('Success', `${validFiles.length} file(s) added.`);
     }
   }
 
   onFileError(errorMessage: string) {
-    this.notificationService.error('Upload Error', errorMessage);
+    this.notification.error('Upload Error', errorMessage);
   }
 
   get acceptedExtensionsString(): string {

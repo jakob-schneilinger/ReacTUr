@@ -1,15 +1,19 @@
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { DrawMolComponent } from '../draw-mol/draw-mol.component';
 import { Component, Input, Output, EventEmitter, OnInit } from '@angular/core';
-import { Reactant } from '../../../dtos/reactant';
+import { ReactantDto } from '../../../dtos/reactant.dto';
 
 @Component({
   selector: 'app-reactant-selector',
   templateUrl: './reactant-selector.component.html',
   styleUrls: ['./reactant-selector.component.scss'],
-  standalone: false,
+  standalone: true,
+  imports: [CommonModule, FormsModule, DrawMolComponent],
 })
 export class ReactantSelectorComponent implements OnInit {
   @Input() label: string = 'Reactant';
-  @Input() availableReactants: Reactant[] = [];
+  @Input() availableReactants: ReactantDto[] = [];
 
   @Input() set initialValue(val: string) {
     if (val) this.initReactant(val);
@@ -22,8 +26,8 @@ export class ReactantSelectorComponent implements OnInit {
   @Output() selectionChanged = new EventEmitter<string>();
 
   searchTerm: string = '';
-  selectedReactant: Reactant | null = null;
-  suggestions: Reactant[] = [];
+  selectedReactant: ReactantDto | null = null;
+  suggestions: ReactantDto[] = [];
 
   isDrawModalOpen = false;
   currentSmilesForModal = '';
@@ -44,7 +48,7 @@ export class ReactantSelectorComponent implements OnInit {
       const lowerTerm = this.searchTerm.toLowerCase();
       this.suggestions = this.availableReactants.filter(r =>
         r.shortName.toLowerCase().includes(lowerTerm) ||
-        r.type1.toLowerCase().includes(lowerTerm) ||
+        r.chemicalType.name.toLowerCase().includes(lowerTerm) ||
         r.smiles.includes(this.searchTerm)
       );
     } else {
@@ -53,7 +57,7 @@ export class ReactantSelectorComponent implements OnInit {
     this.emitChange();
   }
 
-  selectReactant(reactant: Reactant) {
+  selectReactant(reactant: ReactantDto) {
     this.selectedReactant = reactant;
     this.searchTerm = '';
     this.suggestions = [];

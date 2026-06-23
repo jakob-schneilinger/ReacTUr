@@ -1,98 +1,106 @@
-<div class="modal fade show custom-backdrop" tabindex="-1" style="display: block;" aria-modal="true" role="dialog">
-  <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
-    <div class="modal-content">
+<app-modal
+  [isOpen]="true"
+  [title]="selectedExperiment?.uuid ? headerText : 'Details'"
+  size="xl"
+  (close)="close.emit()">
 
-      <div class="modal-header">
-        <h5 class="modal-title">
-          {{ selectedExperiment?.id ? this.headerText : 'Details' }}
-        </h5>
-        <button type="button" class="btn-close" (click)="close.emit()" aria-label="Close"></button>
-      </div>
+  @if (selectedExperiment) {
+    <div body class="container-fluid">
+      <div class="row">
 
-      <div class="modal-body">
-        <div class="container-fluid" *ngIf="selectedExperiment">
-          <div class="row">
+        <div class="col-md-6 pe-4">
+          <h6 class="border-bottom pb-2 mb-3 text-primary">Experiment Metadata</h6>
 
-            <div class="col-md-6 pe-4">
-              <h6 class="border-bottom pb-2 mb-3 text-primary">Experiment Metadata</h6>
+          @if (selectedExperiment.metadata; as meta) {
+            <dl class="row">
+              <dt class="col-sm-4">Date</dt>
+              <dd class="col-sm-8 text-break">{{ meta.date | date:'mediumDate' }}</dd>
 
-              <dl class="row" *ngIf="selectedExperiment.metadata as meta">
-                <dt class="col-sm-4">Date</dt>
-                <dd class="col-sm-8 text-break">{{ meta.date | date:'mediumDate' }}</dd>
+              <dt class="col-sm-4">Scientist</dt>
+              <dd class="col-sm-8 text-break">{{ meta.scientist.firstName }} {{ meta.scientist.lastName }}</dd>
 
-                <dt class="col-sm-4">Scientist</dt>
-                <dd class="col-sm-8 text-break">{{ meta.scientist }}</dd>
+              <dt class="col-sm-4">Temperature</dt>
+              <dd class="col-sm-8 text-break">{{ meta.temperature }} &deg;C</dd>
 
-                <dt class="col-sm-4">Temperature</dt>
-                <dd class="col-sm-8 text-break">{{ meta.temperature }} &deg;C</dd>
+              <dt class="col-sm-4">Solvent</dt>
+              <dd class="col-sm-8 text-break">{{ meta.solvent.name }}</dd>
 
-                <dt class="col-sm-4">Solvent</dt>
-                <dd class="col-sm-8 text-break">{{ meta.solvent }}</dd>
+              <dt class="col-sm-4">Concentrations</dt>
+              <dd class="col-sm-8 text-break">{{ concentrationText }}</dd>
 
-                <dt class="col-sm-4">Concentrations</dt>
-                <dd class="col-sm-8 text-break">{{ meta.concentrations.join(' mM, ') || '-' }} mM</dd>
+              <dt class="col-sm-4">Instrument</dt>
+              <dd class="col-sm-8 text-break">{{ meta.instrument?.name || '-' }}</dd>
 
-                <dt class="col-sm-4">Instrument</dt>
-                <dd class="col-sm-8 text-break">{{ meta.instrument || '-' }}</dd>
+              <dt class="col-sm-4">Modality</dt>
+              <dd class="col-sm-8 text-break">{{ meta.modality?.name || '-' }}</dd>
 
-                <dt class="col-sm-4">Modality</dt>
-                <dd class="col-sm-8 text-break">{{ meta.modality || '-' }}</dd>
+              <dt class="col-sm-4">Wavelength</dt>
+              <dd class="col-sm-8 text-break">{{ meta.wavelength ? meta.wavelength + ' nm' : '-' }}</dd>
 
-                <dt class="col-sm-4">Wavelength</dt>
-                <dd class="col-sm-8 text-break">{{ meta.wavelength ? meta.wavelength + ' nm' : '-' }}</dd>
+              <dt class="col-sm-4">Comment</dt>
+              <dd class="col-sm-8 text-break">{{ meta.comment || '-' }}</dd>
+            </dl>
+          }
+        </div>
 
-                <dt class="col-sm-4">Comment</dt>
-                <dd class="col-sm-8 text-break">{{ meta.comment || '-' }}</dd>
-              </dl>
-            </div>
+        <div class="col-md-6 border-start ps-4" style="min-height: 600px">
 
-            <div class="col-md-6 border-start ps-4" style="min-height: 600px">
+          <h6 class="border-bottom pb-2 mb-3 text-primary">Files</h6>
 
-              <h6 class="border-bottom pb-2 mb-3 text-primary">Files</h6>
+          @if (selectedExperiment.attachments) {
+            @for (attachment of selectedExperiment.attachments; track $index) {
+              <app-uploaded-file
+                [file]="loadFile(attachment)"
+                [removePossible]="false">
+              </app-uploaded-file>
+            }
+          } @else {
+            <div class="text-muted small mb-4">No files attached.</div>
+          }
 
-              @if (selectedExperiment.metadata.rawDataFile) {
-                <app-uploaded-file
-                  [file]="selectedExperiment.metadata.rawDataFile"
-                  [removePossible]="false">
-                </app-uploaded-file>
-              } @else {
-                <div class="text-muted small mb-4">No files attached.</div>
-              }
+          <h6 class="border-bottom pb-2 mb-3 mt-4 text-primary">Reactants</h6>
 
-              <h6 class="border-bottom pb-2 mb-3 mt-4 text-primary">Reactants</h6>
-
-              @if (!selectedExperiment.reactants || selectedExperiment.reactants.length === 0) {
-                <div class="text-muted small">No reactants associated with this experiment.</div>
-              } @else {
-                <div class="list-group">
-                  @for (reactant of selectedExperiment.reactants; track $index) {
-                    <div class="list-group-item d-flex flex-row justify-content-between align-items-center mb-2 border rounded">
-                      <div class="d-flex flex-column justify-content-between">
-                        <h6 class="mb-1 text-primary">{{ reactant.shortName }}</h6>
-                        <p class="mb-1 small text-truncate" title="{{ reactant.smiles }}">
-                          <strong>SMILES:</strong> {{ reactant.smiles }}
-                        </p>
-                        <small class="text-muted" *ngIf="!!reactant.chemicalName">{{ reactant.chemicalName }}</small>
-                      </div>
-                      <span class="badge bg-secondary">{{ reactant.type1 }}</span>
-                    </div>
+          @if (!selectedExperiment.reactantA && !selectedExperiment.reactantB) {
+            <div class="text-muted small">No reactants associated with this experiment.</div>
+          } @else {
+            <div class="list-group">
+              <div class="list-group-item d-flex flex-row justify-content-between align-items-center mb-2 border rounded">
+                <div class="d-flex flex-column justify-content-between">
+                  <h6 class="mb-1 text-primary">{{ selectedExperiment.reactantA.shortName }}</h6>
+                  <p class="mb-1 small text-truncate" title="{{ selectedExperiment.reactantA.smiles }}">
+                    <strong>SMILES:</strong> {{ selectedExperiment.reactantA.smiles }}
+                  </p>
+                  @if (!!selectedExperiment.reactantA.chemicalName) {
+                    <small class="text-muted">{{ selectedExperiment.reactantA.chemicalName }}</small>
                   }
                 </div>
-              }
-
+                <span class="badge bg-secondary">{{ selectedExperiment.reactantA.chemicalType.name }}</span>
+              </div>
+              <div class="list-group-item d-flex flex-row justify-content-between align-items-center mb-2 border rounded">
+                <div class="d-flex flex-column justify-content-between">
+                  <h6 class="mb-1 text-primary">{{ selectedExperiment.reactantB.shortName }}</h6>
+                  <p class="mb-1 small text-truncate" title="{{ selectedExperiment.reactantB.smiles }}">
+                    <strong>SMILES:</strong> {{ selectedExperiment.reactantB.smiles }}
+                  </p>
+                  @if (!!selectedExperiment.reactantB.chemicalName) {
+                    <small class="text-muted">{{ selectedExperiment.reactantB.chemicalName }}</small>
+                  }
+                </div>
+                <span class="badge bg-secondary">{{ selectedExperiment.reactantB.chemicalType.name }}</span>
+              </div>
             </div>
+          }
 
-          </div>
         </div>
-      </div>
 
-      <div class="modal-footer">
-        @if (hasWritePermission) {
-          <button type="button" class="btn primary" (click)="editExperiment(selectedExperiment?.id)">Edit Experiment</button>
-        }
-        <button type="button" class="btn" (click)="close.emit()">Close</button>
       </div>
-
     </div>
-  </div>
-</div>
+  }
+
+  <ng-container footer>
+    @if (hasWritePermission) {
+      <button type="button" class="btn primary" (click)="editExperiment(selectedExperiment?.uuid)">Edit Experiment</button>
+    }
+    <button type="button" class="btn" (click)="close.emit()">Close</button>
+  </ng-container>
+</app-modal>

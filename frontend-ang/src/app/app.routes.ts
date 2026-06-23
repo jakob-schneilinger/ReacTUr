@@ -1,15 +1,13 @@
-import { NgModule } from "@angular/core";
-import { RouterModule, Routes } from "@angular/router";
+import { Routes } from "@angular/router";
 import { AuthGuard } from './guards/auth.guard';
 import { RoleGuard } from './guards/role.guard';
-
-import { HomeComponent } from "./components/home/home.component";
 
 import { LoginComponent } from "./components/user/login/login.component";
 import { SearchSiteComponent } from './components/search/search-site/search-site.component';
 import { ExperimentDetailsSiteComponent } from './components/experiment/experiment-details-site/experiment-details-site.component';
 import { ReactantDetailsSiteComponent } from './components/reactant/reactant-details-site/reactant-details-site.component';
 import { ReactantSiteComponent } from './components/reactant/reactant-site/reactant-site.component';
+import { AdminSiteComponent } from './components/admin/admin-site/admin-site.component';
 
 export const routes: Routes = [
   { path: 'search', component: SearchSiteComponent, canActivate: [AuthGuard] },
@@ -21,7 +19,7 @@ export const routes: Routes = [
     data: { state: 'create'},
   },
   {
-    path: 'experiments/:id',
+    path: 'experiments/:uuid',
     component: ExperimentDetailsSiteComponent,
     canActivate: [AuthGuard, RoleGuard],
     data: { state: 'edit', roles: ['ADMIN', 'SUPERVISOR'] },
@@ -34,23 +32,17 @@ export const routes: Routes = [
     data: { state: 'create', roles: ['ADMIN', 'SUPERVISOR'] },
   },
   {
-    path: 'reactants/:name',
+    path: 'reactants/:uuid',
     component: ReactantDetailsSiteComponent,
     canActivate: [AuthGuard, RoleGuard],
     data: { state: 'edit', roles: ['ADMIN', 'SUPERVISOR'] },
   },
   {
     path: 'admin',
-    component: HomeComponent,
+    component: AdminSiteComponent,
     canActivate: [AuthGuard, RoleGuard],
-    data: { roles: ['ADMIN', 'SUPERVISOR'] },
+    data: { roles: ['ADMIN'] },
   },
   { path: '', redirectTo: 'search', pathMatch: 'full' },
   { path: '**', redirectTo: 'search' },
 ];
-
-@NgModule({
-  imports: [RouterModule.forRoot(routes)],
-  exports: [RouterModule],
-})
-export class AppRoutingModule {}

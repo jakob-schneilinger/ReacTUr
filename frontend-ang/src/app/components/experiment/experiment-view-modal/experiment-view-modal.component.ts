@@ -1,19 +1,24 @@
+import { CommonModule } from '@angular/common';
+import { AppModalComponent } from '../../shared/modal/app-modal.component';
+import { UploadedFileComponent } from '../../shared/file-upload/uploaded-file/uploaded-file.component';
 import { Component, Input, Output, EventEmitter, OnInit, ChangeDetectorRef } from '@angular/core';
-import { Reactant } from '../../../dtos/reactant';
-import { ReactantService } from '../../../services/reactant.service';
 import { NotificationService } from '../../../services/notification.service';
 import { Router } from '@angular/router';
-import { Experiment } from '../../../dtos/experiment';
+import {
+  ExperimentAttachmentsDto,
+  GetExperimentDto,
+} from '../../../dtos/experiment.dto';
 import { ExperimentService } from '../../../services/experiment.service';
 
 @Component({
   selector: 'app-experiment-view-modal',
   templateUrl: './experiment-view-modal.component.html',
   styleUrls: ['./experiment-view-modal.component.scss'],
-  standalone: false,
+  standalone: true,
+  imports: [CommonModule, AppModalComponent, UploadedFileComponent],
 })
 export class ExperimentViewModalComponent implements OnInit {
-  @Input() selectedExperiment: Experiment | undefined;
+  @Input() selectedExperiment: GetExperimentDto | undefined;
   @Input() hasWritePermission: boolean = false;
   @Output() close = new EventEmitter<void>();
 
@@ -26,33 +31,62 @@ export class ExperimentViewModalComponent implements OnInit {
 
   ngOnInit() {
     if (this.selectedExperiment) {
-
+      /*
+      this.selectedExperiment.attachments
       this.experimentService.getFiles(this.selectedExperiment.id).subscribe({
         next: (files: File[]) => {
           setTimeout(() => {
-            /*
+
             if (this.selectedExperiment) {
               this.selectedExperiment.files = files;
             }
             this.cd.markForCheck();
 
-             */
+
           });
         },
-        error: (err) => {
+        error: (err: any) => {
           setTimeout(() => {
-            this.notification.error('File Error', 'Unable to fetch Experiment Files!');
+            this.notification.error(
+              'File Error',
+              `Unable to fetch Experiment Files! Error: ${err}`,
+            );
           });
         },
       });
+      */
     }
   }
 
-  editExperiment(id: number | undefined): void {
-    if (id) this.router.navigate(['/experiments', id]);
+  editExperiment(uuid: string | undefined): void {
+    if (uuid) this.router.navigate(['/experiments', uuid]);
   }
 
-  get headerText():string {
-    return '#' + this.selectedExperiment?.id + ' ' + this.selectedExperiment?.reactants[0].shortName + ' + ' + this.selectedExperiment?.reactants[1]?.shortName;
+  loadFile(attachment: ExperimentAttachmentsDto): File {
+    //TODO: load file with attachment download url
+    return new File([], attachment.downloadUrl + ' -> ' + attachment.fileName, undefined);
+  }
+
+  get headerText(): string {
+    return (
+      this.selectedExperiment?.reactantA.shortName +
+      ' + ' +
+      this.selectedExperiment?.reactantB.shortName
+    );
+  }
+
+  get concentrationText(): string {
+    if (
+      this.selectedExperiment?.metadata.concentrationA &&
+      this.selectedExperiment.metadata.concentrationB
+    ) {
+      return (
+        this.selectedExperiment.metadata.concentrationA +
+        ' mM, ' +
+        this.selectedExperiment.metadata.concentrationB +
+        ' mM'
+      );
+    }
+    return '-- mM';
   }
 }

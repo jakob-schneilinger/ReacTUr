@@ -1,0 +1,312 @@
+{
+  "header": {
+    "title": "test",
+    "logoAlt": "test",
+    "search": "test",
+    "createExperiment": "test",
+    "reactants": "test",
+    "admin": "test",
+    "userProfile": "test",
+    "greetings": "test",
+    "logout": "test",
+    "login": "test"
+  },
+  "login": {
+    "title": "test",
+    "login": "test",
+    "loginInstruction": "test",
+    "loginButton": "test"
+  },
+  "admin": {
+    "user": {
+      "title": "test",
+      "searchPlaceholder": "test",
+      "pendingTitle": "test",
+      "activeTitle": "test",
+      "deactivatedTitle": "test",
+      "table": {
+        "headerName": "test",
+        "headerEmail": "test",
+        "headerRole": "test",
+        "headerAction": "test",
+        "rolePlaceholder": "test",
+        "actionReject": "test",
+        "actionDeactivate": "test",
+        "actionReactivate": "test",
+        "noUsersFound": "test"
+      },
+      "notifications": {
+        "fetchError": "test",
+        "statusUpdated": "test",
+        "statusError": "test",
+        "roleUpdated": "test",
+        "roleError": "test"
+      }
+    },
+    "option": {
+      "title": "test",
+      "table": {
+        "headerValue": "test",
+        "headerStatus": "test",
+        "headerAction": "test",
+        "statusActive": "test",
+        "statusInactive": "test",
+        "actionDeactivate": "test",
+        "actionActivate": "test",
+        "loadingOptions": "test",
+        "noOptionsFound": "test"
+      },
+      "addPlaceholder": "test",
+      "addButton": "test",
+      "notifications": {
+        "loadError": "test",
+        "statusUpdated": "test",
+        "statusError": "test",
+        "addSuccess": "test",
+        "addError": "test"
+      }
+    }
+  },
+  "selectionOptions": {
+    "type": "test",
+    "modality": "test",
+    "instrument": "test",
+    "solvent": "test"
+  },
+  "userRoles": {
+    "user": "test",
+    "supervisor": "test",
+    "admin": "test"
+  },
+  "reactants": {
+    "title": "test",
+    "searchPlaceholder": "test",
+    "actions": {
+      "showReactants": "test",
+      "showArchived": "test",
+      "addReactant": "test",
+      "viewDetails": "test",
+      "editReactant": "test",
+      "archiveReactant": "test",
+      "restoreReactant": "test",
+      "copySmiles": "test"
+    },
+    "badges": {
+      "archived": "test"
+    },
+    "empty": {
+      "noArchived": "test",
+      "noReactants": "test",
+      "adjustSearch": "test"
+    },
+    "modals": {
+      "archive": {
+        "title": "test",
+        "message": "test",
+        "confirm": "test"
+      }
+    },
+    "notifications": {
+      "fetchError": "test",
+      "fetchArchivedError": "test",
+      "notFoundTitle": "test",
+      "notFoundMessage": "test",
+      "archivedTitle": "test",
+      "archivedMessage": "test",
+      "archiveFailed": "test",
+      "restoredTitle": "test",
+      "restoredMessage": "test",
+      "restoreFailed": "test",
+      "copySuccessTitle": "test",
+      "copySuccessMessage": "test",
+      "copyFailed": "test"
+    },
+    "details": {
+      "addNew": "test",
+      "form": {
+        "sections": {
+          "required": "test",
+          "optional": "test"
+        },
+        "labels": {
+          "shortName": "test",
+          "smiles": "test",
+          "type": "test",
+          "chemicalName": "test",
+          "additionalShortNames": "test",
+          "casNumber": "test",
+          "references": "test",
+          "comment": "test"
+        },
+        "placeholders": {
+          "value": "test",
+          "selectOrType": "test",
+          "comment": "test"
+        },
+        "buttons": {
+          "addShortName": "test",
+          "addReference": "test",
+          "submit": "test",
+          "cancel": "test",
+          "archive": "test"
+        },
+        "errors": {
+          "shortNameRequired": "test",
+          "smilesRequired": "test",
+          "smilesSyntax": "test",
+          "smilesSanitization": "test",
+          "invalidType": "test"
+        }
+      },
+      "modals": {
+        "archive": {
+          "title": "test",
+          "message": "test",
+          "confirm": "test"
+        },
+        "cancel": {
+          "title": "test",
+          "message": "test",
+          "confirm": "test",
+          "cancelBtn": "test"
+        }
+      },
+      "notifications": {
+        "errorTitle": "test",
+        "loadError": "test",
+        "typeLoadErrorTitle": "test",
+        "typeLoadErrorMessage": "test",
+        "savedTitle": "test",
+        "savedMessage": "test",
+        "archivedTitle": "test",
+        "archivedMessage": "test",
+        "archiveFailedTitle": "test",
+        "archiveFailedMessage": "test"
+      }
+    },
+    "structure": {
+      "noStructureLoaded": "test",
+      "switchToView": "test",
+      "addSmiles": "test",
+      "notifications": {
+        "fileFormatErrorTitle": "test",
+        "fileFormatErrorMessage": "test",
+        "invalidXyzTitle": "test",
+        "invalidXyzMessage": "test",
+        "render2dErrorTitle": "test",
+        "render2dErrorMessage": "test"
+      }
+    },
+    "viewModal": {
+      "title": "test",
+      "sections": {
+        "information": "test",
+        "structure": "test",
+        "attachedFiles": "test"
+      },
+      "labels": {
+        "shortName": "test",
+        "type": "test",
+        "smiles": "test",
+        "chemicalName": "test",
+        "additionalNames": "test",
+        "casNumber": "test",
+        "comment": "test",
+        "references": "test"
+      },
+      "emptyFiles": "test",
+      "buttons": {
+        "edit": "test",
+        "close": "test"
+      },
+      "notifications": {
+        "missing3dFileTitle": "test",
+        "missing3dFileMessage": "test"
+      }
+    }
+  },
+  "experiments": {
+    "details": {
+      "createNew": "test",
+      "editExisting": "test",
+      "viewExisting": "test",
+      "form": {
+        "sections": {
+          "required": "test",
+          "optional": "test"
+        },
+        "labels": {
+          "reactantA": "test",
+          "reactantB": "test",
+          "date": "test",
+          "scientist": "test",
+          "temperature": "test",
+          "solvent": "test",
+          "concentrationReactantA": "test",
+          "concentrationReactantB": "test",
+          "instrument": "test",
+          "modality": "test",
+          "wavelength": "test",
+          "comment": "test"
+        },
+        "placeholders": {
+          "value": "test",
+          "selectOrType": "test",
+          "comment": "test"
+        },
+        "buttons": {
+          "submit": "test",
+          "cancel": "test",
+          "archive": "test"
+        },
+        "errors": {
+          "reactantARequired": "test",
+          "reactantBRequired": "test",
+          "dateRequired": "test",
+          "scientistRequired": "test",
+          "temperatureRequired": "test",
+          "solventRequired": "test",
+          "concentrationARequired": "test",
+          "concentrationBRequired": "test",
+          "concentrationNegative": "test",
+          "invalidSolvent": "test",
+          "invalidInstrument": "test",
+          "invalidModality": "test",
+          "wavelengthInvalid": "test",
+          "wavelengthNegative": "test"
+        },
+        "dateTitle": "test"
+      },
+      "modals": {
+        "archive": {
+          "title": "test",
+          "message": "test",
+          "confirm": "test"
+        },
+        "cancel": {
+          "title": "test",
+          "message": "test",
+          "confirm": "test",
+          "cancelBtn": "test"
+        }
+      },
+      "notifications": {
+        "errorTitle": "test",
+        "loadError": "test",
+        "loadExpError": "test",
+        "permissionErrorTitle": "test",
+        "permissionErrorMessage": "test",
+        "optionLoadErrorTitle": "test",
+        "optionLoadErrorMessage": "test",
+        "savedTitle": "test",
+        "savedMessage": "test",
+        "savedErrorTitle": "test",
+        "savedErrorMessage": "test",
+        "archivedTitle": "test",
+        "archivedMessage": "test",
+        "archiveFailedTitle": "test",
+        "archiveFailedMessage": "test"
+      }
+    }
+  }
+}

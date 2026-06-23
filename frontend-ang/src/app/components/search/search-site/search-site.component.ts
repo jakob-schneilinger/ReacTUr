@@ -1,7 +1,14 @@
+import { CommonModule } from '@angular/common';
+import { RouterModule } from '@angular/router';
+import { LayoutComponent } from '../../shared/layout/layout.component';
+import { ExperimentSearchComponent } from '../experiment-search/experiment-search.component';
+import { AdvancedSearchComponent } from '../search-details/advanced-search.component';
+import { SearchResultsComponent } from '../search-results/search-results.component';
+import { ExportModalComponent } from '../../export/export-modal.component';
 import { Component, OnInit } from '@angular/core';
-import { AdvancedSearch } from '../../../dtos/metadata';
-import { Experiment } from '../../../dtos/experiment';
+import { GetExperimentDto } from '../../../dtos/experiment.dto';
 import { ExperimentService } from '../../../services/experiment.service';
+import { SearchParametersDto } from '../../../dtos/search.dto';
 
 declare var initRDKitModule: any;
 
@@ -9,11 +16,20 @@ declare var initRDKitModule: any;
   selector: 'app-search-site',
   templateUrl: './search-site.component.html',
   styleUrls: ['./search-site.component.scss'],
-  standalone: false,
+  standalone: true,
+  imports: [
+    CommonModule,
+    RouterModule,
+    LayoutComponent,
+    ExperimentSearchComponent,
+    AdvancedSearchComponent,
+    SearchResultsComponent,
+    ExportModalComponent,
+  ],
 })
 export class SearchSiteComponent implements OnInit {
   currentSearchState: 'initial' | 'no-results' | 'has-results' = 'initial'; //TODO: Potential für ein Ladespinner dann status loading hinzufügen
-  foundExperiments: any[] = [];
+  foundExperiments: GetExperimentDto[] = [];
 
   rdkitModule: any;
   sketcher1: any;
@@ -23,11 +39,11 @@ export class SearchSiteComponent implements OnInit {
 
   reactant1: string[] = [];
   reactant2: string[] = [];
-  metadata: AdvancedSearch = {};
+  metadata: SearchParametersDto = { reactantA: [], reactantB: [], scientist: [] };
 
   isAdvancedSearchOpen: boolean = false;
   isExportModalOpen: boolean = false;
-  experimentsToExport: Experiment[] = [];
+  experimentsToExport: GetExperimentDto[] = [];
 
   // Service injecten!
   constructor(private experimentService: ExperimentService) {}
@@ -44,10 +60,10 @@ export class SearchSiteComponent implements OnInit {
     this.clearSignal = Date.now();
     this.reactant1 = [];
     this.reactant2 = [];
-    this.metadata = {};
+    this.metadata = { reactantA: [], reactantB: [], scientist: [] };
 
     if (this.rdkitModule && this.sketcher1 && this.sketcher2) {
-      const mol = this.rdkitModule.get_mol("");
+      const mol = this.rdkitModule.get_mol('');
       const molBlock = mol.get_molblock();
       this.sketcher1.loadMolecule(molBlock);
       this.sketcher2.loadMolecule(molBlock);
@@ -61,7 +77,7 @@ export class SearchSiteComponent implements OnInit {
     this.executeSearch();
   }
 
-  handleAdvancedSearch(terms: AdvancedSearch) {
+  handleAdvancedSearch(terms: SearchParametersDto) {
     this.metadata = terms;
     this.executeSearch();
   }
@@ -72,7 +88,9 @@ export class SearchSiteComponent implements OnInit {
 
   private executeSearch() {
     const isBasicEmpty = this.reactant1.length === 0 && this.reactant2.length === 0;
-    const isAdvancedEmpty = !this.metadata || Object.values(this.metadata).every((val) => val === undefined || val === null || val === '');
+    const isAdvancedEmpty =
+      !this.metadata ||
+      Object.values(this.metadata).every((val) => val === undefined || val === null || val === '');
 
     if (isBasicEmpty && isAdvancedEmpty) {
       this.currentSearchState = 'initial';
@@ -84,26 +102,25 @@ export class SearchSiteComponent implements OnInit {
     // this.currentSearchState = 'loading';
 
     // Service Call anstatt lokaler Logik
-    this.experimentService.searchExperiment(this.reactant1, this.reactant2, this.metadata)
-      .subscribe({
-        next: (results) => {
-          if (results.length === 0) {
-            this.currentSearchState = 'no-results';
-            this.foundExperiments = [];
-          } else {
-            this.currentSearchState = 'has-results';
-            this.foundExperiments = results;
-          }
-        },
-        error: (err) => {
-          console.error("Search failed", err);
+    this.experimentService.searchExperiments(this.metadata).subscribe({
+      next: (results) => {
+        if (results.length === 0) {
           this.currentSearchState = 'no-results';
+          this.foundExperiments = [];
+        } else {
+          this.currentSearchState = 'has-results';
+          this.foundExperiments = results;
         }
-      });
+      },
+      error: (err) => {
+        console.error('Search failed', err);
+        this.currentSearchState = 'no-results';
+      },
+    });
   }
 
-  handleExport(selectedIds: number[]) {
-    this.experimentsToExport = this.foundExperiments.filter((exp) => selectedIds.includes(exp.id));
+  handleExport(selectedUuids: string[]) {
+    this.experimentsToExport = this.foundExperiments.filter((exp) => selectedUuids.includes(exp.uuid));
     this.isExportModalOpen = true;
   }
 }

@@ -17,11 +17,11 @@
             <div class="btn-group w-100 mb-4" role="group">
               <input type="radio" class="btn-check" name="btnradio" id="btnradio1"
                      [checked]="exportFormat === 'json'" (change)="toggleFormat('json')">
-              <label class="btn btn-outline-primary" for="btnradio1">JSON</label>
+              <label class="btn-outline-primary" for="btnradio1">JSON</label>
 
               <input type="radio" class="btn-check" name="btnradio" id="btnradio2"
                      [checked]="exportFormat === 'csv'" (change)="toggleFormat('csv')">
-              <label class="btn btn-outline-primary" for="btnradio2">CSV</label>
+              <label class="btn-outline-primary" for="btnradio2">CSV</label>
             </div>
 
             @if (exportFormat === "json") {
@@ -81,13 +81,14 @@
                 [cdkDropListConnectedTo]="['tableHeaderList']"
                 class="d-flex flex-wrap gap-2 mb-4">
 
-                <div
-                  *ngFor="let field of availableFields"
-                  cdkDrag
-                  class="badge bg-light text-dark border p-2 cursor-grab"
-                  style="cursor: grab;">
-                  {{ field.label }}
-                </div>
+                @for (field of availableFields; track field.id) {
+                  <div
+                    cdkDrag
+                    class="badge bg-light text-dark border p-2 cursor-grab"
+                    style="cursor: grab;">
+                    {{ field.label }}
+                  </div>
+                }
               </div>
             }
           </div>
@@ -137,18 +138,21 @@
                         class="d-flex bg-white border rounded p-2 mb-3 align-items-center"
                         style="min-height: 60px; overflow-x: auto;">
 
-                        <div *ngIf="selectedColumns.length === 0" class="text-muted w-100 text-center fst-italic">
-                          Drag & Drop fields here...
-                        </div>
+                        @if (selectedColumns.length === 0) {
+                          <div class="text-muted w-100 text-center fst-italic">
+                            Drag & Drop fields here...
+                          </div>
+                        }
 
-                        <div
-                          *ngFor="let col of selectedColumns; let i = index"
-                          cdkDrag
-                          class="badge bg-primary me-2 p-2 d-flex align-items-center"
-                          style="cursor: grab; white-space: nowrap;">
-                          {{ col.label }}
-                          <i class="bi bi-x-circle ms-2" style="cursor: pointer;" (click)="removeColumn(i)"></i>
-                        </div>
+                        @for (col of selectedColumns ; track $index) {
+                          <div
+                            cdkDrag
+                            class="badge bg-primary me-2 p-2 d-flex align-items-center"
+                            style="cursor: grab; white-space: nowrap;">
+                            {{ col.label }}
+                            <i class="bi bi-x-circle ms-2" style="cursor: pointer;" (click)="removeColumn($index)"></i>
+                          </div>
+                        }
 
                       </div>
 
@@ -156,13 +160,19 @@
                         <table class="table table-sm table-striped m-0">
                           <thead>
                           <tr>
-                            <th *ngFor="let col of selectedColumns">{{ col.label }}</th>
+                            @for (col of selectedColumns; track $index) {
+                              <th>{{ col.label }}</th>
+                            }
                           </tr>
                           </thead>
                           <tbody>
-                            <tr *ngFor="let row of tableData; let i = index" [class.header-row]="i === 0">
-                              <td *ngFor="let cell of row">{{ cell }}</td>
-                            </tr>
+                            @for (row of tableData; track $index) {
+                              <tr [class.header-row]="$index === 0">
+                                @for (cell of row; track $index) {
+                                  <td>{{ cell }}</td>
+                                }
+                              </tr>
+                            }
                           </tbody>
                         </table>
                       </div>

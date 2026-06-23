@@ -26,12 +26,12 @@
           [(ngModel)]="rule.smiles"
           (ngModelChange)="onRuleChange()">
 
-        <button class="btn btn-outline-secondary bg-white" type="button" (click)="openDraw(rule)" title="Draw Substructure">
+        <button class="btn btn-outline-secondary bg-white substructure-btn" type="button" (click)="openDraw(rule)" title="Draw Substructure">
           <i class="bi bi-pencil-square"></i>
         </button>
       </div>
 
-      <button class="btn btn-link text-danger p-0 ms-1" (click)="removeRule(rule.id)" title="Remove Condition">
+      <button class="btn btn-link text-danger p-0 ms-1 remove-condition-btn" (click)="removeRule(rule.id)" title="Remove Condition">
         <i class="bi bi-trash"></i>
       </button>
 

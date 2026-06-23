@@ -1,12 +1,16 @@
+import { CommonModule } from '@angular/common';
+import { ReactantSelectorComponent } from '../../shared/reactant-selector/reactant-selector.component';
+import { SubstructureSearchComponent } from '../sub-structure-search/sub-structure-search.component';
 import { Component, Output, EventEmitter, Input } from '@angular/core';
-import { Reactant } from '../../../dtos/reactant';
+import { ReactantDto } from '../../../dtos/reactant.dto';
 import { MOCK_REACTANTS } from '../../../mock/mock-experiments';
 
 @Component({
   selector: 'app-experiment-search',
   templateUrl: './experiment-search.component.html',
   styleUrls: ['./experiment-search.component.scss'],
-  standalone: false,
+  standalone: true,
+  imports: [CommonModule, ReactantSelectorComponent, SubstructureSearchComponent],
 })
 export class ExperimentSearchComponent {
   @Output() searchChanged = new EventEmitter<{
@@ -46,7 +50,7 @@ export class ExperimentSearchComponent {
   currentSub1: string[] = [];
   currentSub2: string[] = [];
 
-  availableReactants: Reactant[] = MOCK_REACTANTS; //TODO: do service call
+  availableReactants: ReactantDto[] = MOCK_REACTANTS; //TODO: do service call
 
   onReactantChange(num: 1 | 2, value: string) {
     if (num === 1) this.currentExact1 = value;

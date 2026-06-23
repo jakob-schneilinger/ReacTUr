@@ -1,3 +1,5 @@
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import {
   AfterViewInit,
   Component,
@@ -8,6 +10,7 @@ import {
   NgZone,
   HostListener,
 } from '@angular/core';
+import { AppModalComponent } from '../modal/app-modal.component';
 declare var initRDKitModule: any;
 declare var ChemDoodle: any;
 
@@ -15,7 +18,8 @@ declare var ChemDoodle: any;
   selector: 'app-draw-mol',
   templateUrl: './draw-mol.component.html',
   styleUrls: ['./draw-mol.component.scss'],
-  standalone: false,
+  standalone: true,
+  imports: [CommonModule, FormsModule, AppModalComponent],
 })
 export class DrawMolComponent implements OnInit, AfterViewInit {
   @Input() initialSmiles: string = '';

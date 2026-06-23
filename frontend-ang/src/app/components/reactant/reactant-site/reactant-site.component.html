@@ -2,143 +2,81 @@
 
   <div class="row mb-3">
     <div class="col-12">
-      <h2 class="mb-0">Reactants</h2>
+      <h2 class="mb-0">{{ 'reactants.title' | transloco }}</h2>
     </div>
   </div>
 
-  <div class="d-flex justify-content-between align-items-center mb-4">
+  <div class="d-flex justify-content-between align-items-center mb-4 gap-2">
 
-    <div class="custom-search-wrapper input-group search-group" style="max-width: 500px;">
-      <span class="input-group-text bg-white border-end-0">
-        <i class="bi bi-search text-muted"></i>
-      </span>
-      <input
-        type="text"
-        class="form-control border-start-0 ps-0"
-        placeholder="Search by name, SMILES, or type..."
-        [(ngModel)]="searchTerm"
-        (input)="onSearch()"
-      >
+    <app-search-input
+      [(searchTerm)]="searchTerm"
+      (search)="onSearch()"
+      (openDraw)="openDraw()"
+      [showDrawButton]="true"
+      [placeholder]="'reactants.searchPlaceholder' | transloco"
+      style="width: 500px; display: block;">
+    </app-search-input>
 
-      <button
-        class="btn icon-btn text-secondary"
-        type="button"
-        (click)="openDraw()"
-        title="Draw Molecule">
-        <i class="bi bi-pencil-square"></i>
+    <div class="d-flex gap-2">
+      <button *appHasRole="['ADMIN']" class="text-nowrap m-0" (click)="showArchivedReactants(!showArchived)">
+        {{ showArchived ? ('reactants.actions.showReactants' | transloco) : ('reactants.actions.showArchived' | transloco) }}
       </button>
 
-      @if (searchTerm) {
-        <button
-          class="btn icon-btn text-danger"
-          type="button"
-          (click)="searchTerm = ''; onSearch()"
-          title="Clear Search">
-          <i class="bi bi-x-lg"></i>
-        </button>
-      }
+      <button *appHasRole="['SUPERVISOR','ADMIN']" class="primary text-nowrap m-0" (click)="goToCreate()">
+        <i class="bi bi-plus-lg me-1"></i> {{ 'reactants.actions.addReactant' | transloco }}
+      </button>
     </div>
-
-    @if (role != "USER") {
-      <button class="primary text-nowrap m-0" (click)="goToCreate()">
-        <i class="bi bi-plus-lg me-1"></i> Add Reactant
-      </button>
-    }
 
   </div>
 
   <div class="divider"></div>
 
   <div class="d-flex flex-column gap-3 mt-4 reactants-container">
-    <div class="card reactant-card-horizontal shadow-sm" *ngFor="let reactant of filteredReactants">
+    @for (reactant of filteredReactants; track reactant.uuid) {
+      <app-reactant-card
+        [reactant]="reactant"
+        [hasWritePermission]="hasWritePermission"
+        [isArchived]="showArchived"
+        (view)="viewDetails($event)"
+        (edit)="editReactant($event)"
+        (archive)="archiveReactant($event)"
+        (restore)="restoreReactant($event)"
+        (copySmiles)="copyToClipboard($event)">
+      </app-reactant-card>
+    }
+  </div>
 
-      <div class="card-body p-3 d-flex align-items-center">
-
-        <div class="d-flex align-items-center gap-2 pe-3 short-name">
-          <h5 class="fw-bold mb-0 text-truncate" [title]="reactant.shortName">
-            {{ reactant.shortName }}
-          </h5>
-          <span class="badge type-badge">{{ reactant.type1 }}</span>
-        </div>
-
-        <div class="text-muted text-truncate pe-3 chemical-name" [title]="reactant.chemicalName || ''">
-          {{ reactant.chemicalName || '--' }}
-        </div>
-
-        <div class="smiles-container d-flex align-items-center px-3 mx-2 flex-grow-1" >
-          <div class="text-truncate me-2" [title]="reactant.smiles">
-            {{ reactant.smiles }}
-          </div>
-          <button class="btn btn-sm p-0 ms-auto copy-btn text-muted" (click)="copyToClipboard(reactant.smiles)" title="Copy SMILES">
-            <i class="bi bi-clipboard"></i>
-          </button>
-        </div>
-
-        <div class="d-flex justify-content-end gap-2 ms-auto ps-3" [ngStyle]="{'min-width': hasWritePermission ? '125   px' : '47px'}">
-          <button class="compact" (click)="viewDetails(reactant.shortName)" title="View Details">
-            <i class="bi bi-file-earmark-text"></i>
-          </button>
-          @if (hasWritePermission) {
-            <button class="primary compact" (click)="editReactant(reactant.shortName)" title="Edit Reactant">
-              <i class="bi bi-pencil"></i>
-            </button>
-            <button class="error compact" (click)="deleteReactant(reactant.shortName)" title="Remove Reactant">
-              <i class="bi bi-trash"></i>
-            </button>
-          }
-        </div>
-
+  @if (filteredReactants.length === 0) {
+    <div class="row">
+      <div class="col-12 text-center mt-5">
+        <i class="bi bi-inbox text-muted" style="font-size: 3rem;"></i>
+        <h4 class="text-muted mt-3">{{ showArchived ? ('reactants.empty.noArchived' | transloco) : ('reactants.empty.noReactants' | transloco)}}</h4>
+        @if (searchTerm) {
+          <p class="text-muted">{{ 'reactants.empty.adjustSearch' | transloco }}</p>
+        }
       </div>
     </div>
-  </div>
-
-  <div class="row" *ngIf="filteredReactants.length === 0">
-    <div class="col-12 text-center mt-5">
-      <i class="bi bi-inbox text-muted" style="font-size: 3rem;"></i>
-      <h4 class="text-muted mt-3">No reactants found.</h4>
-      <p class="text-muted" *ngIf="searchTerm">Try adjusting your search criteria.</p>
-    </div>
-  </div>
+  }
 
 </div>
 
+<app-confirm-modal
+  [isOpen]="isArchiveReactantModalOpen"
+  [title]="'reactants.modals.archive.title' | transloco"
+  [message]="'reactants.modals.archive.message' | transloco: { name: pendingReactant?.shortName }"
+  [confirmLabel]="'reactants.modals.archive.confirm' | transloco"
+  confirmButtonClass="danger"
+  (confirm)="executeArchive()"
+  (cancel)="cancelArchive()">
+</app-confirm-modal>
 
-<!-- Delete Reactant Modal -->
-<div
-  class="modal fade"
-  [ngClass]="{'show': isDeleteReactantModalOpen}"
-  [style.display]="isDeleteReactantModalOpen ? 'block' : 'none'"
-  tabindex="-1"
-  style="background-color: rgba(0,0,0,0.5);" >
-  <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content shadow">
-
-      <div class="modal-header border-0 pb-0">
-        <h5 class="modal-title text-danger">
-          <i class="bi bi-exclamation-triangle-fill me-2"></i> Remove Reactant
-        </h5>
-        <button type="button" class="btn-close" (click)="cancelDelete()" aria-label="Close"></button>
-      </div>
-
-      <div class="modal-body py-4">
-        <p class="mb-0">Are you sure you want to remove the reactant <strong>{{ pendingReactantName }}</strong>?</p>
-      </div>
-
-      <div class="modal-footer border-0 pt-0">
-        <button type="button" class="" (click)="cancelDelete()">Cancel</button>
-        <button type="button" class="error" (click)="executeDelete()">Yes, remove it</button>
-      </div>
-
-    </div>
-  </div>
-</div>
-
-<app-reactant-view-modal
-  *ngIf="isViewModalOpen"
-  [selectedReactant]="selectedReactantForView"
-  [hasWritePermission]="hasWritePermission"
-  (close)="closeViewModal()">
-</app-reactant-view-modal>
+@if (isViewModalOpen) {
+  <app-reactant-view-modal
+    [selectedReactant]="selectedReactantForView"
+    [hasWritePermission]="hasWritePermission"
+    (close)="closeViewModal()">
+  </app-reactant-view-modal>
+}
 
 @if (isDrawModalOpen) {
   <app-draw-mol

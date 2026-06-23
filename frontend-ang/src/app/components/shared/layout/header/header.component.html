@@ -3,11 +3,14 @@
   <div id="items">
     <div class="layout"></div>
     <div class="navitem logo" routerLink="/search">
-      <img alt="ReacTUr Logo" ngSrc="images/enzyme.png" width="50" height="50" priority>
-      <span>ReacTUr</span>
+      <div class="shadow-container">
+        <div class="img-shadow"></div>
+      </div>
+      <img [alt]="'header.logoAlt' | transloco" ngSrc="images/enzyme.png" width="50" height="50" priority>
+      <span>{{ 'header.title' | transloco }}</span>
     </div>
-    <div class="navitem" routerLink="/search" routerLinkActive="active-link">Search</div>
-    <div class="navitem" routerLink="/experiments/create" routerLinkActive="active-link">Create Experiment</div>
+    <div class="navitem" routerLink="/search" routerLinkActive="active-link">{{ 'header.search' | transloco }}</div>
+    <div class="navitem" routerLink="/experiments/create" routerLinkActive="active-link">{{ 'header.createExperiment' | transloco }}</div>
     <!--
     <div class="navitem"
          ngbDropdown
@@ -33,33 +36,28 @@
       </div>
     </div>
     -->
-    <div class="navitem" routerLink="/reactants" routerLinkActive="active-link">Reactants</div>
-    <div class="navitem" routerLink="/admin" routerLinkActive="active-link" *appHasRole="['ADMIN']">Admin</div>
+    <div class="navitem" routerLink="/reactants" routerLinkActive="active-link">{{ 'header.reactants' | transloco }}</div>
+    <div class="navitem" routerLink="/admin" routerLinkActive="active-link" *appHasRole="['ADMIN']">{{ 'header.admin' | transloco }}</div>
   </div>
 
   <div class="profile-container">
     <div ngbDropdown placement="bottom-end" class="d-inline-block">
-      <div id="profile" ngbDropdownToggle title="User Profile" class="bi bi-person"></div>
+      <div id="profile" ngbDropdownToggle [title]="'header.userProfile' | transloco" class="bi bi-person"></div>
 
       <div ngbDropdownMenu>
-        <!-- logged in -->
-        <ng-container *ngIf="isLoggedIn; else loggedOutMenu">
-          <button ngbDropdownItem disabled>Hallo, {{ user?.firstName }}</button>
+        @if (isLoggedIn) {
+          <button ngbDropdownItem disabled>{{'header.greetings' | transloco}}, {{ user?.firstName }}</button>
           <div class="dropdown-divider"></div>
           <button ngbDropdownItem (click)="logout()" class="text-danger logout-button">
-            Logout
-            <i id="logout_icon" title="Logout" class="bi bi-box-arrow-right"></i>
+            {{ 'header.logout' | transloco }}
+            <i id="logout_icon" [title]="'header.logout' | transloco" class="bi bi-box-arrow-right"></i>
           </button>
-        </ng-container>
-
-        <!-- not logged in -->
-        <ng-template #loggedOutMenu>
+        } @else {
           <button ngbDropdownItem routerLink="/login">
-            Login
-            <i id="login_icon" title="Login" class="bi bi-box-arrow-right"></i>
+            {{ 'header.login' | transloco }}
+            <i id="login_icon" [title]="'header.login' | transloco" class="bi bi-box-arrow-right"></i>
           </button>
-        </ng-template>
-
+        }
       </div>
     </div>
     <div class="layout"></div>

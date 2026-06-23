@@ -10,38 +10,8 @@
   margin-right: auto;
 }
 
-.btn-primary {
-  background-color: $primary;
-  color: white;
-  border: none;
-  border-radius: 6px;
-  padding: 0.5rem 1rem;
-  font-size: 0.875rem;
-  cursor: pointer;
-  transition: background-color 0.2s;
-
-  margin-right: 0.75rem;
-  margin-bottom: 0.5rem;
-
-  &:hover {
-    background-color: $primary_hover !important;
-  }
-}
-
-.btn-clear {
-  background-color: $light_gray;
-  color: white;
-  border: none;
-  border-radius: 6px;
-  padding: 0.5rem 1rem;
-  font-size: 0.875rem;
-  cursor: pointer;
-  margin-right: 1rem;
-  transition: background-color 0.2s;
-
-  &:hover {
-    background-color: $light_gray_hover !important;
-  }
+.primary {
+  margin-left: 0.5rem;
 }
 
 .divider {

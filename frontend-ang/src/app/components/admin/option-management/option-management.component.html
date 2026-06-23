@@ -1,0 +1,85 @@
+<div class="option-management-container d-flex flex-column gap-3">
+
+  <div class="card border-0 shadow-sm">
+    <div class="card-header bg-white pb-0 border-bottom-0">
+      <ul class="nav nav-pills category-tabs mb-3 d-flex gap-2">
+        @for (cat of categories; track cat.value) {
+          <li class="nav-item">
+            <button
+              class="nav-link px-3 py-1 rounded-pill"
+              [class.active]="selectedCategory === cat.value"
+              (click)="selectCategory(cat.value)">
+              {{ cat.label | transloco }}
+            </button>
+          </li>
+        }
+      </ul>
+    </div>
+
+    <div class="card-body p-0 border-top">
+      @if (isLoading) {
+        <div class="p-4 text-center text-muted">
+          <div class="spinner-border spinner-border-sm me-2" role="status"></div>
+          {{ 'admin.option.table.loadingOptions' | transloco }}
+        </div>
+      } @else if (options.length === 0) {
+        <div class="p-4 text-center text-muted">
+         {{ 'admin.option.table.noOptionsFound' | transloco }}
+        </div>
+      } @else {
+        <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
+          <table class="table table-hover mb-0 align-middle">
+            <thead class="table-light sticky-top">
+            <tr>
+              <th>{{ 'admin.option.table.headerValue' | transloco }}</th>
+              <th>{{ 'admin.option.table.headerStatus' | transloco }}</th>
+              <th class="text-end">{{ 'admin.option.table.headerAction' | transloco }}</th>
+            </tr>
+            </thead>
+            <tbody>
+              @for (option of options; track option.uuid) {
+                <tr>
+                  <td class="fw-medium">
+                    <div [class.opacity-50]="!!option.archivedAt">{{ option.name }} </div>
+                  </td>
+                  <td>
+                    @if (!option.archivedAt) {
+                      <span class="badge bg-success-subtle text-success border border-success-subtle">{{ 'admin.option.table.statusActive' | transloco }}</span>
+                    } @else {
+                      <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle">{{ 'admin.option.table.statusInactive' | transloco }}</span>
+                    }
+                  </td>
+                  <td class="text-end">
+                    <button
+                      class="compact px-3 py-1"
+                      [ngClass]="!option.archivedAt ? 'error' : 'primary'"
+                      (click)="toggleOptionStatus(option)">
+                      {{ !option.archivedAt ? ('admin.option.table.actionDeactivate' | transloco) : ('admin.option.table.actionActivate' | transloco) }}
+                    </button>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+    </div>
+
+    <div class="card-footer bg-light p-3">
+      <form (ngSubmit)="addOption()" class="d-flex gap-2">
+        <input
+          type="text"
+          name="newOption"
+          class="add-input flex-grow-1"
+          placeholder="{{ 'admin.option.addPlaceholder' | transloco }}"
+          [(ngModel)]="newOptionValue"
+          autocomplete="off"
+        />
+        <button type="submit" class="primary add-btn" [disabled]="!newOptionValue.trim()">
+          <i class="bi bi-plus-lg me-1"></i> {{ 'admin.option.addButton' | transloco }}
+        </button>
+      </form>
+    </div>
+  </div>
+
+</div>
