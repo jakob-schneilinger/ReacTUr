@@ -41,5 +41,24 @@ services:
     depends_on:
       - seaweedfs-master
 
+  seaweedfs-filer:
+    image: chrislusf/seaweedfs
+    container_name: kinetics-seaweed-filer
+    command: filer -master=seaweedfs-master:9333
+    ports:
+      - "8888:8888"
+    depends_on:
+      - seaweedfs-master
+      - seaweedfs-volume
+
+  seaweedfs-s3:
+    image: chrislusf/seaweedfs
+    container_name: kinetics-seaweed-s3
+    command: s3 -filer=seaweedfs-filer:8888 -port=8333
+    ports:
+      - "8333:8333"
+    depends_on:
+      - seaweedfs-filer
+
 volumes:
   postgres-data:

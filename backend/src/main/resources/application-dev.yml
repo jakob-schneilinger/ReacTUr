@@ -17,3 +17,10 @@ spring:
       resourceserver:
         jwt:
           issuer-uri: http://localhost:8081/realms/test
+
+seaweedfs:
+  s3:
+    endpoint: ${SEAWEEDFS_ENDPOINT:http://localhost:8333}
+    access-key: ${SEAWEEDFS_ACCESS_KEY}
+    secret-key: ${SEAWEEDFS_SECRET_KEY}
+    bucket: ${SEAWEEDFS_BUCKET:experiment-files}
