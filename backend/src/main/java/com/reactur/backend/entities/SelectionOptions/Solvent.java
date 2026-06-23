@@ -21,6 +21,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+// TODO: ArchivedAt instead of isActive
 public class Solvent {
 
     @Id
