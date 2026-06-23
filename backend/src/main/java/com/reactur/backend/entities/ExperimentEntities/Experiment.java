@@ -75,6 +75,7 @@ public class Experiment {
     private ExperimentResult result;
 
     @OneToMany(mappedBy = "experiment", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
     private List<ExperimentAttachments> files = new ArrayList<>();
 
     @Column(name = "archived_at")
