@@ -4,6 +4,7 @@ import com.reactur.backend.dtos.ExperimentDtos.*;
 import com.reactur.backend.security.SecurityConfig;
 import com.reactur.backend.services.ExperimentService;
 import com.reactur.backend.repositories.UserRepository;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
@@ -110,11 +111,11 @@ class ExperimentEndpointTest {
     );
     SaveExperimentDto capturedDto = dtoCaptor.getValue();
 
-    org.junit.jupiter.api.Assertions.assertNotNull(capturedDto, "The captured DTO should not be null");
-    org.junit.jupiter.api.Assertions.assertEquals(reactantA, capturedDto.reactantA());
-    org.junit.jupiter.api.Assertions.assertEquals(reactantB, capturedDto.reactantB());
-    org.junit.jupiter.api.Assertions.assertEquals("10.1000/rxn123", capturedDto.doi());
-    org.junit.jupiter.api.Assertions.assertEquals(25.0, capturedDto.metadata().temperature());
+    Assertions.assertNotNull(capturedDto, "The captured DTO should not be null");
+    Assertions.assertEquals(reactantA, capturedDto.reactantA());
+    Assertions.assertEquals(reactantB, capturedDto.reactantB());
+    Assertions.assertEquals("10.1000/rxn123", capturedDto.doi());
+    Assertions.assertEquals(25.0, capturedDto.metadata().temperature());
   }
 
   @Test
