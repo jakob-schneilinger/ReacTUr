@@ -46,15 +46,16 @@ export class ReactantSelectorComponent implements OnInit {
   onSearchInput() {
     if (this.searchTerm.length > 0) {
       const lowerTerm = this.searchTerm.toLowerCase();
-      this.suggestions = this.availableReactants.filter(r =>
-        r.shortName.toLowerCase().includes(lowerTerm) ||
-        r.chemicalType.name.toLowerCase().includes(lowerTerm) ||
-        r.smiles.includes(this.searchTerm)
+      this.suggestions = this.availableReactants.filter(
+        (r) =>
+          r.shortName.toLowerCase().includes(lowerTerm) ||
+          r.chemicalType.name.toLowerCase().includes(lowerTerm) ||
+          r.chemicalName?.toLowerCase().includes(lowerTerm) ||
+          r.smiles.includes(this.searchTerm),
       );
     } else {
       this.suggestions = [];
     }
-    this.emitChange();
   }
 
   selectReactant(reactant: ReactantDto) {
@@ -72,7 +73,7 @@ export class ReactantSelectorComponent implements OnInit {
   }
 
   emitChange() {
-    const value = this.selectedReactant ? this.selectedReactant.shortName : this.searchTerm;
+    const value = this.selectedReactant ? this.selectedReactant.uuid : this.searchTerm;
     this.selectionChanged.emit(value);
   }
 

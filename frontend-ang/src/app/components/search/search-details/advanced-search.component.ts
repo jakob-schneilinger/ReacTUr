@@ -14,8 +14,8 @@ import { NotificationService } from '../../../services/notification.service';
 })
 export class AdvancedSearchComponent {
   @Output() searchChanged = new EventEmitter<SearchParametersDto>();
-  @Input() reactant1: string[] = [];
-  @Input() reactant2: string[] = [];
+  @Input() reactantA: string[] = [];
+  @Input() reactantB: string[] = [];
   @Input() set triggerClear(value: number) {
     if (value) {
       this.clearAll();

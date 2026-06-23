@@ -7,8 +7,8 @@
       <h2>Search</h2>
       <app-experiment-search
         [triggerClear]="clearSignal"
-        [reactant1]="reactant1"
-        [reactant2]="reactant2"
+        [reactantA]="reactantA"
+        [reactantB]="reactantB"
         (searchChanged)="handleSearch($event)">
       </app-experiment-search>
 
@@ -24,8 +24,8 @@
       <app-advanced-search
         class="advanced-search-content"
         [hidden]="!isAdvancedSearchOpen"
-        [reactant1]="reactant1"
-        [reactant2]="reactant2"
+        [reactantA]="reactantA"
+        [reactantB]="reactantB"
         [triggerClear]="clearSignal"
         (searchChanged)="handleAdvancedSearch($event)">
       </app-advanced-search>
@@ -42,8 +42,8 @@
       <button class="primary"
               [routerLink]="['/experiments/create']"
               [queryParams]="{
-          reactant1: reactant1.length ? reactant1 : null,
-          reactant2: reactant2.length ? reactant2 : null
+          reactantA: reactantA.length ? reactantA : null,
+          reactantB: reactantB.length ? reactantB : null
         }">
         Create new Experiment
       </button>

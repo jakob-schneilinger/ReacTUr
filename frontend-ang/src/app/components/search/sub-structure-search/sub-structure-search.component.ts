@@ -3,13 +3,22 @@ import { FormsModule } from '@angular/forms';
 import { DrawMolComponent } from '../../shared/draw-mol/draw-mol.component';
 import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { ReactantDto } from '../../../dtos/reactant.dto';
+import { RDKitService } from '../../../services/rdkit.service';
 
-// Das RDKit Objekt vom globalen window scope laden
-declare var window: any;
+export type LogicalOperator = 'AND' | 'OR';
 
-interface SubstructureRule {
+export interface SearchGroup {
   id: number;
-  operator: 'AND' | 'OR';
+  type: 'GROUP';
+  operator: LogicalOperator;
+  isNot: boolean;
+  children: (SearchGroup | SearchRule)[];
+}
+
+export interface SearchRule {
+  id: number;
+  type: 'RULE';
+  isNot: boolean;
   smiles: string;
 }
 
@@ -24,97 +33,157 @@ export class SubstructureSearchComponent {
   @Input() availableReactants: ReactantDto[] = [];
   @Output() matchedReactants = new EventEmitter<string[]>();
 
-  rules: SubstructureRule[] = [];
+  rootGroup: SearchGroup = {
+    id: Date.now(),
+    type: 'GROUP',
+    operator: 'AND',
+    isNot: false,
+    children: [],
+  };
 
   isDrawModalOpen = false;
   activeRuleId: number | null = null;
   currentSmilesForModal = '';
 
-  constructor() {
-    // Direkt mit einer leeren Regel starten
-    this.addRule();
+  constructor(private rdkitService: RDKitService) {
+    this.addRule(this.rootGroup);
   }
 
-  addRule() {
-    this.rules.push({
+  addRule(parentGroup: SearchGroup) {
+    parentGroup.children.push({
       id: Date.now(),
-      operator: 'AND', // Standardmäßig AND
-      smiles: ''
+      type: 'RULE',
+      isNot: false,
+      smiles: '',
     });
   }
 
-  removeRule(id: number) {
-    this.rules = this.rules.filter(r => r.id !== id);
-    if (this.rules.length === 0) {
-      this.addRule(); // Immer mindestens eine Zeile übrig lassen
-    }
-    this.evaluateRules();
+  addGroup(parentGroup: SearchGroup) {
+    parentGroup.children.push({
+      id: Date.now(),
+      type: 'GROUP',
+      operator: 'AND',
+      isNot: false,
+      children: [{ id: Date.now() + 1, type: 'RULE', isNot: false, smiles: '' }], // Start group with one rule
+    });
   }
 
-  openDraw(rule: SubstructureRule) {
+  removeNode(id: number, currentGroup: SearchGroup = this.rootGroup): boolean {
+    const index = currentGroup.children.findIndex((c) => c.id === id);
+    if (index !== -1) {
+      currentGroup.children.splice(index, 1);
+      return true;
+    }
+    for (const child of currentGroup.children) {
+      if (child.type === 'GROUP') {
+        if (this.removeNode(id, child as SearchGroup)) return true;
+      }
+    }
+    return false;
+  }
+
+  openDraw(rule: SearchRule) {
     this.activeRuleId = rule.id;
     this.currentSmilesForModal = rule.smiles;
     this.isDrawModalOpen = true;
   }
 
   onModalSave(newSmiles: string) {
-    const rule = this.rules.find(r => r.id === this.activeRuleId);
+    const rule = this.findRuleById(this.activeRuleId!, this.rootGroup);
     if (rule) {
       rule.smiles = newSmiles;
     }
     this.isDrawModalOpen = false;
-    this.evaluateRules();
   }
 
-  onRuleChange() {
-    this.evaluateRules();
+  private findRuleById(id: number, group: SearchGroup): SearchRule | null {
+    for (const child of group.children) {
+      if (child.id === id && child.type === 'RULE') return child as SearchRule;
+      if (child.type === 'GROUP') {
+        const found = this.findRuleById(id, child as SearchGroup);
+        if (found) return found;
+      }
+    }
+    return null;
   }
 
-  // --- DIE KERN-LOGIK MIT RDKIT ---
-  evaluateRules() {
-    // Filtere leere Regeln heraus
-    const activeRules = this.rules.filter(r => r.smiles.trim().length > 0);
+  onSearchSubmit() {
+    this.evaluateRulesTree();
+  }
 
-    if (activeRules.length === 0) {
+  evaluateRulesTree() {
+    if (!this.rdkitService.isLoaded) {
+      console.warn('RDKit is not loaded yet.');
+      return;
+    }
+
+    if (this.rootGroup.children.length === 0) {
       this.matchedReactants.emit([]);
       return;
     }
 
-    const matchedNames = this.availableReactants.filter(reactant => {
-      // 1. Erstelle das Hauptmolekül
-      const mol = window.RDKit.get_mol(reactant.smiles);
-      if (!mol) return false;
+    const matchedNames = this.availableReactants
+      .filter((reactant) => {
 
-      let finalMatch = false;
+        const targetMol = this.rdkitService.getMol(reactant.smiles);
+        if (!targetMol) return false;
 
-      // 2. Logik-Kette von links nach rechts abarbeiten
-      for (let i = 0; i < activeRules.length; i++) {
-        const rule = activeRules[i];
-        const qmol = window.RDKit.get_qmol(rule.smiles);
+        let isMatch = false;
 
-        // Prüfen, ob die Substruktur im Molekül vorkommt
-        const matchObj = JSON.parse(mol.get_substruct_match(qmol));
-        const hasSubstructure = Object.keys(matchObj).length > 0;
+        try {
+          isMatch = this.evaluateNode(this.rootGroup, targetMol);
+        } catch (e) {
+          console.error('Error evaluating substructure tree for', reactant.shortName, e);
+        }
 
-        qmol.delete(); // Memory Management!
+        targetMol.delete();
 
-        if (i === 0) {
-          // Erste Regel setzt den Startwert
-          finalMatch = hasSubstructure;
-        } else {
-          // Verknüpfung mit vorherigem Ergebnis
-          if (rule.operator === 'AND') {
-            finalMatch = finalMatch && hasSubstructure;
-          } else if (rule.operator === 'OR') {
-            finalMatch = finalMatch || hasSubstructure;
-          }
+        return isMatch;
+      })
+      .map((r) => r.uuid);
+
+    this.matchedReactants.emit(matchedNames);
+  }
+
+  private evaluateNode(node: SearchGroup | SearchRule, targetMol: any): boolean {
+
+    if (node.type === 'RULE') {
+      const rule = node as SearchRule;
+
+      if (!rule.smiles || rule.smiles.trim().length === 0) {
+        return true;
+      }
+
+      const hasSubstructure = this.rdkitService.hasSubstructureMatch(targetMol, rule.smiles);
+
+      return rule.isNot ? !hasSubstructure : hasSubstructure;
+    }
+
+    if (node.type === 'GROUP') {
+      const group = node as SearchGroup;
+
+      if (group.children.length === 0) return true;
+
+      let result = this.evaluateNode(group.children[0], targetMol);
+
+      for (let i = 1; i < group.children.length; i++) {
+        const child = group.children[i];
+
+        if (group.operator === 'AND' && !result) break;
+        if (group.operator === 'OR' && result) break;
+
+        const childResult = this.evaluateNode(child, targetMol);
+
+        if (group.operator === 'AND') {
+          result = result && childResult;
+        } else if (group.operator === 'OR') {
+          result = result || childResult;
         }
       }
 
-      mol.delete(); // Memory Management!
-      return finalMatch;
-    }).map(r => r.shortName); // Wir wollen nur die Namen (Strings) emitten
+      return group.isNot ? !result : result;
+    }
 
-    this.matchedReactants.emit(matchedNames);
+    return false;
   }
 }

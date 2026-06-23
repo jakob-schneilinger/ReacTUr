@@ -5,7 +5,7 @@ import { ExperimentSearchComponent } from '../experiment-search/experiment-searc
 import { AdvancedSearchComponent } from '../search-details/advanced-search.component';
 import { SearchResultsComponent } from '../search-results/search-results.component';
 import { ExportModalComponent } from '../../export/export-modal.component';
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { GetExperimentDto } from '../../../dtos/experiment.dto';
 import { ExperimentService } from '../../../services/experiment.service';
 import { SearchParametersDto } from '../../../dtos/search.dto';
@@ -35,8 +35,8 @@ export class SearchSiteComponent implements OnInit {
 
   clearSignal: number = 0;
 
-  reactant1: string[] = [];
-  reactant2: string[] = [];
+  reactantA: string[] = [];
+  reactantB: string[] = [];
   metadata: SearchParametersDto = { reactantA: [], reactantB: [], scientist: [] };
 
   isAdvancedSearchOpen: boolean = false;
@@ -47,6 +47,7 @@ export class SearchSiteComponent implements OnInit {
   constructor(
     private experimentService: ExperimentService,
     private rdkitService: RDKitService,
+    private cdr: ChangeDetectorRef
   ) {}
 
   async ngOnInit() {
@@ -59,8 +60,8 @@ export class SearchSiteComponent implements OnInit {
 
   onClearClicked() {
     this.clearSignal = Date.now();
-    this.reactant1 = [];
-    this.reactant2 = [];
+    this.reactantA = [];
+    this.reactantB = [];
     this.metadata = { reactantA: [], reactantB: [], scientist: [] };
 
     if (this.rdkitService.isLoaded && this.sketcher1 && this.sketcher2) {
@@ -71,9 +72,11 @@ export class SearchSiteComponent implements OnInit {
     this.executeSearch();
   }
 
-  handleSearch(terms: { reactant1: string[]; reactant2: string[] }) {
-    this.reactant1 = terms.reactant1;
-    this.reactant2 = terms.reactant2;
+  handleSearch(terms: { reactantA: string[]; reactantB: string[] }) {
+    this.reactantA = terms.reactantA;
+    this.reactantB = terms.reactantB;
+    this.metadata.reactantA = terms.reactantA;
+    this.metadata.reactantB = terms.reactantB;
     this.executeSearch();
   }
 
@@ -87,10 +90,15 @@ export class SearchSiteComponent implements OnInit {
   }
 
   private executeSearch() {
-    const isBasicEmpty = this.reactant1.length === 0 && this.reactant2.length === 0;
+    const isBasicEmpty = this.reactantA.length === 0 && this.reactantB.length === 0;
     const isAdvancedEmpty =
       !this.metadata ||
-      Object.values(this.metadata).every((val) => val === undefined || val === null || val === '');
+      Object.values(this.metadata).every((val) =>
+        val === undefined ||
+        val === null ||
+        val === '' ||
+        (Array.isArray(val) && val.length === 0)
+      );
 
     if (isBasicEmpty && isAdvancedEmpty) {
       this.currentSearchState = 'initial';
@@ -100,10 +108,9 @@ export class SearchSiteComponent implements OnInit {
 
     // Zeige Ladezustand an, bis das Service antwortet
     // this.currentSearchState = 'loading';
-
-    // Service Call anstatt lokaler Logik
     this.experimentService.searchExperiments(this.metadata).subscribe({
       next: (results) => {
+        console.log(results)
         if (results.length === 0) {
           this.currentSearchState = 'no-results';
           this.foundExperiments = [];
@@ -111,6 +118,7 @@ export class SearchSiteComponent implements OnInit {
           this.currentSearchState = 'has-results';
           this.foundExperiments = results;
         }
+        this.cdr.markForCheck();
       },
       error: (err) => {
         console.error('Search failed', err);

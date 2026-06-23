@@ -1,25 +1,24 @@
 <div class="d-flex flex-column gap-4 mb-2">
 
   <div>
-    <app-reactant-selector
-      label="Reactant 1"
-      [availableReactants]="availableReactants"
-      [initialValue]="initVal1[0]"
-      [clearSignal]="triggerClearValue"
-      (selectionChanged)="onReactantChange(1, $event)">
-    </app-reactant-selector>
-
-    <div class="d-flex justify-content-end mt-1">
-      <button
-        class="btn-sm btn-link text-decoration-none text-muted p-0 substructure-btn"
-        (click)="showSub1 = !showSub1">
-        <i class="bi" [ngClass]="showSub1 ? 'bi-chevron-up' : 'bi-chevron-down'"></i>
-        {{ showSub1 ? 'Hide Substructure Filters' : 'Add Substructure Filters' }}
+    <div class="d-flex justify-content-between align-items-end mb-1">
+      <label class="form-label text-muted fw-bold mb-0">Reactant 1</label>
+      <button class="btn-sm btn-link text-decoration-none text-muted p-0 substructure-btn" (click)="toggleMode(1)">
+        <i class="bi" [ngClass]="showSub1 ? 'bi-arrow-return-left' : 'bi-diagram-3'"></i>
+        {{ showSub1 ? 'Switch to Exact Match' : 'Search by Substructure' }}
       </button>
     </div>
 
-    @if (showSub1) {
-      <div class="mt-2 p-3 bg-light border rounded">
+    @if (!showSub1) {
+      <app-reactant-selector
+        label=""
+        [availableReactants]="availableReactants"
+        [initialValue]="initVal1[0]"
+        [clearSignal]="triggerClearValue"
+        (selectionChanged)="onReactantChange(1, $event)">
+      </app-reactant-selector>
+    } @else {
+      <div class="p-3 bg-light border rounded shadow-sm">
         <app-substructure-search
           [availableReactants]="availableReactants"
           (matchedReactants)="onSubstructureMatch(1, $event)">
@@ -29,25 +28,24 @@
   </div>
 
   <div>
-    <app-reactant-selector
-      label="Reactant 2"
-      [availableReactants]="availableReactants"
-      [initialValue]="initVal2[0]"
-      [clearSignal]="triggerClearValue"
-      (selectionChanged)="onReactantChange(2, $event)">
-    </app-reactant-selector>
-
-    <div class="d-flex justify-content-end mt-1">
-      <button
-        class="btn-sm btn-link text-decoration-none text-muted p-0 substructure-btn"
-        (click)="showSub2 = !showSub2">
-        <i class="bi" [ngClass]="showSub2 ? 'bi-chevron-up' : 'bi-chevron-down'"></i>
-        {{ showSub2 ? 'Hide Substructure Filters' : 'Add Substructure Filters' }}
+    <div class="d-flex justify-content-between align-items-end mb-1">
+      <label class="form-label text-muted fw-bold mb-0">Reactant 2</label>
+      <button class="btn-sm btn-link text-decoration-none text-muted p-0 substructure-btn" (click)="toggleMode(2)">
+        <i class="bi" [ngClass]="showSub2 ? 'bi-arrow-return-left' : 'bi-diagram-3'"></i>
+        {{ showSub2 ? 'Switch to Exact Match' : 'Search by Substructure' }}
       </button>
     </div>
 
-    @if (showSub2) {
-      <div class="mt-2 p-3 bg-light border rounded">
+    @if (!showSub2) {
+      <app-reactant-selector
+        label=""
+        [availableReactants]="availableReactants"
+        [initialValue]="initVal2[0]"
+        [clearSignal]="triggerClearValue"
+        (selectionChanged)="onReactantChange(2, $event)">
+      </app-reactant-selector>
+    } @else {
+      <div class="p-3 bg-light border rounded shadow-sm">
         <app-substructure-search
           [availableReactants]="availableReactants"
           (matchedReactants)="onSubstructureMatch(2, $event)">

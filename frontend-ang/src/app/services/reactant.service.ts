@@ -3,7 +3,7 @@ import { delay, map, Observable, of, throwError } from 'rxjs';
 import { AuthService } from './auth.service';
 import { HttpClient } from '@angular/common/http';
 import { Globals } from '../global/globals';
-import { MOCK_REACTANTS} from '../mock/mock-reactants';
+import { MOCK_REACTANT_DETAILS} from '../mock/mock-reactants';
 import { ReactantDetailDto, ReactantDto, SaveReactantDto } from '../dtos/reactant.dto';
 import { MOCK_CHEM_TYPES } from '../mock/mock.data';
 
@@ -14,7 +14,7 @@ export class ReactantService {
   private reactantBaseUri: string;
   private fileBaseUri: string;
 
-  private reactantsDb: ReactantDetailDto[] = [...(MOCK_REACTANTS as ReactantDetailDto[])];
+  private reactantsDb: ReactantDetailDto[] = [...(MOCK_REACTANT_DETAILS as ReactantDetailDto[])];
 
   constructor(
     private httpClient: HttpClient,

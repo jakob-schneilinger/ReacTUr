@@ -120,4 +120,42 @@ export class RDKitService {
       if (mol) mol.delete();
     }
   }
+
+  getMol(smiles: string): any {
+    if (!this.rdkitModule || !smiles) return null;
+    try {
+      return this.rdkitModule.get_mol(smiles);
+    } catch (error) {
+      console.warn('Invalid SMILES for get_mol:', smiles);
+      return null;
+    }
+  }
+
+  getQMol(smiles: string): any {
+    if (!this.rdkitModule || !smiles) return null;
+    try {
+      return this.rdkitModule.get_qmol(smiles);
+    } catch (error) {
+      console.warn('Invalid SMILES for get_qmol:', smiles);
+      return null;
+    }
+  }
+
+  hasSubstructureMatch(targetMol: any, querySmiles: string): boolean {
+    if (!this.rdkitModule || !targetMol || !querySmiles) return false;
+
+    let qmol;
+    try {
+      qmol = this.getQMol(querySmiles);
+      if (!qmol) return false;
+
+      const matchObj = JSON.parse(targetMol.get_substruct_match(qmol));
+      return Object.keys(matchObj).length > 0;
+    } catch (error) {
+      console.error('Error during substructure match:', error);
+      return false;
+    } finally {
+      if (qmol) qmol.delete();
+    }
+  }
 }

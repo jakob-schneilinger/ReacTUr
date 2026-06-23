@@ -12,154 +12,15 @@ import {
   MOCK_USERS,
 } from './mock.data';
 
-export const MOCK_REACTANTS: ReactantDto[] = [
-  {
-    uuid: 'r-1',
-    shortName: 'Sodium',
-    smiles: '[Na]',
-    chemicalType: MOCK_CHEM_TYPES.METAL,
-    chemicalName: 'Sodium Metal',
-    archivedAt: null,
-  },
-  {
-    uuid: 'r-2',
-    shortName: 'Chlorine',
-    smiles: 'Cl[Cl]',
-    chemicalType: MOCK_CHEM_TYPES.HALOGEN,
-    archivedAt: null,
-  },
-  {
-    uuid: 'r-3',
-    shortName: 'Hydrogen',
-    smiles: '[H][H]',
-    chemicalType: MOCK_CHEM_TYPES.GAS,
-    archivedAt: null,
-  },
-  {
-    uuid: 'r-4',
-    shortName: 'Oxygen',
-    smiles: 'O=O',
-    chemicalType: MOCK_CHEM_TYPES.GAS,
-    archivedAt: null,
-  },
-  {
-    uuid: 'r-5',
-    shortName: 'Ethanol',
-    smiles: 'CCO',
-    chemicalType: MOCK_CHEM_TYPES.SOLVENT,
-    archivedAt: null,
-  },
-  {
-    uuid: 'r-6',
-    shortName: 'Phenol',
-    smiles: 'c1ccccc1O',
-    chemicalType: MOCK_CHEM_TYPES.SOLVENT,
-    archivedAt: null,
-  },
-  {
-    uuid: 'r-7',
-    shortName: 'Bromine',
-    smiles: 'Br[Br]',
-    chemicalType: MOCK_CHEM_TYPES.HALOGEN,
-    archivedAt: null,
-  },
-  {
-    uuid: 'r-8',
-    shortName: 'Carbon',
-    smiles: '[C]',
-    chemicalType: MOCK_CHEM_TYPES.NON_METAL,
-    archivedAt: null,
-  },
-  {
-    uuid: 'r-9',
-    shortName: 'Potassium',
-    smiles: '[K]',
-    chemicalType: MOCK_CHEM_TYPES.METAL,
-    chemicalName: 'Potassium Metal',
-    archivedAt: null,
-  },
-  {
-    uuid: 'r-10',
-    shortName: 'Iodine',
-    smiles: 'I[I]',
-    chemicalType: MOCK_CHEM_TYPES.HALOGEN,
-    archivedAt: null,
-  },
-  {
-    uuid: 'r-11',
-    shortName: 'Iron',
-    smiles: '[Fe]',
-    chemicalType: MOCK_CHEM_TYPES.METAL,
-    chemicalName: 'Iron Solid',
-    archivedAt: null,
-  },
-  {
-    uuid: 'r-12',
-    shortName: 'Sulfur',
-    smiles: '[S]',
-    chemicalType: MOCK_CHEM_TYPES.NON_METAL,
-    archivedAt: null,
-  },
-  {
-    uuid: 'r-13',
-    shortName: 'Nitrogen',
-    smiles: 'N#N',
-    chemicalType: MOCK_CHEM_TYPES.GAS,
-    archivedAt: null,
-  },
-  {
-    uuid: 'r-14',
-    shortName: 'Copper',
-    smiles: '[Cu]',
-    chemicalType: MOCK_CHEM_TYPES.METAL,
-    chemicalName: 'Copper Solid',
-    archivedAt: null,
-  },
-  {
-    uuid: 'r-15',
-    shortName: 'Nitric Acid',
-    smiles: 'O[N+]([O-])=O',
-    chemicalType: MOCK_CHEM_TYPES.ACID,
-    archivedAt: null,
-  },
-  {
-    uuid: 'r-16',
-    shortName: 'Salicylic Acid',
-    smiles: 'C1=CC=C(C(=C1)C(=O)O)O',
-    chemicalType: MOCK_CHEM_TYPES.ORGANIC,
-    archivedAt: null,
-  },
-  {
-    uuid: 'r-17',
-    shortName: 'Acetic Anhydride',
-    smiles: 'CC(=O)OC(=O)C',
-    chemicalType: MOCK_CHEM_TYPES.ORGANIC,
-    archivedAt: null,
-  },
-  {
-    uuid: 'r-18',
-    shortName: 'Magnesium',
-    smiles: '[Mg]',
-    chemicalType: MOCK_CHEM_TYPES.METAL,
-    chemicalName: 'Magnesium Ribbons',
-    archivedAt: null,
-  },
-  {
-    uuid: 'r-19',
-    shortName: 'Hydrochloric Acid',
-    smiles: 'Cl',
-    chemicalType: MOCK_CHEM_TYPES.ACID,
-    archivedAt: null,
-  },
-];
+import { MOCK_REACTANTS } from './mock-reactants';
 
 export const MOCK_EXPERIMENTS: GetExperimentDto[] = [
   {
     uuid: 'exp-1',
     doi: '10.1000/xyz123',
     archivedAt: null,
-    reactantA: MOCK_REACTANTS[0], // Sodium
-    reactantB: MOCK_REACTANTS[1], // Chlorine
+    reactantA: MOCK_REACTANTS[0],
+    reactantB: MOCK_REACTANTS[1],
     createdBy: MOCK_USERS.CURIE,
     metadata: {
       uuid: 'meta-1',
@@ -189,8 +50,8 @@ export const MOCK_EXPERIMENTS: GetExperimentDto[] = [
     uuid: 'exp-2',
     doi: '10.1000/xyz124',
     archivedAt: null,
-    reactantA: MOCK_REACTANTS[2], // Hydrogen
-    reactantB: MOCK_REACTANTS[3], // Oxygen
+    reactantA: MOCK_REACTANTS[1],
+    reactantB: MOCK_REACTANTS[2],
     createdBy: MOCK_USERS.EINSTEIN,
     metadata: {
       uuid: 'meta-2',
@@ -220,8 +81,8 @@ export const MOCK_EXPERIMENTS: GetExperimentDto[] = [
     uuid: 'exp-3',
     doi: '10.1000/xyz125',
     archivedAt: null,
-    reactantA: MOCK_REACTANTS[0], // Sodium
-    reactantB: MOCK_REACTANTS[6], // Bromine
+    reactantA: MOCK_REACTANTS[3],
+    reactantB: MOCK_REACTANTS[4],
     createdBy: MOCK_USERS.CURIE,
     metadata: {
       uuid: 'meta-3',
@@ -251,8 +112,8 @@ export const MOCK_EXPERIMENTS: GetExperimentDto[] = [
     uuid: 'exp-4',
     doi: '10.1000/xyz126',
     archivedAt: null,
-    reactantA: MOCK_REACTANTS[7], // Carbon
-    reactantB: MOCK_REACTANTS[3], // Oxygen
+    reactantA: MOCK_REACTANTS[4],
+    reactantB: MOCK_REACTANTS[5],
     createdBy: MOCK_USERS.BOHR,
     metadata: {
       uuid: 'meta-4',
@@ -265,7 +126,7 @@ export const MOCK_EXPERIMENTS: GetExperimentDto[] = [
       concentrationB: 1.0,
       instrument: MOCK_INSTRUMENTS.MASS_SPEC,
       modality: MOCK_MODALITIES.MS,
-      comment: 'High temp test', // Keine Wellenlänge hier
+      comment: 'High temp test',
     },
     measurementData: { rateConstant: 5.0, error: 0.1, isErrorPercentage: false },
     attachments: [
@@ -281,8 +142,8 @@ export const MOCK_EXPERIMENTS: GetExperimentDto[] = [
     uuid: 'exp-5',
     doi: '10.1000/xyz127',
     archivedAt: null,
-    reactantA: MOCK_REACTANTS[8], // Potassium
-    reactantB: MOCK_REACTANTS[9], // Iodine
+    reactantA: MOCK_REACTANTS[5],
+    reactantB: MOCK_REACTANTS[6],
     createdBy: MOCK_USERS.NEWTON,
     metadata: {
       uuid: 'meta-5',
@@ -311,8 +172,8 @@ export const MOCK_EXPERIMENTS: GetExperimentDto[] = [
     uuid: 'exp-6',
     doi: '10.1000/xyz128',
     archivedAt: null,
-    reactantA: MOCK_REACTANTS[10], // Iron
-    reactantB: MOCK_REACTANTS[11], // Sulfur
+    reactantA: MOCK_REACTANTS[6],
+    reactantB: MOCK_REACTANTS[7],
     createdBy: MOCK_USERS.MENDELEEV,
     metadata: {
       uuid: 'meta-6',
@@ -341,8 +202,8 @@ export const MOCK_EXPERIMENTS: GetExperimentDto[] = [
     uuid: 'exp-7',
     doi: '10.1000/xyz129',
     archivedAt: null,
-    reactantA: MOCK_REACTANTS[12], // Nitrogen
-    reactantB: MOCK_REACTANTS[2], // Hydrogen
+    reactantA: MOCK_REACTANTS[7],
+    reactantB: MOCK_REACTANTS[8],
     createdBy: MOCK_USERS.HABER,
     metadata: {
       uuid: 'meta-7',
@@ -371,8 +232,8 @@ export const MOCK_EXPERIMENTS: GetExperimentDto[] = [
     uuid: 'exp-8',
     doi: '10.1000/xyz130',
     archivedAt: null,
-    reactantA: MOCK_REACTANTS[13], // Copper
-    reactantB: MOCK_REACTANTS[14], // Nitric Acid
+    reactantA: MOCK_REACTANTS[8],
+    reactantB: MOCK_REACTANTS[9],
     createdBy: MOCK_USERS.CURIE,
     metadata: {
       uuid: 'meta-8',
@@ -402,8 +263,8 @@ export const MOCK_EXPERIMENTS: GetExperimentDto[] = [
     uuid: 'exp-9',
     doi: '10.1000/xyz131',
     archivedAt: null,
-    reactantA: MOCK_REACTANTS[15], // Salicylic Acid
-    reactantB: MOCK_REACTANTS[16], // Acetic Anhydride
+    reactantA: MOCK_REACTANTS[9],
+    reactantB: MOCK_REACTANTS[0],
     createdBy: MOCK_USERS.HOFFMAN,
     metadata: {
       uuid: 'meta-9',
@@ -433,8 +294,8 @@ export const MOCK_EXPERIMENTS: GetExperimentDto[] = [
     uuid: 'exp-10',
     doi: '10.1000/xyz132',
     archivedAt: null,
-    reactantA: MOCK_REACTANTS[17], // Magnesium
-    reactantB: MOCK_REACTANTS[18], // Hydrochloric Acid
+    reactantA: MOCK_REACTANTS[1],
+    reactantB: MOCK_REACTANTS[0],
     createdBy: MOCK_USERS.BOHR,
     metadata: {
       uuid: 'meta-10',

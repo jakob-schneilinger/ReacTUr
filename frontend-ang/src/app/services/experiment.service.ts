@@ -121,15 +121,28 @@ export class ExperimentService {
   // --- UTILITIES & MOCK IMPLEMENTATIONS ---
 
   private mockSearchExperiment(searchParams: SearchParametersDto): Observable<GetExperimentDto[]> {
+    console.log('searchParams', searchParams);
     const results = MOCK_EXPERIMENTS.filter((experiment) => {
       const meta = experiment.metadata;
 
       if (searchParams) {
-        if (searchParams.reactantA?.length > 0) {
-          if (!searchParams.reactantA.includes(experiment.reactantA.uuid)) return false;
-        }
-        if (searchParams.reactantB?.length > 0) {
-          if (!searchParams.reactantB.includes(experiment.reactantB.uuid)) return false;
+        const searchA = searchParams.reactantA || [];
+        const searchB = searchParams.reactantB || [];
+        const expA = experiment.reactantA.uuid;
+        const expB = experiment.reactantB.uuid;
+
+        if (searchA.length > 0 && searchB.length > 0) {
+          // Both fields have input (direct match OR cross match)
+          const directMatch = searchA.includes(expA) && searchB.includes(expB);
+          const crossMatch = searchA.includes(expB) && searchB.includes(expA);
+
+          if (!directMatch && !crossMatch) return false;
+        } else if (searchA.length > 0) {
+          // Only Reactant A (check against both experiment reactants)
+          if (!searchA.includes(expA) && !searchA.includes(expB)) return false;
+        } else if (searchB.length > 0) {
+          // Only Reactant B (check against both experiment reactants)
+          if (!searchB.includes(expA) && !searchB.includes(expB)) return false;
         }
 
         const expDate = new Date(meta.date).getTime();
