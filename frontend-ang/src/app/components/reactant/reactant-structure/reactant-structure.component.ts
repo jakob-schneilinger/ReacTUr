@@ -16,9 +16,9 @@ import { NotificationService } from '../../../services/notification.service';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { TRANSLOCO_IMPORTS } from '../../../global/transloco-imports';
 import { TranslocoService } from '@jsverse/transloco';
+import { RDKitService } from '../../../services/rdkit.service';
 
 declare var $3Dmol: any;
-declare var initRDKitModule: any;
 
 @Component({
   selector: 'app-reactant-structure',
@@ -45,6 +45,7 @@ export class ReactantStructureComponent implements AfterViewInit, OnInit, OnChan
   constructor(
     private ngZone: NgZone,
     private notification: NotificationService,
+    private rdkitService: RDKitService,
     private sanitizer: DomSanitizer,
     private cd: ChangeDetectorRef,
     private transloco: TranslocoService,
@@ -52,12 +53,7 @@ export class ReactantStructureComponent implements AfterViewInit, OnInit, OnChan
 
   async ngOnInit(): Promise<void> {
     try {
-      if (!(window as any)['RDKit']) {
-        this.rdkitModule = await initRDKitModule();
-        (window as any)['RDKit'] = this.rdkitModule;
-      } else {
-        this.rdkitModule = (window as any)['RDKit'];
-      }
+      await this.rdkitService.initRDKit();
 
       if (this.smiles) {
         this.render2DModel();
@@ -70,7 +66,7 @@ export class ReactantStructureComponent implements AfterViewInit, OnInit, OnChan
   ngAfterViewInit(): void {
     setTimeout(() => {
       this.initViewer();
-      if (this.rdkitModule) {
+      if (this.rdkitService.isLoaded) {
         this.render2DModel();
       }
       this.renderModel();
@@ -221,23 +217,12 @@ export class ReactantStructureComponent implements AfterViewInit, OnInit, OnChan
   }
 
   private render2DModel(): void {
-    if (!this.smiles || !this.rdkitModule) {
+    const svg = this.rdkitService.getSvgFromSmiles(this.smiles);
+    if (svg) {
+      this.svg2D = this.sanitizer.bypassSecurityTrustHtml(svg);
+      this.cd.markForCheck();
+    } else {
       this.svg2D = null;
-      return;
-    }
-
-    try {
-      const mol = this.rdkitModule.get_mol(this.smiles);
-      if (mol) {
-        const svg = mol.get_svg();
-        this.svg2D = this.sanitizer.bypassSecurityTrustHtml(svg);
-
-        this.cd.markForCheck();
-      } else {
-        this.svg2D = null;
-      }
-      mol.delete();
-    } catch (error) {
       this.notification.error(
         this.transloco.translate('reactants.structure.notifications.render2dErrorTitle'),
         this.transloco.translate('reactants.structure.notifications.render2dErrorMessage'),

@@ -32,10 +32,9 @@ import { Subject } from 'rxjs';
 import { ReactantService } from '../../../../services/reactant.service';
 import { TRANSLOCO_IMPORTS } from '../../../../global/transloco-imports';
 import { TranslocoService } from '@jsverse/transloco';
+import { RDKitService } from '../../../../services/rdkit.service';
 
 export type FormState = 'create' | 'edit';
-
-declare var initRDKitModule: any;
 
 @Component({
   selector: 'app-reactant-details-form',
@@ -71,14 +70,13 @@ export class ReactantDetailsFormComponent implements OnInit, OnDestroy {
   chemicalTypes: ChemicalTypeDto[] = [];
   chemicalTypeNames: string[] = [];
 
-  rdkitModule: any;
-
   constructor(
     private fb: FormBuilder,
     private router: Router,
     private notification: NotificationService,
     private optionService: OptionService,
     private reactantService: ReactantService,
+    private rdkitService: RDKitService,
     private cdr: ChangeDetectorRef,
     private transloco: TranslocoService,
   ) {}
@@ -107,13 +105,7 @@ export class ReactantDetailsFormComponent implements OnInit, OnDestroy {
 
     this.initForm();
 
-    if (!(window as any)['RDKit']) {
-      this.rdkitModule = await initRDKitModule();
-      (window as any)['RDKit'] = this.rdkitModule;
-      this.reactantForm?.get('smiles')?.updateValueAndValidity();
-    } else {
-      this.rdkitModule = (window as any)['RDKit'];
-    }
+    await this.rdkitService.initRDKit();
   }
 
   get isEditMode(): boolean {
@@ -184,48 +176,11 @@ export class ReactantDetailsFormComponent implements OnInit, OnDestroy {
   smilesValidator(): ValidatorFn {
     return (control: AbstractControl): ValidationErrors | null => {
       if (!control.value) return null;
-      const smiles = control.value;
 
-      if (!this.rdkitModule) {
-        console.warn('RDKit not initialized yet');
-        return null;
-      }
+      const status = this.rdkitService.validateSmiles(control.value);
+      if (status === 'syntaxError') return { syntaxError: { value: control.value } };
+      if (status === 'sanitizationError') return { sanitizationError: { value: control.value } };
 
-      const options = JSON.stringify({ sanitize: false });
-      let unsanitizedMol;
-
-      try {
-        unsanitizedMol = this.rdkitModule.get_mol(smiles, options);
-      } catch (e) {
-        return { syntaxError: { value: smiles } };
-      }
-
-      if (
-        !unsanitizedMol ||
-        (typeof unsanitizedMol.is_valid === 'function' && !unsanitizedMol.is_valid())
-      ) {
-        if (unsanitizedMol) unsanitizedMol.delete();
-        return { syntaxError: { value: smiles } };
-      }
-
-      unsanitizedMol.delete();
-      let sanitizedMol;
-
-      try {
-        sanitizedMol = this.rdkitModule.get_mol(smiles);
-      } catch (e) {
-        return { sanitizationError: { value: smiles } };
-      }
-
-      if (
-        !sanitizedMol ||
-        (typeof sanitizedMol.is_valid === 'function' && !sanitizedMol.is_valid())
-      ) {
-        if (sanitizedMol) sanitizedMol.delete();
-        return { sanitizationError: { value: smiles } };
-      }
-
-      sanitizedMol.delete();
       return null;
     };
   }

@@ -9,8 +9,7 @@ import { Component, OnInit } from '@angular/core';
 import { GetExperimentDto } from '../../../dtos/experiment.dto';
 import { ExperimentService } from '../../../services/experiment.service';
 import { SearchParametersDto } from '../../../dtos/search.dto';
-
-declare var initRDKitModule: any;
+import { RDKitService } from '../../../services/rdkit.service';
 
 @Component({
   selector: 'app-search-site',
@@ -31,7 +30,6 @@ export class SearchSiteComponent implements OnInit {
   currentSearchState: 'initial' | 'no-results' | 'has-results' = 'initial'; //TODO: Potential für ein Ladespinner dann status loading hinzufügen
   foundExperiments: GetExperimentDto[] = [];
 
-  rdkitModule: any;
   sketcher1: any;
   sketcher2: any;
 
@@ -46,10 +44,13 @@ export class SearchSiteComponent implements OnInit {
   experimentsToExport: GetExperimentDto[] = [];
 
   // Service injecten!
-  constructor(private experimentService: ExperimentService) {}
+  constructor(
+    private experimentService: ExperimentService,
+    private rdkitService: RDKitService,
+  ) {}
 
   async ngOnInit() {
-    this.rdkitModule = await initRDKitModule();
+    await this.rdkitService.initRDKit();
   }
 
   toggleAdvancedSearch() {
@@ -62,9 +63,8 @@ export class SearchSiteComponent implements OnInit {
     this.reactant2 = [];
     this.metadata = { reactantA: [], reactantB: [], scientist: [] };
 
-    if (this.rdkitModule && this.sketcher1 && this.sketcher2) {
-      const mol = this.rdkitModule.get_mol('');
-      const molBlock = mol.get_molblock();
+    if (this.rdkitService.isLoaded && this.sketcher1 && this.sketcher2) {
+      const molBlock = this.rdkitService.getMolBlockFromSmiles('');
       this.sketcher1.loadMolecule(molBlock);
       this.sketcher2.loadMolecule(molBlock);
     }
@@ -120,7 +120,9 @@ export class SearchSiteComponent implements OnInit {
   }
 
   handleExport(selectedUuids: string[]) {
-    this.experimentsToExport = this.foundExperiments.filter((exp) => selectedUuids.includes(exp.uuid));
+    this.experimentsToExport = this.foundExperiments.filter((exp) =>
+      selectedUuids.includes(exp.uuid),
+    );
     this.isExportModalOpen = true;
   }
 }
