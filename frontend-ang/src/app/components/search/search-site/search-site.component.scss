@@ -10,10 +10,6 @@
   margin-right: auto;
 }
 
-.primary {
-  margin-left: 0.5rem;
-}
-
 .divider {
   height: 1px;
   background-color: $light_gray;
@@ -51,9 +47,6 @@
   overflow: hidden;
   transition: max-height 0.4s ease-in-out, opacity 0.3s ease-in-out;
 }
-
-
-
 
 .sketcher-container {
   display: flex;

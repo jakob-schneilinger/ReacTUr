@@ -1,9 +1,18 @@
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Component, Output, EventEmitter, Input } from '@angular/core';
-import { SearchParametersDto } from '../../../dtos/search.dto';
+import {
+  Component,
+  Output,
+  EventEmitter,
+  Input,
+  OnChanges,
+  SimpleChanges,
+  OnInit,
+} from '@angular/core';
+import { SearchParametersDto, MeasurementSearchDto } from '../../../dtos/search.dto';
 import { UserService } from '../../../services/user.service';
 import { NotificationService } from '../../../services/notification.service';
+import { GetUserDto } from '../../../dtos/user.dto';
 
 @Component({
   selector: 'app-advanced-search',
@@ -12,152 +21,112 @@ import { NotificationService } from '../../../services/notification.service';
   standalone: true,
   imports: [CommonModule, FormsModule],
 })
-export class AdvancedSearchComponent {
+export class AdvancedSearchComponent implements OnChanges, OnInit {
   @Output() searchChanged = new EventEmitter<SearchParametersDto>();
-  @Input() reactantA: string[] = [];
-  @Input() reactantB: string[] = [];
+  @Input() searchScientist?: GetUserDto;
   @Input() set triggerClear(value: number) {
     if (value) {
       this.clearAll();
     }
   }
 
+  allUsers: GetUserDto[] = [];
+  scientistSearchText: string = '';
+
+  params: Partial<SearchParametersDto> & {
+    pFO_rateConstantMin?: number;
+    pFO_rateConstantMax?: number;
+    rateConstantMin?: number;
+    rateConstantMax?: number;
+  } = {};
+
   constructor(
     private userService: UserService,
     private notification: NotificationService,
   ) {}
 
-  dateDay: string = '';
-  dateMonth: string = '';
-  dateYear: string = '';
-  scientist: string = '';
-  tempFrom: string = '';
-  tempTo: string = '';
-  solvent: string = '';
-  concentrationA: string = '';
-  concentrationB: string = '';
-  instrument: string = '';
-  modality: string = '';
-  wavelength: string = '';
-  comment: string = '';
-  minRange: string = '';
-  maxRange: string = '';
-
-  onSearch() {
-    let scientists: string[] = [];
-    if (this.scientist !== '') {
-      this.userService.getAllUsers().subscribe({
-        next: (users) => {
-          scientists = users.map((u) => u.uuid);
-        },
-        error: (err) =>
-          this.notification.error('Error Fetching Users', err.message || err.error || err),
-      });
-    }
-
-    // TODO: overthink this, solvent,instrument,modality want uuid
-    this.searchChanged.emit({
-      reactantA: [],
-      reactantB: [],
-      dateMin: '',
-      dateMax: '',
-      scientist: scientists,
-      temperature_Min: parseFloat(this.tempFrom),
-      temperature_Max: parseFloat(this.tempTo),
-      solvent: this.solvent,
-      concentrationA_Min: parseFloat('' /*this.concentrationA_Min*/),
-      concentrationA_Max: parseFloat('' /*this.concentrationA_Max*/),
-      concentrationB_Min: parseFloat('' /*this.concentrationB_Min*/),
-      concentrationB_Max: parseFloat('' /*this.concentrationB_Max*/),
-      instrument: this.instrument,
-      modality: this.modality,
-      wavelength_Min: parseFloat('' /*this.wavelength_Min*/),
-      wavelength_Max: parseFloat('' /*this.wavelength_Max*/),
-      comment: this.comment,
-      measurementSearch: [],
+  ngOnInit() {
+    this.userService.getAllUsers().subscribe({
+      next: (users) => (this.allUsers = users),
+      error: (err) =>
+        this.notification.error('Error Fetching Users', err.message || err.error || err),
     });
   }
 
-  // --- Calendar Functions ---
-  validateDay() {
-    if (this.dateDay !== null && this.dateDay !== '') {
-      let val = Number(this.dateDay);
-      if (val > 31) this.dateDay = '31';
-      if (val < 1) this.dateDay = '1';
-    }
-    this.onSearch();
-  }
-
-  validateMonth() {
-    if (this.dateMonth !== null && this.dateMonth !== '') {
-      let val = Number(this.dateMonth);
-      if (val > 12) this.dateMonth = '12';
-      if (val < 1) this.dateMonth = '1';
-    }
-    this.onSearch();
-  }
-
-  validateYear() {
-    if (this.dateYear !== null && this.dateYear !== '') {
-      let val = Number(this.dateYear);
-      if (val > 2100) this.dateYear = '2500';
-    }
-    this.onSearch();
-  }
-
-  onCalendarSelect(event: any) {
-    console.log(event); //TODO: remove when debugging done
-    const selectedDate = event.target.value;
-    if (selectedDate) {
-      const parts = selectedDate.split('-');
-      this.dateYear = parts[0];
-      this.dateMonth = parts[1];
-      this.dateDay = parts[2];
-      this.onSearch();
-    } else if (selectedDate === '') {
-      this.dateYear = '';
-      this.dateMonth = '';
-      this.dateDay = '';
-      this.onSearch();
+  ngOnChanges(changes: SimpleChanges) {
+    if (changes['searchScientist'] && this.searchScientist) {
+      this.scientistSearchText = `${this.searchScientist.firstName} ${this.searchScientist.lastName}`;
+      this.params.scientist = [this.searchScientist.uuid];
+      this.emitSearch();
     }
   }
 
-  // --- Individual Clear Functions ---
+  onScientistTyping() {
+    this.searchScientist = undefined;
+
+    if (this.scientistSearchText) {
+      const lowerSearch = this.scientistSearchText.toLowerCase();
+      this.params.scientist = this.allUsers
+        .filter((u) => `${u.firstName} ${u.lastName}`.toLowerCase().includes(lowerSearch))
+        .map((u) => u.uuid);
+    } else {
+      this.params.scientist = [];
+    }
+    this.emitSearch();
+  }
+
+  emitSearch() {
+    const searchDto: SearchParametersDto = {
+      reactantA: [],
+      reactantB: [],
+      dateMin: this.params.dateMin || undefined,
+      dateMax: this.params.dateMax || undefined,
+      scientist: this.params.scientist || [],
+      temperature_Min: this.params.temperature_Min,
+      temperature_Max: this.params.temperature_Max,
+      solvent: this.params.solvent,
+      concentrationA_Min: this.params.concentrationA_Min,
+      concentrationA_Max: this.params.concentrationA_Max,
+      concentrationB_Min: this.params.concentrationB_Min,
+      concentrationB_Max: this.params.concentrationB_Max,
+      instrument: this.params.instrument,
+      modality: this.params.modality,
+      wavelength_Min: this.params.wavelength_Min,
+      wavelength_Max: this.params.wavelength_Max,
+      comment: this.params.comment,
+      measurementSearch: [],
+    };
+
+    if (this.params.rateConstantMin != null || this.params.rateConstantMax != null) {
+      searchDto.measurementSearch = [
+        {
+          rateConstantMin: this.params.rateConstantMin,
+          rateConstantMax: this.params.rateConstantMax,
+          pFO_rateConstantMin: this.params.pFO_rateConstantMin,
+          pFO_rateConstantMax: this.params.pFO_rateConstantMax,
+        },
+      ];
+    }
+
+    this.searchChanged.emit(searchDto);
+  }
+
   clearScientist() {
-    this.scientist = '';
-    this.onSearch();
-  }
-  clearSolvent() {
-    this.solvent = '';
-    this.onSearch();
-  }
-  clearInstrument() {
-    this.instrument = '';
-    this.onSearch();
-  }
-  clearModality() {
-    this.modality = '';
-    this.onSearch();
+    this.scientistSearchText = '';
+    this.searchScientist = undefined;
+    this.params.scientist = [];
+    this.emitSearch();
   }
 
-  // --- Clear All ---
+  clearField(field: keyof typeof this.params) {
+    this.params[field] = undefined as any;
+    this.emitSearch();
+  }
+
   clearAll() {
-    this.dateDay = '';
-    this.dateMonth = '';
-    this.dateYear = '';
-    this.scientist = '';
-    this.tempFrom = '';
-    this.tempTo = '';
-    this.solvent = '';
-    this.concentrationA = '';
-    this.concentrationB = '';
-    this.instrument = '';
-    this.modality = '';
-    this.wavelength = '';
-    this.comment = '';
-    this.minRange = '';
-    this.maxRange = '';
-
-    this.onSearch();
+    this.params = {};
+    this.scientistSearchText = '';
+    this.searchScientist = undefined;
+    this.emitSearch();
   }
 }

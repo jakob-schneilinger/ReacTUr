@@ -3,7 +3,6 @@ import { ReactantSelectorComponent } from '../../shared/reactant-selector/reacta
 import { SubstructureSearchComponent } from '../sub-structure-search/sub-structure-search.component';
 import { Component, Output, EventEmitter, Input, OnInit, ChangeDetectorRef } from '@angular/core';
 import { ReactantDto } from '../../../dtos/reactant.dto';
-import { MOCK_REACTANTS } from '../../../mock/mock-reactants';
 import { ReactantService } from '../../../services/reactant.service';
 import { ExperimentService } from '../../../services/experiment.service';
 import { NotificationService } from '../../../services/notification.service';
@@ -21,13 +20,15 @@ export class ExperimentSearchComponent implements OnInit {
     reactantB: string[];
   }>();
 
-  triggerClearValue: number = 0;
+  triggerClearValue1: number = 0;
+  triggerClearValue2: number = 0;
 
   @Input() set triggerClear(value: number) {
     if (value) {
-      this.triggerClearValue = value;
-      this.currentExact1 = '';
-      this.currentExact2 = '';
+      this.triggerClearValue1 = value;
+      this.triggerClearValue2 = value;
+      this.currentExact1 = [];
+      this.currentExact2 = [];
       this.currentSub1 = [];
       this.currentSub2 = [];
       this.showSub1 = false;
@@ -48,8 +49,9 @@ export class ExperimentSearchComponent implements OnInit {
   showSub1 = false;
   showSub2 = false;
 
-  currentExact1 = '';
-  currentExact2 = '';
+  // Updated to arrays to support multi-select changes
+  currentExact1: string[] = [];
+  currentExact2: string[] = [];
   currentSub1: string[] = [];
   currentSub2: string[] = [];
 
@@ -80,16 +82,16 @@ export class ExperimentSearchComponent implements OnInit {
     if (num === 1) {
       this.showSub1 = !this.showSub1;
       if (this.showSub1) {
-        this.currentExact1 = '';
-        this.triggerClearValue++;
+        this.currentExact1 = [];
+        this.triggerClearValue1++;
       } else {
         this.currentSub1 = [];
       }
     } else {
       this.showSub2 = !this.showSub2;
       if (this.showSub2) {
-        this.currentExact2 = '';
-        this.triggerClearValue++;
+        this.currentExact2 = [];
+        this.triggerClearValue2++;
       } else {
         this.currentSub2 = [];
       }
@@ -98,9 +100,12 @@ export class ExperimentSearchComponent implements OnInit {
     this.emitSearch();
   }
 
-  onReactantChange(num: 1 | 2, value: string) {
-    if (num === 1) this.currentExact1 = value;
-    else this.currentExact2 = value;
+  onReactantChange(num: 1 | 2, values: string[]) {
+    if (num === 1) {
+      this.currentExact1 = values;
+    } else {
+      this.currentExact2 = values;
+    }
     this.emitSearch();
   }
 
@@ -111,13 +116,8 @@ export class ExperimentSearchComponent implements OnInit {
   }
 
   emitSearch() {
-    const r1 = this.showSub1
-      ? this.currentSub1
-      : (this.currentExact1 ? [this.currentExact1] : []);
-
-    const r2 = this.showSub2
-      ? this.currentSub2
-      : (this.currentExact2 ? [this.currentExact2] : []);
+    const r1 = this.showSub1 ? this.currentSub1 : this.currentExact1;
+    const r2 = this.showSub2 ? this.currentSub2 : this.currentExact2;
 
     this.searchChanged.emit({
       reactantA: r1,

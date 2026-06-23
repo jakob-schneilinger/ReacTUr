@@ -5,6 +5,8 @@ import { Component, Input, Output, EventEmitter, OnChanges, SimpleChanges } from
 import { GetExperimentDto } from '../../../dtos/experiment.dto';
 import { NotificationService } from '../../../services/notification.service';
 import { AuthService } from '../../../services/auth.service';
+import { HasRoleDirective } from '../../../directives/has-role.directive';
+import { GetUserDto } from '../../../dtos/user.dto';
 
 export type SearchState = 'initial' | 'no-results' | 'has-results';
 
@@ -14,22 +16,23 @@ export type SearchState = 'initial' | 'no-results' | 'has-results';
   templateUrl: './search-results.component.html',
   styleUrls: ['./search-results.component.scss'],
   standalone: true,
-  imports: [CommonModule, RouterModule, ExperimentViewModalComponent],
+  imports: [CommonModule, RouterModule, ExperimentViewModalComponent, HasRoleDirective],
 })
 export class SearchResultsComponent implements OnChanges {
   @Input() state: SearchState = 'initial';
   @Input() experiments: GetExperimentDto[] = [];
   @Output() getExport = new EventEmitter<string[]>();
+  @Output() searchScientist = new EventEmitter<GetUserDto>();
 
   selectedIds = new Set<string>();
-  isViewModalOpen:boolean = false;
+  isViewModalOpen: boolean = false;
   selectedExperimentForView: GetExperimentDto | undefined;
   hasWritePermission: boolean = false;
 
   constructor(
     private notification: NotificationService,
-    private authService: AuthService
-  ) { }
+    private authService: AuthService,
+  ) {}
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['experiments']) {
@@ -81,7 +84,7 @@ export class SearchResultsComponent implements OnChanges {
     this.getExport.emit(Array.from(this.selectedIds));
   }
 
-  viewDetails(uuid:string | undefined): void {
+  viewDetails(uuid: string | undefined): void {
     if (!uuid) return;
 
     const user = this.authService.getLoggedInUser();
@@ -103,5 +106,9 @@ export class SearchResultsComponent implements OnChanges {
     this.isViewModalOpen = false;
     this.selectedExperimentForView = undefined;
     this.hasWritePermission = false;
+  }
+
+  searchForScientist(scientist: GetUserDto) {
+    this.searchScientist.emit(scientist)
   }
 }

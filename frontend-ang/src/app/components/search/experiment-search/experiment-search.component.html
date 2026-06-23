@@ -13,8 +13,8 @@
       <app-reactant-selector
         label=""
         [availableReactants]="availableReactants"
-        [initialValue]="initVal1[0]"
-        [clearSignal]="triggerClearValue"
+        [initialValue]="initVal1"
+        [clearSignal]="triggerClearValue1"
         (selectionChanged)="onReactantChange(1, $event)">
       </app-reactant-selector>
     } @else {
@@ -40,8 +40,8 @@
       <app-reactant-selector
         label=""
         [availableReactants]="availableReactants"
-        [initialValue]="initVal2[0]"
-        [clearSignal]="triggerClearValue"
+        [initialValue]="initVal2"
+        [clearSignal]="triggerClearValue2"
         (selectionChanged)="onReactantChange(2, $event)">
       </app-reactant-selector>
     } @else {

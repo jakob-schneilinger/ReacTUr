@@ -15,18 +15,18 @@ export class ReactantSelectorComponent implements OnInit {
   @Input() label: string = 'Reactant';
   @Input() availableReactants: ReactantDto[] = [];
 
-  @Input() set initialValue(val: string) {
-    if (val) this.initReactant(val);
+  @Input() set initialValue(vals: string[]) {
+    if (vals && vals.length > 0) this.initReactants(vals);
   }
 
   @Input() set clearSignal(val: number) {
-    if (val) this.clearReactant();
+    if (val) this.clearAll();
   }
 
-  @Output() selectionChanged = new EventEmitter<string>();
+  @Output() selectionChanged = new EventEmitter<string[]>();
 
   searchTerm: string = '';
-  selectedReactant: ReactantDto | null = null;
+  selectedReactants: ReactantDto[] = [];
   suggestions: ReactantDto[] = [];
 
   isDrawModalOpen = false;
@@ -34,13 +34,16 @@ export class ReactantSelectorComponent implements OnInit {
 
   ngOnInit() {}
 
-  initReactant(val: string) {
-    const match = this.availableReactants.find(r => r.shortName.toLowerCase() === val.toLowerCase());
-    if (match) {
-      this.selectedReactant = match;
-    } else {
-      this.searchTerm = val;
-    }
+  initReactants(vals: string[]) {
+    this.selectedReactants = [];
+    vals.forEach((val) => {
+      const match = this.availableReactants.find(
+        (r) => r.shortName.toLowerCase() === val.toLowerCase() || r.uuid === val,
+      );
+      if (match && !this.selectedReactants.includes(match)) {
+        this.selectedReactants.push(match);
+      }
+    });
   }
 
   onSearchInput() {
@@ -48,10 +51,11 @@ export class ReactantSelectorComponent implements OnInit {
       const lowerTerm = this.searchTerm.toLowerCase();
       this.suggestions = this.availableReactants.filter(
         (r) =>
-          r.shortName.toLowerCase().includes(lowerTerm) ||
-          r.chemicalType.name.toLowerCase().includes(lowerTerm) ||
-          r.chemicalName?.toLowerCase().includes(lowerTerm) ||
-          r.smiles.includes(this.searchTerm),
+          !this.selectedReactants.some((selected) => selected.uuid === r.uuid) &&
+          (r.shortName.toLowerCase().includes(lowerTerm) ||
+            r.chemicalType.name.toLowerCase().includes(lowerTerm) ||
+            r.chemicalName?.toLowerCase().includes(lowerTerm) ||
+            r.smiles.includes(this.searchTerm)),
       );
     } else {
       this.suggestions = [];
@@ -59,37 +63,46 @@ export class ReactantSelectorComponent implements OnInit {
   }
 
   selectReactant(reactant: ReactantDto) {
-    this.selectedReactant = reactant;
-    this.searchTerm = '';
-    this.suggestions = [];
+    if (!this.selectedReactants.find((r) => r.uuid === reactant.uuid)) {
+      this.selectedReactants.push(reactant);
+    }
+    this.clearSearch();
     this.emitChange();
   }
 
-  clearReactant() {
-    this.selectedReactant = null;
+  removeReactant(reactant: ReactantDto) {
+    this.selectedReactants = this.selectedReactants.filter((r) => r.uuid !== reactant.uuid);
+    this.emitChange();
+  }
+
+  clearAll() {
+    this.selectedReactants = [];
+    this.clearSearch();
+    this.emitChange();
+  }
+
+  clearSearch() {
     this.searchTerm = '';
     this.suggestions = [];
-    this.emitChange();
   }
 
   emitChange() {
-    const value = this.selectedReactant ? this.selectedReactant.uuid : this.searchTerm;
-    this.selectionChanged.emit(value);
+    const values = this.selectedReactants.map((r) => r.uuid);
+    this.selectionChanged.emit(values);
   }
 
   openDraw() {
-    this.currentSmilesForModal = this.selectedReactant ? this.selectedReactant.smiles : this.searchTerm;
+    this.currentSmilesForModal = this.searchTerm;
     this.isDrawModalOpen = true;
   }
 
   onModalSave(newSmiles: string) {
-    const matched = this.availableReactants.find(r => r.smiles === newSmiles);
+    const matched = this.availableReactants.find((r) => r.smiles === newSmiles);
 
     if (matched) {
       this.selectReactant(matched);
     } else {
       this.searchTerm = newSmiles;
-      this.selectedReactant = null;
       this.onSearchInput();
     }
     this.isDrawModalOpen = false;

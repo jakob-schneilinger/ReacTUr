@@ -1,143 +1,229 @@
 <div class="advanced-search-container">
 
-  <!-- Date Component -->
-  <div class="input-group">
-    <label>Date</label>
-    <div class="date-group position-relative">
-      <input type="number" placeholder="DD" class="date-input" maxlength="2"
-             min="1" max="31"
-             [(ngModel)]="dateDay" (ngModelChange)="validateDay()">
-      <input type="number" placeholder="MM" class="date-input" maxlength="2"
-             min="1" max="12"
-             [(ngModel)]="dateMonth" (ngModelChange)="validateMonth()">
-      <input type="number" placeholder="YYYY" class="date-input year-input" maxlength="4"
-             min="1900" max="2500"
-             [(ngModel)]="dateYear" (ngModelChange)="validateYear()">
-      <input type="date" #datePicker class="hidden-date-picker" (change)="onCalendarSelect($event)">
-      <i class="bi bi-calendar icon-btn" (click)="datePicker.showPicker()"></i>
-    </div>
-  </div>
-
-  <!-- Scientist Component -->
-  <div class="input-group">
-    <label>Scientist</label>
-    <div class="search-field">
-      <input type="text" placeholder="Name"
-             [(ngModel)]="scientist" (ngModelChange)="onSearch()"/>
-      @if (scientist) {
-        <span class="icon bi bi-x text-black clear-btn" (click)="clearScientist()"></span>
-      }
-    </div>
-  </div>
-
-  <!-- Temperature Component -->
-  <div class="input-group">
-    <label>Temperature</label>
-    <div class="temperature-group">
-      <div class="temp-field-wrapper">
-        <input type="number" placeholder="From" class="temp-input"
-               min="−273.15" [max]="tempTo || '5000'"
-               [(ngModel)]="tempFrom" (ngModelChange)="onSearch()">
-        <span class="unit">°C</span>
-      </div>
-      <span class="separator">-</span>
-      <div class="temp-field-wrapper">
-        <input type="number" placeholder="To" class="temp-input"
-               [min]="tempFrom || '-237.15'" max="5000"
-               [(ngModel)]="tempTo" (ngModelChange)="onSearch()">
-        <span class="unit">°C</span>
-      </div>
-    </div>
-  </div>
-
-  <!-- Solvent Component -->
-  <div class="input-group">
-    <label>Solvent</label>
-    <div class="search-field">
-      <input type="text" placeholder="e.g. Water"
-             [(ngModel)]="solvent" (ngModelChange)="onSearch()"/>
-      @if (solvent) {
-        <span class="icon bi bi-x text-black clear-btn" (click)="clearSolvent()"></span>
-      }
-    </div>
-  </div>
-
-  <!-- Concentration Component -->
-  <div class="input-group">
-    <label>Concentration</label>
-    <div class="concentration-group">
-      <div class="concentration-field-wrapper">
-        <input type="number" placeholder="{{reactantA}}" class="concentration-input"
-               [(ngModel)]="concentrationA" (ngModelChange)="onSearch()">
-        <span class="unit">mM</span>
-      </div>
-      <span class="separator">&nbsp;</span>
-      <div class="concentration-field-wrapper">
-        <input type="number" placeholder="{{reactantB}}" class="concentration-input"
-               [(ngModel)]="concentrationB" (ngModelChange)="onSearch()">
-        <span class="unit">mM</span>
-      </div>
-    </div>
-  </div>
-
-  <!-- Instrument Component -->
-  <div class="input-group">
-    <label>Instrument</label>
-    <div class="search-field">
-      <input type="text" placeholder="Instrument Name"
-             [(ngModel)]="instrument" (ngModelChange)="onSearch()"/>
-      @if (instrument) {
-        <span class="icon bi bi-x text-black clear-btn" (click)="clearInstrument()"></span>
-      }
-    </div>
-  </div>
-
-  <!-- Modality Component -->
-  <div class="input-group">
-    <label>Modality</label>
-    <div class="search-field">
-      <input type="text" placeholder="Modality Type"
-             [(ngModel)]="modality" (ngModelChange)="onSearch()"/>
-      @if (modality) {
-        <span class="icon bi bi-x text-black clear-btn" (click)="clearModality()"></span>
-      }
-    </div>
-  </div>
-
-  <!-- Wavelength Component -->
-  <div class="input-group">
-    <label>Wavelength</label>
-    <div class="wavelength-group">
-      <div class="wavelength-field-wrapper">
-        <input type="number" placeholder="Wavelength" class="wavelength-input"
-               [(ngModel)]="wavelength" (ngModelChange)="onSearch()">
-        <span class="unit">nm</span>
-      </div>
-    </div>
-  </div>
-
-  <!-- Comment Component -->
-  <div class="input-group">
-    <label>Comment</label>
-    <div class="comment-field">
-      <textarea placeholder="Comment" [(ngModel)]="comment" (ngModelChange)="onSearch()">
-      </textarea>
-    </div>
-  </div>
-
-  <!-- Rate Constant Range Component -->
+  <!-- Rate Constant Range -->
   <div class="input-group">
     <label>Rate Constant Range</label>
     <div class="rate-constant-range-group">
-      <div class="rate-constant-range-field-wrapper">
+      <div class="clearable-wrapper">
         <input type="number" placeholder="From" class="rate-constant-range-input"
-               [(ngModel)]="minRange" (ngModelChange)="onSearch()">
+               [(ngModel)]="params.rateConstantMin" (ngModelChange)="emitSearch()">
+        @if (params.rateConstantMin) {
+          <span class="bi bi-x clear-btn" (click)="clearField('rateConstantMin')"></span>
+        }
       </div>
       <span class="separator">-</span>
-      <div class="rate-constant-range-field-wrapper">
+      <div class="clearable-wrapper">
         <input type="number" placeholder="To" class="rate-constant-range-input"
-               [(ngModel)]="maxRange" (ngModelChange)="onSearch()">
+               [(ngModel)]="params.rateConstantMax" (ngModelChange)="emitSearch()">
+        @if (params.rateConstantMax) {
+          <span class="bi bi-x clear-btn" (click)="clearField('rateConstantMax')"></span>
+        }
       </div>
     </div>
+  </div>
+
+  <!-- Date Range -->
+  <div class="input-group">
+    <label>Date Range</label>
+    <div class="date-group">
+      <div class="clearable-wrapper date-wrapper" [class.has-value]="!!params.dateMin">
+        <input type="date" class="date-input"
+               [(ngModel)]="params.dateMin" (ngModelChange)="emitSearch()">
+        @if (params.dateMin) {
+          <span class="bi bi-x clear-btn" (click)="clearField('dateMin')"></span>
+        }
+      </div>
+      <span class="separator">-</span>
+      <div class="clearable-wrapper date-wrapper" [class.has-value]="!!params.dateMax">
+        <input type="date" class="date-input"
+               [(ngModel)]="params.dateMax" (ngModelChange)="emitSearch()">
+        @if (params.dateMax) {
+          <span class="bi bi-x clear-btn" (click)="clearField('dateMax')"></span>
+        }
+      </div>
+    </div>
+  </div>
+
+  <!-- Scientist -->
+  <div class="input-group">
+    <label>Scientist</label>
+    <div class="clearable-wrapper">
+      <input type="text" placeholder="Name"
+             [(ngModel)]="scientistSearchText" (ngModelChange)="onScientistTyping()"/>
+      @if (scientistSearchText) {
+        <span class="icon bi bi-x clear-btn" (click)="clearScientist()"></span>
+      }
+    </div>
+  </div>
+
+  <!-- Temperature Range -->
+  <div class="input-group">
+    <label>Temperature</label>
+    <div class="temperature-group">
+      <div class="clearable-wrapper has-unit" [class.has-value]="!!params.temperature_Min">
+        <input type="number" placeholder="Min" class="temp-input"
+               [(ngModel)]="params.temperature_Min" (ngModelChange)="emitSearch()">
+        <span class="unit">°C</span>
+        @if (params.temperature_Min) {
+          <span class="bi bi-x clear-btn" (click)="clearField('temperature_Min')"></span>
+        }
+      </div>
+      <span class="separator">-</span>
+      <div class="clearable-wrapper has-unit" [class.has-value]="!!params.temperature_Max">
+        <input type="number" placeholder="Max" class="temp-input"
+               [(ngModel)]="params.temperature_Max" (ngModelChange)="emitSearch()">
+        <span class="unit">°C</span>
+        @if (params.temperature_Max) {
+          <span class="bi bi-x clear-btn" (click)="clearField('temperature_Max')"></span>
+        }
+      </div>
+    </div>
+  </div>
+
+  <!-- Solvent -->
+  <div class="input-group">
+    <label>Solvent</label>
+    <div class="clearable-wrapper">
+      <input type="text" placeholder="e.g. Water"
+             [(ngModel)]="params.solvent" (ngModelChange)="emitSearch()"/>
+      @if (params.solvent) {
+        <span class="icon bi bi-x clear-btn" (click)="clearField('solvent')"></span>
+      }
+    </div>
+  </div>
+
+  <!-- Concentration A -->
+  <div class="input-group">
+    <label>Concentration A</label>
+    <div class="concentration-group">
+      <div class="clearable-wrapper has-unit" [class.has-value]="!!params.concentrationA_Min">
+        <input type="number" placeholder="Min" class="concentration-input"
+               [(ngModel)]="params.concentrationA_Min" (ngModelChange)="emitSearch()">
+        <span class="unit">mM</span>
+        @if (params.concentrationA_Min) {
+          <span class="bi bi-x clear-btn" (click)="clearField('concentrationA_Min')"></span>
+        }
+      </div>
+      <span class="separator">-</span>
+      <div class="clearable-wrapper has-unit" [class.has-value]="!!params.concentrationA_Max">
+        <input type="number" placeholder="Max" class="concentration-input"
+               [(ngModel)]="params.concentrationA_Max" (ngModelChange)="emitSearch()">
+        <span class="unit">mM</span>
+        @if (params.concentrationA_Max) {
+          <span class="bi bi-x clear-btn" (click)="clearField('concentrationA_Max')"></span>
+        }
+      </div>
+    </div>
+  </div>
+
+  <!-- Concentration B -->
+  <div class="input-group">
+    <label>Concentration B</label>
+    <div class="concentration-group">
+      <div class="clearable-wrapper has-unit" [class.has-value]="!!params.concentrationB_Min">
+        <input type="number" placeholder="Min" class="concentration-input"
+               [(ngModel)]="params.concentrationB_Min" (ngModelChange)="emitSearch()">
+        <span class="unit">mM</span>
+        @if (params.concentrationB_Min) {
+          <span class="bi bi-x clear-btn" (click)="clearField('concentrationB_Min')"></span>
+        }
+      </div>
+      <span class="separator">-</span>
+      <div class="clearable-wrapper has-unit" [class.has-value]="!!params.concentrationB_Max">
+        <input type="number" placeholder="Max" class="concentration-input"
+               [(ngModel)]="params.concentrationB_Max" (ngModelChange)="emitSearch()">
+        <span class="unit">mM</span>
+        @if (params.concentrationB_Max) {
+          <span class="bi bi-x clear-btn" (click)="clearField('concentrationB_Max')"></span>
+        }
+      </div>
+    </div>
+  </div>
+
+  <!-- Instrument -->
+  <div class="input-group">
+    <label>Instrument</label>
+    <div class="clearable-wrapper">
+      <input type="text" placeholder="Instrument Name"
+             [(ngModel)]="params.instrument" (ngModelChange)="emitSearch()"/>
+      @if (params.instrument) {
+        <span class="icon bi bi-x clear-btn" (click)="clearField('instrument')"></span>
+      }
+    </div>
+  </div>
+
+  <!-- Modality -->
+  <div class="input-group">
+    <label>Modality</label>
+    <div class="clearable-wrapper">
+      <input type="text" placeholder="Modality Type"
+             [(ngModel)]="params.modality" (ngModelChange)="emitSearch()"/>
+      @if (params.modality) {
+        <span class="icon bi bi-x clear-btn" (click)="clearField('modality')"></span>
+      }
+    </div>
+  </div>
+
+  <!-- Wavelength Range -->
+  <div class="input-group">
+    <label>Wavelength Range</label>
+    <div class="wavelength-group">
+      <div class="clearable-wrapper has-unit" [class.has-value]="!!params.wavelength_Min">
+        <input type="number" placeholder="Min" class="wavelength-input"
+               [(ngModel)]="params.wavelength_Min" (ngModelChange)="emitSearch()">
+        <span class="unit">nm</span>
+        @if (params.wavelength_Min) {
+          <span class="bi bi-x clear-btn" (click)="clearField('wavelength_Min')"></span>
+        }
+      </div>
+      <span class="separator">-</span>
+      <div class="clearable-wrapper has-unit" [class.has-value]="!!params.wavelength_Max">
+        <input type="number" placeholder="Max" class="wavelength-input"
+               [(ngModel)]="params.wavelength_Max" (ngModelChange)="emitSearch()">
+        <span class="unit">nm</span>
+        @if (params.wavelength_Max) {
+          <span class="bi bi-x clear-btn" (click)="clearField('wavelength_Max')"></span>
+        }
+      </div>
+    </div>
+  </div>
+
+  <!-- Pseudo First Order Rate Constant Range -->
+  <div class="input-group">
+    <label>Pseudo First Order Rate Constant Range</label>
+    <div class="pfo-rate-constant-range-group">
+      <div class="clearable-wrapper">
+        <input type="number" placeholder="From" class="pfo-rate-constant-range-input"
+               [(ngModel)]="params.pFO_rateConstantMin" (ngModelChange)="emitSearch()">
+        @if (params.pFO_rateConstantMin) {
+          <span class="bi bi-x clear-btn" (click)="clearField('pFO_rateConstantMin')"></span>
+        }
+      </div>
+      <span class="separator">-</span>
+      <div class="clearable-wrapper">
+        <input type="number" placeholder="To" class="pfo-rate-constant-range-input"
+               [(ngModel)]="params.pFO_rateConstantMax" (ngModelChange)="emitSearch()">
+        @if (params.pFO_rateConstantMax) {
+          <span class="bi bi-x clear-btn" (click)="clearField('pFO_rateConstantMax')"></span>
+        }
+      </div>
+    </div>
+  </div>
+
+  <!-- Date Range -->
+  <div class="input-group">
+    <label>Comment</label>
+    <div class="clearable-wrapper">
+      <textarea placeholder="Comment" [(ngModel)]="params.comment" (ngModelChange)="emitSearch()"></textarea>
+      @if (params.comment) {
+        <span class="bi bi-x clear-btn" (click)="clearField('comment')" style="top: 0.5rem;"></span>
+      }
+    </div>
+  </div>
+
+  <div>
+    <button (click)="clearAll()">
+      Clear Fields
+    </button>
   </div>
 </div>

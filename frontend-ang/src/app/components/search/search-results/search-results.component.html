@@ -10,7 +10,7 @@
     </div>
   } @else if (state === 'has-results') {
       <!-- Action Bar -->
-      <div class="results-action-bar">
+      <div class="results-action-bar" *appHasRole="['SUPERVISOR', 'ADMIN']">
         <div class="left-actions">
           <span class="results-count">{{ experiments.length }} results found</span>
 
@@ -36,7 +36,7 @@
             <!-- Header Section -->
             <div class="card-header">
               <h3>{{ exp.reactantA.shortName}} + {{ exp.reactantB.shortName}}</h3>
-              <a [routerLink]="['/scientist', exp.metadata.scientist.uuid]" class="scientist-badge"> <!-- TODO: Change router link when it exists-->
+              <a (click)="searchForScientist(exp.metadata.scientist)" class="scientist-badge">
                 <i class="bi bi-person"></i> {{ exp.metadata.scientist.firstName }} {{ exp.metadata.scientist.lastName }}
               </a>
             </div>

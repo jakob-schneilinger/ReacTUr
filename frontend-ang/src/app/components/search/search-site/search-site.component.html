@@ -24,29 +24,25 @@
       <app-advanced-search
         class="advanced-search-content"
         [hidden]="!isAdvancedSearchOpen"
-        [reactantA]="reactantA"
-        [reactantB]="reactantB"
+        [searchScientist]="searchScientist"
         [triggerClear]="clearSignal"
         (searchChanged)="handleAdvancedSearch($event)">
       </app-advanced-search>
 
-      <!-- TODO: currently hidden, look if search without button is feasible -->
-      <button class="primary" (click)="handleSearchButton()" [hidden]="true">
-        Search for Experiments
-      </button>
+      <div class="d-flex flex-row btn-group gap-2">
+        <button class="primary" (click)="handleSearchButton()">
+          Search for Experiments
+        </button>
 
-      <button class="" (click)="onClearClicked()">
-        Clear Fields
-      </button>
-
-      <button class="primary"
-              [routerLink]="['/experiments/create']"
-              [queryParams]="{
-          reactantA: reactantA.length ? reactantA : null,
-          reactantB: reactantB.length ? reactantB : null
-        }">
-        Create new Experiment
-      </button>
+        <button class=""
+                [routerLink]="['/experiments/create']"
+                [queryParams]="{
+            reactantA: reactantA.length ? reactantA : null,
+            reactantB: reactantB.length ? reactantB : null
+          }">
+          Create new Experiment
+        </button>
+      </div>
     </div>
 
     <!-- Rechte Spalte -->
@@ -54,7 +50,8 @@
       <app-experiment-results
         [state]="currentSearchState"
         [experiments]="foundExperiments"
-        (getExport)="handleExport($event)">
+        (getExport)="handleExport($event)"
+        (searchScientist)="handleSearchScientist($event)">
       </app-experiment-results>
     </div>
   </app-layout>
