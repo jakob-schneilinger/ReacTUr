@@ -4,6 +4,7 @@ import com.reactur.backend.dtos.DetailsDto;
 import com.reactur.backend.dtos.SelectionOption.ChemicalTypeDto;
 
 import java.time.Instant;
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -26,12 +27,12 @@ public record ReactantDetailDto(
         String smiles,
         ChemicalTypeDto chemicalType,
         String shortname,
-        String[] additionalShortNames,
+        List<String> additionalShortNames,
         String chemicalName,
         String casNumber,
         String inChiKey,
         String comment,
-        String[] references,
+        List<String> references,
         Instant archivedAt
 ) implements DetailsDto {
 }
