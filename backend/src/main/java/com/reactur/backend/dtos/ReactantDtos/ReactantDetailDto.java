@@ -12,7 +12,7 @@ import java.util.UUID;
  * @param uuid                 The unique identifier of the reactant.
  * @param smiles               The SMILES string representing the chemical structure.
  * @param chemicalType         The categorization of the chemical.
- * @param shortname            The mandatory short name.
+ * @param shortName            The mandatory short name.
  * @param additionalShortNames Array of other commonly used short names.
  * @param chemicalName         The formal chemical name.
  * @param casNumber            The CAS registry number.
@@ -25,7 +25,7 @@ public record ReactantDetailDto(
         UUID uuid,
         String smiles,
         ChemicalTypeDto chemicalType,
-        String shortname,
+        String shortName,
         String[] additionalShortNames,
         String chemicalName,
         String casNumber,
