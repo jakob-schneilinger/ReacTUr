@@ -69,4 +69,13 @@ public class Reactant {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "created_by", referencedColumnName = "id", nullable = false)
     private User createdBy;
+
+    /* TODO:
+    The Bug: Your DTO expects a ChemicalTypeDto.
+    However, if you look back at our Reactant entity code from yesterday,
+    we never actually added a ChemicalType field to it! *
+    The Fix: We need to add a TODO
+                               to update the Reactant entity later with a
+                               @ManyToOne relationship to the ChemicalType table.
+     */
 }
