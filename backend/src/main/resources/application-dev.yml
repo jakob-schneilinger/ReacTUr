@@ -24,3 +24,7 @@ seaweedfs:
     access-key: ${SEAWEEDFS_ACCESS_KEY}
     secret-key: ${SEAWEEDFS_SECRET_KEY}
     bucket: ${SEAWEEDFS_BUCKET:experiment-files}
+
+logging:
+  level:
+    org.springframework.web.servlet.DispatcherServlet: DEBUG

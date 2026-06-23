@@ -54,7 +54,12 @@ services:
   seaweedfs-s3:
     image: chrislusf/seaweedfs
     container_name: kinetics-seaweed-s3
-    command: s3 -filer=seaweedfs-filer:8888 -port=8333
+    entrypoint:
+      - /bin/sh
+      - -c
+      - |
+        echo '{"identities":[{"name":"spring-backend","credentials":[{"accessKey":"${SEAWEEDFS_ACCESS_KEY}","secretKey":"${SEAWEEDFS_SECRET_KEY}"}],"actions":["Admin","Read","Write","List","Tagging"]}]}' > /tmp/s3.json
+        weed s3 -filer=seaweedfs-filer:8888 -port=8333 -config=/tmp/s3.json
     ports:
       - "8333:8333"
     depends_on:
