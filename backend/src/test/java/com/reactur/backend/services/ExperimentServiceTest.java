@@ -1,0 +1,150 @@
+package com.reactur.backend.services;
+
+import com.reactur.backend.dtos.ExperimentDtos.GetExperimentDto;
+import com.reactur.backend.dtos.ExperimentDtos.MeasurementDataDto;
+import com.reactur.backend.dtos.ExperimentDtos.SaveExperimentDto;
+import com.reactur.backend.dtos.ExperimentDtos.SaveMetadataDto;
+import com.reactur.backend.entities.ExperimentEntities.Experiment;
+import com.reactur.backend.entities.Reactant;
+import com.reactur.backend.entities.SelectionOptions.Instrument;
+import com.reactur.backend.entities.SelectionOptions.Modality;
+import com.reactur.backend.entities.SelectionOptions.Solvent;
+import com.reactur.backend.entities.User;
+import com.reactur.backend.repositories.AuditLogRepository;
+import com.reactur.backend.repositories.ExperimentRepository;
+
+import com.reactur.backend.repositories.InstrumentRepository;
+import com.reactur.backend.repositories.ModalityRepository;
+import com.reactur.backend.repositories.ReactantRepository;
+import com.reactur.backend.repositories.SolventRepository;
+import com.reactur.backend.repositories.UserRepository;
+import com.reactur.backend.services.implementations.ExperimentServiceImpl;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.ArgumentMatchers;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.junit.jupiter.MockitoExtension;
+
+import java.util.Optional;
+import java.util.UUID;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.Mockito.when;
+
+@ExtendWith(MockitoExtension.class) // Tells JUnit to use Mockito instead of loading Spring Boot
+class ExperimentServiceTest {
+
+  @Mock private ExperimentRepository experimentRepository;
+  @Mock private ReactantRepository reactantRepository;
+  @Mock private SolventRepository solventRepository;
+  @Mock private InstrumentRepository instrumentRepository;
+  @Mock private ModalityRepository modalityRepository;
+  @Mock private UserRepository userRepository;
+  @Mock private AuditLogRepository auditLogRepository;
+
+  // Mockito will take the mocked Repositories
+  // and inject them into this real Service instance.
+  @InjectMocks
+  private ExperimentServiceImpl experimentService;  // Because of the junit-mockito test,
+                                                    // we cannot auto-wire the interface and need to specify the
+                                                    // concrete class
+
+  @Test
+  void createExperiment_whenValidInput_returnsGetExperimentDto() {
+
+    String userId = "mock-keycloak-id-123";
+    UUID reactantAId = UUID.randomUUID();
+    UUID reactantBId = UUID.randomUUID();
+    UUID solventId = UUID.randomUUID();
+    UUID instrumentId = UUID.randomUUID();
+    UUID modalityId = UUID.randomUUID();
+
+    SaveMetadataDto validMetadata = new SaveMetadataDto(
+      java.time.LocalDate.now().minusDays(1),
+      25.0,
+      solventId,
+      1.5,
+      2.0,
+      instrumentId,
+      modalityId,
+      450.0,
+      "Test"
+    );
+    MeasurementDataDto validMeasurement = new MeasurementDataDto(
+      1.2, 5.5, 0.1, false
+    );
+    SaveExperimentDto validRequestDto = new SaveExperimentDto(
+      reactantAId, reactantBId, validMetadata, validMeasurement, "10.1000/rxn123"
+    );
+
+    // ... create Mocks with the response-data:
+    User mockUser = new User();
+    mockUser.setId(userId);
+    Mockito.when(userRepository.findById(userId)).thenReturn(Optional.of(mockUser));
+
+    Reactant mockReactantA = new Reactant();
+    mockReactantA.setId(reactantAId);
+    Mockito.when(reactantRepository.findById(reactantAId)).thenReturn(Optional.of(mockReactantA));
+
+    Reactant mockReactantB = new Reactant();
+    mockReactantB.setId(reactantBId);
+    Mockito.when(reactantRepository.findById(reactantBId)).thenReturn(Optional.of(mockReactantB));
+
+    Solvent mockSolvent = new Solvent();
+    mockSolvent.setId(solventId);
+    Mockito.when(solventRepository.findById(solventId)).thenReturn(Optional.of(mockSolvent));
+
+    Instrument mockInstrument = new Instrument();
+    mockInstrument.setId(instrumentId);
+    Mockito.when(instrumentRepository.findById(instrumentId)).thenReturn(Optional.of(mockInstrument));
+
+    Modality mockModality = new Modality();
+    mockModality.setId(modalityId);
+    Mockito.when(modalityRepository.findById(modalityId)).thenReturn(Optional.of(mockModality));
+
+    // ... then return the entity of the "saved" experiment
+
+    Experiment mockedSavedExperiment = new Experiment();
+    mockedSavedExperiment.setId(UUID.randomUUID());
+    mockedSavedExperiment.setDoi("10.1000/rxn123");
+
+    when(experimentRepository.save(ArgumentMatchers.any()))
+      .thenAnswer(invocation -> {
+        Experiment saved = invocation.getArgument(0);
+        saved.setId(UUID.randomUUID()); // Simulates DB generating an ID
+        return saved;
+      });
+
+    // ------------------
+
+    GetExperimentDto result = experimentService.createExperiment(validRequestDto, userId);
+
+    // Asserting the performed calls...
+
+    ArgumentCaptor<Experiment> experimentCaptor = ArgumentCaptor.forClass(Experiment.class);
+
+    Mockito.verify(experimentRepository).save(experimentCaptor.capture());
+    Experiment capturedEntity = experimentCaptor.getValue();
+
+    // Builder map correct relationships
+    assertNotNull(capturedEntity, "The captured entity should not be null");
+    assertEquals("10.1000/rxn123", capturedEntity.getDoi());
+    assertEquals(reactantAId, capturedEntity.getReactantA().getId(), "Reactant A was not mapped correctly");
+    assertEquals(solventId, capturedEntity.getMetadata().getSolvent().getId(), "Solvent was not mapped correctly");
+    assertEquals(userId, capturedEntity.getCreatedBy().getId(), "User was not mapped correctly");
+    assertEquals(25.0, capturedEntity.getMetadata().getTemperature(), "Temperature was not mapped correctly");
+
+    // Asserting the returned value
+
+    assertNotNull(result, "The returned DTO should not be null");
+    assertEquals("10.1000/rxn123", result.doi());
+
+    assertNotNull(result.metadata(), "The returned metadata DTO should not be null");
+    assertEquals(25.0, result.metadata().temperature());
+  }
+
+}
