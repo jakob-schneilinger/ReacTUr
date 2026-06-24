@@ -11,7 +11,7 @@
 
     @if (!showSub1) {
       <app-reactant-selector
-        label=""
+        [label]="''"
         [availableReactants]="availableReactants"
         [initialValue]="initVal1"
         [clearSignal]="triggerClearValue1"
@@ -38,7 +38,7 @@
 
     @if (!showSub2) {
       <app-reactant-selector
-        label=""
+        [label]="''"
         [availableReactants]="availableReactants"
         [initialValue]="initVal2"
         [clearSignal]="triggerClearValue2"

@@ -1,5 +1,7 @@
 <div class="reactant-selector-container">
-  <label class="form-label text-muted fw-bold mb-2">{{ label }}</label>
+  @if (label) {
+    <label class="form-label text-muted fw-bold mb-2">{{ label }}</label>
+  }
 
   @if (selectedReactants.length > 0) {
     <div class="selected-reactants-list d-flex flex-column gap-2 mb-3">

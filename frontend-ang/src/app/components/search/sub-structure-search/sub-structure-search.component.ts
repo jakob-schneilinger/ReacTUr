@@ -12,6 +12,7 @@ export interface SearchGroup {
   type: 'GROUP';
   operator: LogicalOperator;
   isNot: boolean;
+  format: 'SMILES' | 'SMARTS';
   children: (SearchGroup | SearchRule)[];
 }
 
@@ -19,7 +20,7 @@ export interface SearchRule {
   id: number;
   type: 'RULE';
   isNot: boolean;
-  smiles: string;
+  query: string;
 }
 
 @Component({
@@ -38,12 +39,17 @@ export class SubstructureSearchComponent {
     type: 'GROUP',
     operator: 'AND',
     isNot: false,
+    format: 'SMARTS',
     children: [],
   };
 
   isDrawModalOpen = false;
   activeRuleId: number | null = null;
   currentSmilesForModal = '';
+
+  matchedReactantsList: ReactantDto[] = [];
+
+  maxDepth = 3;
 
   constructor(private rdkitService: RDKitService) {
     this.addRule(this.rootGroup);
@@ -54,17 +60,22 @@ export class SubstructureSearchComponent {
       id: Date.now(),
       type: 'RULE',
       isNot: false,
-      smiles: '',
+      query: '',
     });
   }
 
-  addGroup(parentGroup: SearchGroup) {
+  addGroup(parentGroup: SearchGroup, currentDepth: number) {
+    if (currentDepth >= this.maxDepth) {
+      console.warn('Maximum group depth reached.');
+      return;
+    }
     parentGroup.children.push({
       id: Date.now(),
       type: 'GROUP',
       operator: 'AND',
       isNot: false,
-      children: [{ id: Date.now() + 1, type: 'RULE', isNot: false, smiles: '' }], // Start group with one rule
+      format: 'SMARTS',
+      children: [{ id: Date.now() + 1, type: 'RULE', isNot: false, query: '' }], // Start group with one rule
     });
   }
 
@@ -84,14 +95,14 @@ export class SubstructureSearchComponent {
 
   openDraw(rule: SearchRule) {
     this.activeRuleId = rule.id;
-    this.currentSmilesForModal = rule.smiles;
+    this.currentSmilesForModal = rule.query;
     this.isDrawModalOpen = true;
   }
 
   onModalSave(newSmiles: string) {
     const rule = this.findRuleById(this.activeRuleId!, this.rootGroup);
     if (rule) {
-      rule.smiles = newSmiles;
+      rule.query = newSmiles;
     }
     this.isDrawModalOpen = false;
   }
@@ -122,39 +133,43 @@ export class SubstructureSearchComponent {
       return;
     }
 
-    const matchedNames = this.availableReactants
-      .filter((reactant) => {
+    const matchedObjects = this.availableReactants.filter((reactant) => {
+      const targetMol = this.rdkitService.getMol(reactant.smiles);
+      if (!targetMol) return false;
 
-        const targetMol = this.rdkitService.getMol(reactant.smiles);
-        if (!targetMol) return false;
+      let isMatch = false;
 
-        let isMatch = false;
+      try {
+        isMatch = this.evaluateNode(this.rootGroup, targetMol, this.rootGroup.format);
+      } catch (e) {
+        console.error('Error evaluating substructure tree for', reactant.shortName, e);
+      }
 
-        try {
-          isMatch = this.evaluateNode(this.rootGroup, targetMol);
-        } catch (e) {
-          console.error('Error evaluating substructure tree for', reactant.shortName, e);
-        }
+      targetMol.delete();
 
-        targetMol.delete();
+      return isMatch;
+    });
 
-        return isMatch;
-      })
-      .map((r) => r.uuid);
-
-    this.matchedReactants.emit(matchedNames);
+    this.matchedReactantsList = matchedObjects;
+    this.matchedReactants.emit(matchedObjects.map((r) => r.uuid));
   }
 
-  private evaluateNode(node: SearchGroup | SearchRule, targetMol: any): boolean {
-
+  private evaluateNode(
+    node: SearchGroup | SearchRule,
+    targetMol: any,
+    currentFormat: 'SMILES' | 'SMARTS',
+  ): boolean {
     if (node.type === 'RULE') {
       const rule = node as SearchRule;
-
-      if (!rule.smiles || rule.smiles.trim().length === 0) {
+      if (!rule.query || rule.query.trim().length === 0) {
         return true;
       }
 
-      const hasSubstructure = this.rdkitService.hasSubstructureMatch(targetMol, rule.smiles);
+      const hasSubstructure = this.rdkitService.hasSubstructureMatch(
+        targetMol,
+        rule.query,
+        currentFormat,
+      );
 
       return rule.isNot ? !hasSubstructure : hasSubstructure;
     }
@@ -164,7 +179,7 @@ export class SubstructureSearchComponent {
 
       if (group.children.length === 0) return true;
 
-      let result = this.evaluateNode(group.children[0], targetMol);
+      let result = this.evaluateNode(group.children[0], targetMol, group.format);
 
       for (let i = 1; i < group.children.length; i++) {
         const child = group.children[i];
@@ -172,7 +187,7 @@ export class SubstructureSearchComponent {
         if (group.operator === 'AND' && !result) break;
         if (group.operator === 'OR' && result) break;
 
-        const childResult = this.evaluateNode(child, targetMol);
+        const childResult = this.evaluateNode(child, targetMol, group.format);
 
         if (group.operator === 'AND') {
           result = result && childResult;
@@ -180,10 +195,13 @@ export class SubstructureSearchComponent {
           result = result || childResult;
         }
       }
-
       return group.isNot ? !result : result;
     }
-
     return false;
+  }
+
+  removeMatchedReactant(reactant: ReactantDto) {
+    this.matchedReactantsList = this.matchedReactantsList.filter((r) => r.uuid !== reactant.uuid);
+    this.matchedReactants.emit(this.matchedReactantsList.map((r) => r.uuid));
   }
 }

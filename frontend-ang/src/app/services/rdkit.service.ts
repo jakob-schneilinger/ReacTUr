@@ -141,18 +141,23 @@ export class RDKitService {
     }
   }
 
-  hasSubstructureMatch(targetMol: any, querySmiles: string): boolean {
-    if (!this.rdkitModule || !targetMol || !querySmiles) return false;
+  hasSubstructureMatch(
+    targetMol: any,
+    queryStr: string,
+    queryType: 'SMILES' | 'SMARTS' = 'SMARTS',
+  ): boolean {
+    if (!this.rdkitModule || !targetMol || !queryStr) return false;
 
     let qmol;
     try {
-      qmol = this.getQMol(querySmiles);
+      qmol = queryType === 'SMARTS' ? this.getQMol(queryStr) : this.getMol(queryStr);
+
       if (!qmol) return false;
 
       const matchObj = JSON.parse(targetMol.get_substruct_match(qmol));
       return Object.keys(matchObj).length > 0;
     } catch (error) {
-      console.error('Error during substructure match:', error);
+      console.error(`Error during ${queryType} substructure match:`, error);
       return false;
     } finally {
       if (qmol) qmol.delete();
