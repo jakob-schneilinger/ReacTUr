@@ -24,6 +24,11 @@
 
   .short-name {
     min-width: 200px;
+
+    &.archivedShortName {
+      min-width: 250px;
+    }
+
   }
 
   .chemical-name {

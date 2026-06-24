@@ -46,7 +46,10 @@ export class ReactantSiteComponent implements OnInit {
   hasWritePermission: boolean = false;
 
   isArchiveReactantModalOpen: boolean = false;
-  pendingReactant: ReactantDto | undefined = undefined;
+  pendingArchiveReactant: ReactantDto | undefined = undefined;
+
+  isRestoreReactantModalOpen: boolean = false;
+  pendingRestoreReactant: ReactantDto | undefined = undefined;
 
   isViewModalOpen: boolean = false;
   selectedReactantForView: ReactantDto | undefined = undefined;
@@ -60,7 +63,7 @@ export class ReactantSiteComponent implements OnInit {
     private authService: AuthService,
     private notification: NotificationService,
     private cdr: ChangeDetectorRef,
-    private transloco: TranslocoService
+    private transloco: TranslocoService,
   ) {}
 
   ngOnInit(): void {
@@ -131,10 +134,11 @@ export class ReactantSiteComponent implements OnInit {
     this.router.navigate(['/reactants/create']);
   }
 
-  viewDetails(uuid: string | undefined): void {
+  viewDetails(uuid: string | undefined, isArchived: boolean): void {
     if (!uuid) return;
 
-    const reactantToView = this.reactants.find((r) => r.uuid === uuid);
+    const tempReactants = isArchived ? this.archivedReactants : this.reactants;
+    const reactantToView = tempReactants.find((r) => r.uuid === uuid);
 
     if (reactantToView) {
       this.selectedReactantForView = reactantToView;
@@ -158,17 +162,26 @@ export class ReactantSiteComponent implements OnInit {
 
   cancelArchive() {
     this.isArchiveReactantModalOpen = false;
-    this.pendingReactant = undefined;
+    this.pendingArchiveReactant = undefined;
+  }
+
+  archiveReactant(reactant: ReactantDto | undefined): void {
+    if (!reactant) return;
+
+    this.pendingArchiveReactant = reactant;
+    this.isArchiveReactantModalOpen = true;
   }
 
   executeArchive() {
-    if (this.pendingReactant) {
-      const shortName = this.pendingReactant.shortName;
-      this.reactantService.archiveReactant(this.pendingReactant.uuid).subscribe({
+    if (this.pendingArchiveReactant) {
+      const shortName = this.pendingArchiveReactant.shortName;
+      this.reactantService.archiveReactant(this.pendingArchiveReactant.uuid).subscribe({
         next: (value) => {
           this.notification.success(
             this.transloco.translate('reactants.notifications.archivedTitle'),
-            this.transloco.translate('reactants.notifications.archivedMessage', { name: shortName }),
+            this.transloco.translate('reactants.notifications.archivedMessage', {
+              name: shortName,
+            }),
           );
           setTimeout(() => {
             this.cancelArchive();
@@ -178,25 +191,29 @@ export class ReactantSiteComponent implements OnInit {
         error: (err) => {
           this.notification.error(
             this.transloco.translate('reactants.notifications.archiveFailed'),
-            err.message
+            err.message,
           );
-        }
+        },
       });
     }
   }
 
-  archiveReactant(reactant: ReactantDto | undefined): void {
-    if (!reactant) return;
-
-    this.pendingReactant = reactant;
-    this.isArchiveReactantModalOpen = true;
+  cancelRestore() {
+    this.isRestoreReactantModalOpen = false;
+    this.pendingRestoreReactant = undefined;
   }
 
   restoreReactant(reactant: ReactantDto | undefined): void {
-    //TODO: think about restore Modal. is it needed?
-    if (reactant) {
-      const shortName = reactant.shortName;
-      this.reactantService.restoreReactant(reactant.uuid).subscribe({
+    if (!reactant) return;
+
+    this.pendingRestoreReactant = reactant;
+    this.isRestoreReactantModalOpen = true;
+  }
+
+  executeRestore() {
+    if (this.pendingRestoreReactant) {
+      const shortName = this.pendingRestoreReactant.shortName;
+      this.reactantService.restoreReactant(this.pendingRestoreReactant.uuid).subscribe({
         next: (value) => {
           this.notification.success(
             this.transloco.translate('reactants.notifications.restoredTitle'),
@@ -205,6 +222,7 @@ export class ReactantSiteComponent implements OnInit {
             }),
           );
           setTimeout(() => {
+            this.cancelRestore();
             this.loadReactants();
           });
         },
@@ -213,7 +231,7 @@ export class ReactantSiteComponent implements OnInit {
             this.transloco.translate('reactants.notifications.restoreFailed'),
             err.message,
           );
-        }
+        },
       });
     }
   }

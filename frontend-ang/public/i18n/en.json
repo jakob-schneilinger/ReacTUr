@@ -109,6 +109,11 @@
         "title": "Archive Reactant",
         "message": "Are you sure you want to permanently archive the reactant <strong>{{name}}</strong>?",
         "confirm": "Permanently Archive"
+      },
+      "restore": {
+        "title": "Restore Reactant",
+        "message": "Are you sure you want to restore the reactant <strong>{{name}}</strong>?",
+        "confirm": "Restore"
       }
     },
     "notifications": {

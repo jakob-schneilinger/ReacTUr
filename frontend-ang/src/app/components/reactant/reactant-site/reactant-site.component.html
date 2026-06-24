@@ -37,7 +37,7 @@
         [reactant]="reactant"
         [hasWritePermission]="hasWritePermission"
         [isArchived]="showArchived"
-        (view)="viewDetails($event)"
+        (view)="viewDetails($event, showArchived)"
         (edit)="editReactant($event)"
         (archive)="archiveReactant($event)"
         (restore)="restoreReactant($event)"
@@ -63,17 +63,27 @@
 <app-confirm-modal
   [isOpen]="isArchiveReactantModalOpen"
   [title]="'reactants.modals.archive.title' | transloco"
-  [message]="'reactants.modals.archive.message' | transloco: { name: pendingReactant?.shortName }"
+  [message]="'reactants.modals.archive.message' | transloco: { name: pendingArchiveReactant?.shortName }"
   [confirmLabel]="'reactants.modals.archive.confirm' | transloco"
   confirmButtonClass="danger"
   (confirm)="executeArchive()"
   (cancel)="cancelArchive()">
 </app-confirm-modal>
 
+<app-confirm-modal
+  [isOpen]="isRestoreReactantModalOpen"
+  [title]="'reactants.modals.restore.title' | transloco"
+  [message]="'reactants.modals.restore.message' | transloco: { name: pendingRestoreReactant?.shortName }"
+  [confirmLabel]="'reactants.modals.restore.confirm' | transloco"
+  confirmButtonClass="primary"
+  (confirm)="executeRestore()"
+  (cancel)="cancelRestore()">
+</app-confirm-modal>
+
 @if (isViewModalOpen) {
   <app-reactant-view-modal
     [selectedReactant]="selectedReactantForView"
-    [hasWritePermission]="hasWritePermission"
+    [hasWritePermission]="hasWritePermission && !showArchived"
     (close)="closeViewModal()">
   </app-reactant-view-modal>
 }
