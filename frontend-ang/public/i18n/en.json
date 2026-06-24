@@ -71,8 +71,15 @@
         "loadingOptions": "Loading options...",
         "noOptionsFound": "No options found in this category."
       },
-      "addPlaceholder": "Type to add a new option...",
+      "addPlaceholder": "Type to add a new option to category \"{{category}}\"...",
       "addButton": "Add",
+      "modals": {
+        "add": {
+          "title": "Add Option to \"{{category}}\"",
+          "message": "Are you sure you want to add the option <strong>{{name}}</strong> to the category <strong>{{category}}</strong>?",
+          "confirm": "Add Option"
+        }
+      },
       "notifications": {
         "loadError": "Failed to load options for {{category}}",
         "statusUpdated": "Option status updated successfully",

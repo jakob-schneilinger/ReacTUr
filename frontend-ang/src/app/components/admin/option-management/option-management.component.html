@@ -27,7 +27,7 @@
          {{ 'admin.option.table.noOptionsFound' | transloco }}
         </div>
       } @else {
-        <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
+        <div class="table-responsive" style="max-height: 500px; overflow-y: auto;">
           <table class="table table-hover mb-0 align-middle">
             <thead class="table-light sticky-top">
             <tr>
@@ -71,7 +71,7 @@
           type="text"
           name="newOption"
           class="add-input flex-grow-1"
-          placeholder="{{ 'admin.option.addPlaceholder' | transloco }}"
+          placeholder="{{ 'admin.option.addPlaceholder' | transloco: {category: this.selectedCategory} }}"
           [(ngModel)]="newOptionValue"
           autocomplete="off"
         />
@@ -83,3 +83,14 @@
   </div>
 
 </div>
+
+
+<app-confirm-modal
+  [isOpen]="isAddOptionModalOpen"
+  [title]="'admin.option.modals.add.title' | transloco: {category: capitalizeOption(this.selectedCategory) }"
+  [message]="'admin.option.modals.add.message' | transloco: { name: newOptionValue, category: this.selectedCategory }"
+  [confirmLabel]="'admin.option.modals.add.confirm' | transloco"
+  confirmButtonClass="primary"
+  (confirm)="executeAddOption()"
+  (cancel)="cancelAddOption()">
+</app-confirm-modal>

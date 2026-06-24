@@ -6,6 +6,7 @@ import { SelectionOptionDto } from '../../../dtos/selection-option.dto';
 import { NotificationService } from '../../../services/notification.service';
 import { TRANSLOCO_IMPORTS } from '../../../global/transloco-imports';
 import { TranslocoService } from '@jsverse/transloco';
+import { AppConfirmModalComponent } from '../../shared/modal/confirm-modal.component';
 
 type OptionCategory = 'type' | 'modality' | 'instrument' | 'solvent';
 
@@ -14,7 +15,7 @@ type OptionCategory = 'type' | 'modality' | 'instrument' | 'solvent';
   templateUrl: './option-management.component.html',
   styleUrls: ['./option-management.component.scss'],
   standalone: true,
-  imports: [CommonModule, FormsModule, TRANSLOCO_IMPORTS],
+  imports: [CommonModule, FormsModule, TRANSLOCO_IMPORTS, AppConfirmModalComponent],
 })
 export class OptionManagementComponent implements OnInit {
   categories: { label: string; value: OptionCategory }[] = [
@@ -26,6 +27,7 @@ export class OptionManagementComponent implements OnInit {
 
   selectedCategory: OptionCategory = 'type';
   options: SelectionOptionDto[] = [];
+  isAddOptionModalOpen: boolean = false;
   newOptionValue: string = '';
   isLoading: boolean = false;
 
@@ -40,6 +42,10 @@ export class OptionManagementComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadOptions();
+  }
+
+  capitalizeOption(option: string): string {
+    return option.charAt(0).toUpperCase() + option.slice(1);
   }
 
   selectCategory(category: OptionCategory): void {
@@ -94,7 +100,17 @@ export class OptionManagementComponent implements OnInit {
     });
   }
 
+  cancelAddOption() {
+    this.isAddOptionModalOpen = false;
+  }
+
   addOption(): void {
+    if (!this.newOptionValue) return;
+
+    this.isAddOptionModalOpen = true;
+  }
+
+  executeAddOption() {
     const value = this.newOptionValue.trim();
     if (!value) return;
 
@@ -105,6 +121,7 @@ export class OptionManagementComponent implements OnInit {
         this.notification.success(
           this.transloco.translate('admin.option.notifications.addSuccess'),
         );
+        this.cancelAddOption();
         this.cdr.markForCheck();
       },
       error: (err) =>
