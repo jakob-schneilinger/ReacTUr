@@ -3,6 +3,7 @@ package com.reactur.backend;
 import com.reactur.backend.dtos.ReactantDtos.CreateReactantDto;
 import com.reactur.backend.dtos.ReactantDtos.ReactantDetailDto;
 import com.reactur.backend.dtos.ReactantDtos.ReactantDto;
+import com.reactur.backend.dtos.ReactantDtos.UpdateReactantDto;
 import com.reactur.backend.entities.Reactant;
 import com.reactur.backend.entities.User;
 import com.reactur.backend.exeptions.ResourceConflictException;
@@ -28,7 +29,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-class ReactantServiceImplTest {
+class ReactantServiceTest {
 
     @Mock
     private ReactantRepository reactantRepository;
@@ -39,7 +40,8 @@ class ReactantServiceImplTest {
     @InjectMocks
     private ReactantServiceImpl reactantService;
 
-    private CreateReactantDto sampleSaveDto;
+    private CreateReactantDto sampleCreateDto;
+    private UpdateReactantDto sampleUpdateDto;
     private User mockUser;
     private Reactant mockReactant;
     private final UUID VALID_UUID = UUID.randomUUID();
@@ -49,7 +51,13 @@ class ReactantServiceImplTest {
         mockUser = new User();
         mockUser.setId("User123");
 
-        sampleSaveDto = new CreateReactantDto(
+        sampleCreateDto = new CreateReactantDto(
+                "CCO", UUID.randomUUID(), "Ethanol",
+                List.of("EtOH", "Alkohol"), "Ethyl alcohol", "64-17-5",
+                "LFQSCWFLJHTTHZ-UHFFFAOYSA-N", "A test comment", List.of("Ref1", "Ref2")
+        );
+
+        sampleUpdateDto = new UpdateReactantDto(
                 "CCO", UUID.randomUUID(), "Ethanol",
                 List.of("EtOH", "Alkohol"), "Ethyl alcohol", "64-17-5",
                 "LFQSCWFLJHTTHZ-UHFFFAOYSA-N", "A test comment", List.of("Ref1", "Ref2")
@@ -79,7 +87,7 @@ class ReactantServiceImplTest {
             return saved;
         });
 
-        ReactantDetailDto result = reactantService.createReactant(sampleSaveDto);
+        ReactantDetailDto result = reactantService.createReactant(sampleCreateDto);
 
         assertNotNull(result);
         assertEquals(VALID_UUID, result.uuid());
@@ -93,7 +101,7 @@ class ReactantServiceImplTest {
     void createReactant_ShouldThrowResourceConflictException_WhenShortNameExists() {
         when(reactantRepository.hasNameConflict(anyCollection())).thenReturn(true);
 
-        assertThrows(ResourceConflictException.class, () -> reactantService.createReactant(sampleSaveDto));
+        assertThrows(ResourceConflictException.class, () -> reactantService.createReactant(sampleCreateDto));
         verify(reactantRepository, never()).save(any(Reactant.class));
     }
 
@@ -112,7 +120,7 @@ class ReactantServiceImplTest {
 
     @Test
     void updateReactant_ShouldUpdateSuccessfully_WhenValidData() {
-        CreateReactantDto updateDto = new CreateReactantDto(
+        UpdateReactantDto updateDto = new UpdateReactantDto(
                 "C", null, "Methane", List.of(), "Methane Gas", "74-82-8",
                 "VNWKTOKETHGBQD-UHFFFAOYSA-N", "Updated Comment", List.of()
         );
@@ -131,7 +139,7 @@ class ReactantServiceImplTest {
     void updateReactant_ShouldThrowResourceNotFound_WhenIdDoesNotExist() {
         when(reactantRepository.findById(VALID_UUID)).thenReturn(Optional.empty());
 
-        assertThrows(ResourceNotFoundException.class, () -> reactantService.updateReactant(VALID_UUID, sampleSaveDto));
+        assertThrows(ResourceNotFoundException.class, () -> reactantService.updateReactant(VALID_UUID, sampleUpdateDto));
         verify(reactantRepository, never()).save(any(Reactant.class));
     }
 
@@ -140,13 +148,13 @@ class ReactantServiceImplTest {
         when(reactantRepository.findById(VALID_UUID)).thenReturn(Optional.of(mockReactant));
         when(reactantRepository.hasNameConflictExcludingId(anyCollection(), eq(VALID_UUID))).thenReturn(true);
 
-        assertThrows(ResourceConflictException.class, () -> reactantService.updateReactant(VALID_UUID, sampleSaveDto));
+        assertThrows(ResourceConflictException.class, () -> reactantService.updateReactant(VALID_UUID, sampleUpdateDto));
         verify(reactantRepository, never()).save(any(Reactant.class));
     }
 
     @Test
     void updateReactant_ShouldOnlyUpdateProvidedFields_WhenPatching() {
-        CreateReactantDto patchDto = new CreateReactantDto(
+        UpdateReactantDto patchDto = new UpdateReactantDto(
                 null, null, null, null, "Neuer Chemischer Name", null, null, null, null
         );
 
@@ -163,7 +171,7 @@ class ReactantServiceImplTest {
 
     @Test
     void updateReactant_ShouldClearFields_WhenEmptyStringOrListProvided() {
-        CreateReactantDto clearDto = new CreateReactantDto(
+        UpdateReactantDto clearDto = new UpdateReactantDto(
                 null, null, null, Collections.emptyList(), null, "", "", "", Collections.emptyList()
         );
 

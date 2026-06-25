@@ -40,7 +40,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-public class FileServiceImplTests {
+public class FileServiceTests {
 
     @Mock
     private ExperimentAttachmentRepository attachmentRepository;
