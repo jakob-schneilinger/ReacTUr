@@ -1,5 +1,7 @@
 package com.reactur.backend.services;
 
+import com.reactur.backend.exeptions.FileStorageException;
+import com.reactur.backend.exeptions.ResourceNotFoundException;
 import org.springframework.core.io.Resource;
 import com.reactur.backend.dtos.ExperimentDtos.ExperimentAttachmentDetailsDto;
 import com.reactur.backend.dtos.ExperimentDtos.ExperimentAttachmentDto;
@@ -16,6 +18,9 @@ public interface FileService {
      * @param experimentId the UUID of the experiment the file should be associated with
      * @param file the multipart file to store
      * @return {@link ExperimentAttachmentDetailsDto} containing the saved metadata and download URL
+     * @throws IllegalArgumentException if the provided file is null or empty
+     * @throws ResourceNotFoundException if no experiment exists for the given UUID
+     * @throws FileStorageException if calculating the checksum or uploading to SeaweedFS fails
      */
     ExperimentAttachmentDetailsDto storeFile(UUID experimentId, MultipartFile file);
 
@@ -24,6 +29,8 @@ public interface FileService {
      *
      * @param fileId the UUID of the file metadata record
      * @return {@link Resource} representing the file stream
+     * @throws ResourceNotFoundException if no file metadata exists for the given ID
+     * @throws FileStorageException if retrieving the file stream from SeaweedFS fails
      */
     Resource loadFileAsResource(UUID fileId);
 
@@ -32,7 +39,8 @@ public interface FileService {
      *
      * @param fileId the unique UUID identifier of the file
      * @return an {@link ExperimentAttachmentDetailsDto} containing complete file attributes, including checksum and size
-     */
+     * @throws ResourceNotFoundException if no file metadata exists for the given ID
+     * */
     ExperimentAttachmentDetailsDto getAttachmentDetail(UUID fileId);
 
     /**
@@ -40,13 +48,15 @@ public interface FileService {
      *
      * @param experimentId the unique UUID identifier of the experiment
      * @return a List of {@link ExperimentAttachmentDto} containing the overview and download information of the attachments
-     */
+     * @throws ResourceNotFoundException if no experiment exists for the given ID
+     * */
     List<ExperimentAttachmentDto> getAttachmentsOfExperiment(UUID experimentId);
 
     /**
      * Archives a file.
      *
      * @param fileId the UUID of the file to archive
+     * @throws ResourceNotFoundException if no file metadata exists for the given ID
      */
     void archiveFile(UUID fileId);
 }
