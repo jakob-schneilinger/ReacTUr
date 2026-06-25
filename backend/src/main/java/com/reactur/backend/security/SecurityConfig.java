@@ -33,7 +33,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         // Open routes here if needed:
                         // .requestMatchers("/api/public/**").permitAll()
-                        .requestMatchers(PathRequest.toH2Console()).permitAll() // TODO: Here H2-console is permitted for test use only !
+                        //.requestMatchers(PathRequest.toH2Console()).permitAll() // TODO: Here H2-console is permitted for test use only !
                         .anyRequest().authenticated()
                 )
                 .oauth2ResourceServer(oauth2 -> oauth2.jwt(jwt -> {}))

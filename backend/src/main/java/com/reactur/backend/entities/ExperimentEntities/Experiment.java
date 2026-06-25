@@ -51,7 +51,7 @@ public class Experiment {
     private ExperimentResult result;
 
     @OneToMany(mappedBy = "experiment", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<ExperimentAttachments> files = new ArrayList<>();
+    private List<ExperimentAttachment> files = new ArrayList<>();
 
     @Column(name = "archived_at")
     private Instant archivedAt;

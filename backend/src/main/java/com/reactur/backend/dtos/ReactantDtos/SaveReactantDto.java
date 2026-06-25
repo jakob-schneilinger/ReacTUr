@@ -1,5 +1,6 @@
 package com.reactur.backend.dtos.ReactantDtos;
 
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -19,11 +20,11 @@ public record SaveReactantDto(
         String smiles,
         UUID chemicalType,
         String shortname,
-        String[] additionalShortNames,
+        List<String> additionalShortNames,
         String chemicalName,
         String casNumber,
         String inChiKey,
         String comment,
-        String[] references
+        List<String> references
 ) {
 }

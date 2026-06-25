@@ -5,6 +5,7 @@ import com.reactur.backend.dtos.GetUserDto;
 import com.reactur.backend.dtos.ReactantDtos.ReactantDto;
 
 import java.time.Instant;
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -28,7 +29,7 @@ public record GetExperimentDto(
         GetMetadataDto metadata,
         MeasurementDataDto measurementData,
         GetUserDto createdBy,
-        ExperimentAttachmentDto[] attachments,
+        List<ExperimentAttachmentDto> attachments,
         Instant archivedAt
 ) implements DetailsDto {
 }
