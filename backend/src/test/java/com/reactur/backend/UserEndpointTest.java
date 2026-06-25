@@ -1,7 +1,7 @@
 package com.reactur.backend;
 
 import com.reactur.backend.dtos.GetUserDto;
-import com.reactur.backend.dtos.SetRoleDto;
+import com.reactur.backend.dtos.RoleDto;
 import com.reactur.backend.endpoints.UserEndpoint;
 import com.reactur.backend.enums.Role;
 import com.reactur.backend.exeptions.GlobalExceptionHandler;
@@ -64,12 +64,34 @@ class UserEndpointTest {
     @Test
     void setRole_ShouldReturn200_WhenSuccessful() throws Exception {
         String id = "some-id-lol";
-        SetRoleDto dto = new SetRoleDto(Role.SUPERVISOR);
+        RoleDto dto = new RoleDto(Role.SUPERVISOR);
 
         mockMvc.perform(post("/api/users/" + id)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(dto)))
                 .andExpect(status().isOk());
+    }
+
+    @Test
+    void getRole_ShouldReturn200AndRole_WhenUserExists() throws Exception {
+        String id = "some-id-lol";
+        RoleDto mockResponse = new RoleDto(Role.SUPERVISOR);
+
+        when(userService.getRole(id)).thenReturn(mockResponse);
+
+        mockMvc.perform(get("/api/users/" + id + "/role"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.role").value("SUPERVISOR"));
+    }
+
+    @Test
+    void getRole_ShouldReturn404_WhenUserNotFound() throws Exception {
+        String id = "some-id-lol";
+
+        when(userService.getRole(id)).thenThrow(new ResourceNotFoundException("User not found"));
+
+        mockMvc.perform(get("/api/users/" + id + "/role"))
+                .andExpect(status().isNotFound());
     }
 
     @Test

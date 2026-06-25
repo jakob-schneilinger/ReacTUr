@@ -1,7 +1,7 @@
 package com.reactur.backend.services;
 
 import com.reactur.backend.dtos.GetUserDto;
-import com.reactur.backend.dtos.SetRoleDto;
+import com.reactur.backend.dtos.RoleDto;
 import com.reactur.backend.exeptions.ResourceNotFoundException;
 
 import java.util.List;
@@ -19,10 +19,19 @@ public interface UserService {
      * Updates the role of a specific user.
      *
      * @param id the unique identifier of the user.
-     * @param setRoleDto the DTO containing the new role.
+     * @param roleDto the DTO containing the new role.
      * @throws ResourceNotFoundException if the user does not exist.
      */
-    void setRole(String id, SetRoleDto setRoleDto);
+    void setRole(String id, RoleDto roleDto);
+
+    /**
+     * Retrieves the role of a specific user.
+     *
+     * @param id the unique identifier of the user.
+     * @return a {@link RoleDto} containing the user's role.
+     * @throws ResourceNotFoundException if the user does not exist.
+     */
+    RoleDto getRole(String id);
 
     /**
      * Archives a user by setting their deactivatedAt timestamp.

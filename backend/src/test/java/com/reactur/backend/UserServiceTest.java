@@ -1,7 +1,7 @@
 package com.reactur.backend;
 
 import com.reactur.backend.dtos.GetUserDto;
-import com.reactur.backend.dtos.SetRoleDto;
+import com.reactur.backend.dtos.RoleDto;
 import com.reactur.backend.entities.User;
 import com.reactur.backend.enums.Role;
 import com.reactur.backend.exeptions.ResourceNotFoundException;
@@ -84,7 +84,7 @@ public class UserServiceTest {
 
     @Test
     void setRole_ShouldUpdateRole_WhenUserExists() {
-        SetRoleDto dto = new SetRoleDto(Role.ADMIN);
+        RoleDto dto = new RoleDto(Role.ADMIN);
         when(userRepository.findById(STRING_ID)).thenReturn(Optional.of(mockUser));
 
         userService.setRole(STRING_ID, dto);
@@ -95,7 +95,7 @@ public class UserServiceTest {
 
     @Test
     void setRole_ShouldNotSave_WhenRoleIsAlreadySet() {
-        SetRoleDto dto = new SetRoleDto(Role.USER);
+        RoleDto dto = new RoleDto(Role.USER);
         when(userRepository.findById(STRING_ID)).thenReturn(Optional.of(mockUser));
 
         userService.setRole(STRING_ID, dto);
@@ -108,7 +108,27 @@ public class UserServiceTest {
         when(userRepository.findById(anyString())).thenReturn(Optional.empty());
 
         assertThrows(ResourceNotFoundException.class,
-                () -> userService.setRole(STRING_ID, new SetRoleDto(Role.ADMIN)));
+                () -> userService.setRole(STRING_ID, new RoleDto(Role.ADMIN)));
+    }
+
+    // --- GET ROLE ---
+
+    @Test
+    void getRole_ShouldReturnRole_WhenUserExists() {
+        when(userRepository.findById(STRING_ID)).thenReturn(Optional.of(mockUser));
+
+        RoleDto result = userService.getRole(STRING_ID);
+
+        assertNotNull(result);
+        assertEquals(Role.USER, result.role());
+        verify(userRepository, times(1)).findById(STRING_ID);
+    }
+
+    @Test
+    void getRole_ShouldThrowNotFound_WhenUserDoesNotExist() {
+        when(userRepository.findById(anyString())).thenReturn(Optional.empty());
+
+        assertThrows(ResourceNotFoundException.class, () -> userService.getRole(STRING_ID));
     }
 
     // --- ARCHIVE USER ---

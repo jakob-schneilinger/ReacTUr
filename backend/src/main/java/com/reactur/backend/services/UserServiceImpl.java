@@ -1,7 +1,7 @@
 package com.reactur.backend.services;
 
 import com.reactur.backend.dtos.GetUserDto;
-import com.reactur.backend.dtos.SetRoleDto;
+import com.reactur.backend.dtos.RoleDto;
 import com.reactur.backend.entities.User;
 import com.reactur.backend.exeptions.ResourceNotFoundException;
 import com.reactur.backend.repositories.UserRepository;
@@ -29,13 +29,20 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public void setRole(String uuid, SetRoleDto setRoleDto) {
+    public void setRole(String uuid, RoleDto roleDto) {
         User user = findUserOrThrow(uuid);
 
-        if (user.getRole() != setRoleDto.role()) {
-            user.setRole(setRoleDto.role());
+        if (user.getRole() != roleDto.role()) {
+            user.setRole(roleDto.role());
             userRepository.save(user);
         }
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public RoleDto getRole(String id) {
+        User user = findUserOrThrow(id);
+        return new RoleDto(user.getRole());
     }
 
     @Override

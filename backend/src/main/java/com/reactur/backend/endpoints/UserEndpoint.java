@@ -1,7 +1,7 @@
 package com.reactur.backend.endpoints;
 
 import com.reactur.backend.dtos.GetUserDto;
-import com.reactur.backend.dtos.SetRoleDto;
+import com.reactur.backend.dtos.RoleDto;
 import com.reactur.backend.services.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -17,7 +17,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
-import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/users")
@@ -36,10 +35,15 @@ public class UserEndpoint {
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> setRole(
             @PathVariable String id,
-            @Valid @RequestBody SetRoleDto setRole) {
+            @Valid @RequestBody RoleDto setRole) {
 
         userService.setRole(id, setRole);
         return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/{id}/role")
+    public ResponseEntity<RoleDto> getRole(@PathVariable String id) {
+        return ResponseEntity.ok(userService.getRole(id));
     }
 
     @DeleteMapping("/{id}")

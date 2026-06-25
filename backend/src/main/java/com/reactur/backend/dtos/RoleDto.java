@@ -8,7 +8,7 @@ import jakarta.validation.constraints.NotNull;
  *
  * @param role The new role to assign to the user.
  */
-public record SetRoleDto(
+public record RoleDto(
         @NotNull(message = "Role must not be null")
         Role role) {
 }
