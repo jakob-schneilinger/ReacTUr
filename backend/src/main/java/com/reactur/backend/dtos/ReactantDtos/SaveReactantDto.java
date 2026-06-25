@@ -1,5 +1,9 @@
 package com.reactur.backend.dtos.ReactantDtos;
 
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
+
 import java.util.List;
 import java.util.UUID;
 
@@ -17,8 +21,15 @@ import java.util.UUID;
  * @param references           Array of literature or external references.
  */
 public record SaveReactantDto(
+
+        @NotBlank(message = "SMILES string must not be empty.")
         String smiles,
+
+        @NotNull(message = "Chemical type must not be null.")
         UUID chemicalType,
+
+        @NotBlank(message = "Short name is a required field.")
+        @Size(max = 100, message = "Short name must not exceed 100 characters.")
         String shortname,
         List<String> additionalShortNames,
         String chemicalName,
