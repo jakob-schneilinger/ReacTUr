@@ -1,6 +1,9 @@
 package com.reactur.backend.entities;
 
+import com.reactur.backend.entities.SelectionOptions.ChemicalType;
+import jakarta.persistence.CollectionTable;
 import jakarta.persistence.Column;
+import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
@@ -16,6 +19,8 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @Entity
@@ -37,6 +42,10 @@ public class Reactant {
     @Column(name = "smiles", nullable = false)
     private String smiles;
 
+     @ManyToOne(fetch = FetchType.LAZY)
+     @JoinColumn(name = "type_id")
+     private ChemicalType type;
+
     @Column(name = "in_chi_key")
     private String inChiKey;
 
@@ -46,8 +55,20 @@ public class Reactant {
     @Column(name = "cas_number")
     private String casNumber;
 
-    @Column(name = "structure_path_xyz")
-    private String structurePathXyz;
+    @Column(name = "comment", columnDefinition = "TEXT")
+    private String comment;
+
+    @ElementCollection(fetch = FetchType.LAZY)
+    @CollectionTable(name = "reactant_additional_short_names", joinColumns = @JoinColumn(name = "reactant_id"))
+    @Column(name = "additional_short_name")
+    @Builder.Default
+    private List<String> additionalShortNames = new ArrayList<>();
+
+    @ElementCollection(fetch = FetchType.LAZY)
+    @CollectionTable(name = "reactant_references", joinColumns = @JoinColumn(name = "reactant_id"))
+    @Column(name = "reference")
+    @Builder.Default
+    private List<String> references = new ArrayList<>();
 
     @Column(name = "archived_at")
     private Instant archivedAt;
