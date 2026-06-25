@@ -10,5 +10,5 @@ import java.util.UUID;
 @Repository
 public interface ExperimentAttachmentRepository extends JpaRepository<ExperimentAttachment, UUID> {
 
-    List<ExperimentAttachment> findByExperimentId(UUID experimentId);
+    List<ExperimentAttachment> findByExperimentIdAndArchivedAtIsNull(UUID experimentId);
 }

@@ -15,6 +15,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.time.Instant;
 import java.util.UUID;
 
 @Entity
@@ -48,4 +49,7 @@ public class ExperimentAttachment {
 
     @Column(name = "file_size_bytes")
     private Long fileSizeBytes;
+
+    @Column(name = "archived_at")
+    private Instant archivedAt;
 }

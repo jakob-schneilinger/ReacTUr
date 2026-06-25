@@ -62,4 +62,12 @@ public class FilesEndpoint {
         fileService.archiveFile(fileId);
         return ResponseEntity.noContent().build();
     }
+
+    @PostMapping("/{reactantId}/structure")
+    public ResponseEntity<Void> generateStructureFromAPI(@PathVariable UUID reactantId) {
+
+        //TODO: Do generate Structure From API
+
+        return ResponseEntity.noContent().build();
+    }
 }
