@@ -10,5 +10,5 @@ import java.util.UUID;
  * @param uuid The unique identifier of the user to update.
  * @param role The new role to assign to the user.
  */
-public record SetRoleDto(UUID uuid, Role role) {
+public record SetRoleDto(String uuid, Role role) {
 }

@@ -23,8 +23,9 @@ public class User {
     private String firstName;
     private String lastName;
 
-    @Column(name="role")
-    private Role role;
+    @Enumerated(EnumType.STRING)
+    @Column(name="role", nullable = false)
+    private Role role = Role.UNAUTHORIZED;
 
     @Column(updatable = false)
     private java.time.LocalDateTime createdAt = java.time.LocalDateTime.now();
