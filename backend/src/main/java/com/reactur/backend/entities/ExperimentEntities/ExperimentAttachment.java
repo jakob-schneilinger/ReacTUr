@@ -15,6 +15,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.time.Instant;
 import java.util.UUID;
 
 @Entity
@@ -24,7 +25,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class ExperimentAttachments {
+public class ExperimentAttachment {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -48,4 +49,7 @@ public class ExperimentAttachments {
 
     @Column(name = "file_size_bytes")
     private Long fileSizeBytes;
+
+    @Column(name = "archived_at")
+    private Instant archivedAt;
 }

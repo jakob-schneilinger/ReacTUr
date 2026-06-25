@@ -1,6 +1,7 @@
 package com.reactur.backend.dtos.ExperimentDtos;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -26,11 +27,11 @@ import java.util.UUID;
  * @param measurementSearch  Array of specific measurement range filters.
  */
 public record SearchParametersDto(
-        UUID[] reactantA,
-        UUID[] reactantB,
+        List<UUID> reactantA,
+        List<UUID> reactantB,
         LocalDate dateMin,
         LocalDate dateMax,
-        UUID[] scientist,
+        List<UUID> scientist,
         Double temperatureMin,
         Double temperatureMax,
         UUID solvent,
@@ -43,6 +44,6 @@ public record SearchParametersDto(
         Double wavelengthMin,
         Double wavelengthMax,
         String comment,
-        MeasurementSearchDto[] measurementSearch
+        List<MeasurementSearchDto> measurementSearch
 ) {
 }
