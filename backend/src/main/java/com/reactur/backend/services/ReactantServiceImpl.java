@@ -35,6 +35,18 @@ public class ReactantServiceImpl implements ReactantService {
             throw new ResourceConflictException("One of the given short names is already used by another reactant");
         }
 
+        if (saveReactant.casNumber() != null && !saveReactant.casNumber().isBlank()) {
+            if (reactantRepository.existsByCasNumber(saveReactant.casNumber())) {
+                throw new ResourceConflictException("CAS number " + saveReactant.casNumber() + " is already taken");
+            }
+        }
+
+        if (saveReactant.inChiKey() != null && !saveReactant.inChiKey().isBlank()) {
+            if (reactantRepository.existsByInChiKey(saveReactant.inChiKey())) {
+                throw new ResourceConflictException("inChiKey number " + saveReactant.casNumber() + " is already taken");
+            }
+        }
+
         //TODO: Here should be a method to get current User
         User fallbackUser = new User();
         fallbackUser.setId("User1");
@@ -71,6 +83,18 @@ public class ReactantServiceImpl implements ReactantService {
 
         if (reactantRepository.hasNameConflictExcludingId(namesToCheck, uuid)) {
             throw new ResourceConflictException("One of the short names is already being used by another reactant");
+        }
+
+        if (patchDto.casNumber() != null && !patchDto.casNumber().equals(reactant.getCasNumber()) && !patchDto.casNumber().isBlank()) {
+            if (reactantRepository.existsByCasNumberAndIdNot(patchDto.casNumber(), uuid)) {
+                throw new ResourceConflictException("CAS number " + patchDto.casNumber() + " is already taken");
+            }
+        }
+
+        if (patchDto.inChiKey() != null && !patchDto.inChiKey().equals(reactant.getInChiKey()) && !patchDto.inChiKey().isBlank()) {
+            if (reactantRepository.existsByCasNumberAndIdNot(patchDto.inChiKey(), uuid)) {
+                throw new ResourceConflictException("inChiKey " + patchDto.inChiKey() + " is already taken");
+            }
         }
 
         // PATCH: Update if not null. "" clears strings, [] empties lists.
