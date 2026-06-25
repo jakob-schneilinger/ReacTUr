@@ -3,8 +3,10 @@ package com.reactur.backend.endpoints;
 import com.reactur.backend.dtos.GetUserDto;
 import com.reactur.backend.dtos.SetRoleDto;
 import com.reactur.backend.services.UserService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -25,26 +27,30 @@ public class UserEndpoint {
     private final UserService userService;
 
     @GetMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<List<GetUserDto>> getAllUsers() {
         return ResponseEntity.ok(userService.getAllUsers());
     }
 
     @PostMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> setRole(
             @PathVariable String id,
-            @RequestBody SetRoleDto setRole) {
+            @Valid @RequestBody SetRoleDto setRole) {
 
         userService.setRole(id, setRole);
         return ResponseEntity.ok().build();
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> archiveUser(@PathVariable String id) {
         userService.archiveUser(id);
         return ResponseEntity.ok().build();
     }
 
     @PutMapping("/{id}/restore")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> restoreUser(@PathVariable String id) {
         userService.restoreUser(id);
         return ResponseEntity.ok().build();

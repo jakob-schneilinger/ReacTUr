@@ -3,15 +3,15 @@ package com.reactur.backend.services;
 import com.reactur.backend.dtos.GetUserDto;
 import com.reactur.backend.dtos.SetRoleDto;
 import com.reactur.backend.entities.User;
+import com.reactur.backend.exeptions.ResourceNotFoundException;
 import com.reactur.backend.repositories.UserRepository;
+import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
 
+import java.time.Instant;
 import java.util.List;
-import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -19,32 +19,61 @@ public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
 
-    public Optional<User> getCurrentUser() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-
-        if (authentication != null && authentication.getPrincipal() instanceof Jwt jwt) {
-            String keycloakId = jwt.getSubject();
-            return userRepository.findById(keycloakId);
-        }
-        return Optional.empty();
-    }
-
+    @Override
+    @Transactional(readOnly = true)
     public List<GetUserDto> getAllUsers() {
-        return null;
+        return userRepository.findAll().stream()
+                .map(this::mapToDto)
+                .collect(Collectors.toList());
     }
 
     @Override
-    public void setRole(String id, SetRoleDto setRoleDto) {
+    @Transactional
+    public void setRole(String uuid, SetRoleDto setRoleDto) {
+        User user = findUserOrThrow(uuid);
 
+        if (user.getRole() != setRoleDto.role()) {
+            user.setRole(setRoleDto.role());
+            userRepository.save(user);
+        }
     }
 
     @Override
-    public void archiveUser(String id) {
+    @Transactional
+    public void archiveUser(String uuid) {
+        User user = findUserOrThrow(uuid);
 
+        if (user.getDeactivatedAt() == null) {
+            user.setDeactivatedAt(Instant.now());
+            userRepository.save(user);
+        }
     }
 
     @Override
-    public void restoreUser(String id) {
+    @Transactional
+    public void restoreUser(String uuid) {
+        User user = findUserOrThrow(uuid);
 
+        if (user.getDeactivatedAt() != null) {
+            user.setDeactivatedAt(null);
+            userRepository.save(user);
+        }
+    }
+
+    // --- Private Helper Methods ---
+
+    private User findUserOrThrow(String uuid) {
+        return userRepository.findById(uuid)
+                .orElseThrow(() -> new ResourceNotFoundException("User with ID " + uuid + " not found."));
+    }
+
+    private GetUserDto mapToDto(User user) {
+        return new GetUserDto(
+                user.getId(),
+                user.getFirstName(),
+                user.getLastName(),
+                user.getRole(),
+                user.getDeactivatedAt()
+        );
     }
 }

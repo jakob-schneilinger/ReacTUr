@@ -9,6 +9,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -30,12 +31,14 @@ public class ReactantEndpoint {
     private final ReactantService reactantService;
 
     @PostMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ReactantDetailDto> createReactant(@Valid @RequestBody CreateReactantDto saveReactant) {
         ReactantDetailDto created = reactantService.createReactant(saveReactant);
         return ResponseEntity.status(HttpStatus.CREATED).body(created);
     }
 
     @PatchMapping("/{uuid}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ReactantDetailDto> updateReactant(@PathVariable UUID uuid, @Valid @RequestBody UpdateReactantDto saveReactant) {
         ReactantDetailDto updated = reactantService.updateReactant(uuid, saveReactant);
         return ResponseEntity.ok(updated);
@@ -60,12 +63,14 @@ public class ReactantEndpoint {
     }
 
     @DeleteMapping("/{uuid}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> archiveReactant(@PathVariable UUID uuid) {
         reactantService.archiveReactant(uuid);
         return ResponseEntity.noContent().build();
     }
 
     @PutMapping("/{uuid}/restore")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ReactantDto> restoreReactant(@PathVariable UUID uuid) {
         ReactantDto restored = reactantService.restoreReactant(uuid);
         return ResponseEntity.ok(restored);
