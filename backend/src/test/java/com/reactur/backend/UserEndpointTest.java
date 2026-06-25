@@ -64,7 +64,7 @@ class UserEndpointTest {
     @Test
     void setRole_ShouldReturn200_WhenSuccessful() throws Exception {
         String id = "some-id-lol";
-        SetRoleDto dto = new SetRoleDto(id, Role.SUPERVISOR);
+        SetRoleDto dto = new SetRoleDto(Role.SUPERVISOR);
 
         mockMvc.perform(post("/api/users/" + id)
                         .contentType(MediaType.APPLICATION_JSON)
