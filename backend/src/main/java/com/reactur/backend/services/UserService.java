@@ -1,32 +1,42 @@
 package com.reactur.backend.services;
 
-import com.reactur.backend.entities.User;
-import com.reactur.backend.repositories.UserRepository;
-import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.oauth2.jwt.Jwt;
-import org.springframework.stereotype.Service;
+import com.reactur.backend.dtos.GetUserDto;
+import com.reactur.backend.dtos.SetRoleDto;
+import com.reactur.backend.exeptions.ResourceNotFoundException;
 
-import java.util.Optional;
+import java.util.List;
 
-@Service
-@RequiredArgsConstructor
-public class UserService {
+public interface UserService {
 
-    private final UserRepository userRepository;
+    /**
+     * Retrieves all users currently registered in the system.
+     *
+     * @return a list of {@link GetUserDto} representing all users.
+     */
+    List<GetUserDto> getAllUsers();
 
-    public Optional<User> getCurrentUser() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+    /**
+     * Updates the role of a specific user.
+     *
+     * @param id the unique identifier of the user.
+     * @param setRoleDto the DTO containing the new role.
+     * @throws ResourceNotFoundException if the user does not exist.
+     */
+    void setRole(String id, SetRoleDto setRoleDto);
 
-        if (authentication != null && authentication.getPrincipal() instanceof Jwt jwt) {
-            String keycloakId = jwt.getSubject();
-            return userRepository.findById(keycloakId);
-        }
-        return Optional.empty();
-    }
+    /**
+     * Archives a user by setting their deactivatedAt timestamp.
+     *
+     * @param id the unique identifier of the user to archive.
+     * @throws ResourceNotFoundException if the user does not exist.
+     */
+    void archiveUser(String id);
 
-    public Iterable<User> getAllUsers() {
-        return userRepository.findAll();
-    }
+    /**
+     * Restores an archived user by setting their deactivatedAt timestamp to null.
+     *
+     * @param id the unique identifier of the user to restore.
+     * @throws ResourceNotFoundException if the user does not exist.
+     */
+    void restoreUser(String id);
 }
