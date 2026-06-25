@@ -32,4 +32,9 @@ public interface ReactantRepository extends JpaRepository<Reactant, UUID> {
     """)
     boolean hasNameConflictExcludingId(@Param("names") Collection<String> names, @Param("excludeId") UUID excludeId);
 
+    boolean existsByCasNumber(String casNumber);
+    boolean existsByInChiKey(String inChiKey);
+
+    boolean existsByCasNumberAndIdNot(String casNumber, UUID id);
+    boolean existsByInChiKeyAndIdNot(String inChiKey, UUID id);
 }
