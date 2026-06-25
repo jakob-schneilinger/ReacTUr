@@ -1,8 +1,9 @@
 package com.reactur.backend.services;
 
+import com.reactur.backend.dtos.ReactantDtos.CreateReactantDto;
 import com.reactur.backend.dtos.ReactantDtos.ReactantDetailDto;
 import com.reactur.backend.dtos.ReactantDtos.ReactantDto;
-import com.reactur.backend.dtos.ReactantDtos.SaveReactantDto;
+import com.reactur.backend.dtos.ReactantDtos.UpdateReactantDto;
 import com.reactur.backend.entities.Reactant;
 import com.reactur.backend.entities.User;
 import com.reactur.backend.exeptions.ResourceConflictException;
@@ -28,7 +29,7 @@ public class ReactantServiceImpl implements ReactantService {
 
     @Override
     @Transactional
-    public ReactantDetailDto createReactant(SaveReactantDto saveReactant) {
+    public ReactantDetailDto createReactant(CreateReactantDto saveReactant) {
         Set<String> namesToCheck = collectNames(saveReactant.shortname(), saveReactant.additionalShortNames());
 
         if (reactantRepository.hasNameConflict(namesToCheck)) {
@@ -49,11 +50,9 @@ public class ReactantServiceImpl implements ReactantService {
 
         //TODO: Here should be a method to get current User
         User fallbackUser = new User();
-        fallbackUser.setId("User1");
+        fallbackUser.setId("526a3632-b1cd-4c04-b9bc-b4e49453cbb6");
 
         //TODO: Check if user is admin?
-
-        //TODO: Check für uniqueness of cas Number, chemical name and inChiKey?
 
         Reactant reactant = Reactant.builder()
                 .shortName(saveReactant.shortname())
@@ -72,7 +71,7 @@ public class ReactantServiceImpl implements ReactantService {
 
     @Override
     @Transactional
-    public ReactantDetailDto updateReactant(UUID uuid, SaveReactantDto patchDto) {
+    public ReactantDetailDto updateReactant(UUID uuid, UpdateReactantDto patchDto) {
         Reactant reactant = reactantRepository.findById(uuid)
                 .orElseThrow(() -> new ResourceNotFoundException("Reactant with ID " + uuid + " not found"));
 

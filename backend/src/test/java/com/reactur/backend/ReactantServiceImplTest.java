@@ -1,8 +1,8 @@
 package com.reactur.backend;
 
+import com.reactur.backend.dtos.ReactantDtos.CreateReactantDto;
 import com.reactur.backend.dtos.ReactantDtos.ReactantDetailDto;
 import com.reactur.backend.dtos.ReactantDtos.ReactantDto;
-import com.reactur.backend.dtos.ReactantDtos.SaveReactantDto;
 import com.reactur.backend.entities.Reactant;
 import com.reactur.backend.entities.User;
 import com.reactur.backend.exeptions.ResourceConflictException;
@@ -39,7 +39,7 @@ class ReactantServiceImplTest {
     @InjectMocks
     private ReactantServiceImpl reactantService;
 
-    private SaveReactantDto sampleSaveDto;
+    private CreateReactantDto sampleSaveDto;
     private User mockUser;
     private Reactant mockReactant;
     private final UUID VALID_UUID = UUID.randomUUID();
@@ -49,7 +49,7 @@ class ReactantServiceImplTest {
         mockUser = new User();
         mockUser.setId("User123");
 
-        sampleSaveDto = new SaveReactantDto(
+        sampleSaveDto = new CreateReactantDto(
                 "CCO", UUID.randomUUID(), "Ethanol",
                 List.of("EtOH", "Alkohol"), "Ethyl alcohol", "64-17-5",
                 "LFQSCWFLJHTTHZ-UHFFFAOYSA-N", "A test comment", List.of("Ref1", "Ref2")
@@ -99,7 +99,7 @@ class ReactantServiceImplTest {
 
     @Test
     void createReactant_ShouldThrowConflict_WhenAdditionalShortNameAlreadyExistsAsPrimary() {
-        SaveReactantDto newReactantDto = new SaveReactantDto(
+        CreateReactantDto newReactantDto = new CreateReactantDto(
                 "C", UUID.randomUUID(), "Methane",
                 List.of("Ethanol"),
                 "Methane Gas", null, null, null, null
@@ -112,7 +112,7 @@ class ReactantServiceImplTest {
 
     @Test
     void updateReactant_ShouldUpdateSuccessfully_WhenValidData() {
-        SaveReactantDto updateDto = new SaveReactantDto(
+        CreateReactantDto updateDto = new CreateReactantDto(
                 "C", null, "Methane", List.of(), "Methane Gas", "74-82-8",
                 "VNWKTOKETHGBQD-UHFFFAOYSA-N", "Updated Comment", List.of()
         );
@@ -146,7 +146,7 @@ class ReactantServiceImplTest {
 
     @Test
     void updateReactant_ShouldOnlyUpdateProvidedFields_WhenPatching() {
-        SaveReactantDto patchDto = new SaveReactantDto(
+        CreateReactantDto patchDto = new CreateReactantDto(
                 null, null, null, null, "Neuer Chemischer Name", null, null, null, null
         );
 
@@ -163,7 +163,7 @@ class ReactantServiceImplTest {
 
     @Test
     void updateReactant_ShouldClearFields_WhenEmptyStringOrListProvided() {
-        SaveReactantDto clearDto = new SaveReactantDto(
+        CreateReactantDto clearDto = new CreateReactantDto(
                 null, null, null, Collections.emptyList(), null, "", "", "", Collections.emptyList()
         );
 

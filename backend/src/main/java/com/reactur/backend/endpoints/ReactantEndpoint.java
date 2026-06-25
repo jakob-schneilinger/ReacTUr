@@ -2,7 +2,8 @@ package com.reactur.backend.endpoints;
 
 import com.reactur.backend.dtos.ReactantDtos.ReactantDto;
 import com.reactur.backend.dtos.ReactantDtos.ReactantDetailDto;
-import com.reactur.backend.dtos.ReactantDtos.SaveReactantDto;
+import com.reactur.backend.dtos.ReactantDtos.CreateReactantDto;
+import com.reactur.backend.dtos.ReactantDtos.UpdateReactantDto;
 import com.reactur.backend.services.ReactantService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -29,13 +30,13 @@ public class ReactantEndpoint {
     private final ReactantService reactantService;
 
     @PostMapping
-    public ResponseEntity<ReactantDetailDto> createReactant(@Valid @RequestBody SaveReactantDto saveReactant) {
+    public ResponseEntity<ReactantDetailDto> createReactant(@Valid @RequestBody CreateReactantDto saveReactant) {
         ReactantDetailDto created = reactantService.createReactant(saveReactant);
         return ResponseEntity.status(HttpStatus.CREATED).body(created);
     }
 
     @PatchMapping("/{uuid}")
-    public ResponseEntity<ReactantDetailDto> updateReactant(@PathVariable UUID uuid, @Valid @RequestBody SaveReactantDto saveReactant) {
+    public ResponseEntity<ReactantDetailDto> updateReactant(@PathVariable UUID uuid, @Valid @RequestBody UpdateReactantDto saveReactant) {
         ReactantDetailDto updated = reactantService.updateReactant(uuid, saveReactant);
         return ResponseEntity.ok(updated);
     }

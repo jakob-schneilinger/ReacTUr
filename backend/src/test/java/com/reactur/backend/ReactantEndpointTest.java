@@ -1,8 +1,8 @@
 package com.reactur.backend;
 
+import com.reactur.backend.dtos.ReactantDtos.CreateReactantDto;
 import com.reactur.backend.dtos.ReactantDtos.ReactantDetailDto;
 import com.reactur.backend.dtos.ReactantDtos.ReactantDto;
-import com.reactur.backend.dtos.ReactantDtos.SaveReactantDto;
 import com.reactur.backend.endpoints.ReactantEndpoint;
 import com.reactur.backend.exeptions.GlobalExceptionHandler;
 import com.reactur.backend.exeptions.ResourceNotFoundException;
@@ -52,10 +52,10 @@ class ReactantEndpointTest {
     @Test
     void createReactant_ShouldReturn201_WhenSuccessful() throws Exception {
         UUID newId = UUID.randomUUID();
-        SaveReactantDto saveDto = new SaveReactantDto("C=C", UUID.randomUUID(), "Ethene", null, "Ethene", "74-85-1", "VGGSQFCHJZSIN-UHFFFAOYSA-N", null, null);
+        CreateReactantDto saveDto = new CreateReactantDto("C=C", UUID.randomUUID(), "Ethene", null, "Ethene", "74-85-1", "VGGSQFCHJZSIN-UHFFFAOYSA-N", null, null);
         ReactantDetailDto mockResponse = new ReactantDetailDto(newId, "C=C", null, "Ethene", null, "Ethene", "74-85-1", "VGGSQFCHJZSIN-UHFFFAOYSA-N", null, null, null);
 
-        when(reactantService.createReactant(any(SaveReactantDto.class))).thenReturn(mockResponse);
+        when(reactantService.createReactant(any(CreateReactantDto.class))).thenReturn(mockResponse);
 
         mockMvc.perform(post("/api/reactant")
                         .contentType(MediaType.APPLICATION_JSON)

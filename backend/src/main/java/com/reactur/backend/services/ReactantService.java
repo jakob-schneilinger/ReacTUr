@@ -2,7 +2,8 @@ package com.reactur.backend.services;
 
 import com.reactur.backend.dtos.ReactantDtos.ReactantDetailDto;
 import com.reactur.backend.dtos.ReactantDtos.ReactantDto;
-import com.reactur.backend.dtos.ReactantDtos.SaveReactantDto;
+import com.reactur.backend.dtos.ReactantDtos.CreateReactantDto;
+import com.reactur.backend.dtos.ReactantDtos.UpdateReactantDto;
 import com.reactur.backend.exeptions.ResourceConflictException;
 import com.reactur.backend.exeptions.ResourceNotFoundException;
 
@@ -18,7 +19,7 @@ public interface ReactantService {
      * @return the {@link ReactantDetailDto} representing the newly created reactant
      * @throws ResourceConflictException if a reactant with the same shortname already exists
      */
-    ReactantDetailDto createReactant(SaveReactantDto saveReactant);
+    ReactantDetailDto createReactant(CreateReactantDto saveReactant);
 
     /**
      * Updates an existing reactant with new details.
@@ -29,7 +30,7 @@ public interface ReactantService {
      * @throws ResourceNotFoundException if no reactant is found for the given UUID
      * @throws ResourceConflictException if the updated shortname is already used by another reactant
      */
-    ReactantDetailDto updateReactant(UUID uuid, SaveReactantDto saveReactant);
+    ReactantDetailDto updateReactant(UUID uuid, UpdateReactantDto saveReactant);
 
     /**
      * Retrieves the comprehensive details of a specific reactant.
