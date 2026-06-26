@@ -65,7 +65,7 @@ export const MOCK_USERS = {
     firstName: 'Pending1',
     lastName: 'User1',
     email: 'pending1@user1.com',
-    role: null,
+    role: Role.UNAUTHORIZED,
     deactivatedAt: null,
   },
   PENDING2: {
@@ -73,7 +73,7 @@ export const MOCK_USERS = {
     firstName: 'Pending2',
     lastName: 'User2',
     email: 'pending2@user2.com',
-    role: null,
+    role: Role.UNAUTHORIZED,
     deactivatedAt: null,
   },
 } satisfies Record<string, GetUserDto>;

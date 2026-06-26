@@ -1,9 +1,11 @@
-import { GetUserDto } from '../dtos/user.dto';
+import { GetUserDto, RoleDto } from '../dtos/user.dto';
 import { Injectable } from '@angular/core';
 import { OAuthService } from 'angular-oauth2-oidc';
 import { authConfig } from '../auth.config';
 import { Observable, of } from 'rxjs';
 import { MOCK_USERS } from '../mock/mock.data';
+import { UserService } from './user.service';
+import { Role } from '../dtos/enums/role.enum';
 
 @Injectable({
   providedIn: 'root',
@@ -13,7 +15,10 @@ export class AuthService {
 
   hardcodedUser: GetUserDto;
 
-  constructor(private oauthService: OAuthService) {
+  constructor(
+    private oauthService: OAuthService,
+    private userService: UserService,
+  ) {
     this.oauthService.configure(authConfig);
     this.oauthService.setupAutomaticSilentRefresh();
 
@@ -21,8 +26,6 @@ export class AuthService {
 
     this.hardcodedUser = MOCK_USERS.CURIE;
   }
-
-
 
   public login() {
     this.oauthService.initCodeFlow();
@@ -47,33 +50,53 @@ export class AuthService {
       return null;
     }
     const claims: any = this.oauthService.getIdentityClaims();
+
+    console.log(claims);
     if (!claims) return null;
 
+    const id = claims['jti'];
+
+    console.log(id)
+
+    if (id == '-1' || id == null) return null;
+
+    let role: RoleDto = {role: Role.UNAUTHORIZED};
+
+    this.userService.getUserRole(id).subscribe({
+      next: (value) => {
+        role = value;
+      },
+      error: (err) => {
+        console.error(err);
+      },
+    });
     return {
-      uuid: claims['id'] ?? '-1',
+      uuid: id,
       firstName: claims['given_name'],
       lastName: claims['family_name'],
       email: claims['email'],
-      role: claims['role'] ?? 'USER', //TODO: get from keycloak
-      deactivatedAt: claims['deactivated_at'] ?? '', //TODO: get from keycloak
+      role: role.role,
+      deactivatedAt: claims['deactivated_at'] ?? '',
     };
   }
 
-  public getUserRole(): string {
+  public getUserRole(): Role {
     // return this.hardcodedUser.role ?? "USER";
     if (!this.isLoggedIn()) {
-      return 'UNDEFINED';
+      return Role.UNAUTHORIZED;
     }
 
     const claims: any = this.oauthService.getIdentityClaims();
     const roles: string[] = claims['realm_access']?.roles || [];
 
     if (roles.includes('ADMIN')) {
-      return 'ADMIN';
+      return Role.ADMIN;
+    } else if (roles.includes('SUPERVISOR')) {
+      return Role.SUPERVISOR;
     } else if (roles.includes('USER')) {
-      return 'USER';
+      return Role.USER;
     }
-    return 'UNDEFINED';
+    return Role.UNAUTHORIZED;
   }
 
   // TODO: think about function, placement, parameters.

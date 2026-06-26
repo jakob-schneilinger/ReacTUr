@@ -22,11 +22,10 @@ export interface GetUserDto {
   firstName: string;
   lastName: string;
   email: string;
-  role: Role | null;
+  role: Role;
   deactivatedAt: string | null;
 }
 
-export interface SetRoleDto {
-  uuid: string; //user
+export interface RoleDto {
   role: Role;
 }
