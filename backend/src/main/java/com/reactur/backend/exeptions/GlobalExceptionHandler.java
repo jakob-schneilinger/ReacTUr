@@ -12,6 +12,7 @@ import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -85,6 +86,13 @@ public class GlobalExceptionHandler {
 
         return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED)
                 .body(String.format("The requested HTTP method is not supported for this endpoint. Details: %s", ex.getMessage()));
+    }
+
+    @ExceptionHandler(NoResourceFoundException.class)
+    public ResponseEntity<String> handleNoResourceFoundException(NoResourceFoundException ex) {
+        log.warn("Endpoint or resource not found: {}", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body("The requested endpoint or resource was not found.");
     }
 
     @ExceptionHandler(Exception.class)
