@@ -1,5 +1,6 @@
 package com.reactur.backend;
 
+import com.reactur.backend.Validators.ReactantValidator;
 import com.reactur.backend.dtos.ReactantDtos.CreateReactantDto;
 import com.reactur.backend.dtos.ReactantDtos.ReactantDetailDto;
 import com.reactur.backend.dtos.ReactantDtos.ReactantDto;
@@ -11,6 +12,7 @@ import com.reactur.backend.exeptions.ResourceNotFoundException;
 import com.reactur.backend.repositories.ReactantRepository;
 import com.reactur.backend.repositories.UserRepository;
 import com.reactur.backend.services.ReactantServiceImpl;
+import com.reactur.backend.services.UserService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -42,9 +44,10 @@ class ReactantServiceTest {
     private ReactantRepository reactantRepository;
 
     @Mock
-    private UserRepository userRepository;
+    private UserService userService;
 
-    @InjectMocks
+    private ReactantValidator validator;
+
     private ReactantServiceImpl reactantService;
 
     private CreateReactantDto sampleCreateDto;
@@ -55,6 +58,10 @@ class ReactantServiceTest {
 
     @BeforeEach
     void setUp() {
+        validator = new ReactantValidator(reactantRepository);
+
+        reactantService = new ReactantServiceImpl(reactantRepository, userService, validator);
+
         mockUser = new User();
         mockUser.setId("User123");
 
@@ -86,6 +93,8 @@ class ReactantServiceTest {
 
     @Test
     void createReactant_ShouldSaveSuccessfully_WhenValidData() {
+        when(userService.getCurrentUser()).thenReturn(Optional.of(mockUser));
+
         when(reactantRepository.hasNameConflict(anyCollection())).thenReturn(false);
 
         when(reactantRepository.save(any(Reactant.class))).thenAnswer(invocation -> {
@@ -98,7 +107,7 @@ class ReactantServiceTest {
 
         assertNotNull(result);
         assertEquals(VALID_UUID, result.uuid());
-        assertEquals("Ethanol", result.shortname());
+        assertEquals("Ethanol", result.shortName());
         assertEquals("A test comment", result.comment());
         assertIterableEquals(List.of("EtOH", "Alkohol"), result.additionalShortNames());
         verify(reactantRepository, times(1)).save(any(Reactant.class));
@@ -172,7 +181,7 @@ class ReactantServiceTest {
         ReactantDetailDto result = reactantService.updateReactant(VALID_UUID, patchDto);
 
         assertEquals("Neuer Chemischer Name", result.chemicalName());
-        assertEquals("Ethanol", result.shortname());
+        assertEquals("Ethanol", result.shortName());
         assertEquals("CCO", result.smiles());
     }
 
@@ -201,7 +210,7 @@ class ReactantServiceTest {
 
         assertNotNull(result);
         assertEquals(VALID_UUID, result.uuid());
-        assertEquals("Ethanol", result.shortname());
+        assertEquals("Ethanol", result.shortName());
         assertIterableEquals(List.of("Ref1", "Ref2"), result.references());
     }
 
@@ -220,7 +229,7 @@ class ReactantServiceTest {
 
         assertFalse(result.isEmpty());
         assertEquals(1, result.size());
-        assertEquals("Ethanol", result.getFirst().shortname());
+        assertEquals("Ethanol", result.getFirst().shortName());
     }
 
     @Test
@@ -238,7 +247,7 @@ class ReactantServiceTest {
 
         assertFalse(result.isEmpty());
         assertEquals(1, result.size());
-        assertEquals("Archived Chem", result.getFirst().shortname());
+        assertEquals("Archived Chem", result.getFirst().shortName());
     }
 
     @Test

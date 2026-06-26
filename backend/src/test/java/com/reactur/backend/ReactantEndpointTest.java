@@ -62,7 +62,7 @@ class ReactantEndpointTest {
                         .content(objectMapper.writeValueAsString(saveDto)))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.uuid").value(newId.toString()))
-                .andExpect(jsonPath("$.shortname").value("Ethene"));
+                .andExpect(jsonPath("$.shortName").value("Ethene"));
     }
 
     @Test
@@ -74,7 +74,7 @@ class ReactantEndpointTest {
 
         mockMvc.perform(get("/api/reactant/" + id))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.shortname").value("Methane"));
+                .andExpect(jsonPath("$.shortName").value("Methane"));
     }
 
     @Test
@@ -93,7 +93,7 @@ class ReactantEndpointTest {
 
         mockMvc.perform(get("/api/reactant"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].shortname").value("Methane"));
+                .andExpect(jsonPath("$[0].shortName").value("Methane"));
     }
 
     @Test

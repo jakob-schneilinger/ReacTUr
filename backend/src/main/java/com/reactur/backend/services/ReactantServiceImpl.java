@@ -1,5 +1,6 @@
 package com.reactur.backend.services;
 
+import com.reactur.backend.Validators.ReactantValidator;
 import com.reactur.backend.dtos.ReactantDtos.CreateReactantDto;
 import com.reactur.backend.dtos.ReactantDtos.ReactantDetailDto;
 import com.reactur.backend.dtos.ReactantDtos.ReactantDto;
@@ -26,35 +27,16 @@ import java.util.stream.Collectors;
 public class ReactantServiceImpl implements ReactantService {
 
     private final ReactantRepository reactantRepository;
-
     private final UserService userService;
+    private final ReactantValidator reactantValidator;
 
     @Override
     @Transactional
     public ReactantDetailDto createReactant(CreateReactantDto saveReactant) {
-        Set<String> namesToCheck = collectNames(saveReactant.shortName(), saveReactant.additionalShortNames());
 
-        if (saveReactant.additionalShortNames() != null && saveReactant.additionalShortNames().contains(saveReactant.shortName())) {
-            throw new IllegalArgumentException("The 'shortName' cannot be included in 'additionalShortNames'.");
-        }
+        reactantValidator.validateForCreate(saveReactant);
 
-        if (reactantRepository.hasNameConflict(namesToCheck)) {
-            throw new ResourceConflictException("One of the given short names is already used by another reactant");
-        }
-
-        if (saveReactant.casNumber() != null && !saveReactant.casNumber().isBlank()) {
-            if (reactantRepository.existsByCasNumber(saveReactant.casNumber())) {
-                throw new ResourceConflictException("CAS number " + saveReactant.casNumber() + " is already taken");
-            }
-        }
-
-        if (saveReactant.inChiKey() != null && !saveReactant.inChiKey().isBlank()) {
-            if (reactantRepository.existsByInChiKey(saveReactant.inChiKey())) {
-                throw new ResourceConflictException("inChiKey number " + saveReactant.casNumber() + " is already taken");
-            }
-        }
-
-        User fallbackUser = userService.getCurrentUser().orElseThrow(() -> new RuntimeException("Current User could not be found"));
+        User activeUser = userService.getCurrentUser().orElseThrow(() -> new RuntimeException("Current User could not be found"));
 
         Reactant reactant = Reactant.builder()
                 .shortName(saveReactant.shortName())
@@ -65,7 +47,7 @@ public class ReactantServiceImpl implements ReactantService {
                 .comment(saveReactant.comment() != null ? saveReactant.comment() : "")
                 .additionalShortNames(saveReactant.additionalShortNames() != null ? new ArrayList<>(saveReactant.additionalShortNames()) : new ArrayList<>())
                 .references(saveReactant.references() != null ? new ArrayList<>(saveReactant.references()) : new ArrayList<>())
-                .createdBy(fallbackUser)
+                .createdBy(activeUser)
                 .build();
 
         return mapToDetailDto(reactantRepository.save(reactant));
@@ -77,30 +59,7 @@ public class ReactantServiceImpl implements ReactantService {
         Reactant reactant = reactantRepository.findById(uuid)
                 .orElseThrow(() -> new ResourceNotFoundException("Reactant with ID " + uuid + " not found"));
 
-        String effectiveShortName = patchDto.shortName() != null ? patchDto.shortName() : reactant.getShortName();
-        List<String> effectiveAdditionalNames = patchDto.additionalShortNames() != null ? patchDto.additionalShortNames() : reactant.getAdditionalShortNames();
-
-        Set<String> namesToCheck = collectNames(effectiveShortName, effectiveAdditionalNames);
-
-        if (patchDto.additionalShortNames() != null && patchDto.shortName() != null && patchDto.additionalShortNames().contains(patchDto.shortName())) {
-            throw new IllegalArgumentException("The 'shortName' cannot be included in 'additionalShortNames'.");
-        }
-
-        if (reactantRepository.hasNameConflictExcludingId(namesToCheck, uuid)) {
-            throw new ResourceConflictException("One of the short names is already being used by another reactant");
-        }
-
-        if (patchDto.casNumber() != null && !patchDto.casNumber().equals(reactant.getCasNumber()) && !patchDto.casNumber().isBlank()) {
-            if (reactantRepository.existsByCasNumberAndIdNot(patchDto.casNumber(), uuid)) {
-                throw new ResourceConflictException("CAS number " + patchDto.casNumber() + " is already taken");
-            }
-        }
-
-        if (patchDto.inChiKey() != null && !patchDto.inChiKey().equals(reactant.getInChiKey()) && !patchDto.inChiKey().isBlank()) {
-            if (reactantRepository.existsByCasNumberAndIdNot(patchDto.inChiKey(), uuid)) {
-                throw new ResourceConflictException("inChiKey " + patchDto.inChiKey() + " is already taken");
-            }
-        }
+        reactantValidator.validateForUpdate(uuid, patchDto, reactant);
 
         // PATCH: Update if not null. "" clears strings, [] empties lists.
         if (patchDto.shortName() != null) reactant.setShortName(patchDto.shortName());
@@ -163,17 +122,6 @@ public class ReactantServiceImpl implements ReactantService {
 
         reactant.setArchivedAt(null);
         return mapToDto(reactantRepository.save(reactant));
-    }
-
-    private Set<String> collectNames(String primary, List<String> additional) {
-        Set<String> names = new HashSet<>();
-        if (primary != null && !primary.isBlank()) {
-            names.add(primary);
-        }
-        if (additional != null) {
-            names.addAll(additional);
-        }
-        return names;
     }
 
     private ReactantDetailDto mapToDetailDto(Reactant reactant) {
