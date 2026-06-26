@@ -27,7 +27,7 @@ export class UserService {
   // backend setRole
   updateUserRole(uuid: string, role: Role): Observable<void> {
     const payload: RoleDto = { role };
-    return this.httpClient.put<void>(`${this.userBaseUri}/${uuid}`, payload);
+    return this.httpClient.post<void>(`${this.userBaseUri}/${uuid}`, payload);
   }
 
   // backend getRole

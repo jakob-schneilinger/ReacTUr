@@ -34,6 +34,8 @@ export class SearchResultsComponent implements OnChanges {
     private authService: AuthService,
   ) {}
 
+  user: GetUserDto | null = null;
+
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['experiments']) {
       this.cleanupSelection();
@@ -87,10 +89,12 @@ export class SearchResultsComponent implements OnChanges {
   viewDetails(uuid: string | undefined): void {
     if (!uuid) return;
 
-    const user = this.authService.getLoggedInUser();
 
-    if (!user) return;
-    this.hasWritePermission = !!this.authService.hasExperimentPermission(uuid, user.uuid);
+    this.authService.getLoggedInUser().subscribe((value) => (this.user = value));
+
+
+    if (!this.user) return;
+    this.hasWritePermission = !!this.authService.hasExperimentPermission(uuid, this.user.id);
 
     const experimentToView = this.experiments.find((exp) => exp.uuid === uuid);
 

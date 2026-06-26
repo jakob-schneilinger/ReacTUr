@@ -30,7 +30,7 @@ public class ReactantServiceImpl implements ReactantService {
     @Override
     @Transactional
     public ReactantDetailDto createReactant(CreateReactantDto saveReactant) {
-        Set<String> namesToCheck = collectNames(saveReactant.shortname(), saveReactant.additionalShortNames());
+        Set<String> namesToCheck = collectNames(saveReactant.shortName(), saveReactant.additionalShortNames());
 
         if (reactantRepository.hasNameConflict(namesToCheck)) {
             throw new ResourceConflictException("One of the given short names is already used by another reactant");
@@ -55,7 +55,7 @@ public class ReactantServiceImpl implements ReactantService {
         //TODO: Check if user is admin?
 
         Reactant reactant = Reactant.builder()
-                .shortName(saveReactant.shortname())
+                .shortName(saveReactant.shortName())
                 .smiles(saveReactant.smiles())
                 .inChiKey(saveReactant.inChiKey() != null ? saveReactant.inChiKey() : "")
                 .chemicalName(saveReactant.chemicalName() != null ? saveReactant.chemicalName() : "")
@@ -75,7 +75,7 @@ public class ReactantServiceImpl implements ReactantService {
         Reactant reactant = reactantRepository.findById(uuid)
                 .orElseThrow(() -> new ResourceNotFoundException("Reactant with ID " + uuid + " not found"));
 
-        String effectiveShortName = patchDto.shortname() != null ? patchDto.shortname() : reactant.getShortName();
+        String effectiveShortName = patchDto.shortName() != null ? patchDto.shortName() : reactant.getShortName();
         List<String> effectiveAdditionalNames = patchDto.additionalShortNames() != null ? patchDto.additionalShortNames() : reactant.getAdditionalShortNames();
 
         Set<String> namesToCheck = collectNames(effectiveShortName, effectiveAdditionalNames);
@@ -97,7 +97,7 @@ public class ReactantServiceImpl implements ReactantService {
         }
 
         // PATCH: Update if not null. "" clears strings, [] empties lists.
-        if (patchDto.shortname() != null) reactant.setShortName(patchDto.shortname());
+        if (patchDto.shortName() != null) reactant.setShortName(patchDto.shortName());
         if (patchDto.smiles() != null) reactant.setSmiles(patchDto.smiles());
         if (patchDto.inChiKey() != null) reactant.setInChiKey(patchDto.inChiKey());
         if (patchDto.chemicalName() != null) reactant.setChemicalName(patchDto.chemicalName());

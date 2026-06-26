@@ -54,12 +54,16 @@ export class ExperimentDetailsSiteComponent implements OnInit {
   ngOnInit(): void {
     const state = this.route.snapshot.data['state'];
     if (state !== 'create') {
-      this.user = this.authService.getLoggedInUser();
-      if (this.user) {
-        if (this.user.role) {
-          this.role = this.user.role;
-        }
-      }
+      this.authService.getLoggedInUser().subscribe({
+        next: (value) => {
+          this.user = value;
+          if (this.user) {
+            if (this.user.role) {
+              this.role = this.user.role;
+            }
+          }
+        },
+      });
       this.state = state;
       const experimentUuid = this.route.snapshot.paramMap.get('uuid');
       if (!experimentUuid) {
@@ -75,7 +79,7 @@ export class ExperimentDetailsSiteComponent implements OnInit {
         if (this.user?.email) {
           console.log('Test2');
           // TODO: check role and permissions, switch to 'view' if not enough permission
-          this.authService.hasExperimentPermission(experimentUuid, this.user?.uuid).subscribe({
+          this.authService.hasExperimentPermission(experimentUuid, this.user?.id).subscribe({
             next: (hasPermission) =>
               hasPermission
                 ? console.log('User has permission to edit experiment')

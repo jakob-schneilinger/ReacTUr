@@ -18,7 +18,7 @@ export interface UserUpdateDto {
 
 // new
 export interface GetUserDto {
-  uuid: string;
+  id: string;
   firstName: string;
   lastName: string;
   email: string;

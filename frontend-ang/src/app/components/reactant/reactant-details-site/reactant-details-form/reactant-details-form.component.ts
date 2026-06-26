@@ -87,7 +87,7 @@ export class ReactantDetailsFormComponent implements OnInit, OnDestroy {
   }
 
   async ngOnInit(): Promise<void> {
-    this.optionService.getSelectionOptions('type').subscribe({
+    this.optionService.getSelectionOptions('chemical_type').subscribe({
       next: (params) => {
         this.chemicalTypes = params;
         this.chemicalTypeNames = this.chemicalTypes.map((t) => t.name);
@@ -218,12 +218,46 @@ export class ReactantDetailsFormComponent implements OnInit, OnDestroy {
   onSubmit(): void {
     if (this.reactantForm.valid) {
       const formValue = this.reactantForm.getRawValue();
-      // TODO: send to backend
-      this.notification.success(
-        this.transloco.translate('reactants.details.notifications.savedTitle'),
-        this.transloco.translate('reactants.details.notifications.savedMessage'),
-      );
-      this.reactantForm.markAsPristine();
+      formValue.chemicalType = this.chemicalTypes.find((t) => t.name === formValue.chemicalType)?.uuid;
+
+      if (!this.isEditMode) {
+        this.reactantService.createReactant(formValue).subscribe({
+          next: (reactant) => {
+            this.notification.success(
+              this.transloco.translate('reactants.details.notifications.savedTitle'),
+              this.transloco.translate('reactants.details.notifications.savedMessage'),
+            );
+            this.router.navigate(['/reactants', reactant.uuid]);
+          },
+          error: (err) => {
+            console.warn(err);
+            this.notification.error(
+              this.transloco.translate('reactants.details.notifications.saveErrorTitle'),
+              this.transloco.translate('reactants.details.notifications.saveErrorMessage', {
+                error: err.message || err.error || err,
+              }),
+            )
+          }
+        });
+      } else {
+        if (!this.reactant) return;
+        this.reactantService.updateReactant(this.reactant?.uuid, formValue).subscribe({
+          next: (reactant) => {
+            this.notification.success(
+              this.transloco.translate('reactants.details.notifications.savedTitle'),
+              this.transloco.translate('reactants.details.notifications.savedMessage'),
+            );
+            this.router.navigate(['/reactants', reactant.uuid]);
+          },
+          error: (err) =>
+            this.notification.error(
+              this.transloco.translate('reactants.details.notifications.saveErrorTitle'),
+              this.transloco.translate('reactants.details.notifications.saveErrorMessage', {
+                error: err.message || err.error || err,
+              }),
+            ),
+        });
+      }
     } else {
       this.reactantForm.markAllAsTouched();
     }

@@ -8,7 +8,7 @@ import { TRANSLOCO_IMPORTS } from '../../../global/transloco-imports';
 import { TranslocoService } from '@jsverse/transloco';
 import { AppConfirmModalComponent } from '../../shared/modal/confirm-modal.component';
 
-type OptionCategory = 'type' | 'modality' | 'instrument' | 'solvent';
+type OptionCategory = 'chemical_type' | 'modality' | 'instrument' | 'solvent';
 
 @Component({
   selector: 'app-option-management',
@@ -19,13 +19,13 @@ type OptionCategory = 'type' | 'modality' | 'instrument' | 'solvent';
 })
 export class OptionManagementComponent implements OnInit {
   categories: { label: string; value: OptionCategory }[] = [
-    { label: 'selectionOptions.type', value: 'type' },
+    { label: 'selectionOptions.type', value: 'chemical_type' },
     { label: 'selectionOptions.modality', value: 'modality' },
     { label: 'selectionOptions.instrument', value: 'instrument' },
     { label: 'selectionOptions.solvent', value: 'solvent' },
   ];
 
-  selectedCategory: OptionCategory = 'type';
+  selectedCategory: OptionCategory = 'chemical_type';
   options: SelectionOptionDto[] = [];
   isAddOptionModalOpen: boolean = false;
   newOptionValue: string = '';

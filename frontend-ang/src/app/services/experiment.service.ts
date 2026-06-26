@@ -152,7 +152,7 @@ export class ExperimentService {
           return false;
 
         if (searchParams?.scientist?.length > 0) {
-          if (!searchParams.scientist.includes(meta.scientist.uuid)) return false;
+          if (!searchParams.scientist.includes(meta.scientist.id)) return false;
         }
         if (searchParams.solvent && meta.solvent.uuid !== searchParams.solvent) return false;
         if (searchParams.instrument && meta.instrument?.uuid !== searchParams.instrument)

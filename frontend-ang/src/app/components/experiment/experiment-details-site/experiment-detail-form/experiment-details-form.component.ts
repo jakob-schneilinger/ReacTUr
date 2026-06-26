@@ -74,7 +74,7 @@ export class ExperimentDetailsFormComponent implements OnInit, OnDestroy, OnChan
   }
 
   ngOnInit(): void {
-    this.user = this.authService.getLoggedInUser();
+    this.authService.getLoggedInUser().subscribe((value) => this.user = value);
     this.initForm();
     this.setupReactionAutoFill();
     this.loadOptions();
