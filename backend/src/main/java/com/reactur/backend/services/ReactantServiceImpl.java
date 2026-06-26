@@ -34,6 +34,10 @@ public class ReactantServiceImpl implements ReactantService {
     public ReactantDetailDto createReactant(CreateReactantDto saveReactant) {
         Set<String> namesToCheck = collectNames(saveReactant.shortName(), saveReactant.additionalShortNames());
 
+        if (saveReactant.additionalShortNames() != null && saveReactant.additionalShortNames().contains(saveReactant.shortName())) {
+            throw new IllegalArgumentException("The 'shortName' cannot be included in 'additionalShortNames'.");
+        }
+
         if (reactantRepository.hasNameConflict(namesToCheck)) {
             throw new ResourceConflictException("One of the given short names is already used by another reactant");
         }
@@ -77,6 +81,10 @@ public class ReactantServiceImpl implements ReactantService {
         List<String> effectiveAdditionalNames = patchDto.additionalShortNames() != null ? patchDto.additionalShortNames() : reactant.getAdditionalShortNames();
 
         Set<String> namesToCheck = collectNames(effectiveShortName, effectiveAdditionalNames);
+
+        if (patchDto.additionalShortNames() != null && patchDto.shortName() != null && patchDto.additionalShortNames().contains(patchDto.shortName())) {
+            throw new IllegalArgumentException("The 'shortName' cannot be included in 'additionalShortNames'.");
+        }
 
         if (reactantRepository.hasNameConflictExcludingId(namesToCheck, uuid)) {
             throw new ResourceConflictException("One of the short names is already being used by another reactant");
