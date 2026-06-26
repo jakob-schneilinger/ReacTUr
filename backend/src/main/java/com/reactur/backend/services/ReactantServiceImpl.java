@@ -27,6 +27,8 @@ public class ReactantServiceImpl implements ReactantService {
 
     private final ReactantRepository reactantRepository;
 
+    private final UserService userService;
+
     @Override
     @Transactional
     public ReactantDetailDto createReactant(CreateReactantDto saveReactant) {
@@ -48,11 +50,7 @@ public class ReactantServiceImpl implements ReactantService {
             }
         }
 
-        //TODO: Here should be a method to get current User
-        User fallbackUser = new User();
-        fallbackUser.setId("526a3632-b1cd-4c04-b9bc-b4e49453cbb6");
-
-        //TODO: Check if user is admin?
+        User fallbackUser = userService.getCurrentUser().orElseThrow(() -> new RuntimeException("Current User could not be found"));
 
         Reactant reactant = Reactant.builder()
                 .shortName(saveReactant.shortName())
