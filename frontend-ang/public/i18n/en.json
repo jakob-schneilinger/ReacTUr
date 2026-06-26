@@ -172,7 +172,8 @@
           "smilesRequired": "SMILES string is required.",
           "smilesSyntax": "SMILES format is invalid. Please check syntax.",
           "smilesSanitization": "SMILES format is invalid. Molecule structure failed RDKit sanitization.",
-          "invalidType": "Please select a valid type from the list."
+          "invalidType": "Please select a valid type from the list.",
+          "fieldRequired" : "Field is required."
         }
       },
       "modals": {

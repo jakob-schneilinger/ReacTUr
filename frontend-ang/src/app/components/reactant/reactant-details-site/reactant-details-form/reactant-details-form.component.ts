@@ -128,10 +128,10 @@ export class ReactantDetailsFormComponent implements OnInit, OnDestroy {
     if (this.reactantForm && changes['reactant'] && this.reactant) {
       const currentType = this.reactantForm.get('chemicalType')?.value;
 
-      if (currentType !== this.reactant.chemicalType.name) {
+      if (currentType !== this.reactant.chemicalType?.name) {
         this.reactantForm.patchValue({
           ...this.reactant,
-          chemicalType: this.reactant.chemicalType.name,
+          chemicalType: this.reactant.chemicalType?.name,
         });
       }
     }
@@ -161,8 +161,8 @@ export class ReactantDetailsFormComponent implements OnInit, OnDestroy {
     if (this.reactant) {
       this.syncArray('additionalShortNames', this.reactant.additionalShortNames);
       this.syncArray('references', this.reactant.references);
-    } else {
-      this.additionalShortNames.push(this.fb.control(''));
+    } else {this.additionalShortNames.push(
+      this.fb.control(''));
       this.references.push(this.fb.control(''));
     }
 

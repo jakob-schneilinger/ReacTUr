@@ -43,7 +43,6 @@ export class ReactantService {
   }
 
   updateReactant(uuid: string, saveReactant: SaveReactantDto): Observable<ReactantDetailDto> {
-
     return this.httpClient.patch<ReactantDetailDto>(
       `${this.reactantBaseUri}/${uuid}`,
       saveReactant,

@@ -16,6 +16,7 @@ export class DynamicArrayInputComponent {
   @Input() label: string = '';
   @Input() addButtonLabel: string = 'Add field';
   @Input() placeholder: string = 'Value';
+  @Input() errorMessage: string = 'This field cannot be empty';
 
   constructor(
     private fb: FormBuilder,
