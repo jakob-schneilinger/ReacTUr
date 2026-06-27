@@ -36,15 +36,9 @@ public interface ExperimentMapper {
   @Mapping(target = "chemicalType", ignore = true) // TODO: Map to ChemicalTypeDto later
   ReactantDto reactantToReactantDto(Reactant reactant);
 
-
-  // 5. User Stub Mapper (Fixes the UserDto type crashes)
-  default GetUserDto userToGetUserDto(User user) {
-   if (user == null) return null;
-   // TODO: Map this properly using a dedicated UserMapper when GetUserDto fields are finalized.
-   //  Returning null or an empty record stub here ensures the structural compilation passes.
-   return null;
-  }
-
+  // User Mapping
+  @Mapping(target = "deactivatedAt", ignore = true) // TODO: Map this when User entity has a deactivatedAt field
+  GetUserDto userToGetUserDto(User user);
 }
 
 // TODO: Separate this into different mapper classes, as we also added here reactants and other staff that
