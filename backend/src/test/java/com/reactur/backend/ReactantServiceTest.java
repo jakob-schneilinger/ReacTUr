@@ -98,7 +98,7 @@ class ReactantServiceTest {
 
         assertNotNull(result);
         assertEquals(VALID_UUID, result.uuid());
-        assertEquals("Ethanol", result.shortname());
+        assertEquals("Ethanol", result.shortName());
         assertEquals("A test comment", result.comment());
         assertIterableEquals(List.of("EtOH", "Alkohol"), result.additionalShortNames());
         verify(reactantRepository, times(1)).save(any(Reactant.class));
@@ -172,7 +172,7 @@ class ReactantServiceTest {
         ReactantDetailDto result = reactantService.updateReactant(VALID_UUID, patchDto);
 
         assertEquals("Neuer Chemischer Name", result.chemicalName());
-        assertEquals("Ethanol", result.shortname());
+        assertEquals("Ethanol", result.shortName());
         assertEquals("CCO", result.smiles());
     }
 
@@ -201,7 +201,7 @@ class ReactantServiceTest {
 
         assertNotNull(result);
         assertEquals(VALID_UUID, result.uuid());
-        assertEquals("Ethanol", result.shortname());
+        assertEquals("Ethanol", result.shortName());
         assertIterableEquals(List.of("Ref1", "Ref2"), result.references());
     }
 
@@ -220,7 +220,7 @@ class ReactantServiceTest {
 
         assertFalse(result.isEmpty());
         assertEquals(1, result.size());
-        assertEquals("Ethanol", result.getFirst().shortname());
+        assertEquals("Ethanol", result.getFirst().shortName());
     }
 
     @Test
@@ -238,7 +238,7 @@ class ReactantServiceTest {
 
         assertFalse(result.isEmpty());
         assertEquals(1, result.size());
-        assertEquals("Archived Chem", result.getFirst().shortname());
+        assertEquals("Archived Chem", result.getFirst().shortName());
     }
 
     @Test
