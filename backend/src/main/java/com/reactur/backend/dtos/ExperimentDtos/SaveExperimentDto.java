@@ -16,8 +16,6 @@ import java.util.UUID;
  */
 public record SaveExperimentDto(
 
-  // TODO: Change back where scientist was here
-
   @NotNull(message = "Reactant A is required")
   UUID reactantA,  // (Semantic - Service Layer): Verify this UUID actually exists in the Reactant DB table.
 

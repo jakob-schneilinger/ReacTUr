@@ -1,6 +1,7 @@
 package com.reactur.backend.dtos.ExperimentDtos;
 
 import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.PastOrPresent;
 import jakarta.validation.constraints.Positive;
@@ -28,15 +29,9 @@ public record SaveMetadataDto(
   @PastOrPresent(message = "Experiment date cannot be in the future")
   LocalDate date,
 
-  /* TODO: Remove from frontend: It's better, easier, more secure and more consistent(apparently)
-      just to pull from the token who this person is, rather than trusting the user-crafter parameter (we would
-      need to verify it anyways, so...)
-
-  // TODO (Architecture): Consider removing this and pulling from SecurityContext instead.
-  //  If kept: TODO (Frontend): Ensure Angular sends a UUID, not the String fullName.
-  @NotNull(message = "Scientist ID is required")
-  UUID scientist,
-   */
+  @NotBlank(message = "Scientist ID is required")
+  // TODO (Frontend): Ensure Angular sends the Keycloak String ID of the scientist here, NOT their full name (e.g., "f:528a..." not "Marie Curie").
+  String scientist,  // TODO (Semantic - Service Layer): Verify Scient's exists in the database.
 
   @NotNull(message = "Temperature is required")
   @Min(value = -273, message = "Temperature cannot be below absolute zero") // Syntactic chemistry check
