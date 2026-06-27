@@ -170,6 +170,8 @@ public class ReactantServiceImpl implements ReactantService {
         return names;
     }
 
+    // TODO: Substitute private methods with mapper Class (mapper Library) for consistency
+
     private ReactantDetailDto mapToDetailDto(Reactant reactant) {
         return new ReactantDetailDto(
                 reactant.getId(),
