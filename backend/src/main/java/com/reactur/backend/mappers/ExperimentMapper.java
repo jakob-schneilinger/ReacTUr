@@ -29,15 +29,6 @@ public interface ExperimentMapper {
   @Mapping(target = "pFO_rateConstant", source = "pfoRateConstant")
   @Mapping(target = "error", source = "errorValue")
   MeasurementDataDto resultToMeasurementDataDto(ExperimentResult result);
-
-  // The Reactant Mapping
-  @Mapping(target = "uuid", source = "id")
-  @Mapping(target = "chemicalType", source="type")
-  ReactantDto reactantToReactantDto(Reactant reactant);
-
-  // User Mapping
-  @Mapping(target = "deactivatedAt")
-  GetUserDto userToGetUserDto(User user);
 }
 
 // TODO: Separate this into different mapper classes, as we also added here reactants and other staff that

@@ -11,6 +11,8 @@ import com.reactur.backend.entities.SelectionOptions.Modality;
 import com.reactur.backend.entities.SelectionOptions.Solvent;
 import com.reactur.backend.entities.User;
 import com.reactur.backend.mappers.ExperimentMapper;
+import com.reactur.backend.mappers.ReactantMapper;
+import com.reactur.backend.mappers.UserMapper;
 import com.reactur.backend.repositories.AuditLogRepository;
 import com.reactur.backend.repositories.ExperimentRepository;
 
@@ -20,6 +22,7 @@ import com.reactur.backend.repositories.ReactantRepository;
 import com.reactur.backend.repositories.SolventRepository;
 import com.reactur.backend.repositories.UserRepository;
 import com.reactur.backend.services.implementations.ExperimentServiceImpl;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mapstruct.factory.Mappers;
@@ -29,6 +32,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -50,8 +54,10 @@ class ExperimentServiceTest {
   @Mock private UserRepository userRepository;
   @Mock private AuditLogRepository auditLogRepository;
 
-  @Spy  // We actually want to use here the mapper rather than a Mock. This way we also test the Mapper.
-  private ExperimentMapper experimentMapper = Mappers.getMapper(ExperimentMapper.class);
+  // We actually want to use here the mapper rather than a Mock. This way we also test the Mapper.
+  @Spy private ExperimentMapper experimentMapper = Mappers.getMapper(ExperimentMapper.class);
+  @Spy private ReactantMapper reactantMapper = Mappers.getMapper(ReactantMapper.class);
+  @Spy private UserMapper userMapper = Mappers.getMapper(UserMapper.class);
 
   // Mockito will take the mocked Repositories
   // and inject them into this real Service instance.
@@ -59,6 +65,13 @@ class ExperimentServiceTest {
   private ExperimentServiceImpl experimentService;  // Because of the junit-mockito test,
                                                     // we cannot auto-wire the interface and need to specify the
                                                     // concrete class
+
+  @BeforeEach
+  void setUp() {
+    // Manually wire the nested mappers into the main ExperimentMapper
+    ReflectionTestUtils.setField(experimentMapper, "reactantMapper", reactantMapper);
+    ReflectionTestUtils.setField(experimentMapper, "userMapper", userMapper);
+  }
 
   @Test
   void createExperiment_whenValidInput_returnsGetExperimentDto() {
