@@ -237,9 +237,9 @@ export class ReactantDetailsFormComponent implements OnInit, OnDestroy {
             this.notification.error(
               this.transloco.translate('reactants.details.notifications.saveErrorTitle'),
               this.transloco.translate('reactants.details.notifications.saveErrorMessage', {
-                error: err.message || err.error || err,
+                error: err.error || err.message || err,
               }),
-            )
+            );
           }
         });
       } else {
@@ -256,7 +256,7 @@ export class ReactantDetailsFormComponent implements OnInit, OnDestroy {
             this.notification.error(
               this.transloco.translate('reactants.details.notifications.saveErrorTitle'),
               this.transloco.translate('reactants.details.notifications.saveErrorMessage', {
-                error: err.message || err.error || err,
+                error: err.error || err.message || err,
               }),
             ),
         });
