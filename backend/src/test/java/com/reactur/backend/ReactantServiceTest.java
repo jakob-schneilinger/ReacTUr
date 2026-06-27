@@ -1,6 +1,6 @@
 package com.reactur.backend;
 
-import com.reactur.backend.Validators.ReactantValidator;
+import com.reactur.backend.validators.ReactantValidator;
 import com.reactur.backend.dtos.ReactantDtos.CreateReactantDto;
 import com.reactur.backend.dtos.ReactantDtos.ReactantDetailDto;
 import com.reactur.backend.dtos.ReactantDtos.ReactantDto;
