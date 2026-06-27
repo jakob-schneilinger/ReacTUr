@@ -10,6 +10,7 @@ import com.reactur.backend.entities.SelectionOptions.Instrument;
 import com.reactur.backend.entities.SelectionOptions.Modality;
 import com.reactur.backend.entities.SelectionOptions.Solvent;
 import com.reactur.backend.entities.User;
+import com.reactur.backend.exeptions.UnprocessableEntityException;
 import com.reactur.backend.mappers.ExperimentMapper;
 import com.reactur.backend.mappers.ReactantMapper;
 import com.reactur.backend.mappers.UserMapper;
@@ -40,6 +41,8 @@ import java.util.UUID;
 import static java.util.UUID.randomUUID;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
@@ -170,6 +173,78 @@ class ExperimentServiceTest {
 
     assertNotNull(result.metadata(), "The returned metadata DTO should not be null");
     assertEquals(25.0, result.metadata().temperature());
+  }
+
+  @Test
+  void createExperiment_whenCreatorNotFound_throwsIllegalStateException() {
+    String invalidUserId = "non-existent-token-id";
+    SaveExperimentDto validDto = createDummyExperimentDto();
+
+    // Token user doesn't exist in the database
+    when(userRepository.findById(invalidUserId)).thenReturn(Optional.empty());
+
+    IllegalStateException exception = assertThrows(
+      IllegalStateException.class,
+      () -> experimentService.createExperiment(validDto, invalidUserId)
+    );
+
+    assertTrue(exception.getMessage().contains("Authenticated user lacks internal profile"));
+
+    Mockito.verify(experimentRepository, Mockito.never()).save(any());
+  }
+
+  @Test
+  void createExperiment_whenScientistNotFound_throwsUnprocessableEntityException() {
+    String validUserId = "mock-keycloak-id-123";
+    SaveExperimentDto validDto = createDummyExperimentDto();
+
+    // Token user exists, but the scientist in the DTO does not
+    when(userRepository.findById(validUserId)).thenReturn(Optional.of(new User()));
+    when(userRepository.findById(validDto.metadata().scientist())).thenReturn(Optional.empty());
+
+    UnprocessableEntityException exception = assertThrows(UnprocessableEntityException.class, () -> {
+      experimentService.createExperiment(validDto, validUserId);
+    });
+
+    assertTrue(exception.getMessage().contains("Scientist with ID"));
+
+    Mockito.verify(experimentRepository, Mockito.never()).save(any());
+  }
+
+  @Test
+  void createExperiment_whenReactantIsMissing_throwsUnprocessableEntityException() {
+    String validUserId = "mock-keycloak-id-123";
+    SaveExperimentDto validDto = createDummyExperimentDto();
+
+    // Reactant does not exist
+    when(userRepository.findById(validUserId)).thenReturn(Optional.of(new User()));
+    when(userRepository.findById(validDto.metadata().scientist())).thenReturn(Optional.of(new User()));
+    when(reactantRepository.findById(validDto.reactantA())).thenReturn(Optional.empty());
+
+    UnprocessableEntityException exception = assertThrows(UnprocessableEntityException.class, () -> {
+      experimentService.createExperiment(validDto, validUserId);
+    });
+
+    assertTrue(exception.getMessage().contains("Reactant A does not exist"));
+    Mockito.verify(experimentRepository, Mockito.never()).save(any());
+  }
+
+  private SaveExperimentDto createDummyExperimentDto() {
+    SaveMetadataDto metadata = new SaveMetadataDto(
+      java.time.LocalDate.now().minusDays(1),
+      "mock-scientist-id-456",
+      25.0,
+      randomUUID(),
+      1.5,
+      2.0,
+      randomUUID(),
+      randomUUID(),
+      450.0,
+      "Test"
+    );
+    return new SaveExperimentDto(
+      randomUUID(), randomUUID(), metadata, new MeasurementDataDto(1.2, 5.5, 0.1, false), "10.1000/rxn123"
+    );
   }
 
 }
