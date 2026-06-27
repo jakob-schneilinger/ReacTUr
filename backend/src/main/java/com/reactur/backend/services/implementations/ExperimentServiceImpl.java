@@ -12,7 +12,7 @@ import com.reactur.backend.entities.SelectionOptions.Modality;
 import com.reactur.backend.entities.SelectionOptions.Solvent;
 import com.reactur.backend.entities.User;
 import com.reactur.backend.enums.AuditAction;
-import com.reactur.backend.exeptions.ResourceNotFoundException;
+import com.reactur.backend.exeptions.UnprocessableEntityException;
 import com.reactur.backend.mappers.ExperimentMapper;
 import com.reactur.backend.repositories.AuditLogRepository;
 import com.reactur.backend.repositories.ExperimentRepository;
@@ -60,31 +60,31 @@ public class ExperimentServiceImpl implements ExperimentService {
 
     // Who actually performed the experiment: (Extracted from DTO payload)
     User scientist = userRepository.findById(experimentDto.metadata().scientist())
-      .orElseThrow(() -> new ResourceNotFoundException(
+      .orElseThrow(() -> new UnprocessableEntityException(
         "Scientist with ID " + experimentDto.metadata().scientist() + " not found."
       ));
 
     // TODO: Move to Validator? We can discuss Later
 
     Reactant reactantA = reactantRepository.findById(experimentDto.reactantA())
-      .orElseThrow(() -> new ResourceNotFoundException("Reactant A does not exist."));
+      .orElseThrow(() -> new UnprocessableEntityException("Reactant A does not exist."));
 
     Reactant reactantB = reactantRepository.findById(experimentDto.reactantB())
-      .orElseThrow(() -> new ResourceNotFoundException("Reactant B does not exist."));
+      .orElseThrow(() -> new UnprocessableEntityException("Reactant B does not exist."));
 
     Solvent solvent = solventRepository.findById(experimentDto.metadata().solvent())
-      .orElseThrow(() -> new ResourceNotFoundException("Solvent does not exist."));
+      .orElseThrow(() -> new UnprocessableEntityException("Solvent does not exist."));
 
     Instrument instrument = null;
     if (experimentDto.metadata().instrument() != null) {
       instrument = instrumentRepository.findById(experimentDto.metadata().instrument())
-        .orElseThrow(() -> new ResourceNotFoundException("Instrument does not exist."));
+        .orElseThrow(() -> new UnprocessableEntityException("Instrument does not exist."));
     }
 
     Modality modality = null;
     if (experimentDto.metadata().modality() != null) {
       modality = modalityRepository.findById(experimentDto.metadata().modality())
-        .orElseThrow(() -> new ResourceNotFoundException("Modality does not exist."));
+        .orElseThrow(() -> new UnprocessableEntityException("Modality does not exist."));
     }
 
     log.debug("All chemical and lookup entities successfully validated and fetched.");
