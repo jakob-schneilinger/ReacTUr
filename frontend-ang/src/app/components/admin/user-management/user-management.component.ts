@@ -65,9 +65,16 @@ export class UserManagementComponent implements OnInit {
 
     const filteredBySearch = this.allUsers.filter((user) => {
       if (!search) return true;
+
+      const firstName = user.firstName?.toLowerCase() || '';
+      const lastName = user.lastName?.toLowerCase() || '';
+
+      const fullName = `${firstName} ${lastName}`.trim();
+      const reverseName = `${lastName} ${firstName}`.trim();
+
       return (
-        user.firstName?.toLowerCase().includes(search) ||
-        user.lastName?.toLowerCase().includes(search) ||
+        fullName.includes(search) ||
+        reverseName.includes(search) ||
         user.email?.toLowerCase().includes(search) ||
         user.role?.toLowerCase().includes(search)
       );

@@ -14,7 +14,7 @@ export class AuthGuard {
     if (this.authService.isLoggedIn()) {
       return true; // User darf auf /home
     } else {
-      this.router.navigate(['/login']);
+      this.authService.login(state.url);
       return false;
     }
   }

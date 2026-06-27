@@ -28,14 +28,20 @@ export class AuthService {
       .loadDiscoveryDocumentAndTryLogin()
       .then((success) => {
         if (success && this.oauthService.hasValidAccessToken()) {
-          this.router.navigate(['/search']);
+          const targetUrl = this.oauthService.state;
+
+          if (targetUrl && targetUrl !== '/search' && targetUrl !== '/') {
+            setTimeout(() => {
+              this.router.navigateByUrl(targetUrl);
+            });
+          }
         }
         return success;
       });
   }
 
-  public login() {
-    this.oauthService.initCodeFlow();
+  public login(targetUrl: string = this.router.url) {
+    this.oauthService.initCodeFlow(targetUrl);
   }
 
   public logout() {
@@ -65,7 +71,7 @@ export class AuthService {
       return of(null);
     }
 
-    const id = "" + claims['sub'];
+    const id = '' + claims['sub'];
 
     return this.userService.getUserRole(id).pipe(
       map((roleDto: RoleDto) => {
