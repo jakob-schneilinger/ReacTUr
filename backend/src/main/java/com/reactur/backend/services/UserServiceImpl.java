@@ -4,6 +4,7 @@ import com.reactur.backend.dtos.GetUserDto;
 import com.reactur.backend.dtos.RoleDto;
 import com.reactur.backend.entities.User;
 import com.reactur.backend.exeptions.ResourceNotFoundException;
+import com.reactur.backend.mappers.UserMapper;
 import com.reactur.backend.repositories.UserRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
@@ -24,6 +25,7 @@ import java.util.stream.Collectors;
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
+    private final UserMapper userMapper;
 
     public Optional<User> getCurrentUser() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -40,7 +42,7 @@ public class UserServiceImpl implements UserService {
     public List<GetUserDto> getAllUsers() {
         log.debug("Fetching all users from the database");
         List<GetUserDto> users = userRepository.findAll().stream()
-                .map(this::mapToDto)
+                .map(userMapper::toDto)
                 .collect(Collectors.toList());
         log.info("Successfully retrieved {} users", users.size());
         return users;
@@ -109,13 +111,4 @@ public class UserServiceImpl implements UserService {
                 });
     }
 
-    private GetUserDto mapToDto(User user) {
-        return new GetUserDto(
-                user.getId(),
-                user.getFirstName(),
-                user.getLastName(),
-                user.getRole(),
-                user.getDeactivatedAt()
-        );
-    }
 }

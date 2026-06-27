@@ -7,8 +7,8 @@ import com.reactur.backend.dtos.ReactantDtos.ReactantDto;
 import com.reactur.backend.dtos.ReactantDtos.UpdateReactantDto;
 import com.reactur.backend.entities.Reactant;
 import com.reactur.backend.entities.User;
-import com.reactur.backend.exeptions.ResourceConflictException;
 import com.reactur.backend.exeptions.ResourceNotFoundException;
+import com.reactur.backend.mappers.ReactantMapper;
 import com.reactur.backend.repositories.ReactantRepository;
 import org.springframework.transaction.annotation.Transactional;
 import lombok.AllArgsConstructor;
@@ -16,9 +16,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.Instant;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -29,6 +27,7 @@ public class ReactantServiceImpl implements ReactantService {
     private final ReactantRepository reactantRepository;
     private final UserService userService;
     private final ReactantValidator reactantValidator;
+    private final ReactantMapper reactantMapper;
 
     @Override
     @Transactional
@@ -50,7 +49,7 @@ public class ReactantServiceImpl implements ReactantService {
                 .createdBy(activeUser)
                 .build();
 
-        return mapToDetailDto(reactantRepository.save(reactant));
+        return reactantMapper.toDetailDto(reactantRepository.save(reactant));
     }
 
     @Override
@@ -77,7 +76,7 @@ public class ReactantServiceImpl implements ReactantService {
             reactant.setReferences(new ArrayList<>(patchDto.references()));
         }
 
-        return mapToDetailDto(reactantRepository.save(reactant));
+        return reactantMapper.toDetailDto(reactantRepository.save(reactant));
     }
 
     @Override
@@ -85,14 +84,14 @@ public class ReactantServiceImpl implements ReactantService {
     public ReactantDetailDto getReactantDetail(UUID uuid) {
         Reactant reactant = reactantRepository.findById(uuid)
                 .orElseThrow(() -> new ResourceNotFoundException("Reactant with ID " + uuid + " not found"));
-        return mapToDetailDto(reactant);
+        return reactantMapper.toDetailDto(reactant);
     }
 
     @Override
     @Transactional(readOnly = true)
     public List<ReactantDto> getAllReactants() {
         return reactantRepository.findAllByArchivedAtIsNull().stream()
-                .map(this::mapToDto)
+                .map(reactantMapper::toDto)
                 .collect(Collectors.toList());
     }
 
@@ -100,7 +99,7 @@ public class ReactantServiceImpl implements ReactantService {
     @Transactional(readOnly = true)
     public List<ReactantDto> getArchivedReactants() {
         return reactantRepository.findAllByArchivedAtIsNotNull().stream()
-                .map(this::mapToDto)
+                .map(reactantMapper::toDto)
                 .collect(Collectors.toList());
     }
 
@@ -121,32 +120,6 @@ public class ReactantServiceImpl implements ReactantService {
                 .orElseThrow(() -> new ResourceNotFoundException("Reactant with ID " + uuid + " not found"));
 
         reactant.setArchivedAt(null);
-        return mapToDto(reactantRepository.save(reactant));
-    }
-
-    private ReactantDetailDto mapToDetailDto(Reactant reactant) {
-        return new ReactantDetailDto(
-                reactant.getId(),
-                reactant.getSmiles(),
-                null, // TODO: Get Type method should be inserted here !
-                reactant.getShortName(),
-                reactant.getAdditionalShortNames(),
-                reactant.getChemicalName(),
-                reactant.getCasNumber(),
-                reactant.getInChiKey(),
-                reactant.getComment(),
-                reactant.getReferences(),
-                reactant.getArchivedAt()
-        );
-    }
-
-    private ReactantDto mapToDto(Reactant reactant) {
-        return new ReactantDto(
-                reactant.getId(),
-                reactant.getSmiles(),
-                null, // TODO: Get Type method should be inserted here !
-                reactant.getShortName(),
-                reactant.getChemicalName()
-        );
+        return reactantMapper.toDto(reactantRepository.save(reactant));
     }
 }

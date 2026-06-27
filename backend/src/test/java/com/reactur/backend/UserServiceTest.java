@@ -5,11 +5,13 @@ import com.reactur.backend.dtos.RoleDto;
 import com.reactur.backend.entities.User;
 import com.reactur.backend.enums.Role;
 import com.reactur.backend.exeptions.ResourceNotFoundException;
+import com.reactur.backend.mappers.UserMapper;
 import com.reactur.backend.repositories.UserRepository;
 import com.reactur.backend.services.UserServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mapstruct.factory.Mappers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -40,7 +42,6 @@ public class UserServiceTest {
     @Mock
     private UserRepository userRepository;
 
-    @InjectMocks
     private UserServiceImpl userService;
 
     private User mockUser;
@@ -48,6 +49,9 @@ public class UserServiceTest {
 
     @BeforeEach
     void setUp() {
+        UserMapper userMapper = Mappers.getMapper(UserMapper.class);
+        userService = new UserServiceImpl(userRepository, userMapper);
+
         mockUser = new User();
         mockUser.setId(STRING_ID);
         mockUser.setFirstName("John");

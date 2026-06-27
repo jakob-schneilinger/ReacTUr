@@ -9,14 +9,14 @@ import com.reactur.backend.entities.Reactant;
 import com.reactur.backend.entities.User;
 import com.reactur.backend.exeptions.ResourceConflictException;
 import com.reactur.backend.exeptions.ResourceNotFoundException;
+import com.reactur.backend.mappers.ReactantMapper;
 import com.reactur.backend.repositories.ReactantRepository;
-import com.reactur.backend.repositories.UserRepository;
 import com.reactur.backend.services.ReactantServiceImpl;
 import com.reactur.backend.services.UserService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
+import org.mapstruct.factory.Mappers;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -46,10 +46,7 @@ class ReactantServiceTest {
     @Mock
     private UserService userService;
 
-    private ReactantValidator validator;
-
     private ReactantServiceImpl reactantService;
-
     private CreateReactantDto sampleCreateDto;
     private UpdateReactantDto sampleUpdateDto;
     private User mockUser;
@@ -58,9 +55,10 @@ class ReactantServiceTest {
 
     @BeforeEach
     void setUp() {
-        validator = new ReactantValidator(reactantRepository);
+        ReactantValidator validator = new ReactantValidator(reactantRepository);
+        ReactantMapper reactantMapper = Mappers.getMapper(ReactantMapper.class);
 
-        reactantService = new ReactantServiceImpl(reactantRepository, userService, validator);
+        reactantService = new ReactantServiceImpl(reactantRepository, userService, validator, reactantMapper);
 
         mockUser = new User();
         mockUser.setId("User123");
