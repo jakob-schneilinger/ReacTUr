@@ -33,11 +33,11 @@ public interface ExperimentMapper {
 
   // The Reactant Mapping
   @Mapping(target = "uuid", source = "id")
-  @Mapping(target = "chemicalType", ignore = true) // TODO: Map to ChemicalTypeDto later
+  @Mapping(target = "chemicalType", source="type")
   ReactantDto reactantToReactantDto(Reactant reactant);
 
   // User Mapping
-  @Mapping(target = "deactivatedAt", ignore = true) // TODO: Map this when User entity has a deactivatedAt field
+  @Mapping(target = "deactivatedAt")
   GetUserDto userToGetUserDto(User user);
 }
 
