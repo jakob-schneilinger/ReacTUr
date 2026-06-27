@@ -15,6 +15,9 @@ import java.util.UUID;
  * @param doi             The Digital Object Identifier (optional).
  */
 public record SaveExperimentDto(
+
+  // TODO: Change back where scientist was here
+
   @NotNull(message = "Reactant A is required")
   UUID reactantA,  // (Semantic - Service Layer): Verify this UUID actually exists in the Reactant DB table.
 

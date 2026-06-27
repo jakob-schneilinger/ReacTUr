@@ -47,11 +47,15 @@ public class ExperimentServiceImpl implements ExperimentService {
 
     // First, semantic Validation
 
+    // TODO: scientist should not be active user but should come from request
+
     User scientist = userRepository.findById(userId)
       .orElseThrow(() -> {
         log.error("CRITICAL: Authenticated Keycloak user {} not found in internal database. UserSyncFilter may have failed.", userId);
         return new IllegalStateException("System state error: Authenticated user lacks internal profile.");
       });
+
+    // TODO: Use Conflict Exception and move to Validator
 
     Reactant reactantA = reactantRepository.findById(experimentDto.reactantA())
       .orElseThrow(() -> new IllegalArgumentException("Reactant A does not exist."));
@@ -80,7 +84,7 @@ public class ExperimentServiceImpl implements ExperimentService {
 
     Metadata metadata = Metadata.builder()
       .date(experimentDto.metadata().date())
-      .scientist(scientist)
+      .scientist(scientist) // TODO: Change this
       .temperature(experimentDto.metadata().temperature())
       .solvent(solvent)
       .concentrationA(experimentDto.metadata().concentrationA())
@@ -112,6 +116,8 @@ public class ExperimentServiceImpl implements ExperimentService {
     Experiment savedExperiment = experimentRepository.save(experimentToSave);
 
     log.info("Successfully saved Experiment with internal ID: {}", savedExperiment.getId());
+
+    // TODO: Should be moved to AuditService (later)
 
     AuditLog auditLog = AuditLog.builder()
       .experimentId(savedExperiment.getId())

@@ -54,6 +54,8 @@ public class ExperimentEndpoint {
       @AuthenticationPrincipal Jwt jwt  // Authentication data should come from the token, not from the user's request
     ) {
 
+        // TODO: Remove get Jwt here and use getCurrentUser form UserService in Service
+
         String userId = jwt.getSubject();
 
         log.info("POST /api/experiment called by User ID: {}. ReactantA: {}, ReactantB: {}",

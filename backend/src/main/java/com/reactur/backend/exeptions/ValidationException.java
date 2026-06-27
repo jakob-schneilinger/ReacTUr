@@ -1,6 +1,5 @@
 package com.reactur.backend.exeptions;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
