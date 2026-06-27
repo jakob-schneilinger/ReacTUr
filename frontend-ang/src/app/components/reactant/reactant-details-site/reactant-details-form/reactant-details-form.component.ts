@@ -199,9 +199,9 @@ export class ReactantDetailsFormComponent implements OnInit, OnDestroy {
     const formArray = this.reactantForm.get(arrayName) as FormArray;
     formArray.clear();
     if (data && data.length > 0) {
-      data.forEach((item) => formArray.push(this.fb.control(item, Validators.required)));
+      data.forEach((item) => formArray.push(this.fb.control(item)));
     } else {
-      formArray.push(this.fb.control('', Validators.required));
+      formArray.push(this.fb.control(''));
     }
   }
 
@@ -219,6 +219,9 @@ export class ReactantDetailsFormComponent implements OnInit, OnDestroy {
     if (this.reactantForm.valid) {
       const formValue = this.reactantForm.getRawValue();
       formValue.chemicalType = this.chemicalTypes.find((t) => t.name === formValue.chemicalType)?.uuid;
+
+      formValue.additionalShortNames = formValue.additionalShortNames.filter((val: string) => val && val.trim() !== '');
+      formValue.references = formValue.references.filter((val: string) => val && val.trim() !== '');
 
       if (!this.isEditMode) {
         this.reactantService.createReactant(formValue).subscribe({

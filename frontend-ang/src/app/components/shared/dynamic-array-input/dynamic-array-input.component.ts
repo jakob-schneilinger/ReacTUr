@@ -16,7 +16,6 @@ export class DynamicArrayInputComponent {
   @Input() label: string = '';
   @Input() addButtonLabel: string = 'Add field';
   @Input() placeholder: string = 'Value';
-  @Input() errorMessage: string = 'This field cannot be empty';
 
   constructor(
     private fb: FormBuilder,
@@ -37,7 +36,7 @@ export class DynamicArrayInputComponent {
       );
       return;
     }
-    this.formArray.push(this.fb.control('', Validators.required));
+    this.formArray.push(this.fb.control(''));
     this.cdr.markForCheck();
 
     setTimeout(() => {
