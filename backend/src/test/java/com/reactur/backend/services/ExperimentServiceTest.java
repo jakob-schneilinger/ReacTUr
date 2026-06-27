@@ -77,6 +77,7 @@ class ExperimentServiceTest {
   void createExperiment_whenValidInput_returnsGetExperimentDto() {
 
     String userId = "mock-keycloak-id-123";
+    String scientistId = "mock-scientist-id-456";
     UUID reactantAId = randomUUID();
     UUID reactantBId = randomUUID();
     UUID solventId = randomUUID();
@@ -85,6 +86,7 @@ class ExperimentServiceTest {
 
     SaveMetadataDto validMetadata = new SaveMetadataDto(
       java.time.LocalDate.now().minusDays(1),
+      scientistId,
       25.0,
       solventId,
       1.5,
@@ -102,9 +104,13 @@ class ExperimentServiceTest {
     );
 
     // ... create Mocks with the response-data:
-    User mockUser = new User();
-    mockUser.setId(userId);
-    when(userRepository.findById(userId)).thenReturn(Optional.of(mockUser));
+    User mockCreator = new User();
+    mockCreator.setId(userId);
+    when(userRepository.findById(userId)).thenReturn(Optional.of(mockCreator));
+
+    User mockScientist = new User();
+    mockScientist.setId(scientistId);
+    when(userRepository.findById(scientistId)).thenReturn(Optional.of(mockScientist));
 
     Reactant mockReactantA = new Reactant();
     mockReactantA.setId(reactantAId);
@@ -151,7 +157,11 @@ class ExperimentServiceTest {
     assertEquals("10.1000/rxn123", capturedEntity.getDoi());
     assertEquals(reactantAId, capturedEntity.getReactantA().getId(), "Reactant A was not mapped correctly");
     assertEquals(solventId, capturedEntity.getMetadata().getSolvent().getId(), "Solvent was not mapped correctly");
-    assertEquals(userId, capturedEntity.getCreatedBy().getId(), "User was not mapped correctly");
+
+    // Delegated creation logic:
+    assertEquals(userId, capturedEntity.getCreatedBy().getId(), "Creator should be the token user");
+    assertEquals(scientistId, capturedEntity.getMetadata().getScientist().getId(), "Scientist should be from the DTO");
+
     assertEquals(25.0, capturedEntity.getMetadata().getTemperature(), "Temperature was not mapped correctly");
 
     // Asserting the returned value (Mappers)

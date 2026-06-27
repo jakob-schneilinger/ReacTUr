@@ -12,6 +12,7 @@ import com.reactur.backend.entities.SelectionOptions.Modality;
 import com.reactur.backend.entities.SelectionOptions.Solvent;
 import com.reactur.backend.entities.User;
 import com.reactur.backend.enums.AuditAction;
+import com.reactur.backend.exeptions.ResourceNotFoundException;
 import com.reactur.backend.mappers.ExperimentMapper;
 import com.reactur.backend.repositories.AuditLogRepository;
 import com.reactur.backend.repositories.ExperimentRepository;
@@ -47,35 +48,43 @@ public class ExperimentServiceImpl implements ExperimentService {
 
     // First, semantic Validation
 
-    // TODO: scientist should not be active user but should come from request
-
-    User scientist = userRepository.findById(userId)
+    // Who physically clicks 'Save': (Extracted from Keycloak Token)
+    User creator = userRepository.findById(userId)
       .orElseThrow(() -> {
-        log.error("CRITICAL: Authenticated Keycloak user {} not found in internal database. UserSyncFilter may have failed.", userId);
+        log.error(
+          "CRITICAL: Authenticated Keycloak user {} not found in internal database. " +
+            "UserSyncFilter may have failed.", userId
+        );
         return new IllegalStateException("System state error: Authenticated user lacks internal profile.");
       });
 
-    // TODO: Use Conflict Exception and move to Validator
+    // Who actually performed the experiment: (Extracted from DTO payload)
+    User scientist = userRepository.findById(experimentDto.metadata().scientist())
+      .orElseThrow(() -> new ResourceNotFoundException(
+        "Scientist with ID " + experimentDto.metadata().scientist() + " not found."
+      ));
+
+    // TODO: Move to Validator? We can discuss Later
 
     Reactant reactantA = reactantRepository.findById(experimentDto.reactantA())
-      .orElseThrow(() -> new IllegalArgumentException("Reactant A does not exist."));
+      .orElseThrow(() -> new ResourceNotFoundException("Reactant A does not exist."));
 
     Reactant reactantB = reactantRepository.findById(experimentDto.reactantB())
-      .orElseThrow(() -> new IllegalArgumentException("Reactant B does not exist."));
+      .orElseThrow(() -> new ResourceNotFoundException("Reactant B does not exist."));
 
     Solvent solvent = solventRepository.findById(experimentDto.metadata().solvent())
-      .orElseThrow(() -> new IllegalArgumentException("Solvent does not exist."));
+      .orElseThrow(() -> new ResourceNotFoundException("Solvent does not exist."));
 
     Instrument instrument = null;
     if (experimentDto.metadata().instrument() != null) {
       instrument = instrumentRepository.findById(experimentDto.metadata().instrument())
-        .orElseThrow(() -> new IllegalArgumentException("Instrument does not exist."));
+        .orElseThrow(() -> new ResourceNotFoundException("Instrument does not exist."));
     }
 
     Modality modality = null;
     if (experimentDto.metadata().modality() != null) {
       modality = modalityRepository.findById(experimentDto.metadata().modality())
-        .orElseThrow(() -> new IllegalArgumentException("Modality does not exist."));
+        .orElseThrow(() -> new ResourceNotFoundException("Modality does not exist."));
     }
 
     log.debug("All chemical and lookup entities successfully validated and fetched.");
@@ -84,7 +93,7 @@ public class ExperimentServiceImpl implements ExperimentService {
 
     Metadata metadata = Metadata.builder()
       .date(experimentDto.metadata().date())
-      .scientist(scientist) // TODO: Change this
+      .scientist(scientist)
       .temperature(experimentDto.metadata().temperature())
       .solvent(solvent)
       .concentrationA(experimentDto.metadata().concentrationA())
@@ -108,7 +117,7 @@ public class ExperimentServiceImpl implements ExperimentService {
       .reactantB(reactantB)
       .metadata(metadata)
       .result(result)
-      .createdBy(scientist)
+      .createdBy(creator)
       .build();
 
     // ... aand saving the entities + the loggers

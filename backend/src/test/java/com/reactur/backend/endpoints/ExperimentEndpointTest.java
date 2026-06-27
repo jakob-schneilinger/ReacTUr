@@ -56,7 +56,7 @@ class ExperimentEndpointTest {
 
     SaveMetadataDto validMetadata = new SaveMetadataDto(
       LocalDate.now().minusDays(1), // Yesterday (Valid)
-      // UUID.randomUUID(),            // Scientist ID
+      "mock-scientist-id-456",      // Scientist String ID
       25.0,                         // Temperature
       UUID.randomUUID(),            // Solvent ID
       1.5,                          // Concentration A (Positive)
@@ -123,7 +123,7 @@ class ExperimentEndpointTest {
 
     SaveMetadataDto validMetadata = new SaveMetadataDto(
       LocalDate.now(),
-      // UUID.randomUUID(),
+      "mock-scientist-id-456",
       25.0,
       UUID.randomUUID(),
       1.5,
