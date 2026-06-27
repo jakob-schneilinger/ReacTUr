@@ -17,3 +17,14 @@ spring:
       resourceserver:
         jwt:
           issuer-uri: http://localhost:8081/realms/test
+# TODO: Configure loggers
+#logging:
+#  level:
+#    root: INFO
+#    com.reactur.backend: TRACE
+#  file:
+#    name: logs/reactur.log
+#  logback:
+#    rollingpolicy:
+#      file-name-pattern: logs/reactur-%d{yyyy-MM-dd}.log
+#      max-history: 30
