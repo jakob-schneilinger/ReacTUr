@@ -4,14 +4,19 @@ import com.reactur.backend.dtos.GetUserDto;
 import com.reactur.backend.dtos.RoleDto;
 import com.reactur.backend.entities.User;
 import com.reactur.backend.exeptions.ResourceNotFoundException;
+import com.reactur.backend.mappers.UserMapper;
 import com.reactur.backend.repositories.UserRepository;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -20,13 +25,24 @@ import java.util.stream.Collectors;
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
+    private final UserMapper userMapper;
+
+    public Optional<User> getCurrentUser() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        if (authentication != null && authentication.getPrincipal() instanceof Jwt jwt) {
+            String keycloakId = jwt.getSubject();
+            return userRepository.findById(keycloakId);
+        }
+        return Optional.empty();
+    }
 
     @Override
     @Transactional(readOnly = true)
     public List<GetUserDto> getAllUsers() {
         log.debug("Fetching all users from the database");
         List<GetUserDto> users = userRepository.findAll().stream()
-                .map(this::mapToDto)
+                .map(userMapper::toDto)
                 .collect(Collectors.toList());
         log.info("Successfully retrieved {} users", users.size());
         return users;
@@ -95,13 +111,4 @@ public class UserServiceImpl implements UserService {
                 });
     }
 
-    private GetUserDto mapToDto(User user) {
-        return new GetUserDto(
-                user.getId(),
-                user.getFirstName(),
-                user.getLastName(),
-                user.getRole(),
-                user.getDeactivatedAt()
-        );
-    }
 }

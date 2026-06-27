@@ -18,15 +18,14 @@ export interface UserUpdateDto {
 
 // new
 export interface GetUserDto {
-  uuid: string;
+  id: string;
   firstName: string;
   lastName: string;
   email: string;
-  role: Role | null;
+  role: Role;
   deactivatedAt: string | null;
 }
 
-export interface SetRoleDto {
-  uuid: string; //user
+export interface RoleDto {
   role: Role;
 }

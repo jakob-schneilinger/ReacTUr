@@ -172,7 +172,8 @@
           "smilesRequired": "SMILES string is required.",
           "smilesSyntax": "SMILES format is invalid. Please check syntax.",
           "smilesSanitization": "SMILES format is invalid. Molecule structure failed RDKit sanitization.",
-          "invalidType": "Please select a valid type from the list."
+          "invalidType": "Please select a valid type from the list.",
+          "fieldRequired" : "Field is required."
         }
       },
       "modals": {
@@ -195,6 +196,8 @@
         "typeLoadErrorMessage": "Please refresh page! Error: {{error}}",
         "savedTitle": "Reactant Saved",
         "savedMessage": "Reactant was saved successfully!",
+        "saveErrorTitle": "Save failed",
+        "saveErrorMessage": "Saving of Reactant failed! Error: {{error}}",
         "archivedTitle": "Reactant Archived",
         "archivedMessage": "The reactant \"{{name}}\" was successfully archived.",
         "archiveFailedTitle": "Archive Failed",

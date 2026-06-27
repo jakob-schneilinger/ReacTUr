@@ -16,7 +16,7 @@ export interface BaseOptionDto {
   archivedAt: string | null;
 }
 
-export type OptionCategory = 'type' | 'modality' | 'instrument' | 'solvent';
+export type OptionCategory = 'chemical_type' | 'modality' | 'instrument' | 'solvent';
 
 @Injectable({
   providedIn: 'root',
@@ -25,7 +25,7 @@ export class OptionService {
   private optionBaseUri: string;
 
   private mockData: Record<OptionCategory, BaseOptionDto[]> = {
-    type: Object.values(MOCK_CHEM_TYPES),
+    chemical_type: Object.values(MOCK_CHEM_TYPES),
     solvent: Object.values(MOCK_SOLVENTS),
     instrument: Object.values(MOCK_INSTRUMENTS),
     modality: Object.values(MOCK_MODALITIES),
@@ -77,14 +77,14 @@ export class OptionService {
       return throwError(() => new Error(`Option with uuid ${uuid} not found.`));
     }
 
-    if (!isActive && (foundCategory === 'type' || foundCategory === 'solvent')) {
+    if (!isActive && (foundCategory === 'chemical_type' || foundCategory === 'solvent')) {
       const activeItemsCount = this.mockData[foundCategory].filter(
-        (opt) => opt.archivedAt === null && opt.uuid !== uuid
+        (opt) => opt.archivedAt === null && opt.uuid !== uuid,
       ).length;
 
       if (activeItemsCount === 0) {
         return throwError(
-          () => new Error(`${foundCategory.toUpperCase()} must have at least ONE active option.`)
+          () => new Error(`${foundCategory.toUpperCase()} must have at least ONE active option.`),
         );
       }
     }

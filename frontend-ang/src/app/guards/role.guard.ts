@@ -13,9 +13,13 @@ export class RoleGuard implements CanActivate {
     private notification: NotificationService,
   ) {}
 
-  canActivate(route: ActivatedRouteSnapshot): boolean {
+  async canActivate(route: ActivatedRouteSnapshot): Promise<boolean> {
+    await this.authService.initialLoginSequence;
+
     const expectedRoles = route.data['roles'] as Array<string>;
     const userRole = this.authService.getUserRole();
+
+    console.log("User role: ", userRole);
 
     if (!expectedRoles.includes(userRole)) {
       this.notification.error("Access Denied", "You don't have the required permissions to access this page.")

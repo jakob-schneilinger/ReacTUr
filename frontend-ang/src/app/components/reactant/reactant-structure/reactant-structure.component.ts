@@ -223,10 +223,12 @@ export class ReactantStructureComponent implements AfterViewInit, OnInit, OnChan
       this.cd.markForCheck();
     } else {
       this.svg2D = null;
-      this.notification.error(
-        this.transloco.translate('reactants.structure.notifications.render2dErrorTitle'),
-        this.transloco.translate('reactants.structure.notifications.render2dErrorMessage'),
-      );
+      if (this.smiles) {
+        this.notification.error(
+          this.transloco.translate('reactants.structure.notifications.render2dErrorTitle'),
+          this.transloco.translate('reactants.structure.notifications.render2dErrorMessage'),
+        );
+      }
     }
   }
 }

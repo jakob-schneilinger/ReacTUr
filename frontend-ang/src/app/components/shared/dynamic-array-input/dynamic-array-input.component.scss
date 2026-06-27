@@ -88,3 +88,13 @@
     font-size: 1rem;
   }
 }
+
+
+
+.error-message {
+  color: $error;
+  font-size: 0.75rem;
+  margin-top: 0.3rem;
+  margin-left: 0.5rem;
+  font-weight: 500;
+}

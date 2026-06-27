@@ -12,7 +12,7 @@ import java.util.UUID;
  *
  * @param smiles               The SMILES string representing the chemical structure.
  * @param chemicalType         The UUID of the chemical type.
- * @param shortname            The mandatory short name.
+ * @param shortName            The mandatory short name.
  * @param additionalShortNames Array of other commonly used short names.
  * @param chemicalName         The formal chemical name.
  * @param casNumber            The CAS registry number.
@@ -25,7 +25,7 @@ public record UpdateReactantDto(
         String smiles,
         UUID chemicalType,
         @Size(max = 100, message = "Short name must not exceed 100 characters.")
-        String shortname,
+        String shortName,
         List<String> additionalShortNames,
         String chemicalName,
         String casNumber,

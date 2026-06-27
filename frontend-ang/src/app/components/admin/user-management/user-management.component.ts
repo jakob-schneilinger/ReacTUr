@@ -7,6 +7,7 @@ import { NotificationService } from '../../../services/notification.service';
 import { Role } from '../../../dtos/enums/role.enum';
 import { TRANSLOCO_IMPORTS } from '../../../global/transloco-imports';
 import { TranslocoService } from '@jsverse/transloco';
+import { AuthService } from '../../../services/auth.service';
 
 @Component({
   selector: 'app-user-management',
@@ -35,20 +36,28 @@ export class UserManagementComponent implements OnInit {
     private notification: NotificationService,
     private cdr: ChangeDetectorRef,
     private transloco: TranslocoService,
+    private authService: AuthService,
   ) {}
 
   ngOnInit(): void {
-    this.userService.getAllUsers().subscribe({
-      next: (users) => {
-        this.allUsers = users.filter((user) => user.role !== Role.ADMIN);
-        this.updateFilteredLists();
-      },
-      error: (err) =>
-        this.notification.error(
-          this.transloco.translate('admin.user.notifications.fetchError'),
-          err.message || err.error || err,
-        ),
-    });
+    this.authService.getLoggedInUser().subscribe({
+      next: value => {
+        const user = value;
+        if (!user) return;
+
+        this.userService.getAllUsers().subscribe({
+          next: (users) => {
+            this.allUsers = users.filter((u) => u.id !== user.id);
+            this.updateFilteredLists();
+          },
+          error: (err) =>
+            this.notification.error(
+              this.transloco.translate('admin.user.notifications.fetchError'),
+              err.message || err.error || err,
+            ),
+        });
+      }
+    })
   }
 
   private updateFilteredLists(): void {
@@ -64,8 +73,8 @@ export class UserManagementComponent implements OnInit {
       );
     });
 
-    this.pendingUsers = filteredBySearch.filter((user) => !user.role && !user.deactivatedAt);
-    this.activeUsers = filteredBySearch.filter((user) => !!user.role && !user.deactivatedAt);
+    this.pendingUsers = filteredBySearch.filter((user) => (!user.role || user.role == Role.UNAUTHORIZED ) && !user.deactivatedAt);
+    this.activeUsers = filteredBySearch.filter((user) => user.role != Role.UNAUTHORIZED && !user.deactivatedAt);
     this.deactivatedUsers = filteredBySearch.filter((user) => !!user.deactivatedAt);
 
     this.cdr.markForCheck();
@@ -79,8 +88,8 @@ export class UserManagementComponent implements OnInit {
     const deactivate = newStatus === 'DEACTIVATED';
 
     const obs = deactivate
-      ? this.userService.archiveUser(user.uuid)
-      : this.userService.restoreUser(user.uuid);
+      ? this.userService.archiveUser(user.id)
+      : this.userService.restoreUser(user.id);
 
     obs.subscribe({
       next: () => {
@@ -104,7 +113,7 @@ export class UserManagementComponent implements OnInit {
     const selectElement = event.target as HTMLSelectElement;
     const newRole = selectElement.value as Role;
 
-    this.userService.updateUserRole(user.uuid, newRole).subscribe({
+    this.userService.updateUserRole(user.id, newRole).subscribe({
       next: () => {
         user.role = newRole;
         this.updateFilteredLists();

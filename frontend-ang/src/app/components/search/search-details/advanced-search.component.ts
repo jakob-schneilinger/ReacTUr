@@ -56,7 +56,7 @@ export class AdvancedSearchComponent implements OnChanges, OnInit {
   ngOnChanges(changes: SimpleChanges) {
     if (changes['searchScientist'] && this.searchScientist) {
       this.scientistSearchText = `${this.searchScientist.firstName} ${this.searchScientist.lastName}`;
-      this.params.scientist = [this.searchScientist.uuid];
+      this.params.scientist = [this.searchScientist.id];
       this.emitSearch();
     }
   }
@@ -68,7 +68,7 @@ export class AdvancedSearchComponent implements OnChanges, OnInit {
       const lowerSearch = this.scientistSearchText.toLowerCase();
       this.params.scientist = this.allUsers
         .filter((u) => `${u.firstName} ${u.lastName}`.toLowerCase().includes(lowerSearch))
-        .map((u) => u.uuid);
+        .map((u) => u.id);
     } else {
       this.params.scientist = [];
     }

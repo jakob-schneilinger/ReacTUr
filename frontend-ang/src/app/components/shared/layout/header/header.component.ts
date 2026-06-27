@@ -1,5 +1,5 @@
 import { CommonModule, NgOptimizedImage } from '@angular/common';
-import { Component } from "@angular/core";
+import { Component, OnInit } from '@angular/core';
 import { AuthService } from "../../../../services/auth.service";
 import { Router, RouterModule } from '@angular/router';
 import { GetUserDto } from '../../../../dtos/user.dto';
@@ -21,21 +21,31 @@ import { TRANSLOCO_IMPORTS } from '../../../../global/transloco-imports';
     NgbDropdownToggle,
     NgbDropdownMenu,
     NgbDropdownItem,
-    TRANSLOCO_IMPORTS
+    TRANSLOCO_IMPORTS,
   ],
 })
-export class HeaderComponent {
+export class HeaderComponent implements OnInit {
   constructor(
     public router: Router,
     public authService: AuthService,
   ) {}
+
+  loggedInUser: GetUserDto | null = null;
+
+  ngOnInit(): void {
+    this.authService.initialLoginSequence.then(() => {
+      this.authService.getLoggedInUser().subscribe((user) => {
+        this.loggedInUser = user;
+      });
+    });
+  }
 
   get isLoggedIn(): boolean {
     return this.authService.isLoggedIn();
   }
 
   get user(): GetUserDto | null {
-    return this.authService.getLoggedInUser();
+    return this.loggedInUser;
   }
 
   logout() {

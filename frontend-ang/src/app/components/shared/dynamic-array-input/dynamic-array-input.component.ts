@@ -17,6 +17,8 @@ export class DynamicArrayInputComponent {
   @Input() addButtonLabel: string = 'Add field';
   @Input() placeholder: string = 'Value';
 
+  errorMessage?: string;
+
   constructor(
     private fb: FormBuilder,
     private notification: NotificationService,
@@ -36,7 +38,7 @@ export class DynamicArrayInputComponent {
       );
       return;
     }
-    this.formArray.push(this.fb.control('', Validators.required));
+    this.formArray.push(this.fb.control(''));
     this.cdr.markForCheck();
 
     setTimeout(() => {

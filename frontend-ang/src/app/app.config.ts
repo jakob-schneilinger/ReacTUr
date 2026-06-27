@@ -1,6 +1,6 @@
 import { ApplicationConfig, importProvidersFrom, isDevMode } from '@angular/core';
 import { provideRouter } from '@angular/router';
-import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 import { provideOAuthClient } from 'angular-oauth2-oidc';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 
@@ -11,7 +11,7 @@ import { provideTransloco } from '@jsverse/transloco';
 export const appConfig: ApplicationConfig = {
   providers: [
     provideRouter(routes),
-    provideHttpClient(),
+    provideHttpClient(withInterceptorsFromDi()),
     provideOAuthClient({
       resourceServer: {
         allowedUrls: ['http://localhost:8080/api'],
@@ -19,7 +19,6 @@ export const appConfig: ApplicationConfig = {
       },
     }),
     importProvidersFrom(NgbModule),
-    provideHttpClient(),
     provideTransloco({
       config: {
         availableLangs: ['en'],

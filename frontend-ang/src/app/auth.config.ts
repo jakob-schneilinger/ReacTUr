@@ -1,12 +1,11 @@
 import { AuthConfig } from 'angular-oauth2-oidc';
 
 export const authConfig: AuthConfig = {
-
   // Url of the keycloak server
   issuer: 'http://localhost:8081/realms/test',
 
   // Url for the redirect after successful login
-  redirectUri: window.location.origin + '/experiments',
+  redirectUri: window.location.origin + '/search',
 
   // ID of the client for keycloak
   clientId: 'angular-frontend-client',
@@ -19,4 +18,6 @@ export const authConfig: AuthConfig = {
 
   //TODO: Set to false in Production
   showDebugInformation: true,
+
+  clearHashAfterLogin: true,
 };

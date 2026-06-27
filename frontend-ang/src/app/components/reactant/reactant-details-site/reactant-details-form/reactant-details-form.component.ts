@@ -87,7 +87,7 @@ export class ReactantDetailsFormComponent implements OnInit, OnDestroy {
   }
 
   async ngOnInit(): Promise<void> {
-    this.optionService.getSelectionOptions('type').subscribe({
+    this.optionService.getSelectionOptions('chemical_type').subscribe({
       next: (params) => {
         this.chemicalTypes = params;
         this.chemicalTypeNames = this.chemicalTypes.map((t) => t.name);
@@ -128,10 +128,10 @@ export class ReactantDetailsFormComponent implements OnInit, OnDestroy {
     if (this.reactantForm && changes['reactant'] && this.reactant) {
       const currentType = this.reactantForm.get('chemicalType')?.value;
 
-      if (currentType !== this.reactant.chemicalType.name) {
+      if (currentType !== this.reactant.chemicalType?.name) {
         this.reactantForm.patchValue({
           ...this.reactant,
-          chemicalType: this.reactant.chemicalType.name,
+          chemicalType: this.reactant.chemicalType?.name,
         });
       }
     }
@@ -161,8 +161,8 @@ export class ReactantDetailsFormComponent implements OnInit, OnDestroy {
     if (this.reactant) {
       this.syncArray('additionalShortNames', this.reactant.additionalShortNames);
       this.syncArray('references', this.reactant.references);
-    } else {
-      this.additionalShortNames.push(this.fb.control(''));
+    } else {this.additionalShortNames.push(
+      this.fb.control(''));
       this.references.push(this.fb.control(''));
     }
 
@@ -199,9 +199,9 @@ export class ReactantDetailsFormComponent implements OnInit, OnDestroy {
     const formArray = this.reactantForm.get(arrayName) as FormArray;
     formArray.clear();
     if (data && data.length > 0) {
-      data.forEach((item) => formArray.push(this.fb.control(item, Validators.required)));
+      data.forEach((item) => formArray.push(this.fb.control(item)));
     } else {
-      formArray.push(this.fb.control('', Validators.required));
+      formArray.push(this.fb.control(''));
     }
   }
 
@@ -218,12 +218,49 @@ export class ReactantDetailsFormComponent implements OnInit, OnDestroy {
   onSubmit(): void {
     if (this.reactantForm.valid) {
       const formValue = this.reactantForm.getRawValue();
-      // TODO: send to backend
-      this.notification.success(
-        this.transloco.translate('reactants.details.notifications.savedTitle'),
-        this.transloco.translate('reactants.details.notifications.savedMessage'),
-      );
-      this.reactantForm.markAsPristine();
+      formValue.chemicalType = this.chemicalTypes.find((t) => t.name === formValue.chemicalType)?.uuid;
+
+      formValue.additionalShortNames = formValue.additionalShortNames.filter((val: string) => val && val.trim() !== '');
+      formValue.references = formValue.references.filter((val: string) => val && val.trim() !== '');
+
+      if (!this.isEditMode) {
+        this.reactantService.createReactant(formValue).subscribe({
+          next: (reactant) => {
+            this.notification.success(
+              this.transloco.translate('reactants.details.notifications.savedTitle'),
+              this.transloco.translate('reactants.details.notifications.savedMessage'),
+            );
+            this.router.navigate(['/reactants', reactant.uuid]);
+          },
+          error: (err) => {
+            console.warn(err);
+            this.notification.error(
+              this.transloco.translate('reactants.details.notifications.saveErrorTitle'),
+              this.transloco.translate('reactants.details.notifications.saveErrorMessage', {
+                error: err.message || err.error || err,
+              }),
+            )
+          }
+        });
+      } else {
+        if (!this.reactant) return;
+        this.reactantService.updateReactant(this.reactant?.uuid, formValue).subscribe({
+          next: (reactant) => {
+            this.notification.success(
+              this.transloco.translate('reactants.details.notifications.savedTitle'),
+              this.transloco.translate('reactants.details.notifications.savedMessage'),
+            );
+            this.router.navigate(['/reactants', reactant.uuid]);
+          },
+          error: (err) =>
+            this.notification.error(
+              this.transloco.translate('reactants.details.notifications.saveErrorTitle'),
+              this.transloco.translate('reactants.details.notifications.saveErrorMessage', {
+                error: err.message || err.error || err,
+              }),
+            ),
+        });
+      }
     } else {
       this.reactantForm.markAllAsTouched();
     }

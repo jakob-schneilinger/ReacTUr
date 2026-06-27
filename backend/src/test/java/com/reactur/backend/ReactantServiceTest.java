@@ -1,5 +1,6 @@
 package com.reactur.backend;
 
+import com.reactur.backend.validators.ReactantValidator;
 import com.reactur.backend.dtos.ReactantDtos.CreateReactantDto;
 import com.reactur.backend.dtos.ReactantDtos.ReactantDetailDto;
 import com.reactur.backend.dtos.ReactantDtos.ReactantDto;
@@ -8,13 +9,14 @@ import com.reactur.backend.entities.Reactant;
 import com.reactur.backend.entities.User;
 import com.reactur.backend.exeptions.ResourceConflictException;
 import com.reactur.backend.exeptions.ResourceNotFoundException;
+import com.reactur.backend.mappers.ReactantMapper;
 import com.reactur.backend.repositories.ReactantRepository;
-import com.reactur.backend.repositories.UserRepository;
 import com.reactur.backend.services.ReactantServiceImpl;
+import com.reactur.backend.services.UserService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
+import org.mapstruct.factory.Mappers;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -42,11 +44,9 @@ class ReactantServiceTest {
     private ReactantRepository reactantRepository;
 
     @Mock
-    private UserRepository userRepository;
+    private UserService userService;
 
-    @InjectMocks
     private ReactantServiceImpl reactantService;
-
     private CreateReactantDto sampleCreateDto;
     private UpdateReactantDto sampleUpdateDto;
     private User mockUser;
@@ -55,6 +55,11 @@ class ReactantServiceTest {
 
     @BeforeEach
     void setUp() {
+        ReactantValidator validator = new ReactantValidator(reactantRepository);
+        ReactantMapper reactantMapper = Mappers.getMapper(ReactantMapper.class);
+
+        reactantService = new ReactantServiceImpl(reactantRepository, userService, validator, reactantMapper);
+
         mockUser = new User();
         mockUser.setId("User123");
 
@@ -86,6 +91,8 @@ class ReactantServiceTest {
 
     @Test
     void createReactant_ShouldSaveSuccessfully_WhenValidData() {
+        when(userService.getCurrentUser()).thenReturn(Optional.of(mockUser));
+
         when(reactantRepository.hasNameConflict(anyCollection())).thenReturn(false);
 
         when(reactantRepository.save(any(Reactant.class))).thenAnswer(invocation -> {
