@@ -17,6 +17,8 @@ export class DynamicArrayInputComponent {
   @Input() addButtonLabel: string = 'Add field';
   @Input() placeholder: string = 'Value';
 
+  errorMessage?: string;
+
   constructor(
     private fb: FormBuilder,
     private notification: NotificationService,
