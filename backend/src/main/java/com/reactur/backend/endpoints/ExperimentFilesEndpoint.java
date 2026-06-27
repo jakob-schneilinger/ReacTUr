@@ -25,7 +25,7 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/api/file")
 @RequiredArgsConstructor
-public class FilesEndpoint {
+public class ExperimentFilesEndpoint {
 
     private final FileService fileService;
 
@@ -40,7 +40,6 @@ public class FilesEndpoint {
     @GetMapping("/{fileId}")
     public ResponseEntity<Resource> downloadFile(@PathVariable UUID fileId) {
         ExperimentAttachmentDetailsDto details = fileService.getAttachmentDetail(fileId);
-
         Resource fileResource = fileService.loadFileAsResource(fileId);
 
         return ResponseEntity.ok()
@@ -60,14 +59,6 @@ public class FilesEndpoint {
     public ResponseEntity<Void> archiveFile(
             @PathVariable UUID fileId) {
         fileService.archiveFile(fileId);
-        return ResponseEntity.noContent().build();
-    }
-
-    @PostMapping("/{reactantId}/structure")
-    public ResponseEntity<Void> generateStructureFromAPI(@PathVariable UUID reactantId) {
-
-        //TODO: Do generate Structure From API
-
         return ResponseEntity.noContent().build();
     }
 }

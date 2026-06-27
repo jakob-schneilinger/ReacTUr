@@ -1,7 +1,7 @@
 package com.reactur.backend;
 
 import com.reactur.backend.dtos.ExperimentDtos.ExperimentAttachmentDetailsDto;
-import com.reactur.backend.endpoints.FilesEndpoint;
+import com.reactur.backend.endpoints.ExperimentFilesEndpoint;
 import com.reactur.backend.exeptions.GlobalExceptionHandler;
 import com.reactur.backend.exeptions.ResourceNotFoundException;
 import com.reactur.backend.repositories.UserRepository;
@@ -29,14 +29,14 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(
-        controllers = FilesEndpoint.class,
+        controllers = ExperimentFilesEndpoint.class,
         excludeAutoConfiguration = {
                 SecurityAutoConfiguration.class,
                 OAuth2ResourceServerAutoConfiguration.class
         }
 )
 @Import(GlobalExceptionHandler.class)
-class FilesEndpointTest {
+class ExperimentFilesEndpointTest {
 
     @Autowired
     private MockMvc mockMvc;
