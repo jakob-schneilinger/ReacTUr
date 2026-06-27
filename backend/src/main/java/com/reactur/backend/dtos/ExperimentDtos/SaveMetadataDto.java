@@ -31,7 +31,7 @@ public record SaveMetadataDto(
 
   @NotBlank(message = "Scientist ID is required")
   // TODO (Frontend): Ensure Angular sends the Keycloak String ID of the scientist here, NOT their full name (e.g., "f:528a..." not "Marie Curie").
-  String scientist,  // TODO (Semantic - Service Layer): Verify Scient's exists in the database.
+  String scientist,  // (Semantic - Service Layer): Verify Scientist's exists in the database.
 
   @NotNull(message = "Temperature is required")
   @Min(value = -273, message = "Temperature cannot be below absolute zero") // Syntactic chemistry check
