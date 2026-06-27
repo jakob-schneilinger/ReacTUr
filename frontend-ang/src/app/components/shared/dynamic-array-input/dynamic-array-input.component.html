@@ -1,0 +1,25 @@
+<div class="input-group">
+  <label>{{ label }}</label>
+  <div class="array-fields-container">
+    @for (control of controls; track $index) {
+      <div class="field-row">
+        <div class="search-field">
+          <input
+            type="text"
+            [formControl]="control"
+            [id]="arrayName + '-' + $index"
+            [placeholder]="placeholder" />
+          @if (control.value) {
+            <span class="icon bi bi-x text-black clear-btn" (click)="clearArrayControl($index)" title="Clear"></span>
+          }
+        </div>
+        @if (formArray.length > 1) {
+          <span class="icon bi bi-dash-circle text-danger remove-btn" (click)="removeArrayField($index)" title="Remove Field"></span>
+        }
+      </div>
+    }
+  </div>
+  <div class="add-field-btn" (click)="addArrayField()">
+    <i class="bi bi-plus-circle me-1"></i> {{ addButtonLabel }}
+  </div>
+</div>

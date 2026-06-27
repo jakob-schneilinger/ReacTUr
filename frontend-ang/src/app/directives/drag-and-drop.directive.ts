@@ -1,7 +1,8 @@
-import { Directive, Output, Input, EventEmitter, HostBinding, HostListener } from '@angular/core';
+import { Directive, Output, EventEmitter, HostBinding, HostListener } from '@angular/core';
 
 @Directive({
   selector: '[app-drag-and-drop-directive]',
+  standalone: true,
 })
 export class DragAndDropDirective {
   @HostBinding('class.bg-light') fileOver: boolean = false;

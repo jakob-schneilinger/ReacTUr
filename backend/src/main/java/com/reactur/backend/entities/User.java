@@ -10,6 +10,8 @@ import lombok.Setter;
 
 import java.time.LocalDateTime;
 
+import java.time.Instant;
+
 @Entity
 @Table(name = "app_user")
 @Getter
@@ -32,17 +34,10 @@ public class User {
     @Column(name = "last_name")
     private String lastName;
 
-    // TODO: Remove gemini's enum explanation:
-    /*
-    By default, Hibernate saves Java Enums as Integers (their ordinal position). If Role.USER is first and Role.ADMIN is second, it saves 0 and 1.
-
-    The Danger: If someone later adds Role.MODERATOR to the top of the Enum list, the integers shift. Suddenly, all your normal users in the database are promoted to Moderators!
-
-    The Fix: We must explicitly tell Hibernate to save the string text of the enum using @Enumerated(EnumType.STRING)
-     */
     @Enumerated(EnumType.STRING)
-    @Column(name="role")
-    private Role role;
+    @Column(name="role", nullable = false)
+    @Builder.Default
+    private Role role = Role.UNAUTHORIZED;
 
     /* TODO: Discuss how Roles are extracted:
         Currently, UserSyncFilter does not extract the Role from the Keycloak JWT.
@@ -52,4 +47,7 @@ public class User {
     @Column(name = "created_at", updatable = false)
     @Builder.Default
     private LocalDateTime createdAt = LocalDateTime.now();
+
+    @Column(name = "deactivated_at")
+    private Instant deactivatedAt;
 }

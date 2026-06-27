@@ -1,29 +1,58 @@
-import { Component, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { SearchInputComponent } from '../../shared/search-input/search-input.component';
+import { ReactantCardComponent } from '../reactant-card/reactant-card.component';
+import { AppConfirmModalComponent } from '../../shared/modal/confirm-modal.component';
+import { ReactantViewModalComponent } from '../reactant-view-modal/reactant-view-modal.component';
+import { DrawMolComponent } from '../../shared/draw-mol/draw-mol.component';
+import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { Reactant } from '../../../dtos/reactant';
+import { ReactantDto } from '../../../dtos/reactant.dto';
 import { ReactantService } from '../../../services/reactant.service';
 import { NotificationService } from '../../../services/notification.service';
 import { AuthService } from '../../../services/auth.service';
+import { HasRoleDirective } from '../../../directives/has-role.directive';
+import { TRANSLOCO_IMPORTS } from '../../../global/transloco-imports';
+import { TranslocoService } from '@jsverse/transloco';
 
 @Component({
   selector: 'app-reactant-site',
   templateUrl: './reactant-site.component.html',
   styleUrls: ['./reactant-site.component.scss'],
-  standalone: false,
+  standalone: true,
+  imports: [
+    CommonModule,
+    FormsModule,
+    SearchInputComponent,
+    ReactantCardComponent,
+    AppConfirmModalComponent,
+    ReactantViewModalComponent,
+    DrawMolComponent,
+    HasRoleDirective,
+    TRANSLOCO_IMPORTS,
+  ],
 })
 export class ReactantSiteComponent implements OnInit {
-  reactants: Reactant[] = [];
-  filteredReactants: Reactant[] = [];
+  reactants: ReactantDto[] = [];
+  filteredReactants: ReactantDto[] = [];
   searchTerm: string = '';
+
+  archivedReactants: ReactantDto[] = [];
+  showArchived: boolean = false;
+
+  activeReactants: ReactantDto[] = [];
 
   role: string = 'USER';
   hasWritePermission: boolean = false;
 
-  isDeleteReactantModalOpen: boolean = false;
-  pendingReactantName: string | null = '';
+  isArchiveReactantModalOpen: boolean = false;
+  pendingArchiveReactant: ReactantDto | undefined = undefined;
+
+  isRestoreReactantModalOpen: boolean = false;
+  pendingRestoreReactant: ReactantDto | undefined = undefined;
 
   isViewModalOpen: boolean = false;
-  selectedReactantForView: Reactant | undefined = undefined;
+  selectedReactantForView: ReactantDto | undefined = undefined;
 
   isDrawModalOpen = false;
   currentSmilesForModal = '';
@@ -33,34 +62,71 @@ export class ReactantSiteComponent implements OnInit {
     private reactantService: ReactantService,
     private authService: AuthService,
     private notification: NotificationService,
+    private cdr: ChangeDetectorRef,
+    private transloco: TranslocoService,
   ) {}
 
   ngOnInit(): void {
+    this.role = this.authService.getUserRole();
+    this.hasWritePermission = this.role != 'USER';
+    this.loadReactants();
+  }
+
+  private loadReactants() {
     this.reactantService.getAllReactants().subscribe({
       next: (value) => {
         this.reactants = value;
-        this.onSearch();
+        if (!this.showArchived) {
+          this.activeReactants = this.reactants;
+          this.onSearch();
+          this.cdr.markForCheck();
+        }
       },
-      error: (err) => this.notification.error('Reactants unavailable', err),
+      error: (err) =>
+        this.notification.error(
+          this.transloco.translate('reactants.notifications.fetchError'),
+          err.message || err.error || err,
+        ),
     });
 
-    this.role = this.authService.getUserRole();
-    this.hasWritePermission = this.role != 'USER';
+    if (this.role === 'ADMIN') {
+      this.reactantService.getArchivedReactants().subscribe({
+        next: (value) => {
+          this.archivedReactants = value;
+          if (this.showArchived) {
+            this.activeReactants = this.archivedReactants;
+            this.onSearch();
+            this.cdr.markForCheck();
+          }
+        },
+        error: (err) =>
+          this.notification.error(
+            this.transloco.translate('reactants.notifications.fetchArchivedError'),
+            err.message || err.error || err,
+          ),
+      });
+    }
+  }
+
+  showArchivedReactants(show: boolean) {
+    this.showArchived = show;
+    this.activeReactants = show ? this.archivedReactants : this.reactants;
+    this.onSearch();
   }
 
   onSearch(): void {
     const term = this.searchTerm.toLowerCase().trim();
     if (!term) {
-      this.filteredReactants = [...this.reactants];
+      this.filteredReactants = [...this.activeReactants];
       return;
     }
 
-    this.filteredReactants = this.reactants.filter(
+    this.filteredReactants = this.activeReactants.filter(
       (reactant) =>
         reactant.shortName.toLowerCase().includes(term) ||
         reactant.smiles.toLowerCase().includes(term) ||
         (reactant.chemicalName && reactant.chemicalName.toLowerCase().includes(term)) ||
-        reactant.type1.toLowerCase().includes(term),
+        reactant.chemicalType.name.toLowerCase().includes(term),
     );
   }
 
@@ -68,16 +134,20 @@ export class ReactantSiteComponent implements OnInit {
     this.router.navigate(['/reactants/create']);
   }
 
-  viewDetails(shortName: string | undefined): void {
-    if (!shortName) return;
+  viewDetails(uuid: string | undefined, isArchived: boolean): void {
+    if (!uuid) return;
 
-    const reactantToView = this.reactants.find((r) => r.shortName === shortName);
+    const tempReactants = isArchived ? this.archivedReactants : this.reactants;
+    const reactantToView = tempReactants.find((r) => r.uuid === uuid);
 
     if (reactantToView) {
       this.selectedReactantForView = reactantToView;
       this.isViewModalOpen = true;
     } else {
-      this.notification.error('Error', 'Reactant details could not be found.');
+      this.notification.error(
+        this.transloco.translate('reactants.notifications.notFoundTitle'),
+        this.transloco.translate('reactants.notifications.notFoundMessage'),
+      );
     }
   }
 
@@ -86,33 +156,84 @@ export class ReactantSiteComponent implements OnInit {
     this.selectedReactantForView = undefined;
   }
 
-  editReactant(shortName: string | undefined): void {
-    if (shortName) this.router.navigate(['/reactants', shortName]);
+  editReactant(uuid: string | undefined): void {
+    if (uuid) this.router.navigate(['/reactants', uuid]);
   }
 
-  cancelDelete() {
-    this.isDeleteReactantModalOpen = false;
-    this.pendingReactantName = null;
+  cancelArchive() {
+    this.isArchiveReactantModalOpen = false;
+    this.pendingArchiveReactant = undefined;
   }
 
-  executeDelete() {
-    if (this.pendingReactantName !== null) {
-      const tempName = this.pendingReactantName;
-      this.reactants = this.reactants.filter((r) => r.shortName !== this.pendingReactantName);
-      this.onSearch();
-      this.notification.success(
-        'Reactant Removed',
-        `The reactant "${tempName}" was successfully removed.`,
-      );
+  archiveReactant(reactant: ReactantDto | undefined): void {
+    if (!reactant) return;
+
+    this.pendingArchiveReactant = reactant;
+    this.isArchiveReactantModalOpen = true;
+  }
+
+  executeArchive() {
+    if (this.pendingArchiveReactant) {
+      const shortName = this.pendingArchiveReactant.shortName;
+      this.reactantService.archiveReactant(this.pendingArchiveReactant.uuid).subscribe({
+        next: (value) => {
+          this.notification.success(
+            this.transloco.translate('reactants.notifications.archivedTitle'),
+            this.transloco.translate('reactants.notifications.archivedMessage', {
+              name: shortName,
+            }),
+          );
+          setTimeout(() => {
+            this.cancelArchive();
+            this.loadReactants();
+          });
+        },
+        error: (err) => {
+          this.notification.error(
+            this.transloco.translate('reactants.notifications.archiveFailed'),
+            err.message,
+          );
+        },
+      });
     }
-    this.cancelDelete();
   }
 
-  deleteReactant(shortName: string | undefined): void {
-    if (!shortName) return;
+  cancelRestore() {
+    this.isRestoreReactantModalOpen = false;
+    this.pendingRestoreReactant = undefined;
+  }
 
-    this.pendingReactantName = shortName;
-    this.isDeleteReactantModalOpen = true;
+  restoreReactant(reactant: ReactantDto | undefined): void {
+    if (!reactant) return;
+
+    this.pendingRestoreReactant = reactant;
+    this.isRestoreReactantModalOpen = true;
+  }
+
+  executeRestore() {
+    if (this.pendingRestoreReactant) {
+      const shortName = this.pendingRestoreReactant.shortName;
+      this.reactantService.restoreReactant(this.pendingRestoreReactant.uuid).subscribe({
+        next: (value) => {
+          this.notification.success(
+            this.transloco.translate('reactants.notifications.restoredTitle'),
+            this.transloco.translate('reactants.notifications.restoredMessage', {
+              name: shortName,
+            }),
+          );
+          setTimeout(() => {
+            this.cancelRestore();
+            this.loadReactants();
+          });
+        },
+        error: (err) => {
+          this.notification.error(
+            this.transloco.translate('reactants.notifications.restoreFailed'),
+            err.message,
+          );
+        },
+      });
+    }
   }
 
   copyToClipboard(text: string): void {
@@ -120,10 +241,16 @@ export class ReactantSiteComponent implements OnInit {
       navigator.clipboard
         .writeText(text)
         .then(() => {
-          this.notification.success('Success', 'SMILES copied to clipboard!');
+          this.notification.success(
+            this.transloco.translate('reactants.notifications.copySuccessTitle'),
+            this.transloco.translate('reactants.notifications.copySuccessMessage'),
+          );
         })
         .catch((err) => {
-          this.notification.error('Failed to copy text', err);
+          this.notification.error(
+            this.transloco.translate('reactants.notifications.copyFailed'),
+            err.message || err.error || err,
+          );
         });
     } else {
       const textArea = document.createElement('textarea');
@@ -136,7 +263,8 @@ export class ReactantSiteComponent implements OnInit {
   }
 
   openDraw() {
-    this.currentSmilesForModal = ""
+    //TODO: add RDKit check if current Search is SMILES
+    this.currentSmilesForModal = this.searchTerm;
     this.isDrawModalOpen = true;
   }
 

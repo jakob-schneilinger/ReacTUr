@@ -1,49 +1,62 @@
 package com.reactur.backend.endpoints;
 
 import com.reactur.backend.dtos.GetUserDto;
-import com.reactur.backend.dtos.SetRoleDto;
+import com.reactur.backend.dtos.RoleDto;
+import com.reactur.backend.services.UserService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.UUID;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/users")
 @RequiredArgsConstructor
 public class UserEndpoint {
 
-    @GetMapping()
-    public ResponseEntity<GetUserDto[]> getAllUsers() {
+    private final UserService userService;
 
-        //TODO:
-        throw new UnsupportedOperationException();
+    @GetMapping
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<List<GetUserDto>> getAllUsers() {
+        return ResponseEntity.ok(userService.getAllUsers());
     }
 
-    @PostMapping("/{uuid}")
-    public ResponseEntity<Void> setRole(@PathVariable UUID uuid, SetRoleDto setRole) {
+    @PostMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Void> setRole(
+            @PathVariable String id,
+            @Valid @RequestBody RoleDto setRole) {
 
-        //TODO:
-        throw new UnsupportedOperationException();
+        userService.setRole(id, setRole);
+        return ResponseEntity.ok().build();
     }
 
-    @DeleteMapping("/{uuid}")
-    public ResponseEntity<Void> archiveUser(@PathVariable UUID uuid) {
-
-        //TODO:
-        throw new UnsupportedOperationException();
+    @GetMapping("/{id}/role")
+    public ResponseEntity<RoleDto> getRole(@PathVariable String id) {
+        return ResponseEntity.ok(userService.getRole(id));
     }
 
-    @PutMapping("/{uuid}/restore")
-    public ResponseEntity<Void> restoreUser(@PathVariable UUID uuid) {
+    @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Void> archiveUser(@PathVariable String id) {
+        userService.archiveUser(id);
+        return ResponseEntity.ok().build();
+    }
 
-        //TODO:
-        throw new UnsupportedOperationException();
+    @PutMapping("/{id}/restore")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Void> restoreUser(@PathVariable String id) {
+        userService.restoreUser(id);
+        return ResponseEntity.ok().build();
     }
 }

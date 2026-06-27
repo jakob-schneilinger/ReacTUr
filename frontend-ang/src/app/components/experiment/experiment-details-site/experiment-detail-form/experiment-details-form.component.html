@@ -3,243 +3,224 @@
   @if (formState === 'create') {
     <div class="divider-container">
       <div class="divider"></div>
-      <span class="divider-label">Required</span>
+      <span class="divider-label">{{ 'experiments.details.form.sections.required' | transloco }}</span>
       <div class="divider"></div>
     </div>
   }
 
-  <div formArrayName="reactants">
-    @for (control of reactantsControls; track $index) {
-      <div class="input-group">
-        <label>Reactants {{$index + 1}} (Structure or Substructure)</label>
-        <div class="search-field">
-          <input
-            type="text"
-            [formControlName]="$index"
-            placeholder="Value"
-            [class.is-invalid]="isReactantInvalid($index)"/>
+  <div class="input-group">
+    <label>{{ 'experiments.details.form.labels.reactantA' | transloco }}</label>
+    <div class="search-field">
+      <input type="text" formControlName="reactantA" [class.is-invalid]="isInvalid('reactantA')" [placeholder]="'experiments.details.form.placeholders.value' | transloco" />
+      @if (experimentForm.get('reactantA')?.value && formState === 'create') {
+        <span class="icon bi bi-x text-black clear-btn" (click)="clearControl('reactantA')"></span>
+      }
+    </div>
+    @if (isInvalid('reactantA')) {
+      <div class="error-message">{{ 'experiments.details.form.errors.reactantARequired' | transloco }}</div>
+    }
+  </div>
 
-          @if (control.value && formState === 'create') {
-            <span class="icon bi bi-x text-black clear-btn" (click)="clearReactant($index)"></span>
-          }
-        </div>
-        @if (isReactantInvalid($index)) {
-          <div class="error-message">Reactant {{$index + 1}} is required.</div>
-        }
-      </div>
+  <div class="input-group">
+    <label>{{ 'experiments.details.form.labels.reactantB' | transloco }}</label>
+    <div class="search-field">
+      <input type="text" formControlName="reactantB" [class.is-invalid]="isInvalid('reactantB')" [placeholder]="'experiments.details.form.placeholders.value' | transloco" />
+      @if (experimentForm.get('reactantB')?.value && formState === 'create') {
+        <span class="icon bi bi-x text-black clear-btn" (click)="clearControl('reactantB')"></span>
+      }
+    </div>
+    @if (isInvalid("reactantB")) {
+      <div class="error-message">{{ 'experiments.details.form.errors.reactantBRequired' | transloco }}</div>
     }
   </div>
 
   @if (formState === 'edit') {
     <div class="divider-container">
       <div class="divider"></div>
-      <span class="divider-label">Required</span>
+      <span class="divider-label">{{ 'experiments.details.form.sections.required' | transloco }}</span>
       <div class="divider"></div>
     </div>
   }
 
   <div class="input-group">
-    <label>Date</label>
-    <div class="search-field date-field">
-      <input type="date" formControlName="date" [class.is-invalid]="isInvalid('date')"/>
+    <label>{{ 'experiments.details.form.labels.date' | transloco }}</label>
+    <div class="search-field date-field" [class.has-value]="experimentForm.get('date')?.value">
+      <input type="date" [title]="'experiments.details.form.dateTitle' | transloco" formControlName="date" [class.is-invalid]="isInvalid('date')"/>
+      @if (experimentForm.get('date')?.value) {
+        <span class="icon bi bi-x text-black clear-btn" (click)="clearControl('date')"></span>
+      }
     </div>
     @if (isInvalid('date')) {
-      <div class="error-message">Date is required.</div>
+      <div class="error-message">{{ 'experiments.details.form.errors.dateRequired' | transloco }}</div>
     }
   </div>
 
   <div class="input-group">
-    <label>Scientist</label>
+    <label>{{ 'experiments.details.form.labels.scientist' | transloco }}</label>
     <div class="search-field">
-      <input type="text" formControlName="scientist" [class.is-invalid]="isInvalid('scientist')" placeholder="Value" />
+      <input type="text" formControlName="scientist" [class.is-invalid]="isInvalid('scientist')" [placeholder]="'experiments.details.form.placeholders.value' | transloco" />
       @if (experimentForm.get('scientist')?.value) {
         <span class="icon bi bi-x text-black clear-btn" (click)="clearControl('scientist')"></span>
       }
     </div>
     @if (isInvalid('scientist')) {
-      <div class="error-message">Scientist name is required.</div>
+      <div class="error-message">{{ 'experiments.details.form.errors.scientistRequired' | transloco }}</div>
     }
   </div>
 
   <div class="input-group">
-    <label>Temperature</label>
-    <div class="search-field">
-      <input type="number" formControlName="temperature" [class.is-invalid]="isInvalid('temperature')" placeholder="Value" />
-      <span class="icon text-dark">°C</span>
+    <label>{{ 'experiments.details.form.labels.temperature' | transloco }}</label>
+    <div class="search-field" [class.has-value]="experimentForm.get('temperature')?.value">
+      <input type="number" formControlName="temperature" [class.is-invalid]="isInvalid('temperature')" [placeholder]="'experiments.details.form.placeholders.value' | transloco" />
+      <span class="icon unit-label text-dark">°C</span>
+      @if (experimentForm.get('temperature')?.value) {
+        <span class="icon bi bi-x text-black clear-btn" (click)="clearControl('temperature')"></span>
+      }
     </div>
     @if (isInvalid('temperature')) {
-      <div class="error-message">Temperature is required.</div>
+      <div class="error-message">{{ 'experiments.details.form.errors.temperatureRequired' | transloco }}</div>
     }
   </div>
 
   <div class="input-group">
-    <label>Solvent</label>
-    <div class="search-field position-relative">
+    <label>{{ 'experiments.details.form.labels.solvent' | transloco }}</label>
+    <div class="search-field">
       <input
         type="text"
+        list="solventList"
         formControlName="solvent"
         [class.is-invalid]="isInvalid('solvent')"
-        placeholder="Select or type..."
-        autocomplete="off"
-        (focus)="showSolvents = true"
-        (blur)="onBlur('solvent')"
-        (keydown)="onKeyDown($event, 'solvent')"/>
+        [placeholder]="'experiments.details.form.placeholders.selectOrType' | transloco"
+        autocomplete="off" />
 
-      @if (showSolvents && filteredSolvents.length > 0) {
-        <ul class="dropdown-menu show w-100 shadow-sm"
-            style="position: absolute; top: 100%; left: 0; max-height: 200px; overflow-y: auto; z-index: 1050;">
-          @for (solvent of filteredSolvents; track solvent; let i = $index) {
-            <li>
-              <button
-                type="button"
-                class="dropdown-item dropdown-button"
-                [class.active]="i === activeSolventIndex"
-                (mousedown)="selectOption('solvent', solvent)"
-              >
-                {{ solvent }}
-              </button>
-            </li>
-          }
-        </ul>
-      }
+      <datalist id="solventList">
+        @for (solvent of knownSolvents; track solvent) {
+          <option [value]="solvent"></option>
+        }
+      </datalist>
 
       @if (experimentForm.get('solvent')?.value) {
         <span class="icon bi bi-x text-black clear-btn" (click)="clearControl('solvent')"></span>
       }
     </div>
-    @if (isInvalid('solvent')) {
-      <div class="error-message">Solvent is required.</div>
+
+    @if (isInvalid('solvent') && !experimentForm.get('solvent')?.hasError('notInList')) {
+      <div class="error-message">{{ 'experiments.details.form.errors.solventRequired' | transloco }}</div>
     }
     @if (experimentForm.get('solvent')?.hasError('notInList')) {
-      <div class="error-message">Please select a valid option from the list.</div>
+      <div class="error-message">{{ 'experiments.details.form.errors.invalidSolvent' | transloco }}</div>
     }
   </div>
 
   <div class="input-group">
-    <label>Concentration Reactant 1</label>
-    <div class="search-field">
-      <input type="number" formControlName="concentrationA" [class.is-invalid]="isInvalid('concentrationA')" placeholder="Value" />
-      <span class="icon text-dark">mM</span>
+    <label>{{ 'experiments.details.form.labels.concentrationReactantA' | transloco }}</label>
+    <div class="search-field" [class.has-value]="experimentForm.get('concentrationA')?.value">
+      <input type="number" formControlName="concentrationA" [class.is-invalid]="isInvalid('concentrationA')" [placeholder]="'experiments.details.form.placeholders.value' | transloco" />
+      <span class="icon unit-label text-dark">mM</span>
+      @if (experimentForm.get('concentrationA')?.value) {
+        <span class="icon bi bi-x text-black clear-btn" (click)="clearControl('concentrationA')"></span>
+      }
     </div>
     @if (isInvalid('concentrationA')) {
       <div class="error-message">
-        @if (experimentForm.get('concentrationA')?.hasError('required')) { Concentration is required. }
-        @if (experimentForm.get('concentrationA')?.hasError('min')) { Concentration cannot be negative. }
+        @if (experimentForm.get('concentrationA')?.hasError('required')) { {{ 'experiments.details.form.errors.concentrationARequired' | transloco }} }
+        @if (experimentForm.get('concentrationA')?.hasError('min')) { {{ 'experiments.details.form.errors.concentrationNegative' | transloco }} }
       </div>
     }
   </div>
 
   <div class="input-group">
-    <label>Concentration Reactant 2</label>
-    <div class="search-field">
-      <input type="number" formControlName="concentrationB" [class.is-invalid]="isInvalid('concentrationB')" placeholder="Value" />
-      <span class="icon text-dark">mM</span>
+    <label>{{ 'experiments.details.form.labels.concentrationReactantB' | transloco }}</label>
+    <div class="search-field" [class.has-value]="experimentForm.get('concentrationB')?.value">
+      <input type="number" formControlName="concentrationB" [class.is-invalid]="isInvalid('concentrationB')" [placeholder]="'experiments.details.form.placeholders.value' | transloco" />
+      <span class="icon unit-label text-dark">mM</span>
+      @if (experimentForm.get('concentrationB')?.value) {
+        <span class="icon bi bi-x text-black clear-btn" (click)="clearControl('concentrationB')"></span>
+      }
     </div>
     @if (isInvalid('concentrationB')) {
       <div class="error-message">
-        @if (experimentForm.get('concentrationB')?.hasError('required')) { Concentration is required. }
-        @if (experimentForm.get('concentrationB')?.hasError('min')) { Concentration cannot be negative. }
+        @if (experimentForm.get('concentrationB')?.hasError('required')) { {{ 'experiments.details.form.errors.concentrationBRequired' | transloco }} }
+        @if (experimentForm.get('concentrationB')?.hasError('min')) { {{ 'experiments.details.form.errors.concentrationNegative' | transloco }} }
       </div>
     }
   </div>
-
   <div class="divider-container">
     <div class="divider"></div>
-    <span class="divider-label">Optional</span>
+    <span class="divider-label">{{ 'experiments.details.form.sections.optional' | transloco }}</span>
     <div class="divider"></div>
   </div>
 
   <div class="input-group">
-    <label>Instrument</label>
-    <div class="search-field position-relative">
+    <label>{{ 'experiments.details.form.labels.instrument' | transloco }}</label>
+    <div class="search-field">
       <input
         type="text"
+        list="instrumentList"
         formControlName="instrument"
         [class.is-invalid]="isInvalid('instrument')"
-        placeholder="Select or type..."
-        autocomplete="off"
-        (focus)="showInstruments = true"
-        (blur)="onBlur('instrument')"
-        (keydown)="onKeyDown($event, 'instrument')" />
+        [placeholder]="'experiments.details.form.placeholders.selectOrType' | transloco"
+        autocomplete="off" />
 
-      @if (showInstruments && filteredInstruments.length > 0) {
-        <ul class="dropdown-menu show w-100 shadow-sm"
-            style="position: absolute; top: 100%; left: 0; max-height: 200px; overflow-y: auto; z-index: 1050;">
-          @for (instrument of filteredInstruments; track instrument; let i = $index) {
-            <li>
-              <button type="button" class="dropdown-item dropdown-button" [class.active]="i === activeInstrumentIndex" (mousedown)="selectOption('instrument', instrument)">
-                {{ instrument }}
-              </button>
-            </li>
-          }
-        </ul>
-      }
+      <datalist id="instrumentList">
+        @for (instrument of knownInstruments; track instrument) {
+          <option [value]="instrument"></option>
+        }
+      </datalist>
 
       @if (experimentForm.get('instrument')?.value) {
         <span class="icon bi bi-x text-black clear-btn" (click)="clearControl('instrument')"></span>
       }
     </div>
-    @if (isInvalid('instrument')) {
-      <div class="error-message">Instrument invalid.</div>
-    }
     @if (experimentForm.get('instrument')?.hasError('notInList')) {
-      <div class="error-message">Please select a valid option from the list.</div>
+      <div class="error-message">{{ 'experiments.details.form.errors.invalidInstrument' | transloco }}</div>
     }
   </div>
 
   <div class="input-group">
-    <label>Modality</label>
-    <div class="search-field position-relative">
+    <label>{{ 'experiments.details.form.labels.modality' | transloco }}</label>
+    <div class="search-field">
       <input
         type="text"
+        list="modalityList"
         formControlName="modality"
         [class.is-invalid]="isInvalid('modality')"
-        placeholder="Select or type..."
-        autocomplete="off"
-        (focus)="showModalities = true"
-        (blur)="onBlur('modality')"
-        (keydown)="onKeyDown($event, 'modality')"/>
+        [placeholder]="'experiments.details.form.placeholders.selectOrType' | transloco"
+        autocomplete="off" />
 
-      @if (showModalities && filteredModalities.length > 0) {
-        <ul class="dropdown-menu show w-100 shadow-sm"
-            style="position: absolute; top: 100%; left: 0; max-height: 200px; overflow-y: auto; z-index: 1050;">
-          @for (modality of filteredModalities; track modality; let i = $index) {
-            <li>
-              <button type="button" class="dropdown-item dropdown-button" [class.active]="i === activeModalityIndex" (mousedown)="selectOption('modality', modality)">
-                {{ modality }}
-              </button>
-            </li>
-          }
-        </ul>
-      }
+      <datalist id="modalityList">
+        @for (modality of knownModalities; track modality) {
+          <option [value]="modality"></option>
+        }
+      </datalist>
 
       @if (experimentForm.get('modality')?.value) {
         <span class="icon bi bi-x text-black clear-btn" (click)="clearControl('modality')"></span>
       }
     </div>
-    @if (isInvalid('modality')) {
-      <div class="error-message">Modality invalid.</div>
-    }
     @if (experimentForm.get('modality')?.hasError('notInList')) {
-      <div class="error-message">Please select a valid option from the list.</div>
+      <div class="error-message">{{ 'experiments.details.form.errors.invalidModality' | transloco }}</div>
     }
   </div>
 
   <div class="input-group">
-    <label>Wavelength</label>
-    <div class="search-field">
-      <input type="number" formControlName="wavelength" [class.is-invalid]="isInvalid('wavelength')" placeholder="Value" />
-      <span class="icon text-dark">nm</span>
+    <label>{{ 'experiments.details.form.labels.wavelength' | transloco }}</label>
+    <div class="search-field" [class.has-value]="experimentForm.get('wavelength')?.value">
+      <input type="number" formControlName="wavelength" [class.is-invalid]="isInvalid('wavelength')" [placeholder]="'experiments.details.form.placeholders.value' | transloco" />
+      <span class="icon unit-label text-dark">nm</span>
+      @if (experimentForm.get('wavelength')?.value) {
+        <span class="icon bi bi-x text-black clear-btn" (click)="clearControl('wavelength')"></span>
+      }
     </div>
-    @if (isInvalid('wavelength')) {
-      <div class="error-message">Wavelength invalid.</div>
-    }
+    <div class="error-message">
+      @if (experimentForm.get('wavelength')?.hasError('min')) { {{ 'experiments.details.form.errors.wavelengthNegative' | transloco }} }
+    </div>
   </div>
 
   <div class="input-group">
-    <label>Comment</label>
+    <label>{{ 'experiments.details.form.labels.comment' | transloco }}</label>
     <div class="search-field align-items-start">
-      <textarea formControlName="comment" placeholder="Add additional details..." rows="3"></textarea>
+      <textarea formControlName="comment" [placeholder]="'experiments.details.form.placeholders.comment' | transloco" rows="3"></textarea>
       @if (experimentForm.get('comment')?.value) {
         <span class="icon bi bi-x text-black clear-btn" (click)="clearControl('comment')" style="top: 8px;"></span>
       }
@@ -247,71 +228,30 @@
   </div>
 
   <div class="action-buttons mt-4">
-    <button type="submit" class="btn btn-primary" >Submit</button>
-    <button type="button" class="btn btn-light" (click)="onCancel()">Cancel</button>
-    <button type="button" class="btn btn-danger" (click)="onDelete()">Delete</button>
+    <button type="submit" class="form-button primary">{{ 'experiments.details.form.buttons.submit' | transloco }}</button>
+    <button type="button" class="form-button" (click)="onCancel()">{{ 'experiments.details.form.buttons.cancel' | transloco }}</button>
+    <button type="button" class="form-button error" (click)="onArchive()">{{ 'experiments.details.form.buttons.archive' | transloco }}</button>
   </div>
 
 </form>
 
+<app-confirm-modal
+  [isOpen]="isArchiveExperimentModalOpen"
+  [title]="'experiments.details.modals.archive.title' | transloco"
+  [message]="'experiments.details.modals.archive.message' | transloco"
+  [confirmLabel]="'experiments.details.modals.archive.confirm' | transloco"
+  confirmButtonClass="danger"
+  (confirm)="executeArchive()"
+  (cancel)="closeModals()">
+</app-confirm-modal>
 
-<!-- Delete Experiment Modal -->
-<div
-  class="modal fade"
-  [ngClass]="{'show': isDeleteExperimentModalOpen}"
-  [style.display]="isDeleteExperimentModalOpen ? 'block' : 'none'"
-  tabindex="-1"
-  style="background-color: rgba(0,0,0,0.5);" >
-  <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content shadow">
-
-      <div class="modal-header border-0 pb-0">
-        <h5 class="modal-title text-danger">
-          <i class="bi bi-exclamation-triangle-fill me-2"></i> Delete Experiment
-        </h5>
-        <button type="button" class="btn-close" (click)="closeModals()" aria-label="Close"></button>
-      </div>
-
-      <div class="modal-body py-4">
-        <p class="mb-0">Are you sure you want to permanently delete this experiment? This action cannot be undone.</p>
-      </div>
-
-      <div class="modal-footer border-0 pt-0">
-        <button type="button" class="" (click)="closeModals()">Cancel</button>
-        <button type="button" class="error" (click)="executeDelete()">Permanently Delete</button>
-      </div>
-
-    </div>
-  </div>
-</div>
-
-
-<!-- Cancel Experiment Modal -->
-<div
-  class="modal fade"
-  [ngClass]="{'show': isCancelExperimentModalOpen}"
-  [style.display]="isCancelExperimentModalOpen ? 'block' : 'none'"
-  tabindex="-1"
-  style="background-color: rgba(0,0,0,0.5);" >
-  <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content shadow">
-
-      <div class="modal-header border-0 pb-0">
-        <h5 class="modal-title text-danger">
-          <i class="bi bi-exclamation-triangle-fill me-2"></i> Unsaved Changes
-        </h5>
-        <button type="button" class="btn-close" (click)="closeModals()" aria-label="Close"></button>
-      </div>
-
-      <div class="modal-body py-4">
-        <p class="mb-0">You have unsaved changes. Are you sure you want to cancel? All progress will be lost.</p>
-      </div>
-
-      <div class="modal-footer border-0 pt-0">
-        <button type="button" class="" (click)="closeModals()">Continue Editing</button>
-        <button type="button" class="error" (click)="executeCancel()">Discard Changes</button>
-      </div>
-
-    </div>
-  </div>
-</div>
+<app-confirm-modal
+  [isOpen]="isCancelExperimentModalOpen"
+  [title]="'experiments.details.modals.cancel.title' | transloco"
+  [message]="'experiments.details.modals.cancel.message' | transloco"
+  [confirmLabel]="'experiments.details.modals.cancel.confirm' | transloco"
+  [cancelLabel]="'experiments.details.modals.cancel.cancelBtn' | transloco"
+  confirmButtonClass="danger"
+  (confirm)="executeCancel()"
+  (cancel)="closeModals()">
+</app-confirm-modal>

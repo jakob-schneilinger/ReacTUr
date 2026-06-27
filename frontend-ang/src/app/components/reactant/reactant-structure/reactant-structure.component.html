@@ -1,6 +1,6 @@
 @if (loading) {
   <div class="d-flex flex-column justify-content-center align-items-center py-5" style="min-height: 200px;">
-    <span class="text-muted fw-medium">Currently no reactant structure loaded.</span>
+    <span class="text-muted fw-medium">{{ 'reactants.structure.noStructureLoaded' | transloco }}</span>
   </div>
 }
 
@@ -8,15 +8,19 @@
 
   @if (structure) {
     <div class="structure-header">
-      <button class="toggle-btn" (click)="toggleView()">
-        Switch to {{ viewMode === '2D' ? '3D' : '2D' }} View
+      <button class="toggle-btn primary" (click)="toggleView()">
+        {{ 'reactants.structure.switchToView' | transloco: { view: viewMode === '2D' ? '3D' : '2D' } }}
       </button>
     </div>
   }
 
   <div class="view-wrapper">
     <div class="viewer-container container-2d" [class.active-view]="viewMode === '2D'">
-      <div class="rdkit-svg-container" [innerHTML]="svg2D"></div>
+      @if (smiles === "") {
+        <p class="text-secondary">{{ 'reactants.structure.addSmiles' | transloco }}</p>
+      }
+      <div class="rdkit-svg-container" [innerHTML]="svg2D">
+      </div>
     </div>
 
     <div #viewerContainer class="viewer-container container-3d" [class.active-view]="viewMode === '3D'" [class.d-none]="!structure">

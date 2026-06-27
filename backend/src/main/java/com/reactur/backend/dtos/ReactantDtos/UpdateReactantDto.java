@@ -1,9 +1,14 @@
 package com.reactur.backend.dtos.ReactantDtos;
 
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
+
+import java.util.List;
 import java.util.UUID;
 
 /**
- * DTO used for creating or updating a reactant in the database.
+ * DTO used for updating a reactant in the database.
  *
  * @param smiles               The SMILES string representing the chemical structure.
  * @param chemicalType         The UUID of the chemical type.
@@ -15,15 +20,17 @@ import java.util.UUID;
  * @param comment              Additional notes about the reactant.
  * @param references           Array of literature or external references.
  */
-public record SaveReactantDto(
+public record UpdateReactantDto(
+
         String smiles,
         UUID chemicalType,
+        @Size(max = 100, message = "Short name must not exceed 100 characters.")
         String shortname,
-        String[] additionalShortNames,
+        List<String> additionalShortNames,
         String chemicalName,
         String casNumber,
         String inChiKey,
         String comment,
-        String[] references
+        List<String> references
 ) {
 }

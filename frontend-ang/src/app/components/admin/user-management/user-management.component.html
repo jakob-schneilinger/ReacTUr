@@ -1,0 +1,128 @@
+<div class="user-management-container d-flex flex-column gap-4">
+
+  <div class="search-bar-wrapper">
+    <div class="input-group">
+      <span class="input-group-text bg-white text-muted border-end-0">
+        <i class="bi bi-search"></i>
+      </span>
+      <input
+        type="text"
+        class="search-input form-control border-start-0 ps-0"
+        [placeholder]="'admin.user.searchPlaceholder' | transloco"
+        [ngModel]="searchTerm"
+        (ngModelChange)="onSearchChange($event)"
+        [ngClass]="searchTerm ? 'border-end-0' : ''"
+      />
+      @if (searchTerm) {
+        <span class="input-group-text bg-white text-muted border-start-0" (click)="clearUserSearch()">
+          <span class="icon bi bi-x text-black clear-btn"></span>
+        </span>
+      }
+    </div>
+  </div>
+
+  <div class="user-accordions d-flex flex-column gap-3">
+
+    <div class="card border-0 shadow-sm">
+      <div class="card-header bg-white d-flex justify-content-between align-items-center cursor-pointer"
+           (click)="togglePanel('pending')">
+        <h6 class="mb-0 fw-bold d-flex align-items-center gap-2">
+          {{'admin.user.pendingTitle' | transloco}}
+          <span class="badge warning text-dark">{{ pendingUsers.length }}</span>
+        </h6>
+        <i class="bi" [ngClass]="panels.pending ? 'bi-chevron-up' : 'bi-chevron-down'"></i>
+      </div>
+      @if (panels.pending) {
+        <div class="card-body p-0">
+          <ng-container *ngTemplateOutlet="userTable; context: { $implicit: pendingUsers, type: 'pending' }"></ng-container>
+        </div>
+      }
+    </div>
+
+    <div class="card border-0 shadow-sm">
+      <div class="card-header bg-white d-flex justify-content-between align-items-center cursor-pointer"
+           (click)="togglePanel('active')">
+        <h6 class="mb-0 fw-bold d-flex align-items-center gap-2">
+          {{'admin.user.activeTitle' | transloco}}
+          <span class="badge bg-success">{{ activeUsers.length }}</span>
+        </h6>
+        <i class="bi" [ngClass]="panels.active ? 'bi-chevron-up' : 'bi-chevron-down'"></i>
+      </div>
+      @if (panels.active) {
+        <div class="card-body p-0">
+          <ng-container *ngTemplateOutlet="userTable; context: { $implicit: activeUsers, type: 'active' }"></ng-container>
+        </div>
+      }
+    </div>
+
+    <div class="card border-0 shadow-sm">
+      <div class="card-header bg-white text-muted d-flex justify-content-between align-items-center cursor-pointer"
+           (click)="togglePanel('deactivated')">
+        <h6 class="mb-0 fw-bold d-flex align-items-center gap-2">
+          {{'admin.user.deactivatedTitle' | transloco}}
+          <span class="badge bg-secondary">{{ deactivatedUsers.length }}</span>
+        </h6>
+        <i class="bi" [ngClass]="panels.deactivated ? 'bi-chevron-up' : 'bi-chevron-down'"></i>
+      </div>
+      @if (panels.deactivated) {
+        <div class="card-body p-0">
+          <ng-container *ngTemplateOutlet="userTable; context: { $implicit: deactivatedUsers, type: 'deactivated' }"></ng-container>
+        </div>
+      }
+    </div>
+
+  </div>
+</div>
+
+<ng-template #userTable let-userList let-type="type">
+  @if (userList.length === 0) {
+    <div class="p-4 text-center text-muted">
+      {{'admin.user.table.noUsersFound' | transloco}}
+    </div>
+  } @else {
+    <div class="table-responsive">
+      <table class="table table-hover mb-0 align-middle">
+        <thead class="table-light">
+        <tr>
+          <th>{{'admin.user.table.headerName' | transloco}}</th>
+          <th>{{'admin.user.table.headerEmail' | transloco}}</th>
+          <th>{{'admin.user.table.headerRole' | transloco}}</th>
+          <th class="text-end">{{'admin.user.table.headerAction' | transloco}}</th>
+        </tr>
+        </thead>
+        <tbody>
+          @for (user of userList; track user.uuid) {
+            <tr>
+              <td class="text-break">{{ user.firstName }} {{ user.lastName }}</td>
+              <td class="text-break">{{ user.email }}</td>
+              <td>
+                @if (type === 'active' || type === 'pending') {
+                  <select class="form-select form-select-sm w-auto" [value]="user.role || ''" (change)="updateUserRole(user, $event)">
+                    <option value="" disabled selected>{{'admin.user.table.rolePlaceholder' | transloco}}</option>
+                    <option value="USER">{{'userRoles.user' | transloco}}</option>
+                    <option value="SUPERVISOR">{{'userRoles.supervisor' | transloco}}</option>
+                  </select>
+                } @else {
+                  <span class="text-muted">{{ user.role === Role.USER ? ('userRoles.user' | transloco) : (user.role === Role.SUPERVISOR ? ('userRoles.supervisor' | transloco) : '--') }}</span>
+                }
+              </td>
+              <td class="text-end">
+                <div class="d-flex justify-content-end gap-2">
+                  @if (type === 'pending') {
+                    <button class="error compact px-3 py-1" (click)="updateUserStatus(user, 'DEACTIVATED')">{{'admin.user.table.actionReject' | transloco}}</button>
+                  }
+                  @if (type === 'active') {
+                    <button class="error compact px-3 py-1" (click)="updateUserStatus(user, 'DEACTIVATED')">{{'admin.user.table.actionDeactivate' | transloco}}</button>
+                  }
+                  @if (type === 'deactivated') {
+                    <button class="primary compact px-3 py-1" (click)="updateUserStatus(user, 'ACTIVATED')">{{'admin.user.table.actionReactivate' | transloco}}</button>
+                  }
+                </div>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</ng-template>

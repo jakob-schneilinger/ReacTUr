@@ -1,90 +1,108 @@
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { DrawMolComponent } from '../draw-mol/draw-mol.component';
 import { Component, Input, Output, EventEmitter, OnInit } from '@angular/core';
-import { Reactant } from '../../../dtos/reactant';
+import { ReactantDto } from '../../../dtos/reactant.dto';
 
 @Component({
   selector: 'app-reactant-selector',
   templateUrl: './reactant-selector.component.html',
   styleUrls: ['./reactant-selector.component.scss'],
-  standalone: false,
+  standalone: true,
+  imports: [CommonModule, FormsModule, DrawMolComponent],
 })
 export class ReactantSelectorComponent implements OnInit {
   @Input() label: string = 'Reactant';
-  @Input() availableReactants: Reactant[] = [];
+  @Input() availableReactants: ReactantDto[] = [];
 
-  @Input() set initialValue(val: string) {
-    if (val) this.initReactant(val);
+  @Input() set initialValue(vals: string[]) {
+    if (vals && vals.length > 0) this.initReactants(vals);
   }
 
   @Input() set clearSignal(val: number) {
-    if (val) this.clearReactant();
+    if (val) this.clearAll();
   }
 
-  @Output() selectionChanged = new EventEmitter<string>();
+  @Output() selectionChanged = new EventEmitter<string[]>();
 
   searchTerm: string = '';
-  selectedReactant: Reactant | null = null;
-  suggestions: Reactant[] = [];
+  selectedReactants: ReactantDto[] = [];
+  suggestions: ReactantDto[] = [];
 
   isDrawModalOpen = false;
   currentSmilesForModal = '';
 
   ngOnInit() {}
 
-  initReactant(val: string) {
-    const match = this.availableReactants.find(r => r.shortName.toLowerCase() === val.toLowerCase());
-    if (match) {
-      this.selectedReactant = match;
-    } else {
-      this.searchTerm = val;
-    }
+  initReactants(vals: string[]) {
+    this.selectedReactants = [];
+    vals.forEach((val) => {
+      const match = this.availableReactants.find(
+        (r) => r.shortName.toLowerCase() === val.toLowerCase() || r.uuid === val,
+      );
+      if (match && !this.selectedReactants.includes(match)) {
+        this.selectedReactants.push(match);
+      }
+    });
   }
 
   onSearchInput() {
     if (this.searchTerm.length > 0) {
       const lowerTerm = this.searchTerm.toLowerCase();
-      this.suggestions = this.availableReactants.filter(r =>
-        r.shortName.toLowerCase().includes(lowerTerm) ||
-        r.type1.toLowerCase().includes(lowerTerm) ||
-        r.smiles.includes(this.searchTerm)
+      this.suggestions = this.availableReactants.filter(
+        (r) =>
+          !this.selectedReactants.some((selected) => selected.uuid === r.uuid) &&
+          (r.shortName.toLowerCase().includes(lowerTerm) ||
+            r.chemicalType.name.toLowerCase().includes(lowerTerm) ||
+            r.chemicalName?.toLowerCase().includes(lowerTerm) ||
+            r.smiles.includes(this.searchTerm)),
       );
     } else {
       this.suggestions = [];
     }
+  }
+
+  selectReactant(reactant: ReactantDto) {
+    if (!this.selectedReactants.find((r) => r.uuid === reactant.uuid)) {
+      this.selectedReactants.push(reactant);
+    }
+    this.clearSearch();
     this.emitChange();
   }
 
-  selectReactant(reactant: Reactant) {
-    this.selectedReactant = reactant;
-    this.searchTerm = '';
-    this.suggestions = [];
+  removeReactant(reactant: ReactantDto) {
+    this.selectedReactants = this.selectedReactants.filter((r) => r.uuid !== reactant.uuid);
     this.emitChange();
   }
 
-  clearReactant() {
-    this.selectedReactant = null;
+  clearAll() {
+    this.selectedReactants = [];
+    this.clearSearch();
+    this.emitChange();
+  }
+
+  clearSearch() {
     this.searchTerm = '';
     this.suggestions = [];
-    this.emitChange();
   }
 
   emitChange() {
-    const value = this.selectedReactant ? this.selectedReactant.shortName : this.searchTerm;
-    this.selectionChanged.emit(value);
+    const values = this.selectedReactants.map((r) => r.uuid);
+    this.selectionChanged.emit(values);
   }
 
   openDraw() {
-    this.currentSmilesForModal = this.selectedReactant ? this.selectedReactant.smiles : this.searchTerm;
+    this.currentSmilesForModal = this.searchTerm;
     this.isDrawModalOpen = true;
   }
 
   onModalSave(newSmiles: string) {
-    const matched = this.availableReactants.find(r => r.smiles === newSmiles);
+    const matched = this.availableReactants.find((r) => r.smiles === newSmiles);
 
     if (matched) {
       this.selectReactant(matched);
     } else {
       this.searchTerm = newSmiles;
-      this.selectedReactant = null;
       this.onSearchInput();
     }
     this.isDrawModalOpen = false;

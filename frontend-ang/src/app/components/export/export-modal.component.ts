@@ -1,7 +1,9 @@
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { CdkDropList, CdkDrag, CdkDragDrop, moveItemInArray, transferArrayItem } from '@angular/cdk/drag-drop';
 import { Component, Input, Output, EventEmitter, OnInit, ChangeDetectorRef } from '@angular/core';
-import { Experiment } from '../../dtos/experiment';
+import { GetExperimentDto } from '../../dtos/experiment.dto';
 import { ExperimentService } from '../../services/experiment.service';
-import { CdkDragDrop, moveItemInArray, transferArrayItem } from '@angular/cdk/drag-drop';
 
 export interface ExportField {
   id: string;
@@ -13,10 +15,11 @@ export interface ExportField {
   selector: 'app-export-modal',
   templateUrl: './export-modal.component.html',
   styleUrls: ['./export-modal.component.scss'],
-  standalone: false
+  standalone: true,
+  imports: [CommonModule, FormsModule, CdkDropList, CdkDrag],
 })
 export class ExportModalComponent implements OnInit {
-  @Input() selectedExperiments: Experiment[] = [];
+  @Input() selectedExperiments: GetExperimentDto[] = [];
   @Output() close = new EventEmitter<void>();
 
   exportFormat: 'json' | 'csv' = 'json';
@@ -42,7 +45,7 @@ export class ExportModalComponent implements OnInit {
   };
 
   availableFields: ExportField[] = [
-    { id: 'id', label: 'ID', category: 'core' },
+    { id: 'uuid', label: 'ID', category: 'core' },
     { id: 'reactants', label: 'Reactants', category: 'core' },
     { id: 'date', label: 'Date', category: 'core' },
     { id: 'scientist', label: 'Scientist', category: 'core' },
@@ -100,20 +103,20 @@ export class ExportModalComponent implements OnInit {
   private cd: ChangeDetectorRef,) {}
 
   ngOnInit() {
-    const idsToLoad = this.selectedExperiments.map(exp => exp.id);
+    const idsToLoad = this.selectedExperiments.map(exp => exp.uuid);
 
     this.experimentService.getBulkExperimentData(idsToLoad).subscribe(heavyData => {
 
-      this.fullExportData = this.selectedExperiments.map(exp => {
-        const matchingHeavyData = heavyData.find(hd => hd.experimentId === exp.id);
+      this.fullExportData = this.selectedExperiments.map((exp) => {
+        const matchingHeavyData = heavyData.find((hd) => hd.experimentId === exp.uuid);
         return {
           ...exp,
-          measurements: matchingHeavyData ? matchingHeavyData.measurements : []
+          measurements: matchingHeavyData ? matchingHeavyData.measurements : [],
         };
       });
       this.isLoading = false;
       this.updatePreview();
-      this.cd.detectChanges();
+      this.cd.markForCheck();
     });
   }
 

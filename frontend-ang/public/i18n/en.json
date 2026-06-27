@@ -1,0 +1,330 @@
+{
+  "header": {
+    "title": "ReacTUr",
+    "logoAlt": "ReacTUr Logo",
+    "search": "Search",
+    "createExperiment": "Create Experiment",
+    "reactants": "Reactants",
+    "admin": "Admin",
+    "userProfile": "User Profile",
+    "greetings": "Hello",
+    "logout": "Logout",
+    "login": "Login"
+  },
+
+  "selectionOptions": {
+    "type": "Type",
+    "modality": "Modality",
+    "instrument": "Instrument",
+    "solvent": "Solvent"
+  },
+
+  "userRoles": {
+    "user": "USER",
+    "supervisor": "SUPERVISOR",
+    "admin": "ADMIN"
+  },
+
+  "login": {
+    "title": "ReacTUr",
+    "login": "Login",
+    "loginInstruction": "Please log in with your TU account to continue.",
+    "loginButton": "Login with TU SSO"
+  },
+
+  "admin": {
+    "user": {
+      "title": "User Management",
+      "searchPlaceholder": "Search users by name, email, or role...",
+      "pendingTitle": "Pending Approvals",
+      "activeTitle": "Active Users",
+      "deactivatedTitle": "Deactivated Users",
+      "table": {
+        "headerName": "NAME",
+        "headerEmail": "EMAIL",
+        "headerRole": "ROLE",
+        "headerAction": "ACTION",
+        "rolePlaceholder": "Select Role...",
+        "actionReject": "Reject",
+        "actionDeactivate": "Deactivate",
+        "actionReactivate": "Reactivate",
+        "noUsersFound": "No users found in this category."
+      },
+      "notifications": {
+        "fetchError": "Error fetching users",
+        "statusUpdated": "User status updated successfully",
+        "statusError": "Error updating user status",
+        "roleUpdated": "User role updated successfully",
+        "roleError": "Error updating user role"
+      }
+    },
+    "option": {
+      "title": "System Configuration",
+      "table": {
+        "headerValue": "VALUE",
+        "headerStatus": "STATUS",
+        "headerAction": "ACTION",
+        "statusActive": "Active",
+        "statusInactive": "Inactive",
+        "actionDeactivate": "Deactivate",
+        "actionActivate": "Activate",
+        "loadingOptions": "Loading options...",
+        "noOptionsFound": "No options found in this category."
+      },
+      "addPlaceholder": "Type to add a new option to category \"{{category}}\"...",
+      "addButton": "Add",
+      "modals": {
+        "add": {
+          "title": "Add Option to \"{{category}}\"",
+          "message": "Are you sure you want to add the option <strong>{{name}}</strong> to the category <strong>{{category}}</strong>?",
+          "confirm": "Add Option"
+        }
+      },
+      "notifications": {
+        "loadError": "Failed to load options for {{category}}",
+        "statusUpdated": "Option status updated successfully",
+        "statusError": "Failed to update option",
+        "addSuccess": "New option added successfully",
+        "addError": "Failed to add new option"
+      }
+    }
+  },
+
+  "reactants": {
+    "title": "Reactants",
+    "searchPlaceholder": "Search by name, SMILES, or type...",
+    "actions": {
+      "showReactants": "Show Reactants",
+      "showArchived": "Show Archived",
+      "addReactant": "Add Reactant",
+      "viewDetails": "View Details",
+      "editReactant": "Edit Reactant",
+      "archiveReactant": "Archive Reactant",
+      "restoreReactant": "Restore Reactant",
+      "copySmiles": "Copy SMILES"
+    },
+    "badges": {
+      "archived": "Archived"
+    },
+    "empty": {
+      "noArchived": "No archived reactants found.",
+      "noReactants": "No reactants found.",
+      "adjustSearch": "Try adjusting your search criteria."
+    },
+    "modals": {
+      "archive": {
+        "title": "Archive Reactant",
+        "message": "Are you sure you want to permanently archive the reactant <strong>{{name}}</strong>?",
+        "confirm": "Permanently Archive"
+      },
+      "restore": {
+        "title": "Restore Reactant",
+        "message": "Are you sure you want to restore the reactant <strong>{{name}}</strong>?",
+        "confirm": "Restore"
+      }
+    },
+    "notifications": {
+      "fetchError": "Reactants unavailable",
+      "fetchArchivedError": "Archived Reactants unavailable",
+      "notFoundTitle": "Error",
+      "notFoundMessage": "Reactant details could not be found.",
+      "archivedTitle": "Reactant Archived",
+      "archivedMessage": "The reactant \"{{name}}\" was successfully archived.",
+      "archiveFailed": "Archiving Failed",
+      "restoredTitle": "Reactant Restored",
+      "restoredMessage": "The reactant \"{{name}}\" was successfully restored.",
+      "restoreFailed": "Restoring Failed",
+      "copySuccessTitle": "Success",
+      "copySuccessMessage": "SMILES copied to clipboard!",
+      "copyFailed": "Failed to copy text"
+    },
+    "details": {
+      "addNew": "Add new Reactant",
+      "form": {
+        "sections": {
+          "required": "Required",
+          "optional": "Optional"
+        },
+        "labels": {
+          "shortName": "Short Name",
+          "smiles": "SMILES",
+          "type": "Type",
+          "chemicalName": "Chemical Name",
+          "additionalShortNames": "Additional Short Names",
+          "casNumber": "CAS Number",
+          "references": "Reference(s)",
+          "comment": "Comment"
+        },
+        "placeholders": {
+          "value": "Value",
+          "selectOrType": "Select or type...",
+          "comment": "Add additional details..."
+        },
+        "buttons": {
+          "addShortName": "Add short name",
+          "addReference": "Add reference",
+          "submit": "Submit",
+          "cancel": "Cancel",
+          "archive": "Archive"
+        },
+        "errors": {
+          "shortNameRequired": "Short Name is required.",
+          "smilesRequired": "SMILES string is required.",
+          "smilesSyntax": "SMILES format is invalid. Please check syntax.",
+          "smilesSanitization": "SMILES format is invalid. Molecule structure failed RDKit sanitization.",
+          "invalidType": "Please select a valid type from the list."
+        }
+      },
+      "modals": {
+        "archive": {
+          "title": "Archive Reactant",
+          "message": "Are you sure you want to permanently archive the reactant {{name}}?",
+          "confirm": "Permanently Archive"
+        },
+        "cancel": {
+          "title": "Unsaved Changes",
+          "message": "You have unsaved changes. Are you sure you want to cancel? All progress will be lost.",
+          "confirm": "Discard Changes",
+          "cancelBtn": "Continue Editing"
+        }
+      },
+      "notifications": {
+        "errorTitle": "Error",
+        "loadError": "Failed to load reactant data",
+        "typeLoadErrorTitle": "Type Loading Error",
+        "typeLoadErrorMessage": "Please refresh page! Error: {{error}}",
+        "savedTitle": "Reactant Saved",
+        "savedMessage": "Reactant was saved successfully!",
+        "archivedTitle": "Reactant Archived",
+        "archivedMessage": "The reactant \"{{name}}\" was successfully archived.",
+        "archiveFailedTitle": "Archive Failed",
+        "archiveFailedMessage": "Archiving of Reactant \"{{name}}\" failed! Error: {{error}}"
+      }
+    },
+    "structure": {
+      "noStructureLoaded": "Currently no reactant structure loaded.",
+      "switchToView": "Switch to {{ view }} View",
+      "addSmiles": "Add Smiles for 2D-Structure",
+      "notifications": {
+        "fileFormatErrorTitle": "File Format Error",
+        "fileFormatErrorMessage": "Expected XYZ data but received HTML/XML format. Check file content!",
+        "invalidXyzTitle": "Invalid XYZ file",
+        "invalidXyzMessage": "The uploaded XYZ file contains no valid chemical structure. Check file content!",
+        "render2dErrorTitle": "2D Render Error",
+        "render2dErrorMessage": "Could not generate 2D structure from SMILES."
+      }
+    },
+    "viewModal": {
+      "title": "Reactant Details",
+      "sections": {
+        "information": "Reactant Information",
+        "structure": "Reactant Structure",
+        "attachedFiles": "Attached Files"
+      },
+      "labels": {
+        "shortName": "Short Name",
+        "type": "Type",
+        "smiles": "SMILES",
+        "chemicalName": "Chemical Name",
+        "additionalNames": "Additional Names",
+        "casNumber": "CAS Number",
+        "comment": "Comment",
+        "references": "References"
+      },
+      "emptyFiles": "No structural files attached.",
+      "buttons": {
+        "edit": "Edit Reactant",
+        "close": "Close"
+      },
+      "notifications": {
+        "missing3dFileTitle": "Missing 3D File",
+        "missing3dFileMessage": "3D File(s) of Reactant not found!"
+      }
+    }
+  },
+
+  "experiments": {
+    "details": {
+      "createNew": "Create new Experiment",
+      "editExisting": "Edit Experiment",
+      "viewExisting": "View Experiment",
+      "form": {
+        "sections": {
+          "required": "Required",
+          "optional": "Optional"
+        },
+        "labels": {
+          "reactantA": "Reactant A",
+          "reactantB": "Reactant B",
+          "date": "Date",
+          "scientist": "Scientist",
+          "temperature": "Temperature",
+          "solvent": "Solvent",
+          "concentrationReactantA": "Concentration Reactant A",
+          "concentrationReactantB": "Concentration Reactant B",
+          "instrument": "Instrument",
+          "modality": "Modality",
+          "wavelength": "Wavelength",
+          "comment": "Comment"
+        },
+        "placeholders": {
+          "value": "Value",
+          "selectOrType": "Select or type...",
+          "comment": "Add additional details..."
+        },
+        "buttons": {
+          "submit": "Submit",
+          "cancel": "Cancel",
+          "archive": "Archive"
+        },
+        "errors": {
+          "reactantARequired": "Reactant A is required.",
+          "reactantBRequired": "Reactant B is required.",
+          "dateRequired": "Date is required.",
+          "scientistRequired": "Scientist name is required.",
+          "temperatureRequired": "Temperature is required.",
+          "solventRequired": "Solvent is required.",
+          "concentrationARequired": "Concentration A is required.",
+          "concentrationBRequired": "Concentration B is required.",
+          "concentrationNegative": "Concentration can not be negative.",
+          "invalidSolvent": "Please select a valid solvent from the list.",
+          "invalidInstrument": "Please select a valid instrument from the list.",
+          "invalidModality": "Please select a valid modality from the list.",
+          "wavelengthInvalid": "Wavelength invalid.",
+          "wavelengthNegative": "Wavelength can not be negative."
+        },
+        "dateTitle": "Show date selection"
+      },
+      "modals": {
+        "archive": {
+          "title": "Archive Experiment",
+          "message": "Are you sure you want to permanently archive this experiment? This action cannot be undone.",
+          "confirm": "Permanently Archive"
+        },
+        "cancel": {
+          "title": "Unsaved Changes",
+          "message": "You have unsaved changes. Are you sure you want to cancel? All progress will be lost.",
+          "confirm": "Discard Changes",
+          "cancelBtn": "Continue Editing"
+        }
+      },
+      "notifications": {
+        "errorTitle": "Error",
+        "loadError": "Failed to load experiment data",
+        "loadExpError": "Failed to load experiment data! Error: {{error}}",
+        "permissionErrorTitle": "Permission Error",
+        "permissionErrorMessage": "Permission Error for this Experiment! Error: {{error}}",
+        "optionLoadErrorTitle": "Option Loading Error",
+        "optionLoadErrorMessage": "Failed to load {{category}}! Please check your connection or try again later. Error: {{error}}",
+        "savedTitle": "Experiment Saved",
+        "savedMessage": "Experiment was saved successfully!",
+        "savedErrorTitle": "Save Failed",
+        "savedErrorMessage": "Saving of Experiment failed! Error: {{}}",
+        "archivedTitle": "Experiment Archived",
+        "archivedMessage": "Experiment was archived successfully!",
+        "archiveFailedTitle": "Archive Failed",
+        "archiveFailedMessage": "Archiving of Experiment failed! Error: {{error}}"
+      }
+    }
+  }
+}

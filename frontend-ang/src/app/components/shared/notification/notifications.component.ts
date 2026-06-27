@@ -1,3 +1,4 @@
+import { CommonModule } from '@angular/common';
 import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { Globals } from "../../../global/globals";
 import { Notification, NotificationService, NotificationType } from "../../../services/notification.service";
@@ -6,7 +7,8 @@ import { Notification, NotificationService, NotificationType } from "../../../se
   selector: 'app-notifications',
   templateUrl: './notifications.component.html',
   styleUrls: ['./notifications.component.scss'],
-  standalone: false,
+  standalone: true,
+  imports: [CommonModule],
 })
 export class NotificationsComponent implements OnInit {
   closed: boolean = true;
@@ -24,7 +26,7 @@ export class NotificationsComponent implements OnInit {
   }
 
   constructor(
-    private not: NotificationService,
+    private notification: NotificationService,
     private globals: Globals,
     private cdr: ChangeDetectorRef
   ) {
@@ -75,7 +77,7 @@ export class NotificationsComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.not.notification$.subscribe({
+    this.notification.notification$.subscribe({
       next: (notification) => this.spawnNotification(notification),
       error: console.error,
     });

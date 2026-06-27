@@ -1,3 +1,5 @@
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import {
   AfterViewInit,
   Component,
@@ -7,15 +9,19 @@ import {
   Output,
   NgZone,
   HostListener,
+  ChangeDetectorRef,
 } from '@angular/core';
-declare var initRDKitModule: any;
+import { AppModalComponent } from '../modal/app-modal.component';
+import { RDKitService } from '../../../services/rdkit.service';
+
 declare var ChemDoodle: any;
 
 @Component({
   selector: 'app-draw-mol',
   templateUrl: './draw-mol.component.html',
   styleUrls: ['./draw-mol.component.scss'],
-  standalone: false,
+  standalone: true,
+  imports: [CommonModule, FormsModule, AppModalComponent],
 })
 export class DrawMolComponent implements OnInit, AfterViewInit {
   @Input() initialSmiles: string = '';
@@ -27,28 +33,28 @@ export class DrawMolComponent implements OnInit, AfterViewInit {
   canvasId: string = 'sketcher-modal-' + Math.random().toString(36).substring(2, 9);
 
   sketcher: any;
-  rdkitModule: any;
-  isSyncing: boolean = false;
 
-  constructor(private ngZone: NgZone) {}
+  private isUpdatingFromCanvas: boolean = false;
+  private isUpdatingFromInput: boolean = false;
+
+  private syncTimeout: any;
+
+  constructor(
+    private ngZone: NgZone,
+    private rdkitService: RDKitService,
+    private cdr: ChangeDetectorRef,
+  ) {}
 
   async ngOnInit() {
     this.smilesString = this.initialSmiles;
 
-    if (!(window as any)['RDKit']) {
-      this.rdkitModule = await initRDKitModule();
-      (window as any)['RDKit'] = this.rdkitModule;
-    } else {
-      this.rdkitModule = (window as any)['RDKit'];
-    }
+    await this.rdkitService.initRDKit();
   }
 
   ngAfterViewInit() {
     setTimeout(() => {
       this.initChemDoodle();
-      if (this.smilesString) {
-        this.syncCanvasFromSmiles(this.smilesString);
-      }
+      this.syncCanvasFromSmiles(this.smilesString || '');
     }, 100);
   }
 
@@ -59,58 +65,82 @@ export class DrawMolComponent implements OnInit, AfterViewInit {
 
     const canvasElement = document.getElementById(this.canvasId);
     if (canvasElement) {
-      canvasElement.addEventListener('mouseup', () => this.syncCanvasToSmiles());
-      canvasElement.addEventListener('touchend', () => this.syncCanvasToSmiles());
+      canvasElement.addEventListener('mouseup', () => this.onCanvasInteraction());
+      canvasElement.addEventListener('touchend', () => this.onCanvasInteraction());
     }
   }
 
   onSmileInput(newValue: string) {
+    if (this.isUpdatingFromCanvas) return;
+
     this.smilesString = newValue;
     this.syncCanvasFromSmiles(newValue);
   }
 
   private syncCanvasFromSmiles(smiles: string) {
-    if (!this.rdkitModule || !this.sketcher) return;
+    if (!this.rdkitService.isLoaded || !this.sketcher) return;
 
-    this.isSyncing = true;
-    try {
-      if (!smiles) {
-        const emptyMol = this.rdkitModule.get_mol('');
-        this.sketcher.loadMolecule(ChemDoodle.readMOL(emptyMol.get_molblock()));
-        emptyMol.delete();
-      } else {
-        const mol = this.rdkitModule.get_mol(smiles);
-        if (mol) {
-          const molBlock = mol.get_molblock();
-          this.sketcher.loadMolecule(ChemDoodle.readMOL(molBlock));
-          mol.delete();
+    this.isUpdatingFromInput = true;
+
+    if (!smiles || smiles.trim() === '') {
+      if (typeof this.sketcher.clear === 'function') {
+        this.sketcher.clear();
+      }
+    } else {
+      const molBlock = this.rdkitService.getMolBlockFromSmiles(smiles);
+      if (molBlock) {
+        try {
+          const chemMolecule = ChemDoodle.readMOL(molBlock);
+          if (chemMolecule) {
+            this.sketcher.loadMolecule(chemMolecule);
+          }
+        } catch (error) {
+          console.warn('Failed to load molecule into ChemDoodle', error);
         }
       }
-    } catch (error) {
-      console.warn('Invalid SMILES input', error);
     }
-    setTimeout(() => (this.isSyncing = false), 50);
+
+    setTimeout(() => (this.isUpdatingFromInput = false), 50);
   }
 
   private syncCanvasToSmiles() {
-    if (!this.rdkitModule || !this.sketcher || this.isSyncing) return;
+    if (!this.sketcher || this.isUpdatingFromInput) return;
 
-    this.isSyncing = true;
+    this.isUpdatingFromCanvas = true;
+
     try {
-      const molBlock = ChemDoodle.writeMOL(this.sketcher.getMolecule());
-      const mol = this.rdkitModule.get_mol(molBlock);
+      const molecule = this.sketcher.getMolecule();
 
-      this.ngZone.run(() => {
-        this.smilesString = mol.get_smiles();
-      });
-
-      mol.delete();
+      if (!molecule || !molecule.atoms || molecule.atoms.length === 0) {
+        this.ngZone.run(() => {
+          this.smilesString = '';
+          this.cdr.markForCheck();
+        });
+      } else {
+        const molBlock = ChemDoodle.writeMOL(molecule);
+        if (molBlock) {
+          const newSmiles = this.rdkitService.getSmilesFromMolBlock(molBlock);
+          this.ngZone.run(() => {
+            this.smilesString = newSmiles || '';
+            this.cdr.markForCheck();
+          });
+        }
+      }
     } catch (error) {
-      this.ngZone.run(() => {
-        this.smilesString = '';
-      });
+      console.warn('Could not read molecule from canvas:', error);
     }
-    setTimeout(() => (this.isSyncing = false), 50);
+
+    setTimeout(() => (this.isUpdatingFromCanvas = false), 50);
+  }
+
+  onCanvasInteraction() {
+    if (this.syncTimeout) {
+      clearTimeout(this.syncTimeout);
+    }
+
+    this.syncTimeout = setTimeout(() => {
+      this.syncCanvasToSmiles();
+    }, 100);
   }
 
   onSave() {
@@ -119,12 +149,6 @@ export class DrawMolComponent implements OnInit, AfterViewInit {
 
   onClose() {
     this.closeModal.emit();
-  }
-
-  onCanvasInteraction() {
-    setTimeout(() => {
-      this.syncCanvasToSmiles();
-    }, 100);
   }
 
   @HostListener('window:resize')

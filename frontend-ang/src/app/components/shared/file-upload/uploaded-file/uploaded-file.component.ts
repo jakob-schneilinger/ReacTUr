@@ -1,11 +1,12 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
-
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-uploaded-file',
   templateUrl: './uploaded-file.component.html',
   styleUrls: ['./uploaded-file.component.scss'],
-  standalone: false,
+  standalone: true,
+  imports: [CommonModule],
 })
 export class UploadedFileComponent {
   @Input() file!: File;

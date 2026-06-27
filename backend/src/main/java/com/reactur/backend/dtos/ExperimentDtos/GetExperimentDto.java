@@ -5,6 +5,7 @@ import com.reactur.backend.dtos.GetUserDto;
 import com.reactur.backend.dtos.ReactantDtos.ReactantDto;
 
 import java.time.Instant;
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -21,14 +22,14 @@ import java.util.UUID;
  * @param archivedAt      The timestamp when the experiment was archived (null if active).
  */
 public record GetExperimentDto(
-  UUID uuid,
-  String doi,
-  ReactantDto reactantA,
-  ReactantDto reactantB,
-  GetMetadataDto metadata,
-  MeasurementDataDto measurementData,
-  GetUserDto createdBy,
-  ExperimentAttachmentDto[] attachments,
-  Instant archivedAt
+        UUID uuid,
+        String doi,
+        ReactantDto reactantA,
+        ReactantDto reactantB,
+        GetMetadataDto metadata,
+        MeasurementDataDto measurementData,
+        GetUserDto createdBy,
+        List<ExperimentAttachmentDto> attachments,
+        Instant archivedAt
 ) implements DetailsDto {
 }

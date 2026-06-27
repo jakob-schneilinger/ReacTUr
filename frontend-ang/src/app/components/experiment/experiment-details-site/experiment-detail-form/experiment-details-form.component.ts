@@ -1,9 +1,26 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { ReactiveFormsModule } from '@angular/forms';
+import { AppConfirmModalComponent } from '../../../shared/modal/confirm-modal.component';
+import {
+  ChangeDetectorRef,
+  Component,
+  Input,
+  OnChanges,
+  OnDestroy,
+  OnInit,
+  SimpleChanges,
+} from '@angular/core';
 import { FormBuilder, FormGroup, FormArray, Validators, ValidatorFn, AbstractControl, ValidationErrors } from '@angular/forms';
 import { Router } from '@angular/router';
 import { NotificationService } from '../../../../services/notification.service';
 import { AuthService } from '../../../../services/auth.service';
-import { User } from '../../../../dtos/user';
+import { GetUserDto } from '../../../../dtos/user.dto';
+import { TRANSLOCO_IMPORTS } from '../../../../global/transloco-imports';
+import { TranslocoService } from '@jsverse/transloco';
+import { ExperimentService } from '../../../../services/experiment.service';
+import { GetExperimentDto, SaveExperimentDto } from '../../../../dtos/experiment.dto';
+import { Observable, Subject } from 'rxjs';
+import { OptionService } from '../../../../services/option.service';
 
 export type FormState = 'create' | 'edit';
 
@@ -11,65 +28,135 @@ export type FormState = 'create' | 'edit';
   selector: 'app-experiment-details-form',
   templateUrl: './experiment-details-form.component.html',
   styleUrls: ['./experiment-details-form.component.scss'],
-  standalone: false,
+  standalone: true,
+  imports: [CommonModule, ReactiveFormsModule, AppConfirmModalComponent, TRANSLOCO_IMPORTS],
 })
-export class ExperimentDetailsFormComponent implements OnInit {
+export class ExperimentDetailsFormComponent implements OnInit, OnDestroy, OnChanges {
+  private destroy$ = new Subject<void>();
   @Input() formState: FormState = 'create';
+  @Input() experiment?: GetExperimentDto;
 
-  isDeleteExperimentModalOpen = false;
+  isArchiveExperimentModalOpen = false;
   isCancelExperimentModalOpen = false;
 
   experimentForm!: FormGroup;
 
-  // TODO: fetch from backend
-  knownSolvents = ['Water', 'Methanol', 'Ethanol', 'DMSO', 'Acetonitrile'];
-  knownInstruments = ['Spectrometer A', 'HPLC B', 'Mass Spec C'];
-  knownModalities = ['UV-Vis', 'Fluorescence', 'NMR'];
+  knownSolvents: string[] = [];
+  knownInstruments: string[] = [];
+  knownModalities: string[] = [];
 
   filteredSolvents: string[] = [];
-  showSolvents = false;
   filteredInstruments: string[] = [];
-  showInstruments = false;
   filteredModalities: string[] = [];
-  showModalities = false;
 
-  activeSolventIndex = -1;
-  activeInstrumentIndex = -1;
-  activeModalityIndex = -1;
-
-  user: User | null = null
+  user: GetUserDto | null = null;
 
   constructor(
     private fb: FormBuilder,
     private router: Router,
     private notification: NotificationService,
     private authService: AuthService,
+    private optionService: OptionService,
+    private experimentService: ExperimentService,
+    private cdr: ChangeDetectorRef,
+    private transloco: TranslocoService,
   ) {}
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['experiment'] && this.experiment && this.experimentForm) {
+      this.patchFormWithExperiment(this.experiment);
+    }
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
 
   ngOnInit(): void {
     this.user = this.authService.getLoggedInUser();
     this.initForm();
     this.setupReactionAutoFill();
-    this.setupFilters();
+    this.loadOptions();
+  }
+
+  private loadOptions(): void {
+    // Fetch Solvents
+    this.optionService.getSelectionOptions('solvent').subscribe({
+      next: (opts) => {
+        this.knownSolvents = opts.map((o) => o.name);
+        this.filteredSolvents = [...this.knownSolvents];
+        const solventControl = this.experimentForm.get('solvent');
+        solventControl?.setValidators([
+          Validators.required,
+          this.inListValidator(this.knownSolvents),
+        ]);
+        solventControl?.updateValueAndValidity({ emitEvent: false });
+        this.cdr.markForCheck();
+      },
+      error: (err) => this.handleOptionError('solvents', err),
+    });
+
+    // Fetch Instruments
+    this.optionService.getSelectionOptions('instrument').subscribe({
+      next: (opts) => {
+        this.knownInstruments = opts.map((o) => o.name);
+        this.filteredInstruments = [...this.knownInstruments];
+        const instrumentControl = this.experimentForm.get('instrument');
+        instrumentControl?.setValidators([this.inListValidator(this.knownInstruments)]);
+        instrumentControl?.updateValueAndValidity({ emitEvent: false });
+        this.cdr.markForCheck();
+      },
+      error: (err) => this.handleOptionError('instruments', err),
+    });
+
+    // Fetch Modalities
+    this.optionService.getSelectionOptions('modality').subscribe({
+      next: (opts) => {
+        this.knownModalities = opts.map((o) => o.name);
+        this.filteredModalities = [...this.knownModalities];
+        const modalityControl = this.experimentForm.get('modality');
+        modalityControl?.setValidators([this.inListValidator(this.knownModalities)]);
+        modalityControl?.updateValueAndValidity({ emitEvent: false });
+        this.cdr.markForCheck();
+      },
+      error: (err) => this.handleOptionError('modalities', err),
+    });
+  }
+
+  private handleOptionError(category: string, err: any): void {
+    this.notification.error(
+      this.transloco.translate('experiments.details.notifications.optionLoadErrorTitle') ||
+        'Connection Error',
+      this.transloco.translate('experiments.details.notifications.optionLoadErrorMessage', {
+        category: category,
+        error: err.message || err.error || err,
+      }),
+    );
   }
 
   get fullName(): string {
-    return "" + this.user?.firstName + " " + this.user?.lastName;
+    return `${this.user?.firstName} ${this.user?.lastName}`;
   }
 
   get currentDate(): string {
-    return new Date().toISOString().split("T")[0]
+    return new Date().toISOString().split('T')[0];
   }
+
+  private formatDate(date: string) {
+    if (date) {
+      return date.split('T')[0];
+    }
+    return null;
+  };
 
   private initForm(): void {
     const isEditMode = this.formState !== 'create';
 
     this.experimentForm = this.fb.group({
-      // Reactants Array
-      reactants: this.fb.array([
-        this.fb.control({ value: '', disabled: isEditMode }, Validators.required),
-        this.fb.control({ value: '', disabled: isEditMode }, Validators.required),
-      ]),
+      // Reactants
+      reactantA: [{ value: '', disabled: isEditMode }, Validators.required],
+      reactantB: [{ value: '', disabled: isEditMode }, Validators.required],
 
       // Required Metadata
       date: [this.currentDate, Validators.required],
@@ -80,14 +167,35 @@ export class ExperimentDetailsFormComponent implements OnInit {
       concentrationB: ['', [Validators.required, Validators.min(0)]],
 
       // Optional Metadata
-      instrument: ['', [Validators.required, this.inListValidator(this.knownInstruments)]],
-      modality: ['', [Validators.required, this.inListValidator(this.knownModalities)]],
-      wavelength: [''],
+      instrument: ['', [this.inListValidator(this.knownInstruments)]],
+      modality: ['', [this.inListValidator(this.knownModalities)]],
+      wavelength: ['', Validators.min(0)],
       comment: [''],
     });
 
     //TODO: if edit mode init form with existing data
+    if (this.experiment) {
+      this.patchFormWithExperiment(this.experiment);
+    }
+  }
 
+  private patchFormWithExperiment(exp: GetExperimentDto): void {
+    this.experimentForm.patchValue({
+      reactantA: exp.reactantA.shortName || '',
+      reactantB: exp.reactantB.shortName || '',
+      date: this.formatDate(exp.metadata?.date) || this.currentDate,
+      scientist:
+        `${exp.metadata?.scientist?.firstName} ${exp.metadata?.scientist?.lastName}` ||
+        this.fullName,
+      temperature: exp.metadata?.temperature,
+      solvent: exp.metadata?.solvent?.name,
+      concentrationA: exp.metadata?.concentrationA,
+      concentrationB: exp.metadata?.concentrationB,
+      instrument: exp.metadata?.instrument?.name,
+      modality: exp.metadata?.modality?.name,
+      wavelength: exp.metadata?.wavelength,
+      comment: exp.metadata?.comment,
+    });
   }
 
   private inListValidator(validOptions: string[]): ValidatorFn {
@@ -98,88 +206,6 @@ export class ExperimentDetailsFormComponent implements OnInit {
 
       return isValid ? null : { notInList: { value: control.value } };
     };
-  }
-
-  private setupFilters(): void {
-    this.filteredSolvents = [...this.knownSolvents];
-    this.filteredInstruments = [...this.knownInstruments];
-    this.filteredModalities = [...this.knownModalities];
-
-    // Filter Solvents
-    this.experimentForm.get('solvent')?.valueChanges.subscribe((value) => {
-      const searchTerm = (value || '').toLowerCase();
-      this.filteredSolvents = this.knownSolvents.filter((s) =>
-        s.toLowerCase().includes(searchTerm),
-      );
-      this.activeSolventIndex = -1;
-    });
-
-    this.experimentForm.get('instrument')?.valueChanges.subscribe((value) => {
-      const searchTerm = (value || '').toLowerCase();
-      this.filteredInstruments = this.knownInstruments.filter((i) =>
-        i.toLowerCase().includes(searchTerm),
-      );
-      this.activeInstrumentIndex = -1;
-    });
-
-    this.experimentForm.get('modality')?.valueChanges.subscribe((value) => {
-      const searchTerm = (value || '').toLowerCase();
-      this.filteredModalities = this.knownModalities.filter((m) =>
-        m.toLowerCase().includes(searchTerm),
-      );
-      this.activeModalityIndex = -1;
-    });
-  }
-
-  selectOption(controlName: string, value: string): void {
-    this.experimentForm.get(controlName)?.setValue(value);
-    if (controlName === 'solvent') this.showSolvents = false;
-    if (controlName === 'instrument') this.showInstruments = false;
-    if (controlName === 'modality') this.showModalities = false;
-  }
-
-  onBlur(dropdownName: 'solvent' | 'instrument' | 'modality'): void {
-    setTimeout(() => {
-      if (dropdownName === 'solvent') this.showSolvents = false;
-      if (dropdownName === 'instrument') this.showInstruments = false;
-      if (dropdownName === 'modality') this.showModalities = false;
-    }, 200);
-  }
-
-  onKeyDown(event: KeyboardEvent, dropdown: 'solvent' | 'instrument' | 'modality'): void {
-    let activeIndex: number;
-    let filteredList: string[];
-
-    if (dropdown === 'solvent') {
-      activeIndex = this.activeSolventIndex;
-      filteredList = this.filteredSolvents;
-    } else if (dropdown === 'instrument') {
-      activeIndex = this.activeInstrumentIndex;
-      filteredList = this.filteredInstruments;
-    } else {
-      activeIndex = this.activeModalityIndex;
-      filteredList = this.filteredModalities;
-    }
-
-    if (!filteredList.length) return;
-
-    if (event.key === 'ArrowDown') {
-      event.preventDefault();
-      activeIndex = activeIndex < filteredList.length - 1 ? activeIndex + 1 : activeIndex;
-    } else if (event.key === 'ArrowUp') {
-      event.preventDefault();
-      activeIndex = activeIndex > 0 ? activeIndex - 1 : 0;
-    } else if (event.key === 'Enter') {
-      if (activeIndex >= 0) {
-        event.preventDefault();
-        this.selectOption(dropdown, filteredList[activeIndex]);
-        activeIndex = -1;
-      }
-    }
-
-    if (dropdown === 'solvent') this.activeSolventIndex = activeIndex;
-    if (dropdown === 'instrument') this.activeInstrumentIndex = activeIndex;
-    if (dropdown === 'modality') this.activeModalityIndex = activeIndex;
   }
 
   get reactantsControls() {
@@ -194,13 +220,13 @@ export class ExperimentDetailsFormComponent implements OnInit {
     });
   }
 
-  clearReactant(index: number): void {
-    const reactantsArray = this.experimentForm.get('reactants') as FormArray;
-    reactantsArray.at(index).setValue('');
-  }
-
   clearControl(controlName: string): void {
-    this.experimentForm.get(controlName)?.setValue('');
+    const control = this.experimentForm.get(controlName);
+    if (control) {
+      control.setValue('');
+      control.markAsTouched();
+      control.markAsDirty();
+    }
   }
 
   isInvalid(controlName: string): boolean {
@@ -214,11 +240,34 @@ export class ExperimentDetailsFormComponent implements OnInit {
   }
 
   onSubmit(): void {
+    // TODO: send to backend and wait for success
     if (this.experimentForm.valid) {
       const formValue = this.experimentForm.getRawValue();
-      // TODO: send to backend and wait for success, then ->
-      this.notification.success('Experiment Saved', 'Experiment was saved successfully!');
-      this.experimentForm.markAsPristine();
+
+      const saveExperiment: SaveExperimentDto = {
+        ...formValue,
+      };
+
+      const request$: Observable<GetExperimentDto> =
+        this.formState === 'create'
+          ? this.experimentService.createExperiment(saveExperiment)
+          : this.experimentService.patchExperiment(this.experiment!.uuid, saveExperiment);
+
+      request$.subscribe({
+        next: (value) => {
+          this.experimentForm.markAsPristine();
+          this.notification.success(
+            this.transloco.translate('experiments.details.notifications.savedTitle'),
+            this.transloco.translate('experiments.details.notifications.savedMessage'),
+          );
+        },
+        error: (err) => {
+          this.notification.error(
+            this.transloco.translate('experiments.details.notifications.savedErrorTitle'),
+            this.transloco.translate('experiments.details.notifications.savedErrorMessage'),
+          );
+        },
+      });
     } else {
       this.experimentForm.markAllAsTouched();
     }
@@ -238,20 +287,20 @@ export class ExperimentDetailsFormComponent implements OnInit {
     this.router.navigate(['/search']);
   }
 
-  onDelete(): void {
-    this.isDeleteExperimentModalOpen = true;
+  onArchive(): void {
+    this.isArchiveExperimentModalOpen = true;
   }
 
-  executeDelete(): void {
-    this.isDeleteExperimentModalOpen = false;
-    // TODO: Call backend delete
-    this.notification.success('Experiment Deleted', 'Experiment was deleted successfully!');
+  executeArchive(): void {
+    this.isArchiveExperimentModalOpen = false;
+    // TODO: Call backend Archive
+    this.notification.success('Experiment Archived', 'Experiment was archived successfully!');
     this.experimentForm.reset();
     this.router.navigate(['/search']);
   }
 
   closeModals(): void {
     this.isCancelExperimentModalOpen = false;
-    this.isDeleteExperimentModalOpen = false;
+    this.isArchiveExperimentModalOpen = false;
   }
 }

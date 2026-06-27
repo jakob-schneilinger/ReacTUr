@@ -1,3 +1,4 @@
+import { CommonModule } from '@angular/common';
 import {
   AfterViewInit,
   Component,
@@ -13,15 +14,18 @@ import {
 } from '@angular/core';
 import { NotificationService } from '../../../services/notification.service';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
+import { TRANSLOCO_IMPORTS } from '../../../global/transloco-imports';
+import { TranslocoService } from '@jsverse/transloco';
+import { RDKitService } from '../../../services/rdkit.service';
 
 declare var $3Dmol: any;
-declare var initRDKitModule: any;
 
 @Component({
   selector: 'app-reactant-structure',
   templateUrl: './reactant-structure.component.html',
   styleUrls: ['./reactant-structure.component.scss'],
-  standalone: false,
+  standalone: true,
+  imports: [CommonModule, TRANSLOCO_IMPORTS],
 })
 export class ReactantStructureComponent implements AfterViewInit, OnInit, OnChanges, OnDestroy {
   @Input() structure: File | undefined;
@@ -41,18 +45,15 @@ export class ReactantStructureComponent implements AfterViewInit, OnInit, OnChan
   constructor(
     private ngZone: NgZone,
     private notification: NotificationService,
+    private rdkitService: RDKitService,
     private sanitizer: DomSanitizer,
-    private cd: ChangeDetectorRef
+    private cd: ChangeDetectorRef,
+    private transloco: TranslocoService,
   ) {}
 
   async ngOnInit(): Promise<void> {
     try {
-      if (!(window as any)['RDKit']) {
-        this.rdkitModule = await initRDKitModule();
-        (window as any)['RDKit'] = this.rdkitModule;
-      } else {
-        this.rdkitModule = (window as any)['RDKit'];
-      }
+      await this.rdkitService.initRDKit();
 
       if (this.smiles) {
         this.render2DModel();
@@ -65,7 +66,7 @@ export class ReactantStructureComponent implements AfterViewInit, OnInit, OnChan
   ngAfterViewInit(): void {
     setTimeout(() => {
       this.initViewer();
-      if (this.rdkitModule) {
+      if (this.rdkitService.isLoaded) {
         this.render2DModel();
       }
       this.renderModel();
@@ -76,7 +77,7 @@ export class ReactantStructureComponent implements AfterViewInit, OnInit, OnChan
     if (changes['structure'] && this.structure && !changes['structure'].isFirstChange()) {
       this.renderModel();
     }
-    if (changes['smiles'] && this.smiles && !changes['smiles'].isFirstChange()) {
+    if (changes['smiles'] && !changes['smiles'].isFirstChange()) {
       this.render2DModel();
     }
     if (changes['loading'] && !this.loading) {
@@ -169,8 +170,8 @@ export class ReactantStructureComponent implements AfterViewInit, OnInit, OnChan
 
       if (xyzDataString.trim().startsWith('<')) {
         this.notification.error(
-          'File Format Error',
-          'Expected XYZ data but received HTML/XML format. Check file content!',
+          this.transloco.translate('reactants.structure.notifications.fileFormatErrorTitle'),
+          this.transloco.translate('reactants.structure.notifications.fileFormatErrorMessage'),
         );
         return;
       }
@@ -185,8 +186,8 @@ export class ReactantStructureComponent implements AfterViewInit, OnInit, OnChan
           this.viewer.clear();
           this.ngZone.run(() => {
             this.notification.error(
-              'Invalid XYZ file',
-              'The uploaded XYZ file contains no valid chemical structure. Check file content!',
+              this.transloco.translate('reactants.structure.notifications.invalidXyzTitle'),
+              this.transloco.translate('reactants.structure.notifications.invalidXyzMessage'),
             );
           });
           return;
@@ -216,23 +217,16 @@ export class ReactantStructureComponent implements AfterViewInit, OnInit, OnChan
   }
 
   private render2DModel(): void {
-    if (!this.smiles || !this.rdkitModule) {
-      return;
-    }
-
-    try {
-      const mol = this.rdkitModule.get_mol(this.smiles);
-      if (mol) {
-        const svg = mol.get_svg();
-        this.svg2D = this.sanitizer.bypassSecurityTrustHtml(svg);
-
-        this.cd.detectChanges();
-
-        mol.delete();
-      }
-    } catch (error) {
-      console.log('Error rendering 2D structure with RDKit:', error);
-      this.notification.error('2D Render Error', 'Could not generate 2D structure from SMILES.');
+    const svg = this.rdkitService.getSvgFromSmiles(this.smiles);
+    if (svg) {
+      this.svg2D = this.sanitizer.bypassSecurityTrustHtml(svg);
+      this.cd.markForCheck();
+    } else {
+      this.svg2D = null;
+      this.notification.error(
+        this.transloco.translate('reactants.structure.notifications.render2dErrorTitle'),
+        this.transloco.translate('reactants.structure.notifications.render2dErrorMessage'),
+      );
     }
   }
 }

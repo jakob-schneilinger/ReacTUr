@@ -7,7 +7,7 @@
   padding: 0 2rem;
   color: $light_black;
   background: $background;
-  box-shadow: 0 1px 10px $light_gray;
+  box-shadow: 0 1px 10px $accent;
 
   position: sticky;
   top: 0;
@@ -64,11 +64,29 @@
   color: $primary;
   margin-right: 0.5rem;
 
+  z-index: 10;
+
   &:hover {
     opacity: 0.8;
   }
-}
 
+  .shadow-container {
+    position: absolute;
+    width: 50px;
+    height: 50px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    .img-shadow {
+      width: 0;
+      height: 0;
+      border-radius: 50%;
+      box-shadow: 0 0 25px 12px $accent;
+    }
+
+  }
+}
 .profile-container{
   position: relative;
   display: flex;
@@ -127,12 +145,12 @@
   padding: 0.75rem 1.25rem;
   cursor: pointer;
   color: $light_black;
+  background-color: $background;
   font-weight: 500;
   transition: background-color 0.2s ease, color 0.2s ease;
 
   &:hover {
-    background-color: rgba($primary, 0.1);
-    color: $primary;
+    background-color: $light_gray !important;
   }
 }
 

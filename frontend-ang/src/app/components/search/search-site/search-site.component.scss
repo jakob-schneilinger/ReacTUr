@@ -10,40 +10,6 @@
   margin-right: auto;
 }
 
-.btn-primary {
-  background-color: $primary;
-  color: white;
-  border: none;
-  border-radius: 6px;
-  padding: 0.5rem 1rem;
-  font-size: 0.875rem;
-  cursor: pointer;
-  transition: background-color 0.2s;
-
-  margin-right: 0.75rem;
-  margin-bottom: 0.5rem;
-
-  &:hover {
-    background-color: $primary_hover !important;
-  }
-}
-
-.btn-clear {
-  background-color: $light_gray;
-  color: white;
-  border: none;
-  border-radius: 6px;
-  padding: 0.5rem 1rem;
-  font-size: 0.875rem;
-  cursor: pointer;
-  margin-right: 1rem;
-  transition: background-color 0.2s;
-
-  &:hover {
-    background-color: $light_gray_hover !important;
-  }
-}
-
 .divider {
   height: 1px;
   background-color: $light_gray;
@@ -81,9 +47,6 @@
   overflow: hidden;
   transition: max-height 0.4s ease-in-out, opacity 0.3s ease-in-out;
 }
-
-
-
 
 .sketcher-container {
   display: flex;

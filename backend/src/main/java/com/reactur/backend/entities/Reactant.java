@@ -1,6 +1,9 @@
 package com.reactur.backend.entities;
 
+import com.reactur.backend.entities.SelectionOptions.ChemicalType;
+import jakarta.persistence.CollectionTable;
 import jakarta.persistence.Column;
+import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
@@ -17,6 +20,8 @@ import lombok.Setter;
 import org.hibernate.annotations.SQLRestriction;
 
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @Entity
@@ -46,7 +51,11 @@ public class Reactant {
     @Column(name = "smiles", nullable = false, columnDefinition = "TEXT")
     private String smiles;
 
-    @Column(name = "in_chi_key", unique = true)  // ToDo: Should bre unique = true?
+     @ManyToOne(fetch = FetchType.LAZY)
+     @JoinColumn(name = "type_id")
+     private ChemicalType type;
+
+    @Column(name = "in_chi_key", unique = true)  // ToDo: Should be unique = true?
     private String inChiKey;
 
     /* TODO remove and ask Dennis:
@@ -60,8 +69,25 @@ public class Reactant {
     @Column(name = "cas_number")
     private String casNumber;
 
+    @Column(name = "comment", columnDefinition = "TEXT")
+    private String comment;
+
+    @ElementCollection(fetch = FetchType.LAZY)
+    @CollectionTable(name = "reactant_additional_short_names", joinColumns = @JoinColumn(name = "reactant_id"))
+    @Column(name = "additional_short_name")
+    @Builder.Default
+    private List<String> additionalShortNames = new ArrayList<>();
+
+    @ElementCollection(fetch = FetchType.LAZY)
+    @CollectionTable(name = "reactant_references", joinColumns = @JoinColumn(name = "reactant_id"))
+    @Column(name = "reference")
+    @Builder.Default
+    private List<String> references = new ArrayList<>();
+
+    /* TODO: During Merge: Should we keep this attribute?
     @Column(name = "structure_path_xyz", columnDefinition = "TEXT")
     private String structurePathXyz;
+     */
 
     @Column(name = "archived_at")
     private Instant archivedAt;
@@ -69,13 +95,4 @@ public class Reactant {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "created_by", referencedColumnName = "id", nullable = false)
     private User createdBy;
-
-    /* TODO:
-    The Bug: Your DTO expects a ChemicalTypeDto.
-    However, if you look back at our Reactant entity code from yesterday,
-    we never actually added a ChemicalType field to it! *
-    The Fix: We need to add a TODO
-                               to update the Reactant entity later with a
-                               @ManyToOne relationship to the ChemicalType table.
-     */
 }

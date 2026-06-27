@@ -1,4 +1,19 @@
-import { Component, EventEmitter, Input, OnInit, Output, SimpleChanges } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { ReactiveFormsModule, FormControl } from '@angular/forms';
+import { DynamicArrayInputComponent } from '../../../shared/dynamic-array-input/dynamic-array-input.component';
+import { OptionSelectorComponent } from '../../../shared/option-selector/option-selector.component';
+import { AppConfirmModalComponent } from '../../../shared/modal/confirm-modal.component';
+import { HasRoleDirective } from '../../../../directives/has-role.directive';
+import {
+  ChangeDetectorRef,
+  Component,
+  EventEmitter,
+  Input,
+  OnDestroy,
+  OnInit,
+  Output,
+  SimpleChanges,
+} from '@angular/core';
 import {
   FormBuilder,
   FormGroup,
@@ -10,11 +25,16 @@ import {
 } from '@angular/forms';
 import { Router } from '@angular/router';
 import { NotificationService } from '../../../../services/notification.service';
-import { Reactant } from '../../../../dtos/reactant';
+import { ReactantDetailDto } from '../../../../dtos/reactant.dto';
+import { OptionService } from '../../../../services/option.service';
+import { ChemicalTypeDto } from '../../../../dtos/selection-option.dto';
+import { Subject } from 'rxjs';
+import { ReactantService } from '../../../../services/reactant.service';
+import { TRANSLOCO_IMPORTS } from '../../../../global/transloco-imports';
+import { TranslocoService } from '@jsverse/transloco';
+import { RDKitService } from '../../../../services/rdkit.service';
 
 export type FormState = 'create' | 'edit';
-
-declare var initRDKitModule: any;
 
 @Component({
   selector: 'app-reactant-details-form',
@@ -23,45 +43,69 @@ declare var initRDKitModule: any;
     './reactant-details-form.component.scss',
     '../../../experiment/experiment-details-site/experiment-detail-form/experiment-details-form.component.scss',
   ],
-  standalone: false,
+  standalone: true,
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    DynamicArrayInputComponent,
+    OptionSelectorComponent,
+    AppConfirmModalComponent,
+    HasRoleDirective,
+    TRANSLOCO_IMPORTS
+  ],
 })
-export class ReactantDetailsFormComponent implements OnInit {
+export class ReactantDetailsFormComponent implements OnInit, OnDestroy {
+  private destroy$ = new Subject<void>();
   @Input() formState: FormState = 'edit';
-  @Input() reactant?: Reactant;
+  @Input() reactant?: ReactantDetailDto;
 
   @Output() smiles = new EventEmitter<string>();
 
-  isDeleteReactantModalOpen = false;
+  isArchiveReactantModalOpen = false;
   isCancelReactantModalOpen = false;
 
   reactantForm!: FormGroup;
 
   // TODO: fetch from backend
-  knownTypes = ['Solvent', 'Catalyst', 'Substrate', 'Reagent'];
-
-  filteredTypes: string[] = [];
-  showTypes = false;
-
-  activeTypesIndex = -1;
-
-  rdkitModule: any;
+  chemicalTypes: ChemicalTypeDto[] = [];
+  chemicalTypeNames: string[] = [];
 
   constructor(
     private fb: FormBuilder,
     private router: Router,
     private notification: NotificationService,
+    private optionService: OptionService,
+    private reactantService: ReactantService,
+    private rdkitService: RDKitService,
+    private cdr: ChangeDetectorRef,
+    private transloco: TranslocoService,
   ) {}
 
-  async ngOnInit(): Promise<void> {
-    this.initForm();
-    this.setupFilters();
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
 
-    if (!(window as any)['RDKit']) {
-      this.rdkitModule = await initRDKitModule();
-      (window as any)['RDKit'] = this.rdkitModule;
-    } else {
-      this.rdkitModule = (window as any)['RDKit'];
-    }
+  async ngOnInit(): Promise<void> {
+    this.optionService.getSelectionOptions('type').subscribe({
+      next: (params) => {
+        this.chemicalTypes = params;
+        this.chemicalTypeNames = this.chemicalTypes.map((t) => t.name);
+        this.cdr.markForCheck();
+      },
+      error: (err) => {
+        this.notification.error(
+          this.transloco.translate('reactants.details.notifications.typeLoadErrorTitle'),
+          this.transloco.translate('reactants.details.notifications.typeLoadErrorMessage', {
+            error: err.message || err.error || err,
+          }),
+        );
+      },
+    });
+
+    this.initForm();
+
+    await this.rdkitService.initRDKit();
   }
 
   get isEditMode(): boolean {
@@ -76,142 +120,76 @@ export class ReactantDetailsFormComponent implements OnInit {
     return this.reactantForm.get('references') as FormArray;
   }
 
-  private setupFilters(): void {
-    this.filteredTypes = [...this.knownTypes];
-
-    // Filter Solvents
-    this.reactantForm.get('type1')?.valueChanges.subscribe((value) => {
-      const searchTerm = (value || '').toLowerCase();
-      this.filteredTypes = this.knownTypes.filter((s) => s.toLowerCase().includes(searchTerm));
-      this.activeTypesIndex = -1;
-    });
-  }
-
-  selectOption(controlName: string, value: string): void {
-    this.reactantForm.get(controlName)?.setValue(value);
-    if (controlName === 'type1') this.showTypes = false;
-  }
-
-  onBlur(dropdownName: 'type1'): void {
-    setTimeout(() => {
-      if (dropdownName === 'type1') this.showTypes = false;
-    }, 200);
-  }
-
-  onKeyDown(event: KeyboardEvent, dropdown: 'type1'): void {
-    let activeIndex: number;
-    let filteredList: string[];
-
-    activeIndex = this.activeTypesIndex;
-    filteredList = this.filteredTypes;
-
-    if (!filteredList.length) return;
-
-    if (event.key === 'ArrowDown') {
-      event.preventDefault();
-      activeIndex = activeIndex < filteredList.length - 1 ? activeIndex + 1 : activeIndex;
-    } else if (event.key === 'ArrowUp') {
-      event.preventDefault();
-      activeIndex = activeIndex > 0 ? activeIndex - 1 : 0;
-    } else if (event.key === 'Enter') {
-      if (activeIndex >= 0) {
-        event.preventDefault();
-        this.selectOption(dropdown, filteredList[activeIndex]);
-        activeIndex = -1;
-      }
-    }
-
-    if (dropdown === 'type1') this.activeTypesIndex = activeIndex;
+  get chemicalTypeControl(): FormControl {
+    return this.reactantForm.get('chemicalType') as FormControl;
   }
 
   ngOnChanges(changes: SimpleChanges): void {
-    if (this.reactantForm) {
-      if (changes['reactant'] && this.reactant) {
-        this.reactantForm.patchValue(this.reactant);
+    if (this.reactantForm && changes['reactant'] && this.reactant) {
+      const currentType = this.reactantForm.get('chemicalType')?.value;
+
+      if (currentType !== this.reactant.chemicalType.name) {
+        this.reactantForm.patchValue({
+          ...this.reactant,
+          chemicalType: this.reactant.chemicalType.name,
+        });
       }
     }
   }
 
   private initForm(): void {
+    const initialType = this.reactant?.chemicalType?.name || '';
+
     this.reactantForm = this.fb.group({
       // Required Inputs
-      shortName: [{ value: '', disabled: this.isEditMode }, Validators.required],
-      smiles: ['', [Validators.required, this.smilesValidator()]],
-      type1: ['', [Validators.required, this.inListValidator(this.knownTypes)]],
+      shortName: [
+        { value: this.reactant?.shortName || '', disabled: this.isEditMode },
+        Validators.required,
+      ],
+      smiles: [this.reactant?.smiles || '', [Validators.required, this.smilesValidator()]],
+      chemicalType: [initialType, [Validators.required, this.inListValidator()]],
 
       // Optional Inputs
-      chemicalName: [''],
-      additionalShortNames: this.fb.array([this.fb.control('')]),
-      casNumber: [''],
-      references: this.fb.array([this.fb.control('')]),
-      comment: [''],
+      chemicalName: [this.reactant?.chemicalName || ''],
+      casNumber: [this.reactant?.casNumber || ''],
+      comment: [this.reactant?.comment || ''],
+
+      additionalShortNames: this.fb.array([]),
+      references: this.fb.array([]),
     });
 
     if (this.reactant) {
       this.syncArray('additionalShortNames', this.reactant.additionalShortNames);
       this.syncArray('references', this.reactant.references);
-      this.reactantForm.patchValue(this.reactant);
+    } else {
+      this.additionalShortNames.push(this.fb.control(''));
+      this.references.push(this.fb.control(''));
     }
 
     this.reactantForm.get('smiles')?.valueChanges.subscribe((value: string) => {
-      this.smiles.emit(value);
+      if (value !== null) {
+        this.smiles.emit(value);
+      }
     });
   }
 
   smilesValidator(): ValidatorFn {
     return (control: AbstractControl): ValidationErrors | null => {
       if (!control.value) return null;
-      const smiles = control.value;
 
-      if (!this.rdkitModule) {
-        console.warn('RDKit not initialized yet');
-        return null;
-      }
+      const status = this.rdkitService.validateSmiles(control.value);
+      if (status === 'syntaxError') return { syntaxError: { value: control.value } };
+      if (status === 'sanitizationError') return { sanitizationError: { value: control.value } };
 
-      const options = JSON.stringify({ sanitize: false });
-      let unsanitizedMol;
-
-      try {
-        unsanitizedMol = this.rdkitModule.get_mol(smiles, options);
-      } catch (e) {
-        return { syntaxError: { value: smiles } };
-      }
-
-      if (
-        !unsanitizedMol ||
-        (typeof unsanitizedMol.is_valid === 'function' && !unsanitizedMol.is_valid())
-      ) {
-        if (unsanitizedMol) unsanitizedMol.delete();
-        return { syntaxError: { value: smiles } };
-      }
-
-      unsanitizedMol.delete();
-      let sanitizedMol;
-
-      try {
-        sanitizedMol = this.rdkitModule.get_mol(smiles);
-      } catch (e) {
-        return { sanitizationError: { value: smiles } };
-      }
-
-      if (
-        !sanitizedMol ||
-        (typeof sanitizedMol.is_valid === 'function' && !sanitizedMol.is_valid())
-      ) {
-        if (sanitizedMol) sanitizedMol.delete();
-        return { sanitizationError: { value: smiles } };
-      }
-
-      sanitizedMol.delete();
       return null;
     };
   }
 
-  inListValidator(validOptions: string[]): ValidatorFn {
+  inListValidator(): ValidatorFn {
     return (control: AbstractControl): ValidationErrors | null => {
       if (!control.value) return null;
 
-      const isValid = validOptions.includes(control.value);
+      const isValid = this.chemicalTypeNames.includes(control.value);
 
       return isValid ? null : { notInList: { value: control.value } };
     };
@@ -221,44 +199,14 @@ export class ReactantDetailsFormComponent implements OnInit {
     const formArray = this.reactantForm.get(arrayName) as FormArray;
     formArray.clear();
     if (data && data.length > 0) {
-      data.forEach((item) => formArray.push(this.fb.control(item)));
+      data.forEach((item) => formArray.push(this.fb.control(item, Validators.required)));
     } else {
-      formArray.push(this.fb.control(''));
+      formArray.push(this.fb.control('', Validators.required));
     }
   }
 
   clearControl(controlName: string): void {
     this.reactantForm.get(controlName)?.setValue('');
-    this.reactantForm.markAsDirty();
-  }
-
-  clearArrayControl(arrayName: 'additionalShortNames' | 'references', index: number): void {
-    const array = this.reactantForm.get(arrayName) as FormArray;
-    array.at(index).setValue('');
-    this.reactantForm.markAsDirty();
-  }
-
-  addArrayField(arrayName: 'additionalShortNames' | 'references'): void {
-    const array = this.reactantForm.get(arrayName) as FormArray;
-    array.push(this.fb.control(''));
-    this.reactantForm.markAsDirty();
-
-    setTimeout(() => {
-      const newIndex = array.length - 1;
-      const inputId = `${arrayName}-${newIndex}`;
-      const inputElement = document.getElementById(inputId);
-      if (inputElement) {
-        inputElement.focus();
-      }
-    });
-  }
-
-  removeArrayField(arrayName: 'additionalShortNames' | 'references', index: number): void {
-    const array = this.reactantForm.get(arrayName) as FormArray;
-    array.removeAt(index);
-    if (array.length === 0) {
-      array.push(this.fb.control(''));
-    }
     this.reactantForm.markAsDirty();
   }
 
@@ -270,8 +218,11 @@ export class ReactantDetailsFormComponent implements OnInit {
   onSubmit(): void {
     if (this.reactantForm.valid) {
       const formValue = this.reactantForm.getRawValue();
-      // TODO: send to backend (create or edit based on formState)
-      this.notification.success('Reactant Saved', 'Reactant was saved successfully!');
+      // TODO: send to backend
+      this.notification.success(
+        this.transloco.translate('reactants.details.notifications.savedTitle'),
+        this.transloco.translate('reactants.details.notifications.savedMessage'),
+      );
       this.reactantForm.markAsPristine();
     } else {
       this.reactantForm.markAllAsTouched();
@@ -288,27 +239,43 @@ export class ReactantDetailsFormComponent implements OnInit {
 
   executeCancel(): void {
     this.isCancelReactantModalOpen = false;
-    this.reactantForm.reset();
+    this.reactantForm.reset(undefined, { emitEvent: false });
     this.router.navigate(['/reactants']);
   }
 
-  onDelete(): void {
-    this.isDeleteReactantModalOpen = true;
+  onArchive(): void {
+    this.isArchiveReactantModalOpen = true;
   }
 
-  executeDelete(): void {
-    this.isDeleteReactantModalOpen = false;
-    // TODO: Call backend delete
-    this.notification.success(
-      'Reactant Removed',
-      `The reactant "${this.reactantForm.get('shortName')?.value}" was successfully removed.`,
-    );
-    this.reactantForm.reset();
-    this.router.navigate(['/reactants']);
+  executeArchive(): void {
+    this.isArchiveReactantModalOpen = false;
+    // TODO: Call backend Archive
+    if (this.reactant) {
+      this.reactantService.archiveReactant(this.reactant.uuid).subscribe({
+        next: () => {
+          this.notification.success(
+            this.transloco.translate('reactants.details.notifications.archivedTitle'),
+            this.transloco.translate('reactants.details.notifications.archivedMessage', {
+              name: this.reactantForm.get('shortName')?.value,
+            }),
+          );
+          this.reactantForm.reset();
+          this.router.navigate(['/reactants']);
+        },
+        error: (err) =>
+          this.notification.error(
+            this.transloco.translate('reactants.details.notifications.archiveFailedTitle'),
+            this.transloco.translate('reactants.details.notifications.archiveFailedMessage', {
+              name: this.reactantForm.get('shortName')?.value,
+              error: err.message || err.error || err,
+            }),
+          ),
+      });
+    }
   }
 
   closeModals(): void {
     this.isCancelReactantModalOpen = false;
-    this.isDeleteReactantModalOpen = false;
+    this.isArchiveReactantModalOpen = false;
   }
 }

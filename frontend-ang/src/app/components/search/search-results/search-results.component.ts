@@ -1,7 +1,12 @@
+import { CommonModule } from '@angular/common';
+import { RouterModule } from '@angular/router';
+import { ExperimentViewModalComponent } from '../../experiment/experiment-view-modal/experiment-view-modal.component';
 import { Component, Input, Output, EventEmitter, OnChanges, SimpleChanges } from '@angular/core';
-import { Experiment } from '../../../dtos/experiment';
+import { GetExperimentDto } from '../../../dtos/experiment.dto';
 import { NotificationService } from '../../../services/notification.service';
 import { AuthService } from '../../../services/auth.service';
+import { HasRoleDirective } from '../../../directives/has-role.directive';
+import { GetUserDto } from '../../../dtos/user.dto';
 
 export type SearchState = 'initial' | 'no-results' | 'has-results';
 
@@ -10,22 +15,24 @@ export type SearchState = 'initial' | 'no-results' | 'has-results';
   selector: 'app-experiment-results',
   templateUrl: './search-results.component.html',
   styleUrls: ['./search-results.component.scss'],
-  standalone: false,
+  standalone: true,
+  imports: [CommonModule, RouterModule, ExperimentViewModalComponent, HasRoleDirective],
 })
 export class SearchResultsComponent implements OnChanges {
   @Input() state: SearchState = 'initial';
-  @Input() experiments: Experiment[] = [];
-  @Output() getExport = new EventEmitter<number[]>();
+  @Input() experiments: GetExperimentDto[] = [];
+  @Output() getExport = new EventEmitter<string[]>();
+  @Output() searchScientist = new EventEmitter<GetUserDto>();
 
-  selectedIds = new Set<number>();
-  isViewModalOpen:boolean = false;
-  selectedExperimentForView: Experiment | undefined;
+  selectedIds = new Set<string>();
+  isViewModalOpen: boolean = false;
+  selectedExperimentForView: GetExperimentDto | undefined;
   hasWritePermission: boolean = false;
 
   constructor(
     private notification: NotificationService,
-    private authService: AuthService
-  ) { }
+    private authService: AuthService,
+  ) {}
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['experiments']) {
@@ -39,7 +46,7 @@ export class SearchResultsComponent implements OnChanges {
       return;
     }
 
-    const visibleIds = new Set(this.experiments.map((exp) => exp.id));
+    const visibleIds = new Set(this.experiments.map((exp) => exp.uuid));
 
     for (const id of this.selectedIds) {
       if (!visibleIds.has(id)) {
@@ -48,7 +55,7 @@ export class SearchResultsComponent implements OnChanges {
     }
   }
 
-  toggleSelection(expId: number) {
+  toggleSelection(expId: string) {
     if (this.selectedIds.has(expId)) {
       this.selectedIds.delete(expId);
     } else {
@@ -56,20 +63,20 @@ export class SearchResultsComponent implements OnChanges {
     }
   }
 
-  isSelected(expId: number): boolean {
+  isSelected(expId: string): boolean {
     return this.selectedIds.has(expId);
   }
 
   get allSelected(): boolean {
     if (this.experiments.length === 0) return false;
-    return this.experiments.every((exp) => this.selectedIds.has(exp.id));
+    return this.experiments.every((exp) => this.selectedIds.has(exp.uuid));
   }
 
   toggleSelectAll() {
     if (this.allSelected) {
-      this.experiments.forEach((exp) => this.selectedIds.delete(exp.id));
+      this.experiments.forEach((exp) => this.selectedIds.delete(exp.uuid));
     } else {
-      this.experiments.forEach((exp) => this.selectedIds.add(exp.id));
+      this.experiments.forEach((exp) => this.selectedIds.add(exp.uuid));
     }
   }
 
@@ -77,20 +84,15 @@ export class SearchResultsComponent implements OnChanges {
     this.getExport.emit(Array.from(this.selectedIds));
   }
 
-  viewDetails(id:number | undefined): void {
-    if (!id) return;
+  viewDetails(uuid: string | undefined): void {
+    if (!uuid) return;
 
     const user = this.authService.getLoggedInUser();
 
     if (!user) return;
-    if (this.authService.hasExperimentPermission(id, user?.email)) {
-      this.hasWritePermission = true;
-    } else {
-      this.hasWritePermission = false;
-    }
+    this.hasWritePermission = !!this.authService.hasExperimentPermission(uuid, user.uuid);
 
-      const experimentToView = this.experiments.find((exp) => exp.id === id);
-
+    const experimentToView = this.experiments.find((exp) => exp.uuid === uuid);
 
     if (experimentToView) {
       this.selectedExperimentForView = experimentToView;
@@ -104,5 +106,9 @@ export class SearchResultsComponent implements OnChanges {
     this.isViewModalOpen = false;
     this.selectedExperimentForView = undefined;
     this.hasWritePermission = false;
+  }
+
+  searchForScientist(scientist: GetUserDto) {
+    this.searchScientist.emit(scientist)
   }
 }
