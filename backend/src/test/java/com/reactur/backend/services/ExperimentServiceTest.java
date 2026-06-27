@@ -10,6 +10,7 @@ import com.reactur.backend.entities.SelectionOptions.Instrument;
 import com.reactur.backend.entities.SelectionOptions.Modality;
 import com.reactur.backend.entities.SelectionOptions.Solvent;
 import com.reactur.backend.entities.User;
+import com.reactur.backend.mappers.ExperimentMapper;
 import com.reactur.backend.repositories.AuditLogRepository;
 import com.reactur.backend.repositories.ExperimentRepository;
 
@@ -21,18 +22,21 @@ import com.reactur.backend.repositories.UserRepository;
 import com.reactur.backend.services.implementations.ExperimentServiceImpl;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mapstruct.factory.Mappers;
 import org.mockito.ArgumentCaptor;
-import org.mockito.ArgumentMatchers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Optional;
 import java.util.UUID;
 
+import static java.util.UUID.randomUUID;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class) // Tells JUnit to use Mockito instead of loading Spring Boot
@@ -46,6 +50,9 @@ class ExperimentServiceTest {
   @Mock private UserRepository userRepository;
   @Mock private AuditLogRepository auditLogRepository;
 
+  @Spy  // We actually want to use here the mapper rather than a Mock. This way we also test the Mapper.
+  private ExperimentMapper experimentMapper = Mappers.getMapper(ExperimentMapper.class);
+
   // Mockito will take the mocked Repositories
   // and inject them into this real Service instance.
   @InjectMocks
@@ -57,11 +64,11 @@ class ExperimentServiceTest {
   void createExperiment_whenValidInput_returnsGetExperimentDto() {
 
     String userId = "mock-keycloak-id-123";
-    UUID reactantAId = UUID.randomUUID();
-    UUID reactantBId = UUID.randomUUID();
-    UUID solventId = UUID.randomUUID();
-    UUID instrumentId = UUID.randomUUID();
-    UUID modalityId = UUID.randomUUID();
+    UUID reactantAId = randomUUID();
+    UUID reactantBId = randomUUID();
+    UUID solventId = randomUUID();
+    UUID instrumentId = randomUUID();
+    UUID modalityId = randomUUID();
 
     SaveMetadataDto validMetadata = new SaveMetadataDto(
       java.time.LocalDate.now().minusDays(1),
@@ -84,38 +91,34 @@ class ExperimentServiceTest {
     // ... create Mocks with the response-data:
     User mockUser = new User();
     mockUser.setId(userId);
-    Mockito.when(userRepository.findById(userId)).thenReturn(Optional.of(mockUser));
+    when(userRepository.findById(userId)).thenReturn(Optional.of(mockUser));
 
     Reactant mockReactantA = new Reactant();
     mockReactantA.setId(reactantAId);
-    Mockito.when(reactantRepository.findById(reactantAId)).thenReturn(Optional.of(mockReactantA));
+    when(reactantRepository.findById(reactantAId)).thenReturn(Optional.of(mockReactantA));
 
     Reactant mockReactantB = new Reactant();
     mockReactantB.setId(reactantBId);
-    Mockito.when(reactantRepository.findById(reactantBId)).thenReturn(Optional.of(mockReactantB));
+    when(reactantRepository.findById(reactantBId)).thenReturn(Optional.of(mockReactantB));
 
     Solvent mockSolvent = new Solvent();
     mockSolvent.setId(solventId);
-    Mockito.when(solventRepository.findById(solventId)).thenReturn(Optional.of(mockSolvent));
+    when(solventRepository.findById(solventId)).thenReturn(Optional.of(mockSolvent));
 
     Instrument mockInstrument = new Instrument();
     mockInstrument.setId(instrumentId);
-    Mockito.when(instrumentRepository.findById(instrumentId)).thenReturn(Optional.of(mockInstrument));
+    when(instrumentRepository.findById(instrumentId)).thenReturn(Optional.of(mockInstrument));
 
     Modality mockModality = new Modality();
     mockModality.setId(modalityId);
-    Mockito.when(modalityRepository.findById(modalityId)).thenReturn(Optional.of(mockModality));
+    when(modalityRepository.findById(modalityId)).thenReturn(Optional.of(mockModality));
 
     // ... then return the entity of the "saved" experiment
 
-    Experiment mockedSavedExperiment = new Experiment();
-    mockedSavedExperiment.setId(UUID.randomUUID());
-    mockedSavedExperiment.setDoi("10.1000/rxn123");
-
-    when(experimentRepository.save(ArgumentMatchers.any()))
+    when(experimentRepository.save(any()))
       .thenAnswer(invocation -> {
         Experiment saved = invocation.getArgument(0);
-        saved.setId(UUID.randomUUID()); // Simulates DB generating an ID
+        saved.setId(randomUUID()); // Simulates DB generating an ID
         return saved;
       });
 
@@ -138,8 +141,7 @@ class ExperimentServiceTest {
     assertEquals(userId, capturedEntity.getCreatedBy().getId(), "User was not mapped correctly");
     assertEquals(25.0, capturedEntity.getMetadata().getTemperature(), "Temperature was not mapped correctly");
 
-    // Asserting the returned value
-
+    // Asserting the returned value (Mappers)
     assertNotNull(result, "The returned DTO should not be null");
     assertEquals("10.1000/rxn123", result.doi());
 
