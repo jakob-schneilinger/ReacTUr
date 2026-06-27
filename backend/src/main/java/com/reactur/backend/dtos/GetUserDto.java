@@ -15,7 +15,7 @@ import java.util.UUID;
  * @param deactivatedAt The timestamp when the user's account was deactivated (null if active).
  */
 public record GetUserDto(
-        UUID id,
+        String id,
         String firstName,
         String lastName,
         Role role,
