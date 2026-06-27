@@ -116,7 +116,7 @@ export const MOCK_INSTRUMENTS = {
     name: 'Chromatograph',
     archivedAt: null,
   },
-  MASS_SPEC: { uuid: '5f9beac3-2e92-41a6-b900-4aa73ae021d1', name: 'Mass Spec', archivedAt: null },
+  MASS_SPEC: { uuid: '5f9beac3-2e92-41a6-b900-4aa73ae021d3', name: 'Mass Spec', archivedAt: null },
   NMR: { uuid: '5f9beac3-2e92-41a6-b900-4aa73ae021d4', name: 'NMR', archivedAt: null },
   CALORIMETER: {
     uuid: '35984d8b-923e-4ef4-a189-512ef4858605',

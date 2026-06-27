@@ -1,5 +1,5 @@
 import { CommonModule, NgOptimizedImage } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { AuthService } from "../../../../services/auth.service";
 import { Router, RouterModule } from '@angular/router';
 import { GetUserDto } from '../../../../dtos/user.dto';
@@ -28,6 +28,7 @@ export class HeaderComponent implements OnInit {
   constructor(
     public router: Router,
     public authService: AuthService,
+    private cdr: ChangeDetectorRef,
   ) {}
 
   loggedInUser: GetUserDto | null = null;
@@ -36,6 +37,7 @@ export class HeaderComponent implements OnInit {
     this.authService.initialLoginSequence.then(() => {
       this.authService.getLoggedInUser().subscribe((user) => {
         this.loggedInUser = user;
+        this.cdr.markForCheck();
       });
     });
   }
