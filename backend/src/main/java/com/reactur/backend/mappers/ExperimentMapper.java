@@ -9,8 +9,7 @@ import com.reactur.backend.entities.User;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
-                                   //  Tells our MapStruct Framework to make this
-@Mapper(componentModel = "spring") // a Spring Bean we can inject!
+@Mapper(componentModel = "spring", uses = {ReactantMapper.class, UserMapper.class})
 public interface ExperimentMapper {
 
   // Main Experiment Mapping
