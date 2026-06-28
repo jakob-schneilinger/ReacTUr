@@ -1,11 +1,17 @@
 import { Injectable } from '@angular/core';
-import { delay, map, Observable, of, throwError } from 'rxjs';
+import { map, Observable, of } from 'rxjs';
 import { AuthService } from './auth.service';
 import { HttpClient } from '@angular/common/http';
 import { Globals } from '../global/globals';
-import { MOCK_REACTANT_DETAILS} from '../mock/mock-reactants';
-import { ReactantDetailDto, ReactantDto, SaveReactantDto } from '../dtos/reactant.dto';
-import { MOCK_CHEM_TYPES } from '../mock/mock.data';
+import { MOCK_REACTANT_DETAILS } from '../mock/mock-reactants';
+import {
+  ReactantDetailDto,
+  ReactantDto,
+  SaveReactantDto,
+  StructureDto,
+} from '../dtos/reactant.dto';
+import { StructureFlag } from '../dtos/enums/structure-flag.enum';
+import { mockStructure1, mockStructure2 } from '../mock/mock-structures';
 
 @Injectable({
   providedIn: 'root',
@@ -26,7 +32,6 @@ export class ReactantService {
   }
 
   getAllReactants(): Observable<ReactantDto[]> {
-
     return this.httpClient.get<ReactantDto[]>(this.reactantBaseUri);
   }
 
@@ -35,6 +40,55 @@ export class ReactantService {
   }
 
   getReactantDetail(uuid: string): Observable<ReactantDetailDto> {
+    return this.httpClient.get<ReactantDetailDto>(`${this.reactantBaseUri}/${uuid}`);
+  }
+
+  getReactantDetailMock(uuid: string): Observable<ReactantDetailDto> {
+    return this.httpClient.get<ReactantDetailDto>(`${this.reactantBaseUri}/${uuid}`).pipe(
+      map((reactant: ReactantDetailDto) => {
+        const random = Math.random();
+        let structures: StructureDto[] = [];
+
+        if (random < 0.3) {
+          structures.push({
+            id: 'structure-1',
+            reactant: uuid,
+            name: 'mockStructure1.xyz',
+            structure: mockStructure1,
+            flag: StructureFlag.READY,
+          });
+
+          if (random < 0.1) {
+            structures.push({
+              id: 'structure-2',
+              reactant: uuid,
+              name: 'mockStructure2.xyz',
+              structure: mockStructure2,
+              flag: StructureFlag.READY,
+            });
+          }
+        } else if (random < 0.5) {
+          structures.push({
+            flag: StructureFlag.FAILED,
+          });
+        } else {
+          structures.push({
+            flag: StructureFlag.PENDING,
+          });
+        }
+
+        console.log('mocked structures:', structures);
+        const final: ReactantDetailDto = {
+          ...reactant,
+          structures: structures,
+        };
+
+        console.log('final reactant:', final);
+
+        return final;
+      }),
+    );
+
     return this.httpClient.get<ReactantDetailDto>(`${this.reactantBaseUri}/${uuid}`);
   }
 
@@ -55,18 +109,5 @@ export class ReactantService {
 
   restoreReactant(uuid: string): Observable<ReactantDto> {
     return this.httpClient.put<ReactantDto>(`${this.reactantBaseUri}/${uuid}/restore`, {});
-  }
-
-  getReactantStructures(reactant: ReactantDto): Observable<File[]> {
-    return this.httpClient.get(this.fileBaseUri, { responseType: 'blob' }).pipe(
-      map((blob: Blob) => {
-        const file = new File([blob], `${reactant.shortName}.xyz`, { type: 'chemical/x-xyz' });
-        return [file];
-      }),
-    );
-  }
-
-  loadReactantStructures(reactant: ReactantDetailDto | ReactantDto): Observable<File[]> {
-    return this.getReactantStructures(reactant);
   }
 }

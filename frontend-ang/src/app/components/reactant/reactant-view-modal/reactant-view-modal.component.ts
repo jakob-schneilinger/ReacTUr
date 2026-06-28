@@ -2,7 +2,7 @@ import { CommonModule } from '@angular/common';
 import { AppModalComponent } from '../../shared/modal/app-modal.component';
 import { ReactantStructureComponent } from '../reactant-structure/reactant-structure.component';
 import { Component, Input, Output, EventEmitter, OnInit, ChangeDetectorRef } from '@angular/core';
-import { ReactantDetailDto, ReactantDto } from '../../../dtos/reactant.dto';
+import { ReactantDetailDto, ReactantDto, StructureDto } from '../../../dtos/reactant.dto';
 import { ReactantService } from '../../../services/reactant.service';
 import { NotificationService } from '../../../services/notification.service';
 import { Router } from '@angular/router';
@@ -58,24 +58,6 @@ export class ReactantViewModalComponent implements OnInit {
           this.cd.markForCheck();
         },
       });
-
-      this.reactantService.loadReactantStructures(this.selectedReactant).subscribe({
-        next: (files: File[]) => {
-          if (this.selectedReactant && this.reactant) {
-            this.reactant.structures = files;
-          }
-          this.loadingStructures = false;
-          this.cd.markForCheck();
-        },
-        error: (err) => {
-          this.loadingStructures = false;
-          this.notification.error(
-            this.transloco.translate('reactants.viewModal.notifications.missing3dFileTitle'),
-            this.transloco.translate('reactants.viewModal.notifications.missing3dFileMessage'),
-          );
-          this.cd.markForCheck();
-        },
-      });
     }
   }
 
@@ -91,5 +73,19 @@ export class ReactantViewModalComponent implements OnInit {
 
   editReactant(uuid: string | undefined): void {
     if (uuid) this.router.navigate(['/reactants', uuid]);
+  }
+
+  parseFile(structure: StructureDto): File | null {
+    if (structure.structure && structure.name) {
+      const fileBits = [structure.structure];
+
+      const options = {
+        type: 'text/plain;charset=utf-8',
+        lastModified: Date.now(),
+      };
+
+      return new File(fileBits, structure.name, options);
+    }
+    return null;
   }
 }

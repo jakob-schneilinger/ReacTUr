@@ -25,7 +25,7 @@ import {
 } from '@angular/forms';
 import { Router } from '@angular/router';
 import { NotificationService } from '../../../../services/notification.service';
-import { ReactantDetailDto } from '../../../../dtos/reactant.dto';
+import { ReactantDetailDto, SaveReactantDto } from '../../../../dtos/reactant.dto';
 import { OptionService } from '../../../../services/option.service';
 import { ChemicalTypeDto } from '../../../../dtos/selection-option.dto';
 import { Subject } from 'rxjs';
@@ -51,7 +51,7 @@ export type FormState = 'create' | 'edit';
     OptionSelectorComponent,
     AppConfirmModalComponent,
     HasRoleDirective,
-    TRANSLOCO_IMPORTS
+    TRANSLOCO_IMPORTS,
   ],
 })
 export class ReactantDetailsFormComponent implements OnInit, OnDestroy {
@@ -60,6 +60,7 @@ export class ReactantDetailsFormComponent implements OnInit, OnDestroy {
   @Input() reactant?: ReactantDetailDto;
 
   @Output() smiles = new EventEmitter<string>();
+  @Output() save = new EventEmitter<SaveReactantDto>();
 
   isArchiveReactantModalOpen = false;
   isCancelReactantModalOpen = false;
@@ -138,16 +139,20 @@ export class ReactantDetailsFormComponent implements OnInit, OnDestroy {
   }
 
   private initForm(): void {
-    const initialType = this.reactant?.chemicalType?.name || '';
-
     this.reactantForm = this.fb.group({
       // Required Inputs
       shortName: [
         { value: this.reactant?.shortName || '', disabled: this.isEditMode },
         Validators.required,
       ],
-      smiles: [this.reactant?.smiles || '', [Validators.required, this.smilesValidator()]],
-      chemicalType: [initialType, [Validators.required, this.inListValidator()]],
+      smiles: [
+        { value: this.reactant?.smiles || '', disabled: this.isEditMode },
+        [Validators.required, this.smilesValidator()],
+      ],
+      chemicalType: [
+        { value: this.reactant?.chemicalType?.name || '', disabled: this.isEditMode },
+        [Validators.required, this.inListValidator()],
+      ],
 
       // Optional Inputs
       chemicalName: [this.reactant?.chemicalName || ''],
@@ -161,8 +166,8 @@ export class ReactantDetailsFormComponent implements OnInit, OnDestroy {
     if (this.reactant) {
       this.syncArray('additionalShortNames', this.reactant.additionalShortNames);
       this.syncArray('references', this.reactant.references);
-    } else {this.additionalShortNames.push(
-      this.fb.control(''));
+    } else {
+      this.additionalShortNames.push(this.fb.control(''));
       this.references.push(this.fb.control(''));
     }
 
@@ -223,44 +228,7 @@ export class ReactantDetailsFormComponent implements OnInit, OnDestroy {
       formValue.additionalShortNames = formValue.additionalShortNames.filter((val: string) => val && val.trim() !== '');
       formValue.references = formValue.references.filter((val: string) => val && val.trim() !== '');
 
-      if (!this.isEditMode) {
-        this.reactantService.createReactant(formValue).subscribe({
-          next: (reactant) => {
-            this.notification.success(
-              this.transloco.translate('reactants.details.notifications.savedTitle'),
-              this.transloco.translate('reactants.details.notifications.savedMessage'),
-            );
-            this.router.navigate(['/reactants', reactant.uuid]);
-          },
-          error: (err) => {
-            console.warn(err);
-            this.notification.error(
-              this.transloco.translate('reactants.details.notifications.saveErrorTitle'),
-              this.transloco.translate('reactants.details.notifications.saveErrorMessage', {
-                error: err.error || err.message || err,
-              }),
-            );
-          }
-        });
-      } else {
-        if (!this.reactant) return;
-        this.reactantService.updateReactant(this.reactant?.uuid, formValue).subscribe({
-          next: (reactant) => {
-            this.notification.success(
-              this.transloco.translate('reactants.details.notifications.savedTitle'),
-              this.transloco.translate('reactants.details.notifications.savedMessage'),
-            );
-            this.router.navigate(['/reactants', reactant.uuid]);
-          },
-          error: (err) =>
-            this.notification.error(
-              this.transloco.translate('reactants.details.notifications.saveErrorTitle'),
-              this.transloco.translate('reactants.details.notifications.saveErrorMessage', {
-                error: err.error || err.message || err,
-              }),
-            ),
-        });
-      }
+      this.save.emit(formValue);
     } else {
       this.reactantForm.markAllAsTouched();
     }

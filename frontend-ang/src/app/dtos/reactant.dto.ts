@@ -1,6 +1,7 @@
 //TODO: overthink interface
 import { ChemicalTypeDto } from './selection-option.dto';
 import { DetailsDto } from './details.dto';
+import { StructureFlag } from './enums/structure-flag.enum';
 
 // old
 export interface ReactantDtoOld {
@@ -21,6 +22,7 @@ export interface ReactantDto extends DetailsDto{
   chemicalType: ChemicalTypeDto;
   shortName: string;
   chemicalName?: string;
+  flag?: StructureFlag;
 }
 
 export interface ReactantDetailDto extends ReactantDto {
@@ -29,7 +31,7 @@ export interface ReactantDetailDto extends ReactantDto {
   inChiKey?: string;
   comment?: string;
   references?: string[];
-  structures?: File[];
+  structures?: StructureDto[];
 }
 
 export interface SaveReactantDto {
@@ -42,4 +44,12 @@ export interface SaveReactantDto {
   inChiKey?: string;
   comment?: string;
   references?: string[];
+}
+
+export interface StructureDto {
+  id?: string;
+  reactant?: string; //safeguard
+  name?: string;
+  structure?: string;
+  flag?: StructureFlag;
 }

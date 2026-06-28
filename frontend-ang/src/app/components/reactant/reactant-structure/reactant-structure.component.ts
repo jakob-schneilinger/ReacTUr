@@ -31,6 +31,7 @@ export class ReactantStructureComponent implements AfterViewInit, OnInit, OnChan
   @Input() structure: File | undefined;
   @Input() smiles: string = '';
   @Input() loading: boolean = false;
+  @Input() show3D: boolean = false;
 
   @ViewChild('viewerContainer', { static: true }) viewerContainer!: ElementRef;
 
@@ -52,6 +53,9 @@ export class ReactantStructureComponent implements AfterViewInit, OnInit, OnChan
   ) {}
 
   async ngOnInit(): Promise<void> {
+    if (this.show3D) {
+      this.viewMode = '3D';
+    }
     try {
       await this.rdkitService.initRDKit();
 
