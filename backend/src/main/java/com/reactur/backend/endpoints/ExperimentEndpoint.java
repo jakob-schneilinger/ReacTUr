@@ -10,6 +10,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -71,11 +73,31 @@ public class ExperimentEndpoint {
         throw new UnsupportedOperationException();
     }
 
+    // TODO: Documentation. Also: Clarify who has access to the archived experiment. Right now I set that only
+    //  the creator and admins can retrieve archived Experiments
     @GetMapping("/{uuid}")
-    public ResponseEntity<GetExperimentDto> getExperiment(@PathVariable UUID uuid) {
+    public ResponseEntity<GetExperimentDto> getExperiment(
+      @PathVariable UUID uuid,
+      Authentication authentication,
+      @AuthenticationPrincipal Jwt jwt
+    ) {
+        log.info("GET /api/experiment/{} called by User ID: {}", uuid, jwt.getSubject());
 
-        //TODO:
-        throw new UnsupportedOperationException();
+        GetExperimentDto experiment = experimentService.getExperiment(uuid);
+
+        // Security Rule: If it is archived, only the creator OR the ADMIN can see it.
+        if (experiment.archivedAt() != null) {
+            boolean isAdmin = authentication.getAuthorities().stream()
+              .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+            boolean isCreator = experiment.createdBy().id().equals(jwt.getSubject());
+
+            if (!isAdmin && !isCreator) {
+                log.warn("Security blocked access to archived experiment {} for user {}", uuid, jwt.getSubject());
+                throw new AccessDeniedException("You do not have permission to view this archived experiment.");
+            }
+        }
+
+        return ResponseEntity.ok(experiment);
     }
 
     @GetMapping()

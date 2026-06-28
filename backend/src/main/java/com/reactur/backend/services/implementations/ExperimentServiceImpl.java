@@ -27,6 +27,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.UUID;
+
 @RequiredArgsConstructor
 @Slf4j
 @Service
@@ -139,6 +141,11 @@ public class ExperimentServiceImpl implements ExperimentService {
     // ...finally returning the saved element
 
     return experimentMapper.experimentToGetExperimentDto(savedExperiment);
+  }
+
+  @Override
+  public GetExperimentDto getExperiment(UUID experimentId) {
+    return null;
   }
 
 }
