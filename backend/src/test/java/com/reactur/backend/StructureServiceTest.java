@@ -225,6 +225,8 @@ class StructureServiceTest {
 
     @Test
     void getStructuresByReactant_shouldReturnMappedDtos() {
+
+        when(reactantRepository.findById(REACTANT_ID)).thenReturn(Optional.of(new Reactant()));
         when(structureRepository.findByReactant_Id(REACTANT_ID)).thenReturn(List.of(mockPendingStructure));
 
         List<StructureDto> result = structureService.getStructuresByReactant(REACTANT_ID);
