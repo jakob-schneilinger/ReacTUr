@@ -1,6 +1,6 @@
-package com.reactur.backend.endpoints.SelectionOptionEndpoints;
+package com.reactur.backend.endpoints.options;
 
-import com.reactur.backend.dtos.SelectionOption.ChemicalTypeDto;
+import com.reactur.backend.dtos.SelectionOption.InstrumentDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -14,34 +14,33 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/chemical_type")
+@RequestMapping("/api/instrument")
 @RequiredArgsConstructor
-public class ChemicalTypeEndpoint {
-
+public class InstrumentEndpoint {
 
     @GetMapping()
-    public ResponseEntity<ChemicalTypeDto[]> getKnownChemicalTypes() {
+    public ResponseEntity<InstrumentDto[]> getKnownInstruments() {
 
         //TODO:
         throw new UnsupportedOperationException();
     }
 
     @PostMapping()
-    public ResponseEntity<ChemicalTypeDto[]> createChemicalTypes(ChemicalTypeDto instrument) {
+    public ResponseEntity<InstrumentDto[]> createInstruments(InstrumentDto instrument) {
 
         //TODO:
         throw new UnsupportedOperationException();
     }
 
     @DeleteMapping("/{uuid}")
-    public ResponseEntity<Void> archiveChemicalType(@PathVariable UUID uuid) {
+    public ResponseEntity<Void> archiveInstrument(@PathVariable UUID uuid) {
 
         //TODO:
         throw new UnsupportedOperationException();
     }
 
     @PutMapping("/{uuid}/restore")
-    public ResponseEntity<Void> restoreChemicalType(@PathVariable UUID uuid) {
+    public ResponseEntity<Void> restoreInstrument(@PathVariable UUID uuid) {
 
         //TODO:
         throw new UnsupportedOperationException();

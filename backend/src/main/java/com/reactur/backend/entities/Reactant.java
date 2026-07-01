@@ -1,6 +1,6 @@
 package com.reactur.backend.entities;
 
-import com.reactur.backend.entities.SelectionOptions.ChemicalType;
+import com.reactur.backend.entities.options.ChemicalType;
 import jakarta.persistence.CollectionTable;
 import jakarta.persistence.Column;
 import jakarta.persistence.ElementCollection;

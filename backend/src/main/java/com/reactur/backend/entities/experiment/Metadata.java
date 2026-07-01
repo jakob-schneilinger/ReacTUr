@@ -1,7 +1,7 @@
-package com.reactur.backend.entities.ExperimentEntities;
+package com.reactur.backend.entities.experiment;
 
-import com.reactur.backend.entities.SelectionOptions.Instrument;
-import com.reactur.backend.entities.SelectionOptions.Solvent;
+import com.reactur.backend.entities.options.Instrument;
+import com.reactur.backend.entities.options.Solvent;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;

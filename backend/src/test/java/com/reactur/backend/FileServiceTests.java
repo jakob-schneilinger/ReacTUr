@@ -2,12 +2,12 @@ package com.reactur.backend;
 
 import com.reactur.backend.dtos.ExperimentDtos.ExperimentAttachmentDetailsDto;
 import com.reactur.backend.dtos.ExperimentDtos.ExperimentAttachmentDto;
-import com.reactur.backend.entities.ExperimentEntities.Experiment;
-import com.reactur.backend.entities.ExperimentEntities.ExperimentAttachment;
+import com.reactur.backend.entities.experiment.Experiment;
+import com.reactur.backend.entities.experiment.ExperimentAttachment;
 import com.reactur.backend.exeptions.ResourceNotFoundException;
 import com.reactur.backend.repositories.ExperimentAttachmentRepository;
 import com.reactur.backend.repositories.ExperimentRepository;
-import com.reactur.backend.services.FileServiceImpl;
+import com.reactur.backend.services.implementations.FileServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

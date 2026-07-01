@@ -1,4 +1,4 @@
-package com.reactur.backend.entities.ExperimentEntities;
+package com.reactur.backend.entities.experiment;
 
 import com.reactur.backend.entities.User;
 import jakarta.persistence.CascadeType;
