@@ -1,5 +1,6 @@
 package com.reactur.backend.services.implementations;
 
+import com.reactur.backend.client.JobStatusResult;
 import com.reactur.backend.client.StructureApiClient;
 import com.reactur.backend.dtos.ReactantDtos.StructureDto;
 import com.reactur.backend.entities.Reactant;
@@ -12,6 +13,7 @@ import com.reactur.backend.repositories.ReactantStructureRepository;
 import com.reactur.backend.services.StructureService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.transaction.annotation.Transactional;
@@ -125,7 +127,56 @@ public class StructureServiceImpl implements StructureService {
     }
 
     @Override
+    @Scheduled(fixedDelay = 60000)
     public void fetchPendingStructuresFromAPI() {
-        // TODO
+        List<ReactantStructure> pendingStructures = structureRepository.findByFlag(StructureFlag.PENDING);
+
+        if (pendingStructures.isEmpty()) {
+            return;
+        }
+
+        log.info("Found {} PENDING structure jobs. Polling external API...", pendingStructures.size());
+
+        for (ReactantStructure pending : pendingStructures) {
+            String jobId = pending.getExternalJobId();
+
+            try {
+                JobStatusResult result = structureApiClient.checkJobStatus(jobId);
+
+                if (result.isFinished()) {
+                    List<String> generatedStructures = result.structures();
+
+                    if (generatedStructures != null && !generatedStructures.isEmpty()) {
+                        log.info("Job {} succeeded. Received {} structures.", jobId, generatedStructures.size());
+
+                        pending.setStructure(generatedStructures.getFirst());
+                        pending.setFlag(StructureFlag.READY);
+                        structureRepository.save(pending);
+
+                        for (int i = 1; i < generatedStructures.size(); i++) {
+                            ReactantStructure additionalStructure = ReactantStructure.builder()
+                                    .reactant(pending.getReactant())
+                                    .externalJobId(jobId)
+                                    .structure(generatedStructures.get(i))
+                                    .flag(StructureFlag.READY)
+                                    .build();
+                            structureRepository.save(additionalStructure);
+                        }
+                    } else {
+                        log.warn("Job {} succeeded but returned no structures.", jobId);
+                        pending.setFlag(StructureFlag.FAILED);
+                        structureRepository.save(pending);
+                    }
+
+                } else if (result.isFailed()) {
+                    log.error("External Job {} failed. Error: {}", jobId, result.errorMessage());
+                    pending.setFlag(StructureFlag.FAILED);
+                    structureRepository.save(pending);
+                }
+
+            } catch (Exception e) {
+                log.error("Failed to check status for pending Job ID: {}", jobId, e);
+            }
+        }
     }
 }

@@ -101,6 +101,13 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
     }
 
+    @ExceptionHandler(ExternalApiException.class)
+    public ResponseEntity<String> handleExternalApiException(ExternalApiException ex) {
+        log.error("External API error: {}", ex.getMessage(), ex);
+        return ResponseEntity.status(HttpStatus.BAD_GATEWAY)
+                .body("The external service is currently unavailable or returned an error.");
+    }
+
     @ExceptionHandler(Exception.class)
     public ResponseEntity<String> handleGlobalException(Exception ex) {
         log.error("Unexpected error occurred: {}", ex.getMessage(), ex);
