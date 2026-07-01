@@ -19,7 +19,7 @@ public interface ReactantService {
      * @return the {@link ReactantDetailDto} representing the newly created reactant
      * @throws ResourceConflictException if a reactant with the same shortname already exists
      */
-    ReactantDetailDto createReactant(CreateReactantDto saveReactant);
+    ReactantDetailDto createReactant(CreateReactantDto saveReactant, String userId);
 
     /**
      * Updates an existing reactant with new details.

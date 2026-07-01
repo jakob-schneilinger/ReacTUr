@@ -33,7 +33,7 @@ public class ReactantServiceImpl implements ReactantService {
 
     @Override
     @Transactional
-    public ReactantDetailDto createReactant(CreateReactantDto saveReactant) {
+    public ReactantDetailDto createReactant(CreateReactantDto saveReactant, String userId) {
 
         reactantValidator.validateForCreate(saveReactant);
 
