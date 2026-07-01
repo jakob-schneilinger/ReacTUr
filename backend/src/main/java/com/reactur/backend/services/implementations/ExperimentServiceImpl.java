@@ -12,6 +12,7 @@ import com.reactur.backend.entities.SelectionOptions.Modality;
 import com.reactur.backend.entities.SelectionOptions.Solvent;
 import com.reactur.backend.entities.User;
 import com.reactur.backend.enums.AuditAction;
+import com.reactur.backend.exeptions.ResourceNotFoundException;
 import com.reactur.backend.exeptions.UnprocessableEntityException;
 import com.reactur.backend.mappers.ExperimentMapper;
 import com.reactur.backend.repositories.AuditLogRepository;
@@ -145,7 +146,14 @@ public class ExperimentServiceImpl implements ExperimentService {
 
   @Override
   public GetExperimentDto getExperiment(UUID experimentId) {
-    return null;
+    log.trace("Fetching experiment with ID: {}", experimentId);
+
+    Experiment experiment = experimentRepository.findById(experimentId)
+      .orElseThrow(() -> new ResourceNotFoundException(
+        "Experiment with ID " + experimentId + " not found"
+      ));
+
+    return experimentMapper.experimentToGetExperimentDto(experiment);
   }
 
 }

@@ -10,6 +10,7 @@ import com.reactur.backend.entities.SelectionOptions.Instrument;
 import com.reactur.backend.entities.SelectionOptions.Modality;
 import com.reactur.backend.entities.SelectionOptions.Solvent;
 import com.reactur.backend.entities.User;
+import com.reactur.backend.exeptions.ResourceNotFoundException;
 import com.reactur.backend.exeptions.UnprocessableEntityException;
 import com.reactur.backend.mappers.ExperimentMapper;
 import com.reactur.backend.mappers.ReactantMapper;
@@ -202,9 +203,10 @@ class ExperimentServiceTest {
     when(userRepository.findById(validUserId)).thenReturn(Optional.of(new User()));
     when(userRepository.findById(validDto.metadata().scientist())).thenReturn(Optional.empty());
 
-    UnprocessableEntityException exception = assertThrows(UnprocessableEntityException.class, () -> {
-      experimentService.createExperiment(validDto, validUserId);
-    });
+    UnprocessableEntityException exception = assertThrows(
+      UnprocessableEntityException.class,
+      () -> experimentService.createExperiment(validDto, validUserId)
+    );
 
     assertTrue(exception.getMessage().contains("Scientist with ID"));
 
@@ -221,9 +223,10 @@ class ExperimentServiceTest {
     when(userRepository.findById(validDto.metadata().scientist())).thenReturn(Optional.of(new User()));
     when(reactantRepository.findById(validDto.reactantA())).thenReturn(Optional.empty());
 
-    UnprocessableEntityException exception = assertThrows(UnprocessableEntityException.class, () -> {
-      experimentService.createExperiment(validDto, validUserId);
-    });
+    UnprocessableEntityException exception = assertThrows(
+      UnprocessableEntityException.class,
+      () -> experimentService.createExperiment(validDto, validUserId)
+    );
 
     assertTrue(exception.getMessage().contains("Reactant A does not exist"));
     Mockito.verify(experimentRepository, Mockito.never()).save(any());
@@ -245,6 +248,36 @@ class ExperimentServiceTest {
     return new SaveExperimentDto(
       randomUUID(), randomUUID(), metadata, new MeasurementDataDto(1.2, 5.5, 0.1, false), "10.1000/rxn123"
     );
+  }
+
+  @Test
+  void getExperiment_whenFound_returnsDto() {
+    UUID experimentId = randomUUID();
+    Experiment mockExperiment = new Experiment();
+    mockExperiment.setId(experimentId);
+    mockExperiment.setDoi("10.1000/rxn999");
+
+    when(experimentRepository.findById(experimentId)).thenReturn(Optional.of(mockExperiment));
+
+    GetExperimentDto result = experimentService.getExperiment(experimentId);
+
+    assertNotNull(result, "The returned DTO should not be null");
+    assertEquals(experimentId, result.uuid());
+    assertEquals("10.1000/rxn999", result.doi());
+  }
+
+  @Test
+  void getExperiment_whenNotFound_throwsResourceNotFoundException() {
+    UUID experimentId = randomUUID();
+
+    when(experimentRepository.findById(experimentId)).thenReturn(Optional.empty());
+
+    ResourceNotFoundException exception = assertThrows(
+      ResourceNotFoundException.class,
+      () -> experimentService.getExperiment(experimentId)
+    );
+
+    assertTrue(exception.getMessage().contains("Experiment with ID " + experimentId + " not found"));
   }
 
 }
