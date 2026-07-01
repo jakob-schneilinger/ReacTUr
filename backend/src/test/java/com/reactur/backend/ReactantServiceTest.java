@@ -11,7 +11,7 @@ import com.reactur.backend.exeptions.ResourceConflictException;
 import com.reactur.backend.exeptions.ResourceNotFoundException;
 import com.reactur.backend.mappers.ReactantMapper;
 import com.reactur.backend.repositories.ReactantRepository;
-import com.reactur.backend.services.ReactantServiceImpl;
+import com.reactur.backend.services.implementations.ReactantServiceImpl;
 import com.reactur.backend.services.UserService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

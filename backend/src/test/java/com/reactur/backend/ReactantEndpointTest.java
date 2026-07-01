@@ -53,7 +53,7 @@ class ReactantEndpointTest {
     void createReactant_ShouldReturn201_WhenSuccessful() throws Exception {
         UUID newId = UUID.randomUUID();
         CreateReactantDto saveDto = new CreateReactantDto("C=C", UUID.randomUUID(), "Ethene", null, "Ethene", "74-85-1", "VGGSQFCHJZSIN-UHFFFAOYSA-N", null, null);
-        ReactantDetailDto mockResponse = new ReactantDetailDto(newId, "C=C", null, "Ethene", null, "Ethene", "74-85-1", "VGGSQFCHJZSIN-UHFFFAOYSA-N", null, null, null);
+        ReactantDetailDto mockResponse = new ReactantDetailDto(newId, "C=C", null, "Ethene", null, "Ethene", "74-85-1", "VGGSQFCHJZSIN-UHFFFAOYSA-N", null, null, null, null);
 
         when(reactantService.createReactant(any(CreateReactantDto.class))).thenReturn(mockResponse);
 
@@ -68,7 +68,7 @@ class ReactantEndpointTest {
     @Test
     void getReactantDetail_ShouldReturn200_WhenReactantExists() throws Exception {
         UUID id = UUID.randomUUID();
-        ReactantDetailDto mockResponse = new ReactantDetailDto(id, "C", null, "Methane", null, "Methane", "74-82-8", "VNWKTOKETHGBQD-UHFFFAOYSA-N", null, null, null);
+        ReactantDetailDto mockResponse = new ReactantDetailDto(id, "C", null, "Methane", null, "Methane", "74-82-8", "VNWKTOKETHGBQD-UHFFFAOYSA-N", null, null, null, null);
 
         when(reactantService.getReactantDetail(id)).thenReturn(mockResponse);
 
@@ -88,7 +88,7 @@ class ReactantEndpointTest {
 
     @Test
     void getAllReactants_ShouldReturn200_WithList() throws Exception {
-        ReactantDto dto = new ReactantDto(UUID.randomUUID(), "C", null, "Methane", "Methane");
+        ReactantDto dto = new ReactantDto(UUID.randomUUID(), "C", null, "Methane", "Methane", null);
         when(reactantService.getAllReactants()).thenReturn(List.of(dto));
 
         mockMvc.perform(get("/api/reactant"))
