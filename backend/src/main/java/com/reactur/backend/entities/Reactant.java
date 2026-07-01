@@ -42,9 +42,9 @@ public class Reactant {
     @Column(name = "smiles", nullable = false)
     private String smiles;
 
-     @ManyToOne(fetch = FetchType.LAZY)
-     @JoinColumn(name = "type_id")
-     private ChemicalType type;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "type_id")
+    private ChemicalType type;
 
     @Column(name = "in_chi_key")
     private String inChiKey;

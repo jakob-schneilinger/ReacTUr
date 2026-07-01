@@ -1,7 +1,8 @@
-package com.reactur.backend.services;
+package com.reactur.backend.services.implementations;
 
 import com.reactur.backend.exeptions.FileStorageException;
 import com.reactur.backend.exeptions.ResourceNotFoundException;
+import com.reactur.backend.services.FileService;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
 import com.reactur.backend.dtos.ExperimentDtos.ExperimentAttachmentDetailsDto;

@@ -1,4 +1,4 @@
-package com.reactur.backend.services;
+package com.reactur.backend.services.implementations;
 
 import com.reactur.backend.dtos.GetUserDto;
 import com.reactur.backend.dtos.RoleDto;
@@ -6,6 +6,7 @@ import com.reactur.backend.entities.User;
 import com.reactur.backend.exeptions.ResourceNotFoundException;
 import com.reactur.backend.mappers.UserMapper;
 import com.reactur.backend.repositories.UserRepository;
+import com.reactur.backend.services.UserService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
