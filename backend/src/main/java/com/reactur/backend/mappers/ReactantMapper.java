@@ -3,7 +3,9 @@ package com.reactur.backend.mappers;
 import com.reactur.backend.dtos.ReactantDtos.ReactantDetailDto;
 import com.reactur.backend.dtos.ReactantDtos.ReactantDto;
 import com.reactur.backend.dtos.ReactantDtos.StructureDto;
+import com.reactur.backend.dtos.SelectionOption.ChemicalTypeDto;
 import com.reactur.backend.entities.Reactant;
+import com.reactur.backend.entities.options.ChemicalType;
 import com.reactur.backend.enums.StructureFlag;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -22,4 +24,8 @@ public interface ReactantMapper {
     @Mapping(source = "reactant.id", target = "uuid")
     @Mapping(target = "chemicalType", ignore = true)
     ReactantDto toDto(Reactant reactant, StructureFlag flag);
+
+    @Mapping(source = "id", target = "uuid")
+    @Mapping(target = "archivedAt", ignore = true) // TODO: Entity uses isActive, DTO expects archivedAt
+    ChemicalTypeDto toChemicalTypeDto(ChemicalType chemicalType);
 }

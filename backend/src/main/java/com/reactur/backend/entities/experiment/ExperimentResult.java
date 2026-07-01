@@ -27,15 +27,16 @@ public class ExperimentResult {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
-    @Column(name = "rate_constant")
+    @Column(name = "rate_constant", nullable = false)
     private Double rateConstant;
 
+    // Optional in DTO, it remains nullable here
     @Column(name = "pfo_rate_constant")
     private Double pfoRateConstant;
 
-    @Column(name = "error_value")
+    @Column(name = "error_value", nullable = false)
     private Double errorValue;
 
-    @Column(name = "is_error_percentage")
+    @Column(name = "is_error_percentage", nullable = false)
     private Boolean isErrorPercentage;
 }

@@ -17,7 +17,7 @@ public interface ReactantService {
      *
      * @param saveReactant the DTO containing the data for the new reactant
      * @return the {@link ReactantDetailDto} representing the newly created reactant
-     * @throws ResourceConflictException if a reactant with the same shortname already exists
+     * @throws ResourceConflictException if a reactant with the same shortName already exists
      */
     ReactantDetailDto createReactant(CreateReactantDto saveReactant, String userId);
 
@@ -28,7 +28,7 @@ public interface ReactantService {
      * @param saveReactant the DTO containing the updated fields
      * @return the {@link ReactantDetailDto} of the updated reactant
      * @throws ResourceNotFoundException if no reactant is found for the given UUID
-     * @throws ResourceConflictException if the updated shortname is already used by another reactant
+     * @throws ResourceConflictException if the updated shortName is already used by another reactant
      */
     ReactantDetailDto updateReactant(UUID uuid, UpdateReactantDto saveReactant);
 

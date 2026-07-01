@@ -49,6 +49,26 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
     }
 
+    /* TODO: Alternatives using MAP for better legibility in the frontend
+    @ExceptionHandler(ResourceConflictException.class)
+    public ResponseEntity<Map<String, String>> handleResourceConflictException(ResourceConflictException ex) {
+        log.warn("Resource conflict: {}", ex.getMessage());
+        Map<String, String> response = new HashMap<>();
+        response.put("error", "Conflict");
+        response.put("message", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
+    }
+
+    @ExceptionHandler(ResourceConflictException.class)
+    public ResponseEntity<Map<String, String>> handleResourceConflictException(ResourceConflictException ex) {
+        log.warn("Resource conflict: {}", ex.getMessage());
+        Map<String, String> response = new HashMap<>();
+        response.put("error", "Conflict");
+        response.put("message", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
+    }
+     */
+
     @ExceptionHandler(FileStorageException.class)
     public ResponseEntity<String> handleFileStorageException(FileStorageException ex) {
         log.error("File storage error: {}", ex.getMessage(), ex);
@@ -72,6 +92,15 @@ public class GlobalExceptionHandler {
     public ResponseEntity<String> handleResourceConflictException(ResourceConflictException ex) {
         log.warn("Resource conflict: {}", ex.getMessage());
         return ResponseEntity.status(HttpStatus.CONFLICT).body(ex.getMessage());
+    }
+
+    @ExceptionHandler(UnprocessableEntityException.class)
+    public ResponseEntity<Map<String, String>> handleUnprocessableEntityException(UnprocessableEntityException ex) {
+        log.warn("Unprocessable Entity (Semantic Validation Failed): {}", ex.getMessage());
+        Map<String, String> response = new HashMap<>();
+        response.put("error", "Unprocessable Entity");
+        response.put("message", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.UNPROCESSABLE_CONTENT).body(response);
     }
 
     @ExceptionHandler({AccessDeniedException.class, AuthorizationDeniedException.class})

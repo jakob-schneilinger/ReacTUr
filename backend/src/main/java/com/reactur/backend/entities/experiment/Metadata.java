@@ -1,7 +1,9 @@
 package com.reactur.backend.entities.experiment;
 
 import com.reactur.backend.entities.options.Instrument;
+import com.reactur.backend.entities.options.Modality;
 import com.reactur.backend.entities.options.Solvent;
+import com.reactur.backend.entities.User;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -16,7 +18,9 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.SQLRestriction;
 
+import java.time.Instant;
 import java.time.LocalDate;
 import java.util.UUID;
 
@@ -27,6 +31,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@SQLRestriction("archived_at IS NULL")
 public class Metadata {
 
     @Id
@@ -36,11 +41,12 @@ public class Metadata {
     @Column(name = "date", nullable = false)
     private LocalDate date;
 
-    @Column(name = "scientist", nullable = false)
-    private String scientist;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "scientist_id", nullable = false)
+    private User scientist;
 
     @Column(name = "temperature")
-    private Float temperature;
+    private Double temperature;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "solvent_id")
@@ -51,11 +57,21 @@ public class Metadata {
     private Instrument instrument;
 
     @Column(name = "concentration_a")
-    private Float concentrationA;
+    private Double concentrationA;
 
     @Column(name = "concentration_b")
-    private Float concentrationB;
+    private Double concentrationB;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "modality_id")
+    private Modality modality;
+
+    @Column(name = "wavelength")
+    private Double wavelength;
 
     @Column(name = "comment", columnDefinition = "TEXT")
     private String comment;
+
+    @Column(name = "archived_at")
+    private Instant archivedAt;
 }

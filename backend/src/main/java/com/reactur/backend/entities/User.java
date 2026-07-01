@@ -2,9 +2,13 @@ package com.reactur.backend.entities;
 
 import com.reactur.backend.enums.Role;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+
+import java.time.LocalDateTime;
 
 import java.time.Instant;
 
@@ -13,6 +17,8 @@ import java.time.Instant;
 @Getter
 @Setter
 @NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class User {
 
     @Id
@@ -30,10 +36,17 @@ public class User {
 
     @Enumerated(EnumType.STRING)
     @Column(name="role", nullable = false)
+    @Builder.Default
     private Role role = Role.UNAUTHORIZED;
 
-    @Column(updatable = false)
-    private java.time.LocalDateTime createdAt = java.time.LocalDateTime.now();
+    /* TODO: Discuss how Roles are extracted:
+        Currently, UserSyncFilter does not extract the Role from the Keycloak JWT.
+        Are we reading roles from the token, or managing them purely in our DB?
+    */
+
+    @Column(name = "created_at", updatable = false)
+    @Builder.Default
+    private LocalDateTime createdAt = LocalDateTime.now();
 
     @Column(name = "deactivated_at")
     private Instant deactivatedAt;

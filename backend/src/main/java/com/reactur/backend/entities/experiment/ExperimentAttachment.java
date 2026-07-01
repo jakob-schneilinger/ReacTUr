@@ -27,6 +27,11 @@ import java.util.UUID;
 @Builder
 public class ExperimentAttachment {
 
+    /* TODO: Review (Dennis?) and delete comment
+        Are there restricted file types? (e.g., only .csv, .xy, .pdf allowed?)
+        Is there a maximum file size the chemists expect to upload?
+     */
+
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
