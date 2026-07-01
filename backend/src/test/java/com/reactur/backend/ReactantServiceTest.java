@@ -1,5 +1,9 @@
 package com.reactur.backend;
 
+import com.reactur.backend.dtos.ReactantDtos.StructureDto;
+import com.reactur.backend.enums.StructureFlag;
+import com.reactur.backend.repositories.UserRepository;
+import com.reactur.backend.services.StructureService;
 import com.reactur.backend.validators.ReactantValidator;
 import com.reactur.backend.dtos.ReactantDtos.CreateReactantDto;
 import com.reactur.backend.dtos.ReactantDtos.ReactantDetailDto;
@@ -12,13 +16,15 @@ import com.reactur.backend.exeptions.ResourceNotFoundException;
 import com.reactur.backend.mappers.ReactantMapper;
 import com.reactur.backend.repositories.ReactantRepository;
 import com.reactur.backend.services.implementations.ReactantServiceImpl;
-import com.reactur.backend.services.UserService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mapstruct.factory.Mappers;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import java.time.Instant;
 import java.util.Collections;
@@ -44,24 +50,31 @@ class ReactantServiceTest {
     private ReactantRepository reactantRepository;
 
     @Mock
-    private UserService userService;
+    private UserRepository userRepository;
 
+    @Mock
+    private StructureService structureService;
+
+    @Spy
+    private ReactantMapper reactantMapper = Mappers.getMapper(ReactantMapper.class);
+
+    @InjectMocks
     private ReactantServiceImpl reactantService;
+
     private CreateReactantDto sampleCreateDto;
     private UpdateReactantDto sampleUpdateDto;
     private User mockUser;
     private Reactant mockReactant;
     private final UUID VALID_UUID = UUID.randomUUID();
+    private final String MOCK_USER_ID = "keycloak-123";
 
     @BeforeEach
     void setUp() {
         ReactantValidator validator = new ReactantValidator(reactantRepository);
-        ReactantMapper reactantMapper = Mappers.getMapper(ReactantMapper.class);
-
-        reactantService = new ReactantServiceImpl(reactantRepository, userService, validator, reactantMapper);
+        ReflectionTestUtils.setField(reactantService, "reactantValidator", validator);
 
         mockUser = new User();
-        mockUser.setId("User123");
+        mockUser.setId(MOCK_USER_ID);
 
         sampleCreateDto = new CreateReactantDto(
                 "CCO", UUID.randomUUID(), "Ethanol",
@@ -91,31 +104,39 @@ class ReactantServiceTest {
 
     @Test
     void createReactant_ShouldSaveSuccessfully_WhenValidData() {
-        when(userService.getCurrentUser()).thenReturn(Optional.of(mockUser));
-
+        when(userRepository.findById(MOCK_USER_ID)).thenReturn(Optional.of(mockUser));
         when(reactantRepository.hasNameConflict(anyCollection())).thenReturn(false);
-
         when(reactantRepository.save(any(Reactant.class))).thenAnswer(invocation -> {
             Reactant saved = invocation.getArgument(0);
             saved.setId(VALID_UUID);
             return saved;
         });
 
-        ReactantDetailDto result = reactantService.createReactant(sampleCreateDto);
+        ReactantDetailDto result = reactantService.createReactant(sampleCreateDto, MOCK_USER_ID);
 
         assertNotNull(result);
         assertEquals(VALID_UUID, result.uuid());
         assertEquals("Ethanol", result.shortName());
         assertEquals("A test comment", result.comment());
         assertIterableEquals(List.of("EtOH", "Alkohol"), result.additionalShortNames());
+        assertTrue(result.structure().isEmpty());
         verify(reactantRepository, times(1)).save(any(Reactant.class));
+    }
+
+    @Test
+    void createReactant_ShouldThrowResourceNotFound_WhenUserDoesNotExist() {
+        when(reactantRepository.hasNameConflict(anyCollection())).thenReturn(false);
+        when(userRepository.findById(MOCK_USER_ID)).thenReturn(Optional.empty());
+
+        assertThrows(ResourceNotFoundException.class, () -> reactantService.createReactant(sampleCreateDto, MOCK_USER_ID));
+        verify(reactantRepository, never()).save(any(Reactant.class));
     }
 
     @Test
     void createReactant_ShouldThrowResourceConflictException_WhenShortNameExists() {
         when(reactantRepository.hasNameConflict(anyCollection())).thenReturn(true);
 
-        assertThrows(ResourceConflictException.class, () -> reactantService.createReactant(sampleCreateDto));
+        assertThrows(ResourceConflictException.class, () -> reactantService.createReactant(sampleCreateDto, MOCK_USER_ID));
         verify(reactantRepository, never()).save(any(Reactant.class));
     }
 
@@ -129,7 +150,7 @@ class ReactantServiceTest {
 
         when(reactantRepository.hasNameConflict(anyCollection())).thenReturn(true);
 
-        assertThrows(ResourceConflictException.class, () -> reactantService.createReactant(newReactantDto));
+        assertThrows(ResourceConflictException.class, () -> reactantService.createReactant(newReactantDto, MOCK_USER_ID));
     }
 
     @Test
@@ -143,9 +164,14 @@ class ReactantServiceTest {
         when(reactantRepository.hasNameConflictExcludingId(anyCollection(), eq(VALID_UUID))).thenReturn(false);
         when(reactantRepository.save(any(Reactant.class))).thenReturn(mockReactant);
 
+        StructureDto mockStruct = new StructureDto(UUID.randomUUID(), VALID_UUID, "test.xyz", "data", StructureFlag.ACTIVE);
+        when(structureService.getStructuresByReactant(VALID_UUID)).thenReturn(List.of(mockStruct));
+
         ReactantDetailDto result = reactantService.updateReactant(VALID_UUID, updateDto);
 
         assertNotNull(result);
+        assertEquals(1, result.structure().size());
+        assertEquals(StructureFlag.ACTIVE, result.structure().get(0).flag());
         verify(reactantRepository, times(1)).save(mockReactant);
     }
 
@@ -175,6 +201,7 @@ class ReactantServiceTest {
         when(reactantRepository.findById(VALID_UUID)).thenReturn(Optional.of(mockReactant));
         when(reactantRepository.hasNameConflictExcludingId(anyCollection(), eq(VALID_UUID))).thenReturn(false);
         when(reactantRepository.save(any(Reactant.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        when(structureService.getStructuresByReactant(VALID_UUID)).thenReturn(List.of());
 
         ReactantDetailDto result = reactantService.updateReactant(VALID_UUID, patchDto);
 
@@ -192,6 +219,7 @@ class ReactantServiceTest {
         when(reactantRepository.findById(VALID_UUID)).thenReturn(Optional.of(mockReactant));
         when(reactantRepository.hasNameConflictExcludingId(anyCollection(), eq(VALID_UUID))).thenReturn(false);
         when(reactantRepository.save(any(Reactant.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        when(structureService.getStructuresByReactant(VALID_UUID)).thenReturn(List.of());
 
         ReactantDetailDto result = reactantService.updateReactant(VALID_UUID, clearDto);
 
@@ -203,6 +231,7 @@ class ReactantServiceTest {
     @Test
     void getReactantDetail_ShouldReturnDetails_WhenExists() {
         when(reactantRepository.findById(VALID_UUID)).thenReturn(Optional.of(mockReactant));
+        when(structureService.getStructuresByReactant(VALID_UUID)).thenReturn(List.of());
 
         ReactantDetailDto result = reactantService.getReactantDetail(VALID_UUID);
 
@@ -210,6 +239,7 @@ class ReactantServiceTest {
         assertEquals(VALID_UUID, result.uuid());
         assertEquals("Ethanol", result.shortName());
         assertIterableEquals(List.of("Ref1", "Ref2"), result.references());
+        assertTrue(result.structure().isEmpty());
     }
 
     @Test
@@ -223,11 +253,15 @@ class ReactantServiceTest {
     void getAllReactants_ShouldReturnOnlyActiveReactants() {
         when(reactantRepository.findAllByArchivedAtIsNull()).thenReturn(List.of(mockReactant));
 
+        StructureDto pendingStruct = new StructureDto(UUID.randomUUID(), VALID_UUID, "test", "data", StructureFlag.PENDING);
+        when(structureService.getStructuresByReactant(VALID_UUID)).thenReturn(List.of(pendingStruct));
+
         List<ReactantDto> result = reactantService.getAllReactants();
 
         assertFalse(result.isEmpty());
         assertEquals(1, result.size());
         assertEquals("Ethanol", result.getFirst().shortName());
+        assertEquals(StructureFlag.PENDING, result.getFirst().flag());
     }
 
     @Test
@@ -240,12 +274,14 @@ class ReactantServiceTest {
                 .build();
 
         when(reactantRepository.findAllByArchivedAtIsNotNull()).thenReturn(List.of(archivedReactant));
+        when(structureService.getStructuresByReactant(any())).thenReturn(List.of());
 
         List<ReactantDto> result = reactantService.getArchivedReactants();
 
         assertFalse(result.isEmpty());
         assertEquals(1, result.size());
         assertEquals("Archived Chem", result.getFirst().shortName());
+        assertNull(result.getFirst().flag());
     }
 
     @Test
@@ -271,6 +307,7 @@ class ReactantServiceTest {
         mockReactant.setArchivedAt(Instant.now());
         when(reactantRepository.findById(VALID_UUID)).thenReturn(Optional.of(mockReactant));
         when(reactantRepository.save(any(Reactant.class))).thenReturn(mockReactant);
+        when(structureService.getStructuresByReactant(VALID_UUID)).thenReturn(List.of());
 
         ReactantDto result = reactantService.restoreReactant(VALID_UUID);
 

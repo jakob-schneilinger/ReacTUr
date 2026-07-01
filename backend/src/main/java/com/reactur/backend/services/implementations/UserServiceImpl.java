@@ -28,16 +28,6 @@ public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final UserMapper userMapper;
 
-    public Optional<User> getCurrentUser() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-
-        if (authentication != null && authentication.getPrincipal() instanceof Jwt jwt) {
-            String keycloakId = jwt.getSubject();
-            return userRepository.findById(keycloakId);
-        }
-        return Optional.empty();
-    }
-
     @Override
     @Transactional(readOnly = true)
     public List<GetUserDto> getAllUsers() {

@@ -11,13 +11,6 @@ import java.util.Optional;
 public interface UserService {
 
     /**
-     * Gets the user that made this request.
-     *
-     * @return {@link User} of this request
-     */
-    Optional<User> getCurrentUser();
-
-    /**
      * Retrieves all users currently registered in the system.
      *
      * @return a list of {@link GetUserDto} representing all users.

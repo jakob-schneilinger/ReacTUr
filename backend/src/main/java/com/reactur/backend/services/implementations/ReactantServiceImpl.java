@@ -1,7 +1,10 @@
 package com.reactur.backend.services.implementations;
 
+import com.reactur.backend.dtos.ReactantDtos.StructureDto;
+import com.reactur.backend.enums.StructureFlag;
+import com.reactur.backend.repositories.UserRepository;
 import com.reactur.backend.services.ReactantService;
-import com.reactur.backend.services.UserService;
+import com.reactur.backend.services.StructureService;
 import com.reactur.backend.validators.ReactantValidator;
 import com.reactur.backend.dtos.ReactantDtos.CreateReactantDto;
 import com.reactur.backend.dtos.ReactantDtos.ReactantDetailDto;
@@ -27,9 +30,10 @@ import java.util.stream.Collectors;
 public class ReactantServiceImpl implements ReactantService {
 
     private final ReactantRepository reactantRepository;
-    private final UserService userService;
+    private final UserRepository userRepository;
     private final ReactantValidator reactantValidator;
     private final ReactantMapper reactantMapper;
+    private final StructureService structureService;
 
     @Override
     @Transactional
@@ -37,7 +41,7 @@ public class ReactantServiceImpl implements ReactantService {
 
         reactantValidator.validateForCreate(saveReactant);
 
-        User activeUser = userService.getCurrentUser().orElseThrow(() -> new RuntimeException("Current User could not be found"));
+        User activeUser = userRepository.findById(userId).orElseThrow(() -> new ResourceNotFoundException("Current User could not be found"));
 
         Reactant reactant = Reactant.builder()
                 .shortName(saveReactant.shortName())
@@ -51,7 +55,8 @@ public class ReactantServiceImpl implements ReactantService {
                 .createdBy(activeUser)
                 .build();
 
-        return reactantMapper.toDetailDto(reactantRepository.save(reactant));
+        Reactant saved = reactantRepository.save(reactant);
+        return reactantMapper.toDetailDto(saved, List.of());
     }
 
     @Override
@@ -78,30 +83,33 @@ public class ReactantServiceImpl implements ReactantService {
             reactant.setReferences(new ArrayList<>(patchDto.references()));
         }
 
-        return reactantMapper.toDetailDto(reactantRepository.save(reactant));
-    }
+        Reactant saved = reactantRepository.save(reactant);
+        List<StructureDto> structures = structureService.getStructuresByReactant(uuid);
+
+        return reactantMapper.toDetailDto(saved, structures);    }
 
     @Override
     @Transactional(readOnly = true)
     public ReactantDetailDto getReactantDetail(UUID uuid) {
         Reactant reactant = reactantRepository.findById(uuid)
                 .orElseThrow(() -> new ResourceNotFoundException("Reactant with ID " + uuid + " not found"));
-        return reactantMapper.toDetailDto(reactant);
+
+        List<StructureDto> structures = structureService.getStructuresByReactant(uuid);
+        return reactantMapper.toDetailDto(reactant, structures);
     }
 
     @Override
     @Transactional(readOnly = true)
     public List<ReactantDto> getAllReactants() {
         return reactantRepository.findAllByArchivedAtIsNull().stream()
-                .map(reactantMapper::toDto)
-                .collect(Collectors.toList());
-    }
+                .map(r -> reactantMapper.toDto(r, determineAggregateFlag(r.getId())))
+                .collect(Collectors.toList());    }
 
     @Override
     @Transactional(readOnly = true)
     public List<ReactantDto> getArchivedReactants() {
         return reactantRepository.findAllByArchivedAtIsNotNull().stream()
-                .map(reactantMapper::toDto)
+                .map(r -> reactantMapper.toDto(r, determineAggregateFlag(r.getId())))
                 .collect(Collectors.toList());
     }
 
@@ -122,6 +130,19 @@ public class ReactantServiceImpl implements ReactantService {
                 .orElseThrow(() -> new ResourceNotFoundException("Reactant with ID " + uuid + " not found"));
 
         reactant.setArchivedAt(null);
-        return reactantMapper.toDto(reactantRepository.save(reactant));
+        Reactant saved = reactantRepository.save(reactant);
+        return reactantMapper.toDto(saved, determineAggregateFlag(uuid));
+    }
+
+    private StructureFlag determineAggregateFlag(UUID reactantId) {
+        List<StructureDto> structures = structureService.getStructuresByReactant(reactantId);
+        if (structures == null || structures.isEmpty()) return null;
+
+        if (structures.stream().anyMatch(s -> s.flag() == StructureFlag.ACTIVE)) return StructureFlag.ACTIVE;
+        if (structures.stream().anyMatch(s -> s.flag() == StructureFlag.READY)) return StructureFlag.READY;
+        if (structures.stream().anyMatch(s -> s.flag() == StructureFlag.PENDING)) return StructureFlag.PENDING;
+        if (structures.stream().allMatch(s -> s.flag() == StructureFlag.FAILED)) return StructureFlag.FAILED;
+
+        return StructureFlag.REJECTED;
     }
 }
