@@ -1,7 +1,5 @@
 package com.reactur.backend.client;
 
-import java.util.List;
-
 /**
  * Client interface for interacting with the external Svatunek-Lab Reactur API.
  * Handles the asynchronous job submission and status polling for 3D structure generation.
