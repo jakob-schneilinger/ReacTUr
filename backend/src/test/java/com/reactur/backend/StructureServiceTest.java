@@ -5,6 +5,7 @@ import com.reactur.backend.dtos.ReactantDtos.StructureDto;
 import com.reactur.backend.entities.Reactant;
 import com.reactur.backend.entities.ReactantStructure;
 import com.reactur.backend.enums.StructureFlag;
+import com.reactur.backend.exeptions.ResourceConflictException;
 import com.reactur.backend.exeptions.ResourceNotFoundException;
 import com.reactur.backend.mappers.StructureMapper;
 import com.reactur.backend.repositories.ReactantRepository;
@@ -73,7 +74,7 @@ class StructureServiceTest {
     }
 
     @Test
-    void uploadStructure_shouldSaveAndReturnDto() throws Exception {
+    void uploadStructure_shouldSaveAndReturnDto() {
         MockMultipartFile file = new MockMultipartFile(
                 "file", "test.xyz", "text/plain", "XYZ content".getBytes()
         );
@@ -93,10 +94,10 @@ class StructureServiceTest {
         assertThat(savedEntity.getReactant()).isEqualTo(mockReactant);
         assertThat(savedEntity.getFileName()).isEqualTo("test.xyz");
         assertThat(savedEntity.getStructure()).isEqualTo("XYZ content");
-        assertThat(savedEntity.getFlag()).isEqualTo(StructureFlag.READY);
+        assertThat(savedEntity.getFlag()).isEqualTo(StructureFlag.ACTIVE);
 
         assertThat(result.name()).isEqualTo("test.xyz");
-        assertThat(result.flag()).isEqualTo(StructureFlag.READY);
+        assertThat(result.flag()).isEqualTo(StructureFlag.ACTIVE);
     }
 
     @Test
@@ -129,6 +130,23 @@ class StructureServiceTest {
     }
 
     @Test
+    void uploadStructure_shouldDeleteExistingAndSaveNewAsActive() {
+        MockMultipartFile file = new MockMultipartFile("file", "test.xyz", "text/plain", "XYZ".getBytes());
+        ReactantStructure oldStructure = ReactantStructure.builder().flag(StructureFlag.REJECTED).build();
+
+        when(reactantRepository.findById(REACTANT_ID)).thenReturn(Optional.of(mockReactant));
+        when(structureRepository.findByReactant_Id(REACTANT_ID)).thenReturn(List.of(oldStructure));
+        when(structureRepository.save(any(ReactantStructure.class))).thenAnswer(i -> i.getArgument(0));
+
+        StructureDto result = structureService.uploadStructure(REACTANT_ID, file);
+
+        verify(structureRepository, times(1)).deleteAll(List.of(oldStructure));
+        verify(structureRepository).save(structureCaptor.capture());
+        assertThat(structureCaptor.getValue().getFlag()).isEqualTo(StructureFlag.ACTIVE);
+        assertThat(result.flag()).isEqualTo(StructureFlag.ACTIVE);
+    }
+
+    @Test
     void generateStructureFromAPI_shouldTriggerApiAndSavePendingEntity() {
         String mockJobId = "24b31e13f36f4fd0808a5cd2f0abb781";
         when(reactantRepository.findById(REACTANT_ID)).thenReturn(Optional.of(mockReactant));
@@ -142,6 +160,19 @@ class StructureServiceTest {
         assertThat(savedEntity.getReactant()).isEqualTo(mockReactant);
         assertThat(savedEntity.getExternalJobId()).isEqualTo(mockJobId);
         assertThat(savedEntity.getFlag()).isEqualTo(StructureFlag.PENDING);
+    }
+
+    @Test
+    void generateStructureFromAPI_shouldTriggerApi_whenOnlyActiveExistsFromManualUpload() {
+        ReactantStructure active = ReactantStructure.builder().flag(StructureFlag.ACTIVE).build();
+        when(reactantRepository.findById(REACTANT_ID)).thenReturn(Optional.of(mockReactant));
+        when(structureRepository.findByReactant_Id(REACTANT_ID)).thenReturn(List.of(active));
+        when(structureApiClient.triggerJob(anyString())).thenReturn("job_123");
+
+        structureService.generateStructureFromAPI(REACTANT_ID);
+
+        verify(structureApiClient, times(1)).triggerJob("CCO");
+        verify(structureRepository, times(1)).save(any(ReactantStructure.class));
     }
 
     @Test
@@ -174,6 +205,35 @@ class StructureServiceTest {
     }
 
     @Test
+    void generateStructureFromAPI_shouldThrowConflict_whenPendingExists() {
+        ReactantStructure pending = ReactantStructure.builder().flag(StructureFlag.PENDING).build();
+        when(reactantRepository.findById(REACTANT_ID)).thenReturn(Optional.of(mockReactant));
+        when(structureRepository.findByReactant_Id(REACTANT_ID)).thenReturn(List.of(pending));
+
+        assertThrows(ResourceConflictException.class, () -> structureService.generateStructureFromAPI(REACTANT_ID));
+        verify(structureApiClient, never()).triggerJob(any());
+    }
+
+    @Test
+    void generateStructureFromAPI_shouldThrowConflict_whenReadyExists() {
+        ReactantStructure ready = ReactantStructure.builder().flag(StructureFlag.READY).build();
+        when(reactantRepository.findById(REACTANT_ID)).thenReturn(Optional.of(mockReactant));
+        when(structureRepository.findByReactant_Id(REACTANT_ID)).thenReturn(List.of(ready));
+
+        assertThrows(ResourceConflictException.class, () -> structureService.generateStructureFromAPI(REACTANT_ID));
+    }
+
+    @Test
+    void generateStructureFromAPI_shouldThrowConflict_whenActiveAndRejectedExist() {
+        ReactantStructure active = ReactantStructure.builder().flag(StructureFlag.ACTIVE).build();
+        ReactantStructure rejected = ReactantStructure.builder().flag(StructureFlag.REJECTED).build();
+        when(reactantRepository.findById(REACTANT_ID)).thenReturn(Optional.of(mockReactant));
+        when(structureRepository.findByReactant_Id(REACTANT_ID)).thenReturn(List.of(active, rejected));
+
+        assertThrows(ResourceConflictException.class, () -> structureService.generateStructureFromAPI(REACTANT_ID));
+    }
+
+    @Test
     void selectStructure_shouldSetActiveAndRejectOthers() {
         ReactantStructure otherStructure = ReactantStructure.builder()
                 .id(UUID.randomUUID())
@@ -183,16 +243,14 @@ class StructureServiceTest {
 
         when(structureRepository.findById(STRUCTURE_ID)).thenReturn(Optional.of(mockPendingStructure));
         when(structureRepository.findByReactant_Id(REACTANT_ID)).thenReturn(List.of(mockPendingStructure, otherStructure));
-        when(structureRepository.save(any(ReactantStructure.class))).thenAnswer(i -> i.getArgument(0));
+
+        when(structureRepository.saveAll(anyIterable())).thenAnswer(i -> i.getArgument(0));
 
         StructureDto result = structureService.selectStructure(STRUCTURE_ID);
 
         assertThat(mockPendingStructure.getFlag()).isEqualTo(StructureFlag.ACTIVE);
-
         assertThat(otherStructure.getFlag()).isEqualTo(StructureFlag.REJECTED);
-
-        verify(structureRepository, times(2)).save(any(ReactantStructure.class));
-
+        verify(structureRepository, times(1)).saveAll(anyIterable());
         assertThat(result.flag()).isEqualTo(StructureFlag.ACTIVE);
         assertThat(result.id()).isEqualTo(STRUCTURE_ID);
     }
@@ -220,6 +278,23 @@ class StructureServiceTest {
         verify(structureRepository, never()).findByReactant_Id(any());
         verify(structureRepository, never()).save(any());
 
+        assertThat(result.flag()).isEqualTo(StructureFlag.ACTIVE);
+    }
+
+    @Test
+    void selectStructure_shouldSwapActiveAndRejected() {
+        ReactantStructure targetToActivate = ReactantStructure.builder().id(STRUCTURE_ID).reactant(mockReactant).flag(StructureFlag.REJECTED).build();
+        ReactantStructure currentlyActive = ReactantStructure.builder().id(UUID.randomUUID()).reactant(mockReactant).flag(StructureFlag.ACTIVE).build();
+
+        when(structureRepository.findById(STRUCTURE_ID)).thenReturn(Optional.of(targetToActivate));
+        when(structureRepository.findByReactant_Id(REACTANT_ID)).thenReturn(List.of(targetToActivate, currentlyActive));
+
+        StructureDto result = structureService.selectStructure(STRUCTURE_ID);
+
+        assertThat(targetToActivate.getFlag()).isEqualTo(StructureFlag.ACTIVE);
+        assertThat(currentlyActive.getFlag()).isEqualTo(StructureFlag.REJECTED);
+
+        verify(structureRepository, times(1)).saveAll(any());
         assertThat(result.flag()).isEqualTo(StructureFlag.ACTIVE);
     }
 

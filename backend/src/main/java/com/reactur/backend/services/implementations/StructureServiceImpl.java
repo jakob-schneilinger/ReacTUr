@@ -6,6 +6,7 @@ import com.reactur.backend.dtos.ReactantDtos.StructureDto;
 import com.reactur.backend.entities.Reactant;
 import com.reactur.backend.entities.ReactantStructure;
 import com.reactur.backend.enums.StructureFlag;
+import com.reactur.backend.exeptions.ResourceConflictException;
 import com.reactur.backend.exeptions.ResourceNotFoundException;
 import com.reactur.backend.mappers.StructureMapper;
 import com.reactur.backend.repositories.ReactantRepository;
@@ -45,6 +46,12 @@ public class StructureServiceImpl implements StructureService {
         Reactant reactant = reactantRepository.findById(reactantId)
                 .orElseThrow(() -> new ResourceNotFoundException("Reactant not found with id: " + reactantId));
 
+        List<ReactantStructure> existingStructures = structureRepository.findByReactant_Id(reactantId);
+        if (!existingStructures.isEmpty()) {
+            structureRepository.deleteAll(existingStructures);
+            log.info("Deleted {} existing structures for reactant {} prior to manual upload.", existingStructures.size(), reactantId);
+        }
+
         try {
             String structureContent = new String(file.getBytes(), StandardCharsets.UTF_8);
 
@@ -52,7 +59,7 @@ public class StructureServiceImpl implements StructureService {
                     .reactant(reactant)
                     .fileName(file.getOriginalFilename())
                     .structure(structureContent)
-                    .flag(StructureFlag.READY)
+                    .flag(StructureFlag.ACTIVE)
                     .build();
 
             ReactantStructure savedStructure = structureRepository.save(structure);
@@ -71,6 +78,20 @@ public class StructureServiceImpl implements StructureService {
     public void generateStructureFromAPI(UUID reactantId) {
         Reactant reactant = reactantRepository.findById(reactantId)
                 .orElseThrow(() -> new ResourceNotFoundException("Reactant not found with id: " + reactantId));
+
+        List<ReactantStructure> existing = structureRepository.findByReactant_Id(reactantId);
+
+        boolean hasPending = existing.stream().anyMatch(s -> s.getFlag() == StructureFlag.PENDING);
+        boolean hasReady = existing.stream().anyMatch(s -> s.getFlag() == StructureFlag.READY);
+        boolean hasActive = existing.stream().anyMatch(s -> s.getFlag() == StructureFlag.ACTIVE);
+        boolean hasRejected = existing.stream().anyMatch(s -> s.getFlag() == StructureFlag.REJECTED);
+
+        if (hasPending || hasReady) {
+            throw new ResourceConflictException("Cannot generate: A structure generation is already in progress or awaiting your selection.");
+        }
+        if (hasActive && hasRejected) {
+            throw new ResourceConflictException("Cannot generate: Structures have already been generated and selected. Upload manually to overwrite.");
+        }
 
         log.info("Triggering external API for reactant smiles: {}", reactant.getSmiles());
 
@@ -103,11 +124,12 @@ public class StructureServiceImpl implements StructureService {
         for (ReactantStructure structure : allStructures) {
             if (structure.getId().equals(structureId)) {
                 structure.setFlag(StructureFlag.ACTIVE);
-            } else if (structure.getFlag() == StructureFlag.ACTIVE || structure.getFlag() == StructureFlag.READY) {
+            } else {
                 structure.setFlag(StructureFlag.REJECTED);
             }
-            structureRepository.save(structure);
         }
+
+        structureRepository.saveAll(allStructures);
 
         log.info("Structure {} selected as ACTIVE for reactant: {}", structureId, reactantId);
         return structureMapper.toDto(selectedStructure);
