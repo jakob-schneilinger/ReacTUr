@@ -1,7 +1,6 @@
-package com.reactur.backend;
+package com.reactur.backend.endpoints;
 
 import com.reactur.backend.dtos.ReactantDtos.StructureDto;
-import com.reactur.backend.endpoints.StructureEndpoint;
 import com.reactur.backend.enums.StructureFlag;
 import com.reactur.backend.repositories.UserRepository;
 import com.reactur.backend.security.SecurityConfig;

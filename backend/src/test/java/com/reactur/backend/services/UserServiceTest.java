@@ -1,4 +1,4 @@
-package com.reactur.backend;
+package com.reactur.backend.services;
 
 import com.reactur.backend.dtos.GetUserDto;
 import com.reactur.backend.dtos.RoleDto;

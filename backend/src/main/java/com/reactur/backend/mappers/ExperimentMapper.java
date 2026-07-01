@@ -1,11 +1,7 @@
 package com.reactur.backend.mappers;
 
 import com.reactur.backend.dtos.ExperimentDtos.*;
-import com.reactur.backend.dtos.GetUserDto;
-import com.reactur.backend.dtos.ReactantDtos.ReactantDto;
-import com.reactur.backend.entities.ExperimentEntities.*;
-import com.reactur.backend.entities.Reactant;
-import com.reactur.backend.entities.User;
+import com.reactur.backend.entities.experiment.*;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 

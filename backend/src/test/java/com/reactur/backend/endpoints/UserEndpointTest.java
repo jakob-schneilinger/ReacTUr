@@ -1,8 +1,7 @@
-package com.reactur.backend;
+package com.reactur.backend.endpoints;
 
 import com.reactur.backend.dtos.GetUserDto;
 import com.reactur.backend.dtos.RoleDto;
-import com.reactur.backend.endpoints.UserEndpoint;
 import com.reactur.backend.enums.Role;
 import com.reactur.backend.exeptions.GlobalExceptionHandler;
 import com.reactur.backend.exeptions.ResourceNotFoundException;

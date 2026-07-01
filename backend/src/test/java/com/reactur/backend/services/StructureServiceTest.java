@@ -1,4 +1,4 @@
-package com.reactur.backend;
+package com.reactur.backend.services;
 
 import com.reactur.backend.client.StructureApiClient;
 import com.reactur.backend.dtos.ReactantDtos.StructureDto;
