@@ -1,0 +1,43 @@
+@use "styles/variables" as *;
+
+.modal {
+  background-color: rgba(0, 0, 0, 0.5);
+  display: none;
+
+  &.show {
+    display: block;
+  }
+}
+
+.modal-content {
+  border: none;
+  border-radius: 12px;
+}
+
+.modal-header {
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+  padding: 1.25rem 1.5rem;
+
+  .modal-title {
+    font-weight: 600;
+    color: $light_black;
+  }
+}
+
+.modal-body {
+  padding: 1.5rem;
+}
+
+.modal-footer {
+  border-top: 1px solid rgba(0, 0, 0, 0.05);
+  padding: 1rem;
+  gap: 0.5rem;
+}
+
+.modal-backdrop {
+  z-index: 1040;
+}
+
+.modal {
+  z-index: 1050;
+}

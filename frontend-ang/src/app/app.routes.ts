@@ -1,13 +1,13 @@
 import { Routes } from "@angular/router";
-import { AuthGuard } from './guards/auth.guard';
-import { RoleGuard } from './guards/role.guard';
+import { AuthGuard } from './core/auth/auth.guard';
+import { RoleGuard } from './core/auth/role.guard';
 
-import { LoginComponent } from "./components/user/login/login.component";
-import { SearchSiteComponent } from './components/search/search-site/search-site.component';
-import { ExperimentDetailsSiteComponent } from './components/experiment/experiment-details-site/experiment-details-site.component';
-import { ReactantDetailsSiteComponent } from './components/reactant/reactant-details-site/reactant-details-site.component';
-import { ReactantSiteComponent } from './components/reactant/reactant-site/reactant-site.component';
-import { AdminSiteComponent } from './components/admin/admin-site/admin-site.component';
+import { LoginComponent } from "./features/login/login.component";
+import { SearchSiteComponent } from './features/search/search-site/search-site.component';
+import { ExperimentDetailsSiteComponent } from './features/experiments/experiment-details/experiment-details-site.component';
+import { ReactantDetailsSiteComponent } from './features/reactants/reactant-details/reactant-details-site.component';
+import { ReactantSiteComponent } from './features/reactants/reactant-site/reactant-site.component';
+import { AdminSiteComponent } from './features/admin/admin-site/admin-site.component';
 
 export const routes: Routes = [
   { path: 'search', component: SearchSiteComponent, canActivate: [AuthGuard] },

@@ -1,0 +1,29 @@
+@use "styles/variables" as *;
+@use "styles/global" as *;
+
+:host {
+  display: block;
+  width: 100vw;
+  height: 100vh;
+
+  background: $background;
+}
+
+.container,
+.container > .row {
+  height: 100vh;
+}
+
+.card {
+  h1 {
+    font-size: 4rem;
+  }
+
+  padding: 2rem;
+  margin: auto;
+
+  form,
+  .form-group {
+    margin: 1rem 0;
+  }
+}

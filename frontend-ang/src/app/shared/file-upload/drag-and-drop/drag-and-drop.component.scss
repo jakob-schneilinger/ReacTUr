@@ -1,0 +1,22 @@
+@use "styles/global" as *;
+@use "styles/variables" as *;
+
+.dropzone {
+  display: flex;
+  flex-direction: column;
+  border: 2px dashed $light_gray;
+  background-color: white;
+  transition: background-color 0.2s ease;
+
+  .drag-and-drop-text-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+}
+
+.dropzone.bg-light {
+  background-color: $background !important;
+  border-color: $primary;
+}

@@ -1,11 +1,11 @@
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
-import { HeaderComponent } from './components/shared/layout/header/header.component';
-import { NotificationsComponent } from './components/shared/notification/notifications.component';
+import { HeaderComponent } from './core/layout/header/header.component';
+import { NotificationsComponent } from './core/layout/notification/notifications.component';
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { NavigationStart, Router } from "@angular/router";
-import { AuthService } from './services/auth.service';
-import { ShortcutService } from './services/shortcut.service';
+import { AuthService } from './core/auth/auth.service';
+import { ShortcutService } from './shared/services/shortcut.service';
 
 @Component({
   selector: "app-root",

@@ -62,7 +62,10 @@
               "lib/ChemDoodleWeb/install/ChemDoodleWeb.js",
               "lib/ChemDoodleWeb/install/ChemDoodleWeb-uis.js"
             ],
-            "polyfills": ["@angular/localize/init"]
+            "polyfills": ["@angular/localize/init"],
+            "stylePreprocessorOptions": {
+              "includePaths": ["src"]
+            }
           },
           "configurations": {
             "production": {

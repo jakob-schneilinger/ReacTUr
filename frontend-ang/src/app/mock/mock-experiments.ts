@@ -2,8 +2,8 @@ import {
   ExperimentDataDto,
   MeasurementDto,
   GetExperimentDto,
-} from '../dtos/experiment.dto';
-import { ReactantDto } from '../dtos/reactant.dto';
+} from '../features/experiments/experiment.dto';
+import { ReactantDto } from '../features/reactants/reactant.dto';
 import {
   MOCK_CHEM_TYPES,
   MOCK_INSTRUMENTS,

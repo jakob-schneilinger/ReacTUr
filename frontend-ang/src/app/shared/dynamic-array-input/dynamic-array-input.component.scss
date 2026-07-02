@@ -1,0 +1,100 @@
+@use "styles/global" as *;
+@use "styles/variables" as *;
+
+.input-group {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 0.75rem;
+
+  label {
+    margin-bottom: 1px;
+    font-size: 0.875rem;
+    color: $light_black;
+  }
+}
+
+.array-fields-container {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.field-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+}
+
+.search-field {
+  position: relative;
+  display: flex;
+  align-items: center;
+
+  .icon {
+    position: absolute;
+    right: 15px;
+    font-size: 1.25rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 2;
+
+    &:hover {
+      color: $error !important;
+    }
+  }
+
+  input {
+    @extend %shared-input;
+    padding: 0.6rem 2.5rem 0.6rem 1rem;
+    width: 100%;
+
+    &:focus {
+      border-color: $primary;
+    }
+  }
+}
+
+.remove-btn {
+  margin-left: 0.25rem;
+  font-size: 1.25rem;
+  cursor: pointer;
+  transition: transform 0.2s ease-in-out;
+
+  &:hover {
+    transform: scale(1.1);
+  }
+}
+
+.add-field-btn {
+  display: inline-flex;
+  align-items: center;
+  font-size: 0.75rem;
+  color: $primary;
+  cursor: pointer;
+  margin-top: 0.25rem;
+  margin-left: 0.5rem;
+  font-weight: 500;
+  transition: color 0.2s ease-in-out, transform 0.2s ease-in-out;
+  width: fit-content;
+
+  &:hover {
+    color: $primary_hover;
+    transform: scale(1.05);
+  }
+
+  i {
+    font-size: 1rem;
+  }
+}
+
+
+
+.error-message {
+  color: $error;
+  font-size: 0.75rem;
+  margin-top: 0.3rem;
+  margin-left: 0.5rem;
+  font-weight: 500;
+}
