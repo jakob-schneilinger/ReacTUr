@@ -39,7 +39,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -170,7 +169,7 @@ class ReactantServiceTest {
 
         assertNotNull(result);
         assertEquals(1, result.structure().size());
-        assertEquals(StructureFlag.ACTIVE, result.structure().get(0).flag());
+        assertEquals(StructureFlag.ACTIVE, result.structure().getFirst().flag());
         verify(reactantRepository, times(1)).save(mockReactant);
     }
 
