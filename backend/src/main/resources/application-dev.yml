@@ -28,3 +28,19 @@ seaweedfs:
 logging:
   level:
     org.springframework.web.servlet.DispatcherServlet: DEBUG
+
+external-api:
+  reactur:
+    base-url: ${REACTUR_API_BASE_URL}
+
+# TODO: Configure loggers in detail for application and libraries
+#logging:
+#  level:
+#    root: INFO
+#    com.reactur.backend: TRACE
+#  file:
+#    name: logs/reactur.log
+#  logback:
+#    rollingpolicy:
+#      file-name-pattern: logs/reactur-%d{yyyy-MM-dd}.log
+#      max-history: 30

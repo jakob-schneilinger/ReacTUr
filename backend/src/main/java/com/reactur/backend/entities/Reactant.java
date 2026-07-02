@@ -1,6 +1,6 @@
 package com.reactur.backend.entities;
 
-import com.reactur.backend.entities.SelectionOptions.ChemicalType;
+import com.reactur.backend.entities.options.ChemicalType;
 import jakarta.persistence.CollectionTable;
 import jakarta.persistence.Column;
 import jakarta.persistence.ElementCollection;
@@ -39,14 +39,14 @@ public class Reactant {
     @Column(name = "short_name", nullable = false, unique = true)
     private String shortName;
 
-    @Column(name = "smiles", nullable = false)
+    @Column(name = "smiles", nullable = false, columnDefinition = "TEXT")
     private String smiles;
 
-     @ManyToOne(fetch = FetchType.LAZY)
-     @JoinColumn(name = "type_id")
-     private ChemicalType type;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "type_id")
+    private ChemicalType type;
 
-    @Column(name = "in_chi_key")
+    @Column(name = "in_chi_key", unique = true)
     private String inChiKey;
 
     @Column(name = "chemical_name")
