@@ -40,30 +40,50 @@
         <div class="col-md-6 border-start ps-4" style="min-height: 600px">
           <h6 class="border-bottom pb-2 mb-3 text-primary">{{ 'reactants.viewModal.sections.structure' | transloco }}</h6>
 
-          @if (loadingStructures || !reactant.structures || reactant.structures.length !== 1) {
+          @if (loadingStructures) {
             <app-reactant-structure
-              [loading]="loadingStructures"
+              [loading]="true"
               [smiles]="reactant.smiles || ''">
             </app-reactant-structure>
-          } @else {
-            @if (parseFile(reactant.structures[0]); as file) {
+          }
+          @else if (activeStructure) {
+            @if (parseFile(activeStructure); as file) {
               <app-reactant-structure
                 [structure]="file"
                 [smiles]="reactant.smiles || ''">
               </app-reactant-structure>
             }
           }
+          @else {
+            <app-reactant-structure
+              [smiles]="reactant.smiles || ''">
+            </app-reactant-structure>
+          }
+
+          <div class="mt-3">
+            @if (failedStructures.length > 0) {
+              <div class="alert alert-danger d-flex align-items-center py-2" role="alert">
+                <i class="bi bi-exclamation-triangle-fill me-2"></i> <div>Die 3D-Strukturgenerierung ist für {{ failedStructures.length }} Versuch(e) fehlgeschlagen.</div>
+              </div>
+            }
+
+            @if (pendingStructures.length > 0) {
+              <div class="alert alert-warning d-flex align-items-center py-2" role="alert">
+                <i class="bi bi-hourglass-split me-2"></i>
+                <div>3D-Strukturen werden im Hintergrund generiert oder warten auf Freigabe.</div>
+              </div>
+            }
+          </div>
 
           <h6 class="border-bottom pb-2 mb-3 mt-4 text-primary">{{ 'reactants.viewModal.sections.attachedFiles' | transloco }}</h6>
 
-          @if (reactant.structures && reactant.structures.length == 1 && parseFile(reactant.structures[0]); as file) {
+          @if (activeStructure && parseFile(activeStructure); as file) {
             <app-uploaded-file
               [file]="file"
               [removePossible]="false">
             </app-uploaded-file>
           } @else {
             <div class="text-muted small">{{ 'reactants.viewModal.emptyFiles' | transloco }}</div>
-
           }
         </div>
 

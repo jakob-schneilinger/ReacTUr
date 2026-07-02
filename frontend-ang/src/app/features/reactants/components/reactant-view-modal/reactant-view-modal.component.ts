@@ -9,6 +9,7 @@ import { Router } from '@angular/router';
 import { UploadedFileComponent } from '../../../../shared/file-upload/uploaded-file/uploaded-file.component';
 import { TRANSLOCO_IMPORTS } from '../../../../core/global/transloco-imports';
 import { TranslocoService } from '@jsverse/transloco';
+import { StructureFlag } from '../../structure-flag.enum';
 
 @Component({
   selector: 'app-reactant-view-modal',
@@ -87,5 +88,21 @@ export class ReactantViewModalComponent implements OnInit {
       return new File(fileBits, structure.name, options);
     }
     return null;
+  }
+
+  get activeStructure(): StructureDto | undefined {
+    return this.reactant?.structures?.find((s) => s.flag === StructureFlag.ACTIVE);
+  }
+
+  get pendingStructures(): StructureDto[] {
+    return (
+      this.reactant?.structures?.filter(
+        (s) => s.flag === StructureFlag.PENDING || s.flag === StructureFlag.READY,
+      ) || []
+    );
+  }
+
+  get failedStructures(): StructureDto[] {
+    return this.reactant?.structures?.filter((s) => s.flag === StructureFlag.FAILED) || [];
   }
 }

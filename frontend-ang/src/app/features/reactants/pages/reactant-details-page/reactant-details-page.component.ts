@@ -216,7 +216,7 @@ export class ReactantDetailsPageComponent implements OnInit, OnDestroy {
   refreshStatus() {
     if (!this.reactant || !this.reactant.uuid) return;
 
-    this.reactantService.getReactantDetailMock(this.reactant.uuid).subscribe({
+    this.reactantService.getReactantDetail(this.reactant.uuid).subscribe({
       next: (value) => {
         console.log(value)
         this.reactant = value;

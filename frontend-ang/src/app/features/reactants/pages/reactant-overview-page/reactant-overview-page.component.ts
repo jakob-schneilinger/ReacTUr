@@ -126,7 +126,7 @@ export class ReactantOverviewPageComponent implements OnInit {
         reactant.shortName.toLowerCase().includes(term) ||
         reactant.smiles.toLowerCase().includes(term) ||
         (reactant.chemicalName && reactant.chemicalName.toLowerCase().includes(term)) ||
-        reactant.chemicalType.name.toLowerCase().includes(term),
+        reactant.chemicalType?.name.toLowerCase().includes(term), //TODO: chemicalType will mandatory in future
     );
   }
 

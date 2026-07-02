@@ -9,7 +9,6 @@ export const MOCK_REACTANTS: ReactantDto[] = [
     chemicalType: MOCK_CHEM_TYPES.ACID,
     shortName: 'EtOH',
     chemicalName: 'Ethanol',
-    archivedAt: null,
     flag: StructureFlag.READY,
   },
   {
@@ -18,7 +17,6 @@ export const MOCK_REACTANTS: ReactantDto[] = [
     chemicalType: MOCK_CHEM_TYPES.METAL,
     shortName: 'DCM',
     chemicalName: 'Dichloromethane',
-    archivedAt: null,
     flag: StructureFlag.ACTIVE,
   },
   {
@@ -28,7 +26,6 @@ export const MOCK_REACTANTS: ReactantDto[] = [
     chemicalType: MOCK_CHEM_TYPES.ACID,
     shortName: 'Pd(PPh3)4',
     chemicalName: 'Tetrakis(triphenylphosphine)palladium(0)',
-    archivedAt: null,
     flag: StructureFlag.ACTIVE,
   },
   {
@@ -37,7 +34,6 @@ export const MOCK_REACTANTS: ReactantDto[] = [
     chemicalType: MOCK_CHEM_TYPES.GAS,
     shortName: 'PhBr',
     chemicalName: 'Bromobenzene',
-    archivedAt: null,
     flag: StructureFlag.PENDING,
   },
   {
@@ -46,7 +42,6 @@ export const MOCK_REACTANTS: ReactantDto[] = [
     chemicalType: MOCK_CHEM_TYPES.NON_METAL,
     shortName: 'PhB(OH)2',
     chemicalName: 'Phenylboronic acid',
-    archivedAt: null,
     flag: StructureFlag.FAILED,
   },
   {
@@ -55,7 +50,6 @@ export const MOCK_REACTANTS: ReactantDto[] = [
     chemicalType: MOCK_CHEM_TYPES.SOLVENT,
     shortName: 'TEA',
     chemicalName: 'Triethylamine',
-    archivedAt: null,
     flag: StructureFlag.FAILED,
   },
   {
@@ -64,7 +58,6 @@ export const MOCK_REACTANTS: ReactantDto[] = [
     chemicalType: MOCK_CHEM_TYPES.NON_METAL,
     shortName: 'DMAP',
     chemicalName: '4-Dimethylaminopyridine',
-    archivedAt: null,
     flag: StructureFlag.PENDING,
   },
   {
@@ -73,7 +66,6 @@ export const MOCK_REACTANTS: ReactantDto[] = [
     chemicalType: MOCK_CHEM_TYPES.HALOGEN,
     shortName: 'TFA',
     chemicalName: 'Trifluoroacetic acid',
-    archivedAt: null,
     flag: StructureFlag.READY,
   },
   {
@@ -82,7 +74,6 @@ export const MOCK_REACTANTS: ReactantDto[] = [
     chemicalType: MOCK_CHEM_TYPES.GAS,
     shortName: 'NaBH4',
     chemicalName: 'Sodium borohydride',
-    archivedAt: null,
     flag: StructureFlag.ACTIVE,
   },
   {
@@ -91,7 +82,6 @@ export const MOCK_REACTANTS: ReactantDto[] = [
     chemicalType: MOCK_CHEM_TYPES.HALOGEN,
     shortName: 'THF',
     chemicalName: 'Tetrahydrofuran',
-    archivedAt: null,
     flag: StructureFlag.PENDING,
   },
 ];

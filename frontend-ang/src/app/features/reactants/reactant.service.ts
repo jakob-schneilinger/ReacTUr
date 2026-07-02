@@ -8,105 +8,99 @@ import {
   ReactantDetailDto,
   ReactantDto,
   SaveReactantDto,
-  StructureDto,
 } from './reactant.dto';
-import { StructureFlag } from './structure-flag.enum';
-import { mockStructure1, mockStructure2 } from '../../mock/mock-structures';
 
 @Injectable({
   providedIn: 'root',
 })
 export class ReactantService {
   private reactantBaseUri: string;
-  private fileBaseUri: string;
 
   private reactantsDb: ReactantDetailDto[] = [...(MOCK_REACTANT_DETAILS as ReactantDetailDto[])];
 
   constructor(
     private httpClient: HttpClient,
     private globals: Globals,
-    private authService: AuthService,
   ) {
     this.reactantBaseUri = this.globals.backendUri + '/reactant';
-    this.fileBaseUri = this.globals.backendUri + '/file';
   }
 
+  /**
+   * Retrieves a list of all active reactants.
+   *
+   * @returns An Observable containing an array of basic ReactantDto.
+   */
   getAllReactants(): Observable<ReactantDto[]> {
     return this.httpClient.get<ReactantDto[]>(this.reactantBaseUri);
   }
 
+  /**
+   * Retrieves a list of all archived reactants.
+   * Requires ADMIN role.
+   *
+   * @returns An Observable containing an array of archived ReactantDto.
+   */
   getArchivedReactants(): Observable<ReactantDto[]> {
     return this.httpClient.get<ReactantDto[]>(`${this.reactantBaseUri}/archived`);
   }
 
+  /**
+   * Retrieves the comprehensive details of a specific reactant by its UUID.
+   *
+   * @param uuid The unique identifier of the reactant.
+   * @returns An Observable containing the ReactantDetailDto.
+   */
   getReactantDetail(uuid: string): Observable<ReactantDetailDto> {
     return this.httpClient.get<ReactantDetailDto>(`${this.reactantBaseUri}/${uuid}`);
   }
 
-  getReactantDetailMock(uuid: string): Observable<ReactantDetailDto> {
-    return this.httpClient.get<ReactantDetailDto>(`${this.reactantBaseUri}/${uuid}`).pipe(
-      map((reactant: ReactantDetailDto) => {
-        const random = Math.random();
-        let structures: StructureDto[] = [];
-
-        if (random < 0.3) {
-          structures.push({
-            id: 'structure-1',
-            reactant: uuid,
-            name: 'mockStructure1.xyz',
-            structure: mockStructure1,
-            flag: StructureFlag.READY,
-          });
-
-          if (random < 0.1) {
-            structures.push({
-              id: 'structure-2',
-              reactant: uuid,
-              name: 'mockStructure2.xyz',
-              structure: mockStructure2,
-              flag: StructureFlag.READY,
-            });
-          }
-        } else if (random < 0.5) {
-          structures.push({
-            flag: StructureFlag.FAILED,
-          });
-        } else {
-          structures.push({
-            flag: StructureFlag.PENDING,
-          });
-        }
-
-        console.log('mocked structures:', structures);
-        const final: ReactantDetailDto = {
-          ...reactant,
-          structures: structures,
-        };
-
-        console.log('final reactant:', final);
-
-        return final;
-      }),
-    );
-
-    return this.httpClient.get<ReactantDetailDto>(`${this.reactantBaseUri}/${uuid}`);
-  }
-
+  /**
+   * Creates a new reactant in the database.
+   * Requires ADMIN role.
+   *
+   * @param saveReactant The DTO containing the data for the new reactant.
+   * @returns An Observable containing the newly created ReactantDetailDto.
+   */
   createReactant(saveReactant: SaveReactantDto): Observable<ReactantDetailDto> {
     return this.httpClient.post<ReactantDetailDto>(this.reactantBaseUri, saveReactant);
   }
 
-  updateReactant(uuid: string, saveReactant: SaveReactantDto): Observable<ReactantDetailDto> {
+  /**
+   * Updates an existing reactant.
+   * Uses PATCH, so partial updates are supported. Requires ADMIN role.
+   *
+   * @param uuid The unique identifier of the reactant to update.
+   * @param saveReactant The DTO containing the updated data (can be partial).
+   * @returns An Observable containing the updated ReactantDetailDto.
+   */
+  updateReactant(
+    uuid: string,
+    saveReactant: Partial<SaveReactantDto>,
+  ): Observable<ReactantDetailDto> {
     return this.httpClient.patch<ReactantDetailDto>(
       `${this.reactantBaseUri}/${uuid}`,
       saveReactant,
     );
   }
 
+  /**
+   * Archives a reactant by setting the archivedAt timestamp.
+   * Requires ADMIN role in the backend.
+   *
+   * @param uuid The unique identifier of the reactant to archive.
+   * @returns An empty Observable (204 No Content).
+   */
   archiveReactant(uuid: string): Observable<void> {
     return this.httpClient.delete<void>(`${this.reactantBaseUri}/${uuid}`);
   }
 
+  /**
+   * Restores an archived reactant, making it active again.
+   * Requires ADMIN role in the backend.
+   *
+   * @param uuid The unique identifier of the reactant to restore.
+   * @returns An Observable containing the restored ReactantDto.
+   */
   restoreReactant(uuid: string): Observable<ReactantDto> {
     return this.httpClient.put<ReactantDto>(`${this.reactantBaseUri}/${uuid}/restore`, {});
   }
