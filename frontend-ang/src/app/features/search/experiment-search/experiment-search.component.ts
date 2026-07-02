@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
-import { ReactantSelectorComponent } from '../../reactants/reactant-selector/reactant-selector.component';
-import { SubstructureSearchComponent } from '../sub-structure-search/sub-structure-search.component';
+import { ReactantSelectorComponent } from '../components/reactant-selector/reactant-selector.component';
+import { SubstructureSearchComponent } from '../components/substructure-search/substructure-search.component';
 import { Component, Output, EventEmitter, Input, OnInit, ChangeDetectorRef } from '@angular/core';
 import { ReactantDto } from '../../reactants/reactant.dto';
 import { ReactantService } from '../../reactants/reactant.service';
