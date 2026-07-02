@@ -47,7 +47,7 @@
             </app-reactant-structure>
           }
           @else if (activeStructure) {
-            @if (parseFile(activeStructure); as file) {
+            @if (structureService.parseFile(activeStructure); as file) {
               <app-reactant-structure
                 [structure]="file"
                 [smiles]="reactant.smiles || ''">
@@ -77,7 +77,7 @@
 
           <h6 class="border-bottom pb-2 mb-3 mt-4 text-primary">{{ 'reactants.viewModal.sections.attachedFiles' | transloco }}</h6>
 
-          @if (activeStructure && parseFile(activeStructure); as file) {
+          @if (activeStructure && structureService.parseFile(activeStructure); as file) {
             <app-uploaded-file
               [file]="file"
               [removePossible]="false">

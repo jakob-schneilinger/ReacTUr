@@ -123,6 +123,15 @@
         "confirm": "Restore"
       }
     },
+    "structureSelectionModal": {
+      "title": "Select 3D Structure",
+      "description": "The API has generated these structures. Please review the 3D models and select the correct structure for this reactant.",
+      "buttons": {
+        "select": "Apply this structure",
+        "rejectAll": "Discard all",
+        "cancel": "Cancel"
+      }
+    },
     "notifications": {
       "fetchError": "Reactants unavailable",
       "fetchArchivedError": "Archived Reactants unavailable",
@@ -173,7 +182,7 @@
           "smilesSyntax": "SMILES format is invalid. Please check syntax.",
           "smilesSanitization": "SMILES format is invalid. Molecule structure failed RDKit sanitization.",
           "invalidType": "Please select a valid type from the list.",
-          "fieldRequired" : "Field is required."
+          "fieldRequired": "Field is required."
         }
       },
       "modals": {

@@ -14,9 +14,10 @@ import { AuthService } from '../../../../core/auth/auth.service';
 import { HasRoleDirective } from '../../../../shared/directives/has-role.directive';
 import { TRANSLOCO_IMPORTS } from '../../../../core/global/transloco-imports';
 import { TranslocoService } from '@jsverse/transloco';
+import { StructureFlag } from '../../structure-flag.enum';
 
 @Component({
-  selector: 'app-reactant-site',
+  selector: 'app-reactant-overview-page',
   templateUrl: './reactant-overview-page.component.html',
   styleUrls: ['./reactant-overview-page.component.scss'],
   standalone: true,
@@ -75,7 +76,11 @@ export class ReactantOverviewPageComponent implements OnInit {
   private loadReactants() {
     this.reactantService.getAllReactants().subscribe({
       next: (value) => {
-        this.reactants = value;
+        if (this.role === 'USER') {
+          this.reactants = value.filter((r) => r.flag === StructureFlag.ACTIVE);
+        } else {
+          this.reactants = value;
+        }
         if (!this.showArchived) {
           this.activeReactants = this.reactants;
           this.onSearch();

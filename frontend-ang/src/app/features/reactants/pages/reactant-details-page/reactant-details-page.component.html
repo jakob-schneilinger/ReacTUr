@@ -56,12 +56,11 @@
             @if (structureFiles.length > 0) {
               <app-reactant-structure
                 [structure]="structureFiles[0]"
-                [smiles]="smiles || ''">
+                [smiles]="smiles || ''"
+                [show3D]="true">
               </app-reactant-structure>
             } @else {
-              <app-reactant-structure
-                [smiles]="smiles || ''">
-              </app-reactant-structure>
+              <app-reactant-structure [smiles]="smiles || ''"></app-reactant-structure>
             }
           }
 
@@ -113,7 +112,7 @@
 
 @if (isStructureSelectionModalOpen) {
   <app-reactant-structure-select-modal
-    [pendingStructures]="structures || []"
+    [pendingStructures]="readyStructures"
     [baseSmiles]="smiles"
     (structureSelected)="handleStructureSelection($event)"
     (close)="isStructureSelectionModalOpen = false">

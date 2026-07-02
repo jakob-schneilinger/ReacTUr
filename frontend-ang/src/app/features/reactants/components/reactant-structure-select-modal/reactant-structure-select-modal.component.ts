@@ -4,6 +4,7 @@ import { AppModalComponent } from '../../../../shared/modal/app-modal.component'
 import { ReactantStructureComponent } from '../reactant-structure/reactant-structure.component';
 import { TRANSLOCO_IMPORTS } from '../../../../core/global/transloco-imports';
 import { StructureDto } from '../../reactant.dto';
+import { StructureService } from '../../structure.service';
 
 @Component({
   selector: 'app-reactant-structure-select-modal',
@@ -20,19 +21,7 @@ export class ReactantStructureSelectModalComponent {
 
   @Output() close = new EventEmitter<void>();
 
-  parseFile(structure: StructureDto): File | null {
-    if (structure.structure && structure.name) {
-      const fileBits = [structure.structure];
-
-      const options = {
-        type: 'text/plain;charset=utf-8',
-        lastModified: Date.now(),
-      };
-
-      return new File(fileBits, structure.name, options);
-    }
-    return null;
-  }
+  constructor(protected structureService: StructureService) {}
 
   selectStructure(structure: StructureDto) {
     this.structureSelected.emit(structure);

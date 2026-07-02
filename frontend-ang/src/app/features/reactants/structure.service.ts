@@ -51,6 +51,33 @@ export class StructureService {
    * @returns An Observable containing the updated StructureDto.
    */
   selectStructure(structureId: string): Observable<StructureDto> {
-    return this.httpClient.post<StructureDto>(`${this.structureBaseUri}/${structureId}/select`, null);
+    return this.httpClient.post<StructureDto>(
+      `${this.structureBaseUri}/${structureId}/select`,
+      null,
+    );
+  }
+
+  /**
+   * Converts a StructureDto from the backend into a JavaScript File object.
+   * Since generated structures often do not receive a filename from the backend (name === null),
+   * a fallback name is automatically assigned to prevent crashes in the 3D viewer.
+   *
+   * @param structure The StructureDto containing the 3D coordinates as a string.
+   * @returns A File object for the 3D viewer, or null if no structure data is available.
+   */
+  parseFile(structure: StructureDto): File | null {
+    if (structure && structure.structure) {
+      const fileBits = [structure.structure];
+
+      const fileName = structure.name || 'generated-structure.xyz';
+
+      const options = {
+        type: 'text/plain;charset=utf-8',
+        lastModified: Date.now(),
+      };
+
+      return new File(fileBits, fileName, options);
+    }
+    return null;
   }
 }

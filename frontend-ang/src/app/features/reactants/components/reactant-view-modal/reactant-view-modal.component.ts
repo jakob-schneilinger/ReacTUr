@@ -10,6 +10,7 @@ import { UploadedFileComponent } from '../../../../shared/file-upload/uploaded-f
 import { TRANSLOCO_IMPORTS } from '../../../../core/global/transloco-imports';
 import { TranslocoService } from '@jsverse/transloco';
 import { StructureFlag } from '../../structure-flag.enum';
+import { StructureService } from '../../structure.service';
 
 @Component({
   selector: 'app-reactant-view-modal',
@@ -39,6 +40,7 @@ export class ReactantViewModalComponent implements OnInit {
     private notification: NotificationService,
     private cd: ChangeDetectorRef,
     private transloco: TranslocoService,
+    protected structureService: StructureService
   ) {}
 
   ngOnInit() {
@@ -74,20 +76,6 @@ export class ReactantViewModalComponent implements OnInit {
 
   editReactant(uuid: string | undefined): void {
     if (uuid) this.router.navigate(['/reactants', uuid]);
-  }
-
-  parseFile(structure: StructureDto): File | null {
-    if (structure.structure && structure.name) {
-      const fileBits = [structure.structure];
-
-      const options = {
-        type: 'text/plain;charset=utf-8',
-        lastModified: Date.now(),
-      };
-
-      return new File(fileBits, structure.name, options);
-    }
-    return null;
   }
 
   get activeStructure(): StructureDto | undefined {

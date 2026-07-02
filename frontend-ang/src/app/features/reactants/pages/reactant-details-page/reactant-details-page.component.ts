@@ -14,6 +14,7 @@ import { StructureFlag } from '../../structure-flag.enum';
 import { FileService } from '../../../../shared/services/file.service';
 import { ReactantStructureSelectModalComponent } from '../../components/reactant-structure-select-modal/reactant-structure-select-modal.component';
 import { FileUploadComponent } from '../../../../shared/file-upload/file-upload.component';
+import { StructureService } from '../../structure.service';
 
 export type FormState = 'create' | 'edit';
 
@@ -42,6 +43,7 @@ export class ReactantDetailsPageComponent implements OnInit, OnDestroy {
   structureFiles: File[] = [];
 
   currentFlag?: StructureFlag;
+  activeFile: File | null = null;
 
   isStructureSelectionModalOpen: boolean = false;
 
@@ -52,7 +54,7 @@ export class ReactantDetailsPageComponent implements OnInit, OnDestroy {
     private route: ActivatedRoute,
     private notification: NotificationService,
     private reactantService: ReactantService,
-    private fileService: FileService,
+    private structureService: StructureService,
     private cd: ChangeDetectorRef,
     private transloco: TranslocoService,
   ) {}
@@ -83,12 +85,14 @@ export class ReactantDetailsPageComponent implements OnInit, OnDestroy {
       .subscribe({
         next: (details) => {
           this.reactant = details;
-          this.currentFlag = details.flag;
           this.structures = details.structures;
+          this.currentFlag = this.determineStateFlag(this.structures);
+          const activeStruct = this.structures?.find((s) => s.flag === StructureFlag.ACTIVE);
+          this.activeFile = activeStruct ? this.structureService.parseFile(activeStruct) : null;
           this.structureFiles = [];
 
           details.structures?.forEach((s) => {
-            const file = this.parseFile(s);
+            const file = this.structureService.parseFile(s);
             if (file) {
               this.structureFiles.push(file);
             }
@@ -105,6 +109,17 @@ export class ReactantDetailsPageComponent implements OnInit, OnDestroy {
           this.cd.markForCheck();
         },
       });
+  }
+
+  private determineStateFlag(structures?: StructureDto[]): StructureFlag | undefined {
+    if (!structures || structures.length === 0) return undefined;
+
+    if (structures.some((s) => s.flag === StructureFlag.ACTIVE)) return StructureFlag.ACTIVE;
+    if (structures.some((s) => s.flag === StructureFlag.READY)) return StructureFlag.READY;
+    if (structures.some((s) => s.flag === StructureFlag.PENDING)) return StructureFlag.PENDING;
+    if (structures.some((s) => s.flag === StructureFlag.FAILED)) return StructureFlag.FAILED;
+
+    return undefined;
   }
 
   get isEditMode(): boolean {
@@ -176,31 +191,18 @@ export class ReactantDetailsPageComponent implements OnInit, OnDestroy {
     }
   }
 
-  parseFile(structure: StructureDto): File | null {
-    if (structure.structure && structure.name) {
-      const fileBits = [structure.structure];
-
-      const options = {
-        type: 'text/plain;charset=utf-8',
-        lastModified: Date.now(),
-      };
-
-      return new File(fileBits, structure.name, options);
-    }
-    return null;
-  }
-
   generateStructureFromSmiles() {
     if (!this.smiles || !this.reactant || !this.reactant.uuid) return;
 
     this.currentFlag = StructureFlag.PENDING;
 
-    this.fileService.generateStructureFromApi(this.reactant.uuid, this.smiles).subscribe({
+    this.structureService.generateStructureFromApi(this.reactant.uuid).subscribe({
       next: (value) => {
         this.notification.success(
           this.transloco.translate('reactants.details.notifications.generateTitle'),
           this.transloco.translate('reactants.details.notifications.generateMessage'),
         );
+        this.refreshStatus();
       },
       error: (err) => {
         this.notification.error(
@@ -218,14 +220,14 @@ export class ReactantDetailsPageComponent implements OnInit, OnDestroy {
 
     this.reactantService.getReactantDetail(this.reactant.uuid).subscribe({
       next: (value) => {
-        console.log(value)
+        console.log(value);
         this.reactant = value;
         if (value.structures && value.structures.length > 0) {
-          this.currentFlag = value.structures[0].flag;
+          this.currentFlag = this.determineStateFlag(this.structures);
           this.structures = value.structures;
           this.structureFiles = [];
           value.structures?.forEach((s) => {
-            const file = this.parseFile(s);
+            const file = this.structureService.parseFile(s);
             if (file) {
               this.structureFiles.push(file);
             }
@@ -247,25 +249,23 @@ export class ReactantDetailsPageComponent implements OnInit, OnDestroy {
   handleStructureSelection(selectedStructure: StructureDto | null) {
     this.isStructureSelectionModalOpen = false;
 
-    if (selectedStructure) {
-      this.currentFlag = StructureFlag.ACTIVE;
-      this.structures = [selectedStructure];
-      const file = this.parseFile(selectedStructure);
-      if (file) {
-        this.structureFiles = [file];
-      } else {
-        this.structureFiles = [];
-      }
-
-      // TODO: Make an API call here to inform the backend which structure was selected
-      // and update the reactant flag to ACTIVE.
+    if (selectedStructure && selectedStructure.id) {
+      this.structureService.selectStructure(selectedStructure.id).subscribe({
+        next: () => {
+          this.notification.success('Erfolg', 'Die Struktur wurde freigegeben.');
+          this.refreshStatus();
+        },
+        error: (err) => {
+          this.notification.error('Fehler', 'Konnte Struktur nicht freigeben.');
+          this.refreshStatus();
+        },
+      });
     } else {
-      this.currentFlag = undefined;
-      this.structures = [];
-      this.structureFiles = [];
-
-      // TODO: Make an API call here to tell the backend to delete the pending structures
-      // and reset the flag.
+      this.refreshStatus();
     }
+  }
+
+  get readyStructures(): StructureDto[] {
+    return this.structures?.filter((s) => s.flag === StructureFlag.READY) || [];
   }
 }
