@@ -28,6 +28,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.reactur.backend.enums.Role;
+import org.springframework.security.access.AccessDeniedException;
+import java.time.Instant;
+
 import java.util.UUID;
 
 @RequiredArgsConstructor
@@ -46,17 +50,17 @@ public class ExperimentServiceImpl implements ExperimentService {
 
   @Override
   @Transactional
-  public GetExperimentDto createExperiment(SaveExperimentDto experimentDto, String userId) {
-    log.trace("Attempting to create new experiment with DOI: {} for user ID: {}", experimentDto.doi(), userId);
+  public GetExperimentDto createExperiment(SaveExperimentDto experimentDto, String requestingUserId, Role requestingUserRole) {
+    log.trace("Attempting to create new experiment with DOI: {} for user ID: {}", experimentDto.doi(), requestingUserId);
 
     // First, semantic Validation
 
     // Who physically clicks 'Save': (Extracted from Keycloak Token)
-    User creator = userRepository.findById(userId)
+    User creator = userRepository.findById(requestingUserId)
       .orElseThrow(() -> {
         log.error(
           "CRITICAL: Authenticated Keycloak user {} not found in internal database. " +
-            "UserSyncFilter may have failed.", userId
+            "UserSyncFilter may have failed.", requestingUserId
         );
         return new IllegalStateException("System state error: Authenticated user lacks internal profile.");
       });
@@ -133,7 +137,7 @@ public class ExperimentServiceImpl implements ExperimentService {
 
     AuditLog auditLog = AuditLog.builder()
       .experimentId(savedExperiment.getId())
-      .userId(userId)
+      .userId(requestingUserId)
       .action(AuditAction.CREATE)
       // TODO: Decide how to serialize the JSON diffs for changeFrom/changeTo
       .build();
@@ -144,14 +148,97 @@ public class ExperimentServiceImpl implements ExperimentService {
     return experimentMapper.experimentToGetExperimentDto(savedExperiment);
   }
 
+
   @Override
-  public GetExperimentDto getExperiment(UUID experimentId) {
+  public GetExperimentDto getExperiment(UUID experimentId, String requestingUserId, Role requestingUserRole) {
     log.trace("Fetching experiment with ID: {}", experimentId);
 
     Experiment experiment = experimentRepository.findById(experimentId)
       .orElseThrow(() -> new ResourceNotFoundException(
         "Experiment with ID " + experimentId + " not found"
       ));
+
+    // Security Check for Archived Data
+    if (experiment.getArchivedAt() != null) {
+      boolean isCreator = experiment.getCreatedBy().getId().equals(requestingUserId);
+      boolean isScientist = experiment.getMetadata().getScientist().getId().equals(requestingUserId);
+
+      if (requestingUserRole != Role.ADMIN && !isCreator && !isScientist) {
+        log.warn("Security blocked access to archived experiment {} for user {}", experimentId, requestingUserId);
+        throw new AccessDeniedException("You do not have permission to view this archived experiment.");
+      }
+    }
+
+    return experimentMapper.experimentToGetExperimentDto(experiment);
+  }
+
+
+  @Override
+  @Transactional
+  public void archiveExperiment(UUID experimentId, String requestingUserId, Role requestingUserRole) {
+    log.trace("Attempting to archive experiment with ID: {}", experimentId);
+
+    // 1. Fetch (Validation)
+    Experiment experiment = experimentRepository.findById(experimentId)
+      .orElseThrow(() -> new ResourceNotFoundException("Experiment with ID " + experimentId + " not found"));
+
+    // 2. Authorize (Security)
+    boolean isCreator = experiment.getCreatedBy().getId().equals(requestingUserId);
+    boolean isScientist = experiment.getMetadata().getScientist().getId().equals(requestingUserId);
+
+    if (requestingUserRole != Role.ADMIN && !isCreator && !isScientist) {
+      log.warn("Security blocked archive attempt on experiment {} by user {}", experimentId, requestingUserId);
+      throw new AccessDeniedException("You do not have permission to archive this experiment.");
+    }
+
+    // TODO: How should we do if the experiment was already archived? I just don't change anything but still
+    //  return the 201 succeeded code.
+    //  Maybe it would be useful to log.warn that a user is trying to archive something already archived...
+    // 3. Act (Execution) - Only update if not already archived (Idempotent)
+    if (experiment.getArchivedAt() == null) {
+      experiment.setArchivedAt(Instant.now());
+      experimentRepository.save(experiment);
+
+      AuditLog auditLog = AuditLog.builder()
+        .experimentId(experimentId)
+        .userId(requestingUserId)
+        .action(AuditAction.UPDATE) // TODO: Change to ARCHIVE or something in the enum!
+        .build();
+      auditLogRepository.save(auditLog);
+    }
+  }
+
+
+  @Override
+  @Transactional
+  public GetExperimentDto restoreExperiment(UUID experimentId, String requestingUserId, Role requestingUserRole) {
+    log.trace("Attempting to restore experiment with ID: {}", experimentId);
+
+    // 1. Fetch
+    Experiment experiment = experimentRepository.findById(experimentId)
+      .orElseThrow(() -> new ResourceNotFoundException("Experiment with ID " + experimentId + " not found"));
+
+    // 2. Authorize
+    boolean isCreator = experiment.getCreatedBy().getId().equals(requestingUserId);
+    boolean isScientist = experiment.getMetadata().getScientist().getId().equals(requestingUserId);
+
+    if (requestingUserRole != Role.ADMIN && !isCreator && !isScientist) {
+      log.warn("Security blocked restore attempt on experiment {} by user {}", experimentId, requestingUserId);
+      throw new AccessDeniedException("You do not have permission to restore this experiment.");
+    }
+
+    // 3. Act
+    if (experiment.getArchivedAt() != null) {
+      experiment.setArchivedAt(null);
+      experiment = experimentRepository.save(experiment);
+
+      AuditLog auditLog = AuditLog.builder()
+        .experimentId(experimentId)
+        .userId(requestingUserId)
+        .action(AuditAction.UPDATE) // TODO: Change to RESTORE if added to the enum
+        .build();
+      auditLogRepository.save(auditLog);
+    }
 
     return experimentMapper.experimentToGetExperimentDto(experiment);
   }

@@ -2,16 +2,22 @@ package com.reactur.backend.services;
 
 import com.reactur.backend.dtos.ExperimentDtos.GetExperimentDto;
 import com.reactur.backend.dtos.ExperimentDtos.SaveExperimentDto;
+import com.reactur.backend.enums.Role;
 import org.springframework.stereotype.Service;
 
 import java.util.UUID;
 
 @Service
 public interface ExperimentService {
-
   // TODO: JavaDOC
-  GetExperimentDto createExperiment(SaveExperimentDto experimentDto, String userId);
 
-  GetExperimentDto getExperiment(UUID experimentId);
+  GetExperimentDto createExperiment(SaveExperimentDto experimentDto, String requestingUserId, Role requestingUserRole);
+
+  // TODO: Clarify who has access to the archived experiment. Right now I set that only
+  //  the creator, scientist, and admins can retrieve archived Experiments
+  GetExperimentDto getExperiment(UUID experimentId, String requestingUserId, Role requestingUserRole);
+
+  void archiveExperiment(UUID experimentId, String requestingUserId, Role requestingUserRole);
+
+  GetExperimentDto restoreExperiment(UUID experimentId, String requestingUserId, Role requestingUserRole);
 }
-

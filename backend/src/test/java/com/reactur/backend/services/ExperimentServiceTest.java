@@ -24,6 +24,7 @@ import com.reactur.backend.repositories.ReactantRepository;
 import com.reactur.backend.repositories.SolventRepository;
 import com.reactur.backend.repositories.UserRepository;
 import com.reactur.backend.services.implementations.ExperimentServiceImpl;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -38,6 +39,11 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 import java.util.Optional;
 import java.util.UUID;
+
+import com.reactur.backend.enums.Role;
+import org.springframework.security.access.AccessDeniedException;
+import java.time.Instant;
+import com.reactur.backend.entities.ExperimentEntities.Metadata;
 
 import static java.util.UUID.randomUUID;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -147,7 +153,7 @@ class ExperimentServiceTest {
 
     // ------------------
 
-    GetExperimentDto result = experimentService.createExperiment(validRequestDto, userId);
+    GetExperimentDto result = experimentService.createExperiment(validRequestDto, userId, Role.USER);
 
     // Asserting the performed calls...
 
@@ -186,7 +192,7 @@ class ExperimentServiceTest {
 
     IllegalStateException exception = assertThrows(
       IllegalStateException.class,
-      () -> experimentService.createExperiment(validDto, invalidUserId)
+      () -> experimentService.createExperiment(validDto, invalidUserId, Role.USER)
     );
 
     assertTrue(exception.getMessage().contains("Authenticated user lacks internal profile"));
@@ -205,7 +211,7 @@ class ExperimentServiceTest {
 
     UnprocessableEntityException exception = assertThrows(
       UnprocessableEntityException.class,
-      () -> experimentService.createExperiment(validDto, validUserId)
+      () -> experimentService.createExperiment(validDto, validUserId, Role.USER)
     );
 
     assertTrue(exception.getMessage().contains("Scientist with ID"));
@@ -225,12 +231,177 @@ class ExperimentServiceTest {
 
     UnprocessableEntityException exception = assertThrows(
       UnprocessableEntityException.class,
-      () -> experimentService.createExperiment(validDto, validUserId)
+      () -> experimentService.createExperiment(validDto, validUserId, Role.USER)
     );
 
     assertTrue(exception.getMessage().contains("Reactant A does not exist"));
     Mockito.verify(experimentRepository, Mockito.never()).save(any());
   }
+
+  @Test
+  void getExperiment_whenFound_returnsDto() {
+    UUID experimentId = randomUUID();
+    String requestingUserId = "user-123";
+
+    Experiment mockExperiment = new Experiment();
+    mockExperiment.setId(experimentId);
+    mockExperiment.setDoi("10.1000/rxn999");
+
+    when(experimentRepository.findById(experimentId)).thenReturn(Optional.of(mockExperiment));
+
+    GetExperimentDto result = experimentService.getExperiment(experimentId, requestingUserId, Role.USER);
+
+    assertNotNull(result, "The returned DTO should not be null");
+    assertEquals(experimentId, result.uuid());
+    assertEquals("10.1000/rxn999", result.doi());
+  }
+
+  @Test
+  void getExperiment_whenNotFound_throwsResourceNotFoundException() {
+    UUID experimentId = randomUUID();
+    String requestingUserId = "user-123";
+
+    when(experimentRepository.findById(experimentId)).thenReturn(Optional.empty());
+
+    ResourceNotFoundException exception = assertThrows(
+      ResourceNotFoundException.class,
+      () -> experimentService.getExperiment(experimentId, requestingUserId, Role.USER)
+    );
+
+    assertTrue(exception.getMessage().contains("Experiment with ID " + experimentId + " not found"));
+  }
+
+  @Test
+  void getExperiment_whenArchivedAndUserIsCreator_returnsDto() {
+    UUID experimentId = randomUUID();
+    String creatorId = "creator-123";
+
+    // Experiment IS archived
+    Experiment mockExperiment = createMockEntityForSecurity(experimentId, creatorId, "scientist-456", Instant.now());
+    when(experimentRepository.findById(experimentId)).thenReturn(Optional.of(mockExperiment));
+
+    // Request is made by the original Creator
+    GetExperimentDto result = experimentService.getExperiment(experimentId, creatorId, Role.USER);
+
+    assertNotNull(result, "Creator should be able to view their archived experiment");
+    assertEquals(experimentId, result.uuid());
+  }
+
+  @Test
+  void getExperiment_whenArchivedAndUserIsScientist_returnsDto() {
+    UUID experimentId = randomUUID();
+    String scientistId = "scientist-456";
+
+    Experiment mockExperiment = createMockEntityForSecurity(experimentId, "creator-123", scientistId, Instant.now());
+    when(experimentRepository.findById(experimentId)).thenReturn(Optional.of(mockExperiment));
+
+    // Request is made by the original Scientist
+    GetExperimentDto result = experimentService.getExperiment(experimentId, scientistId, Role.USER);
+
+    assertNotNull(result, "Scientist should be able to view their archived experiment");
+  }
+
+  @Test
+  void getExperiment_whenArchivedAndUserIsAdmin_returnsDto() {
+    UUID experimentId = randomUUID();
+
+    Experiment mockExperiment = createMockEntityForSecurity(experimentId, "creator-123", "scientist-456", Instant.now());
+    when(experimentRepository.findById(experimentId)).thenReturn(Optional.of(mockExperiment));
+
+    // Request is made by an Admin (different user ID)
+    GetExperimentDto result = experimentService.getExperiment(experimentId, "admin-999", Role.ADMIN);
+
+    assertNotNull(result, "Admins should be able to view any archived experiment");
+  }
+
+  @Test
+  void getExperiment_whenArchivedAndUserIsForbidden_throwsAccessDeniedException() {
+    UUID experimentId = randomUUID();
+
+    Experiment mockExperiment = createMockEntityForSecurity(experimentId, "creator-123", "scientist-456", Instant.now());
+    when(experimentRepository.findById(experimentId)).thenReturn(Optional.of(mockExperiment));
+
+    // Request is made by a standard user who has no relation to the experiment
+    assertThrows(AccessDeniedException.class, () ->
+      experimentService.getExperiment(experimentId, "snooper-000", Role.USER)
+    );
+  }
+
+  @Test
+  void archiveExperiment_whenUserIsCreator_archivesAndSaves() {
+    UUID experimentId = randomUUID();
+    String creatorId = "creator-123";
+
+    Experiment mockExperiment = createMockEntityForSecurity(experimentId, creatorId, "scientist-456", null);
+    when(experimentRepository.findById(experimentId)).thenReturn(Optional.of(mockExperiment));
+
+    experimentService.archiveExperiment(experimentId, creatorId, Role.USER);
+
+    assertNotNull(mockExperiment.getArchivedAt(), "Archived timestamp should be set");
+    Mockito.verify(experimentRepository).save(mockExperiment);
+    Mockito.verify(auditLogRepository).save(any());
+  }
+
+  @Test
+  void archiveExperiment_whenUserIsAdmin_archivesAndSaves() {
+    UUID experimentId = randomUUID();
+
+    Experiment mockExperiment = createMockEntityForSecurity(experimentId, "creator-123", "scientist-456", null);
+    when(experimentRepository.findById(experimentId)).thenReturn(Optional.of(mockExperiment));
+
+    experimentService.archiveExperiment(experimentId, "admin-999", Role.ADMIN);
+
+    assertNotNull(mockExperiment.getArchivedAt());
+    Mockito.verify(experimentRepository).save(mockExperiment);
+  }
+
+  @Test
+  void archiveExperiment_whenUserIsForbidden_throwsAccessDeniedException() {
+    UUID experimentId = randomUUID();
+
+    Experiment mockExperiment = createMockEntityForSecurity(experimentId, "creator-123", "scientist-456", null);
+    when(experimentRepository.findById(experimentId)).thenReturn(Optional.of(mockExperiment));
+
+    assertThrows(AccessDeniedException.class, () ->
+      experimentService.archiveExperiment(experimentId, "snooper-000", Role.USER)
+    );
+
+    Mockito.verify(experimentRepository, Mockito.never()).save(any());
+    Mockito.verify(auditLogRepository, Mockito.never()).save(any());
+  }
+
+
+  @Test
+  void restoreExperiment_whenUserIsScientist_restoresAndSaves() {
+    UUID experimentId = randomUUID();
+    String scientistId = "scientist-456";
+
+    // Experiment is CURRENTLY archived (Instant.now())
+    Experiment mockExperiment = createMockEntityForSecurity(experimentId, "creator-123", scientistId, Instant.now());
+    when(experimentRepository.findById(experimentId)).thenReturn(Optional.of(mockExperiment));
+    when(experimentRepository.save(any())).thenAnswer(i -> i.getArgument(0));
+
+    experimentService.restoreExperiment(experimentId, scientistId, Role.USER);
+
+    Assertions.assertNull(mockExperiment.getArchivedAt(), "Archived timestamp should be cleared");
+    Mockito.verify(experimentRepository).save(mockExperiment);
+    Mockito.verify(auditLogRepository).save(any());
+  }
+
+  @Test
+  void restoreExperiment_whenUserIsForbidden_throwsAccessDeniedException() {
+    UUID experimentId = randomUUID();
+
+    Experiment mockExperiment = createMockEntityForSecurity(experimentId, "creator-123", "scientist-456", Instant.now());
+    when(experimentRepository.findById(experimentId)).thenReturn(Optional.of(mockExperiment));
+
+    assertThrows(AccessDeniedException.class, () ->
+      experimentService.restoreExperiment(experimentId, "snooper-000", Role.USER)
+    );
+
+    Mockito.verify(experimentRepository, Mockito.never()).save(any());
+  }
+
 
   private SaveExperimentDto createDummyExperimentDto() {
     SaveMetadataDto metadata = new SaveMetadataDto(
@@ -250,34 +421,23 @@ class ExperimentServiceTest {
     );
   }
 
-  @Test
-  void getExperiment_whenFound_returnsDto() {
-    UUID experimentId = randomUUID();
-    Experiment mockExperiment = new Experiment();
-    mockExperiment.setId(experimentId);
-    mockExperiment.setDoi("10.1000/rxn999");
 
-    when(experimentRepository.findById(experimentId)).thenReturn(Optional.of(mockExperiment));
+  private Experiment createMockEntityForSecurity(UUID experimentId, String creatorId, String scientistId, Instant archivedAt) {
+    User creator = new User();
+    creator.setId(creatorId);
 
-    GetExperimentDto result = experimentService.getExperiment(experimentId);
+    User scientist = new User();
+    scientist.setId(scientistId);
 
-    assertNotNull(result, "The returned DTO should not be null");
-    assertEquals(experimentId, result.uuid());
-    assertEquals("10.1000/rxn999", result.doi());
+    Metadata metadata = Metadata.builder().scientist(scientist).build();
+
+    return Experiment.builder()
+      .id(experimentId)
+      .createdBy(creator)
+      .metadata(metadata)
+      .archivedAt(archivedAt)
+      .build();
   }
 
-  @Test
-  void getExperiment_whenNotFound_throwsResourceNotFoundException() {
-    UUID experimentId = randomUUID();
-
-    when(experimentRepository.findById(experimentId)).thenReturn(Optional.empty());
-
-    ResourceNotFoundException exception = assertThrows(
-      ResourceNotFoundException.class,
-      () -> experimentService.getExperiment(experimentId)
-    );
-
-    assertTrue(exception.getMessage().contains("Experiment with ID " + experimentId + " not found"));
-  }
 
 }
