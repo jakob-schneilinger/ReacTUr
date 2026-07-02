@@ -10,7 +10,7 @@ import { ReactantDetailDto, SaveReactantDto, StructureDto } from '../../reactant
 import { filter, map, Subject, switchMap, takeUntil } from 'rxjs';
 import { TRANSLOCO_IMPORTS } from '../../../../core/global/transloco-imports';
 import { TranslocoService } from '@jsverse/transloco';
-import { StructureFlag } from '../../../../shared/dtos/enums/structure-flag.enum';
+import { StructureFlag } from '../../structure-flag.enum';
 import { FileService } from '../../../../shared/services/file.service';
 import { ReactantStructureSelectModalComponent } from '../../components/reactant-structure-select-modal/reactant-structure-select-modal.component';
 import { FileUploadComponent } from '../../../../shared/file-upload/file-upload.component';

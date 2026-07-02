@@ -3,7 +3,7 @@ import { Globals } from '../../core/global/globals';
 import { HttpClient } from '@angular/common/http';
 import { Observable, of } from 'rxjs';
 import { StructureDto } from '../../features/reactants/reactant.dto';
-import { StructureFlag } from '../dtos/enums/structure-flag.enum';
+import { StructureFlag } from '../../features/reactants/structure-flag.enum';
 import { mockStructure1 } from '../../mock/mock-structures';
 
 @Injectable({

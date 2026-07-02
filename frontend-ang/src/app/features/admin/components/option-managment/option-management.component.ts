@@ -1,12 +1,12 @@
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
-import { OptionService } from '../../../shared/services/option.service';
-import { SelectionOptionDto } from '../../../shared/dtos/selection-option.dto';
-import { NotificationService } from '../../../core/layout/notification/notification.service';
-import { TRANSLOCO_IMPORTS } from '../../../core/global/transloco-imports';
+import { OptionService } from '../../../../shared/services/option.service';
+import { SelectionOptionDto } from '../../../../shared/dtos/selection-option.dto';
+import { NotificationService } from '../../../../core/layout/notification/notification.service';
+import { TRANSLOCO_IMPORTS } from '../../../../core/global/transloco-imports';
 import { TranslocoService } from '@jsverse/transloco';
-import { AppConfirmModalComponent } from '../../../shared/modal/confirm-modal.component';
+import { AppConfirmModalComponent } from '../../../../shared/modal/confirm-modal.component';
 
 type OptionCategory = 'chemical_type' | 'modality' | 'instrument' | 'solvent';
 

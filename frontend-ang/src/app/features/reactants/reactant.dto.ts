@@ -1,7 +1,7 @@
 //TODO: overthink interface
 import { ChemicalTypeDto } from '../../shared/dtos/selection-option.dto';
 import { DetailsDto } from '../../shared/dtos/details.dto';
-import { StructureFlag } from '../../shared/dtos/enums/structure-flag.enum';
+import { StructureFlag } from './structure-flag.enum';
 
 export interface ReactantDto extends DetailsDto {
   smiles: string;

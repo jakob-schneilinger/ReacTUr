@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { LayoutComponent } from '../../../../core/layout/layout.component';
-import { ExperimentSearchComponent } from '../../experiment-search/experiment-search.component';
+import { StandardSearchComponent } from '../../components/standard-search/standard-search.component';
 import { AdvancedSearchComponent } from '../../components/advanced-search/advanced-search.component';
 import { SearchResultsComponent } from '../../components/search-results/search-results.component';
 import { ExportModalComponent } from '../../components/export-modal/export-modal.component';
@@ -21,7 +21,7 @@ import { GetUserDto } from '../../../../shared/dtos/user.dto';
     CommonModule,
     RouterModule,
     LayoutComponent,
-    ExperimentSearchComponent,
+    StandardSearchComponent,
     AdvancedSearchComponent,
     SearchResultsComponent,
     ExportModalComponent,

@@ -7,7 +7,7 @@ import { SearchPageComponent } from './features/search/pages/search-page/search-
 import { ExperimentDetailsPageComponent } from './features/experiments/pages/experiment-details-page/experiment-details-page.component';
 import { ReactantDetailsPageComponent } from './features/reactants/pages/reactant-details-page/reactant-details-page.component';
 import { ReactantOverviewPageComponent } from './features/reactants/pages/reactant-overview-page/reactant-overview-page.component';
-import { AdminSiteComponent } from './features/admin/admin-site/admin-site.component';
+import { AdminPageComponent } from './features/admin/pages/admin-page/admin-page.component';
 
 export const routes: Routes = [
   { path: 'search', component: SearchPageComponent, canActivate: [AuthGuard] },
@@ -39,7 +39,7 @@ export const routes: Routes = [
   },
   {
     path: 'admin',
-    component: AdminSiteComponent,
+    component: AdminPageComponent,
     canActivate: [AuthGuard, RoleGuard],
     data: { roles: ['ADMIN'] },
   },

@@ -10,7 +10,7 @@ import {
   SaveReactantDto,
   StructureDto,
 } from './reactant.dto';
-import { StructureFlag } from '../../shared/dtos/enums/structure-flag.enum';
+import { StructureFlag } from './structure-flag.enum';
 import { mockStructure1, mockStructure2 } from '../../mock/mock-structures';
 
 @Injectable({

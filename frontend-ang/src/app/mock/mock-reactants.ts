@@ -1,6 +1,6 @@
 import { ReactantDetailDto, ReactantDto } from '../features/reactants/reactant.dto';
 import { MOCK_CHEM_TYPES } from './mock.data';
-import { StructureFlag } from '../shared/dtos/enums/structure-flag.enum';
+import { StructureFlag } from '../features/reactants/structure-flag.enum';
 
 export const MOCK_REACTANTS: ReactantDto[] = [
   {

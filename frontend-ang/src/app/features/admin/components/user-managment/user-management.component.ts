@@ -1,13 +1,13 @@
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
-import { GetUserDto } from '../../../shared/dtos/user.dto';
-import { UserService } from '../../../shared/services/user.service';
-import { NotificationService } from '../../../core/layout/notification/notification.service';
-import { Role } from '../../../shared/dtos/enums/role.enum';
-import { TRANSLOCO_IMPORTS } from '../../../core/global/transloco-imports';
+import { GetUserDto } from '../../../../shared/dtos/user.dto';
+import { UserService } from '../../../../shared/services/user.service';
+import { NotificationService } from '../../../../core/layout/notification/notification.service';
+import { Role } from '../../../../shared/dtos/enums/role.enum';
+import { TRANSLOCO_IMPORTS } from '../../../../core/global/transloco-imports';
 import { TranslocoService } from '@jsverse/transloco';
-import { AuthService } from '../../../core/auth/auth.service';
+import { AuthService } from '../../../../core/auth/auth.service';
 
 @Component({
   selector: 'app-user-management',
