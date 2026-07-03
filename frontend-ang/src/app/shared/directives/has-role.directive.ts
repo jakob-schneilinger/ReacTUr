@@ -21,7 +21,7 @@ export class HasRoleDirective implements OnDestroy {
     this.subscription = new Subscription();
 
     this.subscription.add(
-      this.authService.checkRoleReactive(allowedRoles).subscribe((isAuthorized) => {
+      this.authService.hasRole(allowedRoles).subscribe((isAuthorized) => {
         if (isAuthorized && !this.hasView) {
           this.viewContainer.createEmbeddedView(this.templateRef);
           this.hasView = true;

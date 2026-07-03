@@ -68,9 +68,14 @@ export class ReactantOverviewPageComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.role = this.authService.getUserRole();
-    this.hasWritePermission = this.role != 'USER';
-    this.loadReactants();
+    this.authService.getLoggedInUser().subscribe((user) => {
+      if (user) {
+        this.role = user.role;
+        this.hasWritePermission = this.role !== 'USER';
+        this.loadReactants();
+        this.cdr.markForCheck();
+      }
+    });
   }
 
   private loadReactants() {

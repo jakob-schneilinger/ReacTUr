@@ -17,7 +17,7 @@ export class RoleGuard implements CanActivate {
   canActivate(route: ActivatedRouteSnapshot): Observable<boolean> {
     const expectedRoles = route.data['roles'] as Array<string>;
 
-    return this.authService.checkRoleReactive(expectedRoles).pipe(
+    return this.authService.hasRole(expectedRoles).pipe(
       tap((hasAccess: boolean) => {
         if (!hasAccess) {
           this.notification.error(

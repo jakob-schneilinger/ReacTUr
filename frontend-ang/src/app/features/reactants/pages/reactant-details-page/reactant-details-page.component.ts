@@ -11,7 +11,6 @@ import { filter, map, Subject, switchMap, takeUntil } from 'rxjs';
 import { TRANSLOCO_IMPORTS } from '../../../../core/global/transloco-imports';
 import { TranslocoService } from '@jsverse/transloco';
 import { StructureFlag } from '../../structure-flag.enum';
-import { FileService } from '../../../../shared/services/file.service';
 import { ReactantStructureSelectModalComponent } from '../../components/reactant-structure-select-modal/reactant-structure-select-modal.component';
 import { FileUploadComponent } from '../../../../shared/file-upload/file-upload.component';
 import { StructureService } from '../../structure.service';
@@ -88,11 +87,11 @@ export class ReactantDetailsPageComponent implements OnInit, OnDestroy {
           this.structures = details.structures;
           this.currentFlag = this.determineStateFlag(this.structures);
           const activeStruct = this.structures?.find((s) => s.flag === StructureFlag.ACTIVE);
-          this.activeFile = activeStruct ? this.structureService.parseFile(activeStruct) : null;
+          this.activeFile = activeStruct ? this.structureService.parseFile(activeStruct, details.shortName) : null;
           this.structureFiles = [];
 
           details.structures?.forEach((s) => {
-            const file = this.structureService.parseFile(s);
+            const file = this.structureService.parseFile(s, details.shortName);
             if (file) {
               this.structureFiles.push(file);
             }
@@ -227,7 +226,7 @@ export class ReactantDetailsPageComponent implements OnInit, OnDestroy {
           this.structures = value.structures;
           this.structureFiles = [];
           value.structures?.forEach((s) => {
-            const file = this.structureService.parseFile(s);
+            const file = this.structureService.parseFile(s, value.shortName);
             if (file) {
               this.structureFiles.push(file);
             }

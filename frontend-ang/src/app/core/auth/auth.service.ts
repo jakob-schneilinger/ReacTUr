@@ -2,8 +2,7 @@ import { GetUserDto, RoleDto } from '../../shared/dtos/user.dto';
 import { Injectable } from '@angular/core';
 import { OAuthService } from 'angular-oauth2-oidc';
 import { authConfig } from './auth.config';
-import { catchError, from, map, Observable, of, switchMap } from 'rxjs';
-import { MOCK_USERS } from '../../mock/mock.data';
+import { catchError, map, Observable, of } from 'rxjs';
 import { UserService } from '../../shared/services/user.service';
 import { Role } from '../../shared/dtos/enums/role.enum';
 import { Router } from '@angular/router';
@@ -40,23 +39,33 @@ export class AuthService {
       });
   }
 
+  /**
+   * Starts the OAuth code flow.
+   * @param targetUrl The URL to redirect to after login.
+   */
   public login(targetUrl: string = this.router.url) {
     this.oauthService.initCodeFlow(targetUrl);
   }
 
+  /**
+   * Logs the user out and clears the local user cache.
+   */
   public logout() {
     this.oauthService.logOut();
   }
 
+  /**
+   * Synchronously checks whether a valid access token is currently available.
+   */
   public isLoggedIn(): boolean {
-    // return true;
     return this.oauthService.hasValidAccessToken();
   }
 
-  public getToken(): string {
-    return this.oauthService.getAccessToken();
-  }
-
+  /**
+   * The central source of truth for the current user.
+   * ALWAYS waits for the initial login flow before evaluating data.
+   * Fetches the user role from the backend and constructs the GetUserDto.
+   */
   public getLoggedInUser(): Observable<GetUserDto | null> {
     if (!this.isLoggedIn()) {
       return of(null);
@@ -99,60 +108,25 @@ export class AuthService {
     );
   }
 
-  public getUserRole(): Role {
-    // return this.hardcodedUser.role ?? "USER";
-    if (!this.isLoggedIn()) {
-      return Role.UNAUTHORIZED;
-    }
-
-    if (this.user) {
-      return this.user.role;
-    }
-
-    const claims: any = this.oauthService.getIdentityClaims();
-    const roles: string[] = claims['realm_access']?.roles || [];
-
-    if (roles.includes('ADMIN')) {
-      return Role.ADMIN;
-    } else if (roles.includes('SUPERVISOR')) {
-      return Role.SUPERVISOR;
-    } else if (roles.includes('USER')) {
-      return Role.USER;
-    }
-    return Role.UNAUTHORIZED;
+  /**
+   * Reactively checks whether the logged-in user possesses one of the passed roles.
+   * This method is used by guards and directives.
+   * @param allowedRoles Array of roles (e.g., ['ADMIN', 'SUPERVISOR'])
+   * @returns Observable true if the user is authorized.
+   */
+  public hasRole(allowedRoles: string[]): Observable<boolean> {
+    return this.getLoggedInUser().pipe(
+      map((user) => {
+        if (!user) {
+          return false;
+        }
+        return allowedRoles.includes(user.role);
+      })
+    );
   }
 
   // TODO: think about function, placement, parameters.
   public hasExperimentPermission(experimentUuid: string, userUuid: string): Observable<boolean> {
     return of(false);
-  }
-
-  public checkRoleReactive(allowedRoles: string[]): Observable<boolean> {
-    return from(this.initialLoginSequence).pipe(
-      switchMap(() => {
-        if (!this.isLoggedIn()) {
-          return of(false);
-        }
-
-        return this.getLoggedInUser().pipe(
-          map((user) => {
-            let currentRole = Role.UNAUTHORIZED;
-
-            if (user) {
-              currentRole = user.role;
-            } else {
-              const claims: any = this.oauthService.getIdentityClaims();
-              const roles: string[] = claims?.['realm_access']?.roles || [];
-              if (roles.includes('ADMIN')) currentRole = Role.ADMIN;
-              else if (roles.includes('SUPERVISOR')) currentRole = Role.SUPERVISOR;
-              else if (roles.includes('USER')) currentRole = Role.USER;
-            }
-
-            console.log('Evaluated reactive role:', currentRole);
-            return allowedRoles.includes(currentRole);
-          }),
-        );
-      }),
-    );
   }
 }

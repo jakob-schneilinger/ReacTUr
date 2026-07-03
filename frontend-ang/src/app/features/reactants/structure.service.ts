@@ -63,13 +63,14 @@ export class StructureService {
    * a fallback name is automatically assigned to prevent crashes in the 3D viewer.
    *
    * @param structure The StructureDto containing the 3D coordinates as a string.
+   * @param reactantName The backup name for the .xyz file
    * @returns A File object for the 3D viewer, or null if no structure data is available.
    */
-  parseFile(structure: StructureDto): File | null {
+  parseFile(structure: StructureDto, reactantName: string): File | null {
     if (structure && structure.structure) {
       const fileBits = [structure.structure];
 
-      const fileName = structure.name || 'generated-structure.xyz';
+      const fileName = structure.name || reactantName + ".xyz";
 
       const options = {
         type: 'text/plain;charset=utf-8',
