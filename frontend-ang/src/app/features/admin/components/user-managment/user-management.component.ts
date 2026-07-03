@@ -41,7 +41,7 @@ export class UserManagementComponent implements OnInit {
 
   ngOnInit(): void {
     this.authService.getLoggedInUser().subscribe({
-      next: value => {
+      next: (value) => {
         const user = value;
         if (!user) return;
 
@@ -56,8 +56,8 @@ export class UserManagementComponent implements OnInit {
               err.message || err.error || err,
             ),
         });
-      }
-    })
+      },
+    });
   }
 
   private updateFilteredLists(): void {
@@ -80,8 +80,9 @@ export class UserManagementComponent implements OnInit {
       );
     });
 
-    this.pendingUsers = filteredBySearch.filter((user) => (!user.role || user.role == Role.UNAUTHORIZED ) && !user.deactivatedAt);
+    this.pendingUsers = filteredBySearch.filter((user) => !user.role && !user.deactivatedAt);
     this.activeUsers = filteredBySearch.filter((user) => user.role != Role.UNAUTHORIZED && !user.deactivatedAt);
+    this.pendingUsers = filteredBySearch.filter((user) => user.role == Role.UNAUTHORIZED && !user.deactivatedAt,);
     this.deactivatedUsers = filteredBySearch.filter((user) => !!user.deactivatedAt);
 
     this.cdr.markForCheck();
@@ -143,6 +144,21 @@ export class UserManagementComponent implements OnInit {
   clearUserSearch() {
     this.searchTerm = '';
     this.updateFilteredLists();
+  }
+
+  roleText(user:GetUserDto) {
+    switch (user.role) {
+      case Role.USER:
+        return 'userRoles.user';
+      case Role.SUPERVISOR:
+        return 'userRoles.supervisor';
+      case Role.ADMIN:
+        return 'userRoles.admin';
+      case Role.UNAUTHORIZED:
+        return 'userRoles.unauthorized';
+      default:
+        return '--';
+    }
   }
 
   protected readonly Role = Role;

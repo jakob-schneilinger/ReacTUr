@@ -1,0 +1,51 @@
+@use "src/styles/global.scss" as *;
+@use "src/styles/variables.scss" as *;
+
+.unauthorized-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  background-color: $background;
+  padding: 1rem;
+}
+
+.status-card {
+  background-color: white;
+  border-radius: 8px;
+  padding: 2.5rem 2rem;
+  max-width: 450px;
+  text-align: center;
+  box-shadow: 0 4px 12px rgba($light_black, 0.08);
+
+  .icon-placeholder {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+  }
+
+  h1 {
+    color: $primary;
+    margin-bottom: 1rem;
+    font-size: 1.75rem;
+  }
+
+  p {
+    color: $light_gray_hover;
+    margin-bottom: 1rem;
+    line-height: 1.5;
+
+    &:last-of-type {
+      margin-bottom: 2rem;
+    }
+  }
+
+  .button-group {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+
+    button {
+      min-width: 120px;
+    }
+  }
+}

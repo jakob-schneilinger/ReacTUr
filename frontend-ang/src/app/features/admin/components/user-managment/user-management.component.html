@@ -91,7 +91,7 @@
         </tr>
         </thead>
         <tbody>
-          @for (user of userList; track user.uuid) {
+          @for (user of userList; track user.id) {
             <tr>
               <td class="text-break">{{ user.firstName }} {{ user.lastName }}</td>
               <td class="text-break">{{ user.email }}</td>
@@ -99,11 +99,13 @@
                 @if (type === 'active' || type === 'pending') {
                   <select class="form-select form-select-sm w-auto" [value]="user.role || ''" (change)="updateUserRole(user, $event)">
                     <option value="" disabled selected>{{'admin.user.table.rolePlaceholder' | transloco}}</option>
+                    <option value="UNAUTHORIZED">{{'userRoles.unauthorized' | transloco}}</option>
                     <option value="USER">{{'userRoles.user' | transloco}}</option>
                     <option value="SUPERVISOR">{{'userRoles.supervisor' | transloco}}</option>
+                    <option value="ADMIN">{{'userRoles.admin' | transloco}}</option>
                   </select>
                 } @else {
-                  <span class="text-muted">{{ user.role === Role.USER ? ('userRoles.user' | transloco) : (user.role === Role.SUPERVISOR ? ('userRoles.supervisor' | transloco) : '--') }}</span>
+                  <span class="text-muted">{{ roleText(user) | transloco }}</span>
                 }
               </td>
               <td class="text-end">

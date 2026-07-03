@@ -24,7 +24,16 @@ export class RoleGuard implements CanActivate {
             'Access Denied',
             "You don't have the required permissions to access this page.",
           );
-          this.router.navigate(['/search']);
+
+          this.authService.hasRole(['UNAUTHORIZED']).subscribe({
+            next: (value) => {
+              if (value) {
+                this.router.navigate(['/unauthorized']);
+              } else {
+                this.router.navigate(['/search']);
+              }
+            },
+          });
         }
       }),
     );

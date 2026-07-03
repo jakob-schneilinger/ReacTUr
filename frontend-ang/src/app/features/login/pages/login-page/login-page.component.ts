@@ -1,17 +1,17 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from "@angular/core";
 import { ActivatedRoute } from "@angular/router";
-import { AuthService } from "../../core/auth/auth.service";
-import { TRANSLOCO_IMPORTS } from '../../core/global/transloco-imports';
+import { AuthService } from "../../../../core/auth/auth.service";
+import { TRANSLOCO_IMPORTS } from '../../../../core/global/transloco-imports';
 
 @Component({
   selector: 'app-login',
-  templateUrl: './login.component.html',
-  styleUrls: ['./login.component.scss', './auth.scss'],
+  templateUrl: './login-page.component.html',
+  styleUrls: ['./login-page.component.scss', '../../auth.scss'],
   standalone: true,
   imports: [CommonModule, TRANSLOCO_IMPORTS],
 })
-export class LoginComponent implements OnInit {
+export class LoginPageComponent implements OnInit {
   gotoAfterSuccess: string = '/';
 
   constructor(
