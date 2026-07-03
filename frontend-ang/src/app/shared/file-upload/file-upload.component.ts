@@ -29,7 +29,7 @@ import { ExperimentService } from '../../features/experiments/experiment.service
     DragAndDropComponent,
     PasteTableComponent,
     UploadedFileComponent,
-    AppConfirmModalComponent
+    AppConfirmModalComponent,
   ],
 })
 export class FileUploadComponent implements OnInit, OnChanges {
@@ -38,6 +38,7 @@ export class FileUploadComponent implements OnInit, OnChanges {
   @Input() existingFiles?: File[];
   @Input() maxFileSizeMB?: number;
   @Input() maxFiles: number = 0;
+  @Input() removePossible: boolean = true;
 
   @Output() filesChanged = new EventEmitter<File[]>();
 

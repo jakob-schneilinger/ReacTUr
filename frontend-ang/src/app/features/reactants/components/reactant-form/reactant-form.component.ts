@@ -150,7 +150,7 @@ export class ReactantFormComponent implements OnInit, OnDestroy {
         [Validators.required, this.smilesValidator()],
       ],
       chemicalType: [
-        { value: this.reactant?.chemicalType?.name || '', disabled: this.isEditMode },
+        this.reactant?.chemicalType?.name || '',
         [Validators.required, this.inListValidator()],
       ],
 

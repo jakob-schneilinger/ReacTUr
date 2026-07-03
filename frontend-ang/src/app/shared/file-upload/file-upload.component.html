@@ -16,7 +16,8 @@
     @for (file of files; track $index) {
       <app-uploaded-file
         [file]="file"
-        (remove)="confirmRemoveFile($index)">
+        (remove)="confirmRemoveFile($index)"
+        [removePossible]="removePossible">
       </app-uploaded-file>
     }
   </div>

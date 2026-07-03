@@ -31,7 +31,7 @@
             @if (isEditMode) {
               <div class="info-banner align-self-center mt-4 d-flex flex-column align-items-center">
                 <p>Generating 3D structure... Please wait.</p>
-                <button type="button" class="primary" (click)="refreshStatus()">
+                <button type="button" class="primary" (click)="refreshStatus()" [disabled]="isRefreshDisabled">
                   Refresh Status
                 </button>
               </div>
@@ -83,7 +83,7 @@
               [smiles]="smiles || ''">
             </app-reactant-structure>
 
-            @if (smiles) {
+            @if (isEditMode) {
               <div class="generate-actions align-self-center mt-4">
                 <button type="button" class="primary" (click)="generateStructureFromSmiles()">
                   Generate Structure from SMILES
@@ -99,8 +99,9 @@
           [showTable]="false"
           [allowedExtensions]="['xyz']"
           [existingFiles]="structureFiles"
-          [maxFileSizeMB]="20"
+          [maxFileSizeMB]="1"
           [maxFiles]="1"
+          [removePossible]="false"
           (filesChanged)="handleUploadedFiles($event)" >
         </app-file-upload>
       }

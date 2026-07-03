@@ -23,7 +23,7 @@
     <label>{{ 'reactants.details.form.labels.smiles' | transloco }}</label>
     <div class="search-field">
       <input type="text" formControlName="smiles" [class.is-invalid]="isInvalid('smiles')" [placeholder]="'reactants.details.form.placeholders.value' | transloco" />
-      @if (reactantForm.get('smiles')?.value) {
+      @if (reactantForm.get('smiles')?.value && !isEditMode) {
         <span class="icon bi bi-x text-black clear-btn" (click)="clearControl('smiles')"></span>
       }
     </div>

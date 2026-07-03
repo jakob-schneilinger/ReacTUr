@@ -70,6 +70,10 @@ button {
     color: white;
     background-color: $primary;
 
+    &:disabled {
+      background-color: $primary_disabled;
+    }
+
     &:hover:not([disabled]) {
       background-color: $primary_hover;
     }

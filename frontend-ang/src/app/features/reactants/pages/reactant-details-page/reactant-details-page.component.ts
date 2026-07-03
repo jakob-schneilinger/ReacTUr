@@ -7,7 +7,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { NotificationService } from '../../../../core/layout/notification/notification.service';
 import { ReactantService } from '../../reactant.service';
 import { ReactantDetailDto, SaveReactantDto, StructureDto } from '../../reactant.dto';
-import { filter, map, Subject, switchMap, takeUntil } from 'rxjs';
+import { filter, map, Subject, switchMap, takeUntil, timer } from 'rxjs';
 import { TRANSLOCO_IMPORTS } from '../../../../core/global/transloco-imports';
 import { TranslocoService } from '@jsverse/transloco';
 import { StructureFlag } from '../../structure-flag.enum';
@@ -43,6 +43,8 @@ export class ReactantDetailsPageComponent implements OnInit, OnDestroy {
 
   currentFlag?: StructureFlag;
   activeFile: File | null = null;
+
+  isRefreshDisabled: boolean = false;
 
   isStructureSelectionModalOpen: boolean = false;
 
@@ -87,7 +89,9 @@ export class ReactantDetailsPageComponent implements OnInit, OnDestroy {
           this.structures = details.structures;
           this.currentFlag = this.determineStateFlag(this.structures);
           const activeStruct = this.structures?.find((s) => s.flag === StructureFlag.ACTIVE);
-          this.activeFile = activeStruct ? this.structureService.parseFile(activeStruct, details.shortName) : null;
+          this.activeFile = activeStruct
+            ? this.structureService.parseFile(activeStruct, details.shortName)
+            : null;
           this.structureFiles = [];
 
           details.structures?.forEach((s) => {
@@ -215,14 +219,24 @@ export class ReactantDetailsPageComponent implements OnInit, OnDestroy {
   }
 
   refreshStatus() {
-    if (!this.reactant || !this.reactant.uuid) return;
+    if (!this.reactant || !this.reactant.uuid || this.isRefreshDisabled) return;
+
+    this.isRefreshDisabled = true;
+    this.cd.markForCheck();
+
+    timer(5000).pipe(
+      takeUntil(this.destroy$),
+    )
+    .subscribe(() => {
+      this.isRefreshDisabled = false;
+      this.cd.markForCheck();
+    });
 
     this.reactantService.getReactantDetail(this.reactant.uuid).subscribe({
       next: (value) => {
-        console.log(value);
         this.reactant = value;
         if (value.structures && value.structures.length > 0) {
-          this.currentFlag = this.determineStateFlag(this.structures);
+          this.currentFlag = this.determineStateFlag(value.structures);
           this.structures = value.structures;
           this.structureFiles = [];
           value.structures?.forEach((s) => {
@@ -231,10 +245,10 @@ export class ReactantDetailsPageComponent implements OnInit, OnDestroy {
               this.structureFiles.push(file);
             }
           });
-          this.loadingStructures = false;
-
-          this.cd.markForCheck();
         }
+        this.loadingStructures = false;
+        this.notification.success('Refresh Succeeded', '', 1000);
+        this.cd.markForCheck();
       },
     });
   }
