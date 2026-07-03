@@ -19,6 +19,7 @@ public interface ReactantMapper {
 
     @Mapping(source = "reactant.id", target = "uuid")
     @Mapping(target = "chemicalType", ignore = true)
+    @Mapping(source = "structure", target = "structures")
     ReactantDetailDto toDetailDto(Reactant reactant, List<StructureDto> structure);
 
     @Mapping(source = "reactant.id", target = "uuid")

@@ -233,8 +233,6 @@ export class ReactantDetailsPageComponent implements OnInit, OnDestroy {
           });
           this.loadingStructures = false;
 
-          this.notification.success('Flag: ' + this.currentFlag);
-
           this.cd.markForCheck();
         }
       },
