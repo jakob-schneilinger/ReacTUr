@@ -1,6 +1,6 @@
 package com.reactur.backend.endpoints;
 
-import com.reactur.backend.dtos.ExperimentDtos.*;
+import com.reactur.backend.dtos.experiments.*;
 import com.reactur.backend.dtos.GetUserDto;
 import com.reactur.backend.enums.Role;
 import com.reactur.backend.security.SecurityConfig;

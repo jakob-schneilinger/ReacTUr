@@ -1,6 +1,6 @@
 package com.reactur.backend.services;
 
-import com.reactur.backend.dtos.ReactantDtos.StructureDto;
+import com.reactur.backend.dtos.reactants.StructureDto;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;

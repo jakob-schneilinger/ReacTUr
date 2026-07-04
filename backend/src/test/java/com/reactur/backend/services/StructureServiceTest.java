@@ -1,7 +1,7 @@
 package com.reactur.backend.services;
 
 import com.reactur.backend.client.StructureApiClient;
-import com.reactur.backend.dtos.ReactantDtos.StructureDto;
+import com.reactur.backend.dtos.reactants.StructureDto;
 import com.reactur.backend.entities.Reactant;
 import com.reactur.backend.entities.ReactantStructure;
 import com.reactur.backend.enums.StructureFlag;

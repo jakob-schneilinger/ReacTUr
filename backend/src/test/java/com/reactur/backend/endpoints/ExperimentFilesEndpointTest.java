@@ -1,6 +1,6 @@
 package com.reactur.backend.endpoints;
 
-import com.reactur.backend.dtos.ExperimentDtos.ExperimentAttachmentDetailsDto;
+import com.reactur.backend.dtos.experiments.ExperimentAttachmentDetailsDto;
 import com.reactur.backend.exeptions.GlobalExceptionHandler;
 import com.reactur.backend.exeptions.ResourceNotFoundException;
 import com.reactur.backend.repositories.UserRepository;

@@ -1,6 +1,6 @@
 package com.reactur.backend.mappers;
 
-import com.reactur.backend.dtos.ExperimentDtos.*;
+import com.reactur.backend.dtos.experiments.*;
 import com.reactur.backend.entities.experiment.*;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;

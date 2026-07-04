@@ -1,9 +1,9 @@
 package com.reactur.backend.services;
 
-import com.reactur.backend.dtos.ExperimentDtos.GetExperimentDto;
-import com.reactur.backend.dtos.ExperimentDtos.MeasurementDataDto;
-import com.reactur.backend.dtos.ExperimentDtos.SaveExperimentDto;
-import com.reactur.backend.dtos.ExperimentDtos.SaveMetadataDto;
+import com.reactur.backend.dtos.experiments.GetExperimentDto;
+import com.reactur.backend.dtos.experiments.MeasurementDataDto;
+import com.reactur.backend.dtos.experiments.SaveExperimentDto;
+import com.reactur.backend.dtos.experiments.SaveMetadataDto;
 import com.reactur.backend.entities.experiment.Experiment;
 import com.reactur.backend.entities.Reactant;
 import com.reactur.backend.entities.options.Instrument;
@@ -17,10 +17,10 @@ import com.reactur.backend.mappers.UserMapper;
 import com.reactur.backend.repositories.AuditLogRepository;
 import com.reactur.backend.repositories.ExperimentRepository;
 
-import com.reactur.backend.repositories.InstrumentRepository;
-import com.reactur.backend.repositories.ModalityRepository;
+import com.reactur.backend.repositories.options.InstrumentRepository;
+import com.reactur.backend.repositories.options.ModalityRepository;
 import com.reactur.backend.repositories.ReactantRepository;
-import com.reactur.backend.repositories.SolventRepository;
+import com.reactur.backend.repositories.options.SolventRepository;
 import com.reactur.backend.repositories.UserRepository;
 import com.reactur.backend.services.implementations.ExperimentServiceImpl;
 import org.junit.jupiter.api.BeforeEach;

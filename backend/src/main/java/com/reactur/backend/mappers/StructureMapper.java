@@ -1,6 +1,6 @@
 package com.reactur.backend.mappers;
 
-import com.reactur.backend.dtos.ReactantDtos.StructureDto;
+import com.reactur.backend.dtos.reactants.StructureDto;
 import com.reactur.backend.entities.ReactantStructure;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;

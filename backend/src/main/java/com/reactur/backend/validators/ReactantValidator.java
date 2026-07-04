@@ -1,7 +1,7 @@
 package com.reactur.backend.validators;
 
-import com.reactur.backend.dtos.ReactantDtos.CreateReactantDto;
-import com.reactur.backend.dtos.ReactantDtos.UpdateReactantDto;
+import com.reactur.backend.dtos.reactants.CreateReactantDto;
+import com.reactur.backend.dtos.reactants.UpdateReactantDto;
 import com.reactur.backend.entities.Reactant;
 import com.reactur.backend.exeptions.ResourceConflictException;
 import com.reactur.backend.exeptions.ValidationException;

@@ -1,9 +1,9 @@
 package com.reactur.backend.services;
 
-import com.reactur.backend.dtos.ReactantDtos.ReactantDetailDto;
-import com.reactur.backend.dtos.ReactantDtos.ReactantDto;
-import com.reactur.backend.dtos.ReactantDtos.CreateReactantDto;
-import com.reactur.backend.dtos.ReactantDtos.UpdateReactantDto;
+import com.reactur.backend.dtos.reactants.ReactantDetailDto;
+import com.reactur.backend.dtos.reactants.ReactantDto;
+import com.reactur.backend.dtos.reactants.CreateReactantDto;
+import com.reactur.backend.dtos.reactants.UpdateReactantDto;
 import com.reactur.backend.exeptions.ResourceConflictException;
 import com.reactur.backend.exeptions.ResourceNotFoundException;
 

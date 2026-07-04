@@ -1,7 +1,7 @@
 package com.reactur.backend.endpoints;
 
 
-import com.reactur.backend.dtos.ExperimentDtos.ExperimentAttachmentDetailsDto;
+import com.reactur.backend.dtos.experiments.ExperimentAttachmentDetailsDto;
 import com.reactur.backend.services.FileService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

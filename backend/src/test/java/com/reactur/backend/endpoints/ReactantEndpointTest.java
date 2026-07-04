@@ -1,8 +1,8 @@
 package com.reactur.backend.endpoints;
 
-import com.reactur.backend.dtos.ReactantDtos.CreateReactantDto;
-import com.reactur.backend.dtos.ReactantDtos.ReactantDetailDto;
-import com.reactur.backend.dtos.ReactantDtos.ReactantDto;
+import com.reactur.backend.dtos.reactants.CreateReactantDto;
+import com.reactur.backend.dtos.reactants.ReactantDetailDto;
+import com.reactur.backend.dtos.reactants.ReactantDto;
 import com.reactur.backend.enums.StructureFlag;
 import com.reactur.backend.exeptions.GlobalExceptionHandler;
 import com.reactur.backend.exeptions.ResourceNotFoundException;

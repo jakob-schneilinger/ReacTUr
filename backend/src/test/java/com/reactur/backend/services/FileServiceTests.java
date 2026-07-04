@@ -1,7 +1,7 @@
 package com.reactur.backend.services;
 
-import com.reactur.backend.dtos.ExperimentDtos.ExperimentAttachmentDetailsDto;
-import com.reactur.backend.dtos.ExperimentDtos.ExperimentAttachmentDto;
+import com.reactur.backend.dtos.experiments.ExperimentAttachmentDetailsDto;
+import com.reactur.backend.dtos.experiments.ExperimentAttachmentDto;
 import com.reactur.backend.entities.experiment.Experiment;
 import com.reactur.backend.entities.experiment.ExperimentAttachment;
 import com.reactur.backend.exeptions.ResourceNotFoundException;

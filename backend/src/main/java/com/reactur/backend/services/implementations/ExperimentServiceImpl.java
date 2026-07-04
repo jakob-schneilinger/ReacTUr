@@ -1,7 +1,7 @@
 package com.reactur.backend.services.implementations;
 
-import com.reactur.backend.dtos.ExperimentDtos.GetExperimentDto;
-import com.reactur.backend.dtos.ExperimentDtos.SaveExperimentDto;
+import com.reactur.backend.dtos.experiments.GetExperimentDto;
+import com.reactur.backend.dtos.experiments.SaveExperimentDto;
 import com.reactur.backend.entities.AuditLog;
 import com.reactur.backend.entities.experiment.Experiment;
 import com.reactur.backend.entities.experiment.ExperimentResult;
@@ -16,10 +16,10 @@ import com.reactur.backend.exeptions.UnprocessableEntityException;
 import com.reactur.backend.mappers.ExperimentMapper;
 import com.reactur.backend.repositories.AuditLogRepository;
 import com.reactur.backend.repositories.ExperimentRepository;
-import com.reactur.backend.repositories.InstrumentRepository;
-import com.reactur.backend.repositories.ModalityRepository;
+import com.reactur.backend.repositories.options.InstrumentRepository;
+import com.reactur.backend.repositories.options.ModalityRepository;
 import com.reactur.backend.repositories.ReactantRepository;
-import com.reactur.backend.repositories.SolventRepository;
+import com.reactur.backend.repositories.options.SolventRepository;
 import com.reactur.backend.repositories.UserRepository;
 import com.reactur.backend.services.ExperimentService;
 import lombok.RequiredArgsConstructor;

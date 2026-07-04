@@ -1,9 +1,9 @@
 package com.reactur.backend.endpoints;
 
-import com.reactur.backend.dtos.ReactantDtos.ReactantDto;
-import com.reactur.backend.dtos.ReactantDtos.ReactantDetailDto;
-import com.reactur.backend.dtos.ReactantDtos.CreateReactantDto;
-import com.reactur.backend.dtos.ReactantDtos.UpdateReactantDto;
+import com.reactur.backend.dtos.reactants.ReactantDto;
+import com.reactur.backend.dtos.reactants.ReactantDetailDto;
+import com.reactur.backend.dtos.reactants.CreateReactantDto;
+import com.reactur.backend.dtos.reactants.UpdateReactantDto;
 import com.reactur.backend.services.ReactantService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;

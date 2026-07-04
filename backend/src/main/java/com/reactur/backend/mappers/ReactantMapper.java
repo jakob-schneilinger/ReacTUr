@@ -1,9 +1,9 @@
 package com.reactur.backend.mappers;
 
-import com.reactur.backend.dtos.ReactantDtos.ReactantDetailDto;
-import com.reactur.backend.dtos.ReactantDtos.ReactantDto;
-import com.reactur.backend.dtos.ReactantDtos.StructureDto;
-import com.reactur.backend.dtos.SelectionOption.ChemicalTypeDto;
+import com.reactur.backend.dtos.reactants.ReactantDetailDto;
+import com.reactur.backend.dtos.reactants.ReactantDto;
+import com.reactur.backend.dtos.reactants.StructureDto;
+import com.reactur.backend.dtos.options.ChemicalTypeDto;
 import com.reactur.backend.entities.Reactant;
 import com.reactur.backend.entities.options.ChemicalType;
 import com.reactur.backend.enums.StructureFlag;

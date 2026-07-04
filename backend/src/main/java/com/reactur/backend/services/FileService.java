@@ -3,8 +3,8 @@ package com.reactur.backend.services;
 import com.reactur.backend.exeptions.FileStorageException;
 import com.reactur.backend.exeptions.ResourceNotFoundException;
 import org.springframework.core.io.Resource;
-import com.reactur.backend.dtos.ExperimentDtos.ExperimentAttachmentDetailsDto;
-import com.reactur.backend.dtos.ExperimentDtos.ExperimentAttachmentDto;
+import com.reactur.backend.dtos.experiments.ExperimentAttachmentDetailsDto;
+import com.reactur.backend.dtos.experiments.ExperimentAttachmentDto;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;

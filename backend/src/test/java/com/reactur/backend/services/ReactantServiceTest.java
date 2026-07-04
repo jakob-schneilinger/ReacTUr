@@ -1,13 +1,13 @@
 package com.reactur.backend.services;
 
-import com.reactur.backend.dtos.ReactantDtos.StructureDto;
+import com.reactur.backend.dtos.reactants.StructureDto;
 import com.reactur.backend.enums.StructureFlag;
 import com.reactur.backend.repositories.UserRepository;
 import com.reactur.backend.validators.ReactantValidator;
-import com.reactur.backend.dtos.ReactantDtos.CreateReactantDto;
-import com.reactur.backend.dtos.ReactantDtos.ReactantDetailDto;
-import com.reactur.backend.dtos.ReactantDtos.ReactantDto;
-import com.reactur.backend.dtos.ReactantDtos.UpdateReactantDto;
+import com.reactur.backend.dtos.reactants.CreateReactantDto;
+import com.reactur.backend.dtos.reactants.ReactantDetailDto;
+import com.reactur.backend.dtos.reactants.ReactantDto;
+import com.reactur.backend.dtos.reactants.UpdateReactantDto;
 import com.reactur.backend.entities.Reactant;
 import com.reactur.backend.entities.User;
 import com.reactur.backend.exeptions.ResourceConflictException;
@@ -117,7 +117,7 @@ class ReactantServiceTest {
         assertEquals("Ethanol", result.shortName());
         assertEquals("A test comment", result.comment());
         assertIterableEquals(List.of("EtOH", "Alkohol"), result.additionalShortNames());
-        assertTrue(result.structure().isEmpty());
+        assertTrue(result.structures().isEmpty());
         verify(reactantRepository, times(1)).save(any(Reactant.class));
     }
 
@@ -168,8 +168,8 @@ class ReactantServiceTest {
         ReactantDetailDto result = reactantService.updateReactant(VALID_UUID, updateDto);
 
         assertNotNull(result);
-        assertEquals(1, result.structure().size());
-        assertEquals(StructureFlag.ACTIVE, result.structure().getFirst().flag());
+        assertEquals(1, result.structures().size());
+        assertEquals(StructureFlag.ACTIVE, result.structures().getFirst().flag());
         verify(reactantRepository, times(1)).save(mockReactant);
     }
 
@@ -237,7 +237,7 @@ class ReactantServiceTest {
         assertEquals(VALID_UUID, result.uuid());
         assertEquals("Ethanol", result.shortName());
         assertIterableEquals(List.of("Ref1", "Ref2"), result.references());
-        assertTrue(result.structure().isEmpty());
+        assertTrue(result.structures().isEmpty());
     }
 
     @Test

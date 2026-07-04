@@ -1,15 +1,15 @@
 package com.reactur.backend.services.implementations;
 
-import com.reactur.backend.dtos.ReactantDtos.StructureDto;
+import com.reactur.backend.dtos.reactants.StructureDto;
 import com.reactur.backend.enums.StructureFlag;
 import com.reactur.backend.repositories.UserRepository;
 import com.reactur.backend.services.ReactantService;
 import com.reactur.backend.services.StructureService;
 import com.reactur.backend.validators.ReactantValidator;
-import com.reactur.backend.dtos.ReactantDtos.CreateReactantDto;
-import com.reactur.backend.dtos.ReactantDtos.ReactantDetailDto;
-import com.reactur.backend.dtos.ReactantDtos.ReactantDto;
-import com.reactur.backend.dtos.ReactantDtos.UpdateReactantDto;
+import com.reactur.backend.dtos.reactants.CreateReactantDto;
+import com.reactur.backend.dtos.reactants.ReactantDetailDto;
+import com.reactur.backend.dtos.reactants.ReactantDto;
+import com.reactur.backend.dtos.reactants.UpdateReactantDto;
 import com.reactur.backend.entities.Reactant;
 import com.reactur.backend.entities.User;
 import com.reactur.backend.exeptions.ResourceNotFoundException;

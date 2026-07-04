@@ -1,48 +1,15 @@
 package com.reactur.backend.endpoints.options;
 
-import com.reactur.backend.dtos.SelectionOption.InstrumentDto;
-import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
+import com.reactur.backend.dtos.options.InstrumentDto;
+import com.reactur.backend.services.options.InstrumentService;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.UUID;
-
 @RestController
 @RequestMapping("/api/instrument")
-@RequiredArgsConstructor
-public class InstrumentEndpoint {
+public class InstrumentEndpoint extends AbstractOptionsEndpoint<InstrumentDto> {
 
-    @GetMapping()
-    public ResponseEntity<InstrumentDto[]> getKnownInstruments() {
-
-        //TODO:
-        throw new UnsupportedOperationException();
-    }
-
-    @PostMapping()
-    public ResponseEntity<InstrumentDto[]> createInstruments(InstrumentDto instrument) {
-
-        //TODO:
-        throw new UnsupportedOperationException();
-    }
-
-    @DeleteMapping("/{uuid}")
-    public ResponseEntity<Void> archiveInstrument(@PathVariable UUID uuid) {
-
-        //TODO:
-        throw new UnsupportedOperationException();
-    }
-
-    @PutMapping("/{uuid}/restore")
-    public ResponseEntity<Void> restoreInstrument(@PathVariable UUID uuid) {
-
-        //TODO:
-        throw new UnsupportedOperationException();
+    public InstrumentEndpoint(InstrumentService service) {
+        super(service);
     }
 }

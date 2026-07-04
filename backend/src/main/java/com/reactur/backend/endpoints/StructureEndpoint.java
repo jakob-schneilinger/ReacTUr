@@ -1,6 +1,6 @@
 package com.reactur.backend.endpoints;
 
-import com.reactur.backend.dtos.ReactantDtos.StructureDto;
+import com.reactur.backend.dtos.reactants.StructureDto;
 import com.reactur.backend.services.StructureService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
