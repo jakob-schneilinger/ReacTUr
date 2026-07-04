@@ -1,0 +1,34 @@
+
+<div class="container mt-4" style="max-width: 500px;">
+
+  @if (showTable) {
+    <app-paste-table (fileGenerated)="onPasteTableGenerated($event)"></app-paste-table>
+  }
+
+  <app-drag-and-drop
+    (filesSelected)="addFiles($event)"
+    [allowedExtensions]="allowedExtensions"
+    [maxFileSizeMB]="maxFileSizeMB"
+    [maxFiles]="maxFiles" >
+  </app-drag-and-drop>
+
+  <div class="file-list mt-4">
+    @for (file of files; track $index) {
+      <app-uploaded-file
+        [file]="file"
+        (remove)="confirmRemoveFile($index)"
+        [removePossible]="removePossible">
+      </app-uploaded-file>
+    }
+  </div>
+</div>
+
+<app-confirm-modal
+  [isOpen]="isDeleteFileModalOpen"
+  title="Remove File"
+  [message]="'Are you sure you want to permanently remove <strong>' + pendingFileName + '</strong> from the upload list?'"
+  confirmLabel="Permanently Remove"
+  confirmButtonClass="danger"
+  (confirm)="executeDelete()"
+  (cancel)="cancelDelete()">
+</app-confirm-modal>

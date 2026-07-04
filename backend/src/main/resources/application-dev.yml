@@ -29,6 +29,10 @@ logging:
   level:
     org.springframework.web.servlet.DispatcherServlet: DEBUG
 
+external-api:
+  reactur:
+    base-url: ${REACTUR_API_BASE_URL}
+
 # TODO: Configure loggers in detail for application and libraries
 #logging:
 #  level:

@@ -1,0 +1,58 @@
+@use "styles/variables" as *;
+
+.custom-search-wrapper {
+  border: 1px solid #cbd5e1;
+  border-radius: 0.5rem;
+  transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+  background-color: white;
+
+  &:focus-within {
+    border-color: $primary;
+    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25) !important;
+  }
+
+  .form-control {
+    border: none;
+    padding-left: 1rem;
+
+    &:focus {
+      outline: none;
+      box-shadow: none;
+    }
+  }
+
+  .input-group-text{
+    border: none
+  }
+
+  .icon-btn {
+    border: none;
+    border-radius: 0.5rem;
+    border-bottom-left-radius: 0.5rem !important;
+    border-top-left-radius: 0.5rem !important;
+    background: transparent;
+    padding: 0.4rem 0.6rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    &:hover {
+      background-color: $background;
+    }
+
+    &:focus {
+      box-shadow: none;
+    }
+  }
+}
+
+.search-group {
+  box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+
+  .form-control {
+    &:focus {
+      box-shadow: none;
+      border-color: #dee2e6;
+    }
+  }
+}

@@ -1,0 +1,40 @@
+@use "styles/variables" as *;
+
+.substructure-query-builder {
+  .d-flex.align-items-center.gap-2 {
+    flex-wrap: wrap;
+  }
+
+  .form-switch {
+    flex-wrap: nowrap !important;
+    white-space: nowrap;
+  }
+
+  .input-group {
+    flex: 1 1 150px;
+    width: auto;
+  }
+
+  .ms-4 {
+    margin-left: 1rem !important;
+  }
+}
+
+.substructure-btn {
+  &:hover {
+    background: $background !important;
+    color: $light_gray_hover;
+  }
+}
+
+.remove-condition-btn {
+  transition: transform 0.2s ease-in-out;
+
+  &:hover {
+    transform: scale(1.1);
+  }
+}
+
+.btn-close {
+  min-width: 16px;
+}

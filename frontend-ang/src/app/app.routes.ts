@@ -1,48 +1,50 @@
 import { Routes } from "@angular/router";
-import { AuthGuard } from './guards/auth.guard';
-import { RoleGuard } from './guards/role.guard';
+import { AuthGuard } from './core/auth/auth.guard';
+import { RoleGuard } from './core/auth/role.guard';
 
-import { LoginComponent } from "./components/user/login/login.component";
-import { SearchSiteComponent } from './components/search/search-site/search-site.component';
-import { ExperimentDetailsSiteComponent } from './components/experiment/experiment-details-site/experiment-details-site.component';
-import { ReactantDetailsSiteComponent } from './components/reactant/reactant-details-site/reactant-details-site.component';
-import { ReactantSiteComponent } from './components/reactant/reactant-site/reactant-site.component';
-import { AdminSiteComponent } from './components/admin/admin-site/admin-site.component';
+import { LoginPageComponent } from "./features/login/pages/login-page/login-page.component";
+import { SearchPageComponent } from './features/search/pages/search-page/search-page.component';
+import { ExperimentDetailsPageComponent } from './features/experiments/pages/experiment-details-page/experiment-details-page.component';
+import { ReactantDetailsPageComponent } from './features/reactants/pages/reactant-details-page/reactant-details-page.component';
+import { ReactantOverviewPageComponent } from './features/reactants/pages/reactant-overview-page/reactant-overview-page.component';
+import { AdminPageComponent } from './features/admin/pages/admin-page/admin-page.component';
+import { UnauthorizedPageComponent } from './features/login/pages/unauthorized-page/unauthorized-page.component';
 
 export const routes: Routes = [
-  { path: 'search', component: SearchSiteComponent, canActivate: [AuthGuard] },
-  { path: 'login', component: LoginComponent },
+  { path: 'search', component: SearchPageComponent, canActivate: [AuthGuard] },
+  { path: 'login', component: LoginPageComponent },
   {
     path: 'experiments/create',
-    component: ExperimentDetailsSiteComponent,
+    component: ExperimentDetailsPageComponent,
     canActivate: [AuthGuard],
-    data: { state: 'create'},
+    data: { state: 'create' },
   },
   {
     path: 'experiments/:uuid',
-    component: ExperimentDetailsSiteComponent,
+    component: ExperimentDetailsPageComponent,
     canActivate: [AuthGuard, RoleGuard],
     data: { state: 'edit', roles: ['ADMIN', 'SUPERVISOR'] },
   },
-  { path: 'reactants', component: ReactantSiteComponent, canActivate: [AuthGuard] },
+  { path: 'reactants', component: ReactantOverviewPageComponent, canActivate: [AuthGuard] },
   {
     path: 'reactants/create',
-    component: ReactantDetailsSiteComponent,
+    component: ReactantDetailsPageComponent,
     canActivate: [AuthGuard, RoleGuard],
     data: { state: 'create', roles: ['ADMIN', 'SUPERVISOR'] },
   },
   {
     path: 'reactants/:uuid',
-    component: ReactantDetailsSiteComponent,
+    component: ReactantDetailsPageComponent,
     canActivate: [AuthGuard, RoleGuard],
     data: { state: 'edit', roles: ['ADMIN', 'SUPERVISOR'] },
   },
   {
     path: 'admin',
-    component: AdminSiteComponent,
+    component: AdminPageComponent,
     canActivate: [AuthGuard, RoleGuard],
     data: { roles: ['ADMIN'] },
   },
+  { path: 'unauthorized', component: UnauthorizedPageComponent, canActivate: [AuthGuard] },
   { path: '', redirectTo: 'search', pathMatch: 'full' },
   { path: '**', redirectTo: 'search' },
 ];

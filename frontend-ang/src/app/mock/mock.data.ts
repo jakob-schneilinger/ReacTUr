@@ -1,6 +1,6 @@
-import { ChemicalTypeDto, InstrumentDto, ModalityDto, SolventDto } from '../dtos/selection-option.dto';
-import { GetUserDto } from '../dtos/user.dto';
-import { Role } from '../dtos/enums/role.enum';
+import { ChemicalTypeDto, InstrumentDto, ModalityDto, SolventDto } from '../shared/dtos/selection-option.dto';
+import { GetUserDto } from '../shared/dtos/user.dto';
+import { Role } from '../shared/dtos/enums/role.enum';
 
 // Mock Users
 export const MOCK_USERS = {

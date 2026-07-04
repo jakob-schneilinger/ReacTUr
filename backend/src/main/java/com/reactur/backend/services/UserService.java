@@ -2,20 +2,11 @@ package com.reactur.backend.services;
 
 import com.reactur.backend.dtos.GetUserDto;
 import com.reactur.backend.dtos.RoleDto;
-import com.reactur.backend.entities.User;
 import com.reactur.backend.exeptions.ResourceNotFoundException;
 
 import java.util.List;
-import java.util.Optional;
 
 public interface UserService {
-
-    /**
-     * Gets the user that made this request.
-     *
-     * @return {@link User} of this request
-     */
-    Optional<User> getCurrentUser();
 
     /**
      * Retrieves all users currently registered in the system.

@@ -1,13 +1,6 @@
-import { ReactantDetailDto, ReactantDto } from '../dtos/reactant.dto';
-import {
-  MOCK_CHEM_TYPES,
-  MOCK_INSTRUMENTS,
-  MOCK_MODALITIES,
-  MOCK_SOLVENTS,
-  MOCK_USERS,
-} from './mock.data';
-import { GetExperimentDto } from '../dtos/experiment.dto';
-
+import { ReactantDetailDto, ReactantDto } from '../features/reactants/reactant.dto';
+import { MOCK_CHEM_TYPES } from './mock.data';
+import { StructureFlag } from '../features/reactants/structure-flag.enum';
 
 export const MOCK_REACTANTS: ReactantDto[] = [
   {
@@ -16,7 +9,7 @@ export const MOCK_REACTANTS: ReactantDto[] = [
     chemicalType: MOCK_CHEM_TYPES.ACID,
     shortName: 'EtOH',
     chemicalName: 'Ethanol',
-    archivedAt: null,
+    flag: StructureFlag.READY,
   },
   {
     uuid: 'reactant2',
@@ -24,7 +17,7 @@ export const MOCK_REACTANTS: ReactantDto[] = [
     chemicalType: MOCK_CHEM_TYPES.METAL,
     shortName: 'DCM',
     chemicalName: 'Dichloromethane',
-    archivedAt: null,
+    flag: StructureFlag.ACTIVE,
   },
   {
     uuid: 'reactant3',
@@ -33,7 +26,7 @@ export const MOCK_REACTANTS: ReactantDto[] = [
     chemicalType: MOCK_CHEM_TYPES.ACID,
     shortName: 'Pd(PPh3)4',
     chemicalName: 'Tetrakis(triphenylphosphine)palladium(0)',
-    archivedAt: null,
+    flag: StructureFlag.ACTIVE,
   },
   {
     uuid: 'reactant4',
@@ -41,7 +34,7 @@ export const MOCK_REACTANTS: ReactantDto[] = [
     chemicalType: MOCK_CHEM_TYPES.GAS,
     shortName: 'PhBr',
     chemicalName: 'Bromobenzene',
-    archivedAt: null,
+    flag: StructureFlag.PENDING,
   },
   {
     uuid: 'reactant5',
@@ -49,7 +42,7 @@ export const MOCK_REACTANTS: ReactantDto[] = [
     chemicalType: MOCK_CHEM_TYPES.NON_METAL,
     shortName: 'PhB(OH)2',
     chemicalName: 'Phenylboronic acid',
-    archivedAt: null,
+    flag: StructureFlag.FAILED,
   },
   {
     uuid: 'reactant6',
@@ -57,7 +50,7 @@ export const MOCK_REACTANTS: ReactantDto[] = [
     chemicalType: MOCK_CHEM_TYPES.SOLVENT,
     shortName: 'TEA',
     chemicalName: 'Triethylamine',
-    archivedAt: null,
+    flag: StructureFlag.FAILED,
   },
   {
     uuid: 'reactant7',
@@ -65,7 +58,7 @@ export const MOCK_REACTANTS: ReactantDto[] = [
     chemicalType: MOCK_CHEM_TYPES.NON_METAL,
     shortName: 'DMAP',
     chemicalName: '4-Dimethylaminopyridine',
-    archivedAt: null,
+    flag: StructureFlag.PENDING,
   },
   {
     uuid: 'reactant8',
@@ -73,7 +66,7 @@ export const MOCK_REACTANTS: ReactantDto[] = [
     chemicalType: MOCK_CHEM_TYPES.HALOGEN,
     shortName: 'TFA',
     chemicalName: 'Trifluoroacetic acid',
-    archivedAt: null,
+    flag: StructureFlag.READY,
   },
   {
     uuid: 'reactant9',
@@ -81,7 +74,7 @@ export const MOCK_REACTANTS: ReactantDto[] = [
     chemicalType: MOCK_CHEM_TYPES.GAS,
     shortName: 'NaBH4',
     chemicalName: 'Sodium borohydride',
-    archivedAt: null,
+    flag: StructureFlag.ACTIVE,
   },
   {
     uuid: 'reactant10',
@@ -89,7 +82,7 @@ export const MOCK_REACTANTS: ReactantDto[] = [
     chemicalType: MOCK_CHEM_TYPES.HALOGEN,
     shortName: 'THF',
     chemicalName: 'Tetrahydrofuran',
-    archivedAt: null,
+    flag: StructureFlag.PENDING,
   },
 ];
 

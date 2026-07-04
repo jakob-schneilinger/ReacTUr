@@ -1,6 +1,6 @@
 package com.reactur.backend.repositories;
 
-import com.reactur.backend.entities.ExperimentEntities.ExperimentAttachment;
+import com.reactur.backend.entities.experiment.ExperimentAttachment;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

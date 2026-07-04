@@ -1,0 +1,121 @@
+
+<div class="layout-wrapper">
+  <app-layout>
+
+    <!-- Linke Spalte -->
+    <div leftContent>
+      <h2>{{ isEditMode ? reactant?.shortName : ('reactants.details.addNew' | transloco) }}</h2>
+      <app-reactant-details-form
+        [formState]="state"
+        [reactant]="reactant"
+        (smiles)="updateSmiles($event)"
+        (save)="saveReactantForm($event)">
+      </app-reactant-details-form>
+    </div>
+
+    <!-- Rechte Spalte -->
+    <div rightContent class="d-flex flex-column">
+
+      @if (loadingStructures) {
+        <app-reactant-structure
+          [loading]="true"
+          [smiles]="smiles || ''">
+        </app-reactant-structure>
+      } @else {
+        @switch (currentFlag) {
+
+          @case (StructureFlag.PENDING) {
+            <app-reactant-structure
+              [smiles]="smiles || ''">
+            </app-reactant-structure>
+            @if (isEditMode) {
+              <div class="info-banner align-self-center mt-4 d-flex flex-column align-items-center">
+                <p>Generating 3D structure... Please wait.</p>
+                <button type="button" class="primary" (click)="refreshStatus()" [disabled]="isRefreshDisabled">
+                  Refresh Status
+                </button>
+              </div>
+            }
+          }
+
+          @case (StructureFlag.READY) {
+            <app-reactant-structure
+              [smiles]="smiles || ''">
+            </app-reactant-structure>
+            @if (isEditMode) {
+              <div class="action-banner align-self-center mt-4 d-flex flex-column align-items-center">
+                <p>Structure generation complete.</p>
+                <button type="button" (click)="openStructureSelectionModal()">
+                  Select Structure
+                </button>
+              </div>
+            }
+          }
+
+          @case (StructureFlag.ACTIVE) {
+            @if (structureFiles.length > 0) {
+              <app-reactant-structure
+                [structure]="structureFiles[0]"
+                [smiles]="smiles || ''"
+                [show3D]="true">
+              </app-reactant-structure>
+            } @else {
+              <app-reactant-structure [smiles]="smiles || ''"></app-reactant-structure>
+            }
+          }
+
+          @case (StructureFlag.FAILED) {
+            <app-reactant-structure
+              [smiles]="smiles || ''">
+            </app-reactant-structure>
+            @if (isEditMode) {
+              <div class="error-banner align-self-center mt-4 d-flex flex-column align-items-center">
+                <p>Failed to generate structure.</p>
+                <button type="button" (click)="generateStructureFromSmiles()">
+                  Try Again
+                </button>
+              </div>
+            }
+          }
+
+          @default {
+            <app-reactant-structure
+              [smiles]="smiles || ''">
+            </app-reactant-structure>
+
+            @if (isEditMode) {
+              <div class="generate-actions align-self-center mt-4">
+                <button type="button" class="primary" (click)="generateStructureFromSmiles()">
+                  Generate Structure from SMILES
+                </button>
+              </div>
+            }
+          }
+        }
+      }
+
+      @if (showUpload) {
+        <app-file-upload
+          [showTable]="false"
+          [allowedExtensions]="['xyz']"
+          [existingFiles]="structureFiles"
+          [maxFileSizeMB]="1"
+          [maxFiles]="1"
+          [removePossible]="false"
+          (filesChanged)="handleUploadedFiles($event)" >
+        </app-file-upload>
+      }
+    </div>
+
+  </app-layout>
+</div>
+
+
+@if (isStructureSelectionModalOpen) {
+  <app-reactant-structure-select-modal
+    [pendingStructures]="readyStructures"
+    [baseSmiles]="smiles"
+    (structureSelected)="handleStructureSelection($event)"
+    (close)="isStructureSelectionModalOpen = false">
+  </app-reactant-structure-select-modal>
+}

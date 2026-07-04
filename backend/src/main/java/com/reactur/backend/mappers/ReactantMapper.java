@@ -2,22 +2,29 @@ package com.reactur.backend.mappers;
 
 import com.reactur.backend.dtos.ReactantDtos.ReactantDetailDto;
 import com.reactur.backend.dtos.ReactantDtos.ReactantDto;
+import com.reactur.backend.dtos.ReactantDtos.StructureDto;
 import com.reactur.backend.dtos.SelectionOption.ChemicalTypeDto;
 import com.reactur.backend.entities.Reactant;
-import com.reactur.backend.entities.SelectionOptions.ChemicalType;
+import com.reactur.backend.entities.options.ChemicalType;
+import com.reactur.backend.enums.StructureFlag;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+
+import java.util.List;
+
+//TODO: Activate chemicalType when available
 
 @Mapper(componentModel = "spring")
 public interface ReactantMapper {
 
-    @Mapping(source = "id", target = "uuid")
-    @Mapping(source = "type", target = "chemicalType")
-    ReactantDetailDto toDetailDto(Reactant reactant);
+    @Mapping(source = "reactant.id", target = "uuid")
+    @Mapping(target = "chemicalType", ignore = true)
+    @Mapping(source = "structure", target = "structures")
+    ReactantDetailDto toDetailDto(Reactant reactant, List<StructureDto> structure);
 
-    @Mapping(source = "id", target = "uuid")
-    @Mapping(source = "type", target = "chemicalType")
-    ReactantDto toDto(Reactant reactant);
+    @Mapping(source = "reactant.id", target = "uuid")
+    @Mapping(target = "chemicalType", ignore = true)
+    ReactantDto toDto(Reactant reactant, StructureFlag flag);
 
     @Mapping(source = "id", target = "uuid")
     @Mapping(target = "archivedAt", ignore = true) // TODO: Entity uses isActive, DTO expects archivedAt

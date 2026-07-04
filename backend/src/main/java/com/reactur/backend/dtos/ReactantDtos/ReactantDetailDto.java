@@ -21,6 +21,7 @@ import java.util.UUID;
  * @param comment              Additional notes about the reactant.
  * @param references           Array of literature or external references.
  * @param archivedAt           The timestamp when the reactant was archived (null if active).
+ * @param structures            List of structures associated with this reactant.
  */
 public record ReactantDetailDto(
         UUID uuid,
@@ -33,6 +34,7 @@ public record ReactantDetailDto(
         String inChiKey,
         String comment,
         List<String> references,
-        Instant archivedAt
+        Instant archivedAt,
+        List<StructureDto> structures
 ) implements DetailsDto {
 }

@@ -1,6 +1,7 @@
 package com.reactur.backend.dtos.ReactantDtos;
 
 import com.reactur.backend.dtos.SelectionOption.ChemicalTypeDto;
+import com.reactur.backend.enums.StructureFlag;
 
 import java.util.UUID;
 
@@ -12,12 +13,14 @@ import java.util.UUID;
  * @param chemicalType The categorization of the chemical.
  * @param shortName    The mandatory short name used for quick identification.
  * @param chemicalName The optional formal chemical name.
+ * @param flag         Indicates if this reactant has an active structure.
  */
 public record ReactantDto(
         UUID uuid,
         String smiles,
         ChemicalTypeDto chemicalType,
         String shortName,
-        String chemicalName
+        String chemicalName,
+        StructureFlag flag
 ) {
 }

@@ -18,16 +18,16 @@ public interface ReactantRepository extends JpaRepository<Reactant, UUID> {
     List<Reactant> findAllByArchivedAtIsNotNull();
 
     @Query("""
-        SELECT COUNT(r) > 0 FROM Reactant r 
-        LEFT JOIN r.additionalShortNames asn 
+        SELECT COUNT(r) > 0 FROM Reactant r
+        LEFT JOIN r.additionalShortNames asn
         WHERE r.shortName IN :names OR asn IN :names
     """)
     boolean hasNameConflict(@Param("names") Collection<String> names);
 
     @Query("""
-        SELECT COUNT(r) > 0 FROM Reactant r 
-        LEFT JOIN r.additionalShortNames asn 
-        WHERE (r.shortName IN :names OR asn IN :names) 
+        SELECT COUNT(r) > 0 FROM Reactant r
+        LEFT JOIN r.additionalShortNames asn
+        WHERE (r.shortName IN :names OR asn IN :names)
         AND r.id != :excludeId
     """)
     boolean hasNameConflictExcludingId(@Param("names") Collection<String> names, @Param("excludeId") UUID excludeId);
