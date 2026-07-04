@@ -2,7 +2,7 @@ import { CommonModule } from '@angular/common';
 import { LayoutComponent } from '../../../../core/layout/layout.component';
 import { ReactantFormComponent } from '../../components/reactant-form/reactant-form.component';
 import { ReactantStructureComponent } from '../../components/reactant-structure/reactant-structure.component';
-import { ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { NotificationService } from '../../../../core/layout/notification/notification.service';
 import { ReactantService } from '../../reactant.service';
@@ -146,14 +146,16 @@ export class ReactantDetailsPageComponent implements OnInit, OnDestroy {
     }
   }
 
-  saveReactantForm(formValue: SaveReactantDto) {
+  saveReactantForm(payload: { data: SaveReactantDto, onSuccess: () => void }) {
+    const { data, onSuccess } = payload;
     if (!this.isEditMode) {
-      this.reactantService.createReactant(formValue).subscribe({
+      this.reactantService.createReactant(data).subscribe({
         next: (reactant) => {
           this.notification.success(
             this.transloco.translate('reactants.details.notifications.savedTitle'),
             this.transloco.translate('reactants.details.notifications.savedMessage'),
           );
+          onSuccess();
           this.router.navigate(['/reactants', reactant.uuid]);
         },
         error: (err) => {
@@ -168,12 +170,13 @@ export class ReactantDetailsPageComponent implements OnInit, OnDestroy {
       });
     } else {
       if (!this.reactant) return;
-      this.reactantService.updateReactant(this.reactant?.uuid, formValue).subscribe({
+      this.reactantService.updateReactant(this.reactant?.uuid, data).subscribe({
         next: (reactant) => {
           this.notification.success(
             this.transloco.translate('reactants.details.notifications.savedTitle'),
             this.transloco.translate('reactants.details.notifications.savedMessage'),
           );
+          onSuccess();
           this.router.navigate(['/reactants', reactant.uuid]);
         },
         error: (err) =>
@@ -224,13 +227,12 @@ export class ReactantDetailsPageComponent implements OnInit, OnDestroy {
     this.isRefreshDisabled = true;
     this.cd.markForCheck();
 
-    timer(5000).pipe(
-      takeUntil(this.destroy$),
-    )
-    .subscribe(() => {
-      this.isRefreshDisabled = false;
-      this.cd.markForCheck();
-    });
+    timer(5000)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(() => {
+        this.isRefreshDisabled = false;
+        this.cd.markForCheck();
+      });
 
     this.reactantService.getReactantDetail(this.reactant.uuid).subscribe({
       next: (value) => {

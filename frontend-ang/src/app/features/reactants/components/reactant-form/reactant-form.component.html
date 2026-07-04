@@ -41,7 +41,7 @@
   <app-option-selector
     [label]="'reactants.details.form.labels.type' | transloco"
     [control]="chemicalTypeControl"
-    [options]="chemicalTypes"
+    [options]="filteredChemicalTypes"
     datalistId="chemicalTypesList"
     [placeholder]="'reactants.details.form.placeholders.selectOrType' | transloco"
     [errorMessage]="'reactants.details.form.errors.invalidType' | transloco">

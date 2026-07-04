@@ -60,16 +60,16 @@ export class ReactantFormComponent implements OnInit, OnDestroy {
   @Input() reactant?: ReactantDetailDto;
 
   @Output() smiles = new EventEmitter<string>();
-  @Output() save = new EventEmitter<SaveReactantDto>();
+  @Output() save = new EventEmitter<{ data: SaveReactantDto; onSuccess: () => void }>();
 
   isArchiveReactantModalOpen = false;
   isCancelReactantModalOpen = false;
 
   reactantForm!: FormGroup;
 
-  // TODO: fetch from backend
   chemicalTypes: ChemicalTypeDto[] = [];
-  chemicalTypeNames: string[] = [];
+  filteredChemicalTypes: ChemicalTypeDto[] = [];
+  filteredChemicalTypeNames: string[] = [];
 
   constructor(
     private fb: FormBuilder,
@@ -91,7 +91,24 @@ export class ReactantFormComponent implements OnInit, OnDestroy {
     this.optionService.getSelectionOptions('chemical_type').subscribe({
       next: (params) => {
         this.chemicalTypes = params;
-        this.chemicalTypeNames = this.chemicalTypes.map((t) => t.name);
+        let displayTypes = params.filter((t) => t.archivedAt === null);
+        if (this.reactant?.chemicalType) {
+          const currentTypeName = this.reactant.chemicalType.name;
+          const isCurrentTypeArchived = !displayTypes.some((t) => t.name === currentTypeName);
+
+          if (isCurrentTypeArchived) {
+            const archivedCurrentType = params.find((t) => t.name === currentTypeName);
+            if (archivedCurrentType) {
+              displayTypes.push(archivedCurrentType);
+            }
+          }
+        }
+
+        console.log('displayTypes', displayTypes);
+        this.filteredChemicalTypes = displayTypes;
+        this.filteredChemicalTypeNames = this.filteredChemicalTypes.map((t) => t.name);
+
+        this.chemicalTypeControl.updateValueAndValidity();
         this.cdr.markForCheck();
       },
       error: (err) => {
@@ -192,9 +209,10 @@ export class ReactantFormComponent implements OnInit, OnDestroy {
 
   inListValidator(): ValidatorFn {
     return (control: AbstractControl): ValidationErrors | null => {
+      console.log('inListValidator', control);
       if (!control.value) return null;
 
-      const isValid = this.chemicalTypeNames.includes(control.value);
+      const isValid = this.filteredChemicalTypeNames.includes(control.value);
 
       return isValid ? null : { notInList: { value: control.value } };
     };
@@ -223,12 +241,19 @@ export class ReactantFormComponent implements OnInit, OnDestroy {
   onSubmit(): void {
     if (this.reactantForm.valid) {
       const formValue = this.reactantForm.getRawValue();
-      formValue.chemicalType = this.chemicalTypes.find((t) => t.name === formValue.chemicalType)?.uuid;
+      formValue.chemicalType = this.chemicalTypes.find(
+        (t) => t.name === formValue.chemicalType,
+      )?.uuid;
 
-      formValue.additionalShortNames = formValue.additionalShortNames.filter((val: string) => val && val.trim() !== '');
+      formValue.additionalShortNames = formValue.additionalShortNames.filter(
+        (val: string) => val && val.trim() !== '',
+      );
       formValue.references = formValue.references.filter((val: string) => val && val.trim() !== '');
 
-      this.save.emit(formValue);
+      this.save.emit({
+        data: formValue,
+        onSuccess: () => this.reactantForm.markAsPristine(),
+      });
     } else {
       this.reactantForm.markAllAsTouched();
     }
@@ -254,7 +279,6 @@ export class ReactantFormComponent implements OnInit, OnDestroy {
 
   executeArchive(): void {
     this.isArchiveReactantModalOpen = false;
-    // TODO: Call backend Archive
     if (this.reactant) {
       this.reactantService.archiveReactant(this.reactant.uuid).subscribe({
         next: () => {
