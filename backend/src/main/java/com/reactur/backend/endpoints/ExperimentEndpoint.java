@@ -4,13 +4,13 @@ import com.reactur.backend.dtos.AuditLogDto;
 import com.reactur.backend.dtos.experiments.GetExperimentDto;
 import com.reactur.backend.dtos.experiments.SaveExperimentDto;
 import com.reactur.backend.dtos.experiments.SearchParametersDto;
+import com.reactur.backend.enums.Role;
 import com.reactur.backend.services.ExperimentService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
@@ -31,37 +31,21 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/api/experiment")
 public class ExperimentEndpoint {
+    // TODO: JavaDoc
 
     private final ExperimentService experimentService;
 
-    // TODO: Decide how to do with archived experiments
-    //  - Should archived experiments be visible to everybody, or just to admins (+ the original creator)?
-    //  - For Example, a different api for archived experiments, like get .../archived/uuid instead of directly /uuid ?
-    //  - Advantage: Easy to set who is allowed to access the /archived endpoint
-    //  - Disadvantage: Necessity for two endpoints with similar (but not equal) functionality
-
-    // Not sure if we should describe in the contract here or in the service
-    // layer when something is correctly validated, etc.
-    // We are testing syntax in the REST layer with the simple DTO annotations, and Semantic or Data-Base related
-    // rules with the Service layer
-    // Also: I'm not sure how we should verify permissions / security
-    /**
-     *
-     * @param experimentDto
-     * @return
-     */
     @PostMapping
     public ResponseEntity<GetExperimentDto> createExperiment(
       @Valid @RequestBody SaveExperimentDto experimentDto,
-      @AuthenticationPrincipal Jwt jwt  // Authentication data should come from the token, not from the user's request
+      Authentication authentication,
+      @AuthenticationPrincipal Jwt jwt
     ) {
-
-        String userId = jwt.getSubject();  // TODO: decide universal strategy for authenticating user
-
         log.info("POST /api/experiment called by User ID: {}. ReactantA: {}, ReactantB: {}",
-          userId, experimentDto.reactantA(), experimentDto.reactantB());
+          jwt.getSubject(), experimentDto.reactantA(), experimentDto.reactantB());
 
-        GetExperimentDto createdExperiment = experimentService.createExperiment(experimentDto, userId);
+        Role userRole = extractUserRole(authentication);
+        GetExperimentDto createdExperiment = experimentService.createExperiment(experimentDto, jwt.getSubject(), userRole);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(createdExperiment);
     }
@@ -73,8 +57,6 @@ public class ExperimentEndpoint {
         throw new UnsupportedOperationException();
     }
 
-    // TODO: Documentation. Also: Clarify who has access to the archived experiment. Right now I set that only
-    //  the creator and admins can retrieve archived Experiments
     @GetMapping("/{uuid}")
     public ResponseEntity<GetExperimentDto> getExperiment(
       @PathVariable UUID uuid,
@@ -83,19 +65,8 @@ public class ExperimentEndpoint {
     ) {
         log.info("GET /api/experiment/{} called by User ID: {}", uuid, jwt.getSubject());
 
-        GetExperimentDto experiment = experimentService.getExperiment(uuid);
-
-        // Security Rule: If it is archived, only the creator OR the ADMIN can see it.
-        if (experiment.archivedAt() != null) {
-            boolean isAdmin = authentication.getAuthorities().stream()
-              .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
-            boolean isCreator = experiment.createdBy().id().equals(jwt.getSubject());
-
-            if (!isAdmin && !isCreator) {
-                log.warn("Security blocked access to archived experiment {} for user {}", uuid, jwt.getSubject());
-                throw new AccessDeniedException("You do not have permission to view this archived experiment.");
-            }
-        }
+        Role userRole = extractUserRole(authentication);
+        GetExperimentDto experiment = experimentService.getExperiment(uuid, jwt.getSubject(), userRole);
 
         return ResponseEntity.ok(experiment);
     }
@@ -122,16 +93,41 @@ public class ExperimentEndpoint {
     }
 
     @DeleteMapping("/{uuid}")
-    public ResponseEntity<Void> archiveExperiment(@PathVariable UUID uuid) {
+    public ResponseEntity<Void> archiveExperiment(
+      @PathVariable UUID uuid,
+      Authentication authentication,
+      @AuthenticationPrincipal Jwt jwt
+    ) {
+        log.info("DELETE (Archive) /api/experiment/{} called by User ID: {}", uuid, jwt.getSubject());
 
-        //TODO:
-        throw new UnsupportedOperationException();
+        Role userRole = extractUserRole(authentication);
+        experimentService.archiveExperiment(uuid, jwt.getSubject(), userRole);
+
+        return ResponseEntity.noContent().build();
     }
 
     @PutMapping("/{uuid}/restore")
-    public ResponseEntity<GetExperimentDto> restoreExperiment(@PathVariable UUID uuid) {
+    public ResponseEntity<GetExperimentDto> restoreExperiment(
+      @PathVariable UUID uuid,
+      Authentication authentication,
+      @AuthenticationPrincipal Jwt jwt
+    ) {
+        log.info("PUT (Restore) /api/experiment/{} called by User ID: {}", uuid, jwt.getSubject());
 
-        //TODO:
-        throw new UnsupportedOperationException();
+        Role userRole = extractUserRole(authentication);
+        GetExperimentDto restoredExperiment = experimentService.restoreExperiment(uuid, jwt.getSubject(), userRole);
+
+        return ResponseEntity.ok(restoredExperiment);
+    }
+
+    // TODO: Rewrite
+    private Role extractUserRole(Authentication authentication) {
+        if (authentication == null || authentication.getAuthorities() == null) {
+            return Role.USER;
+        }
+        boolean isAdmin = authentication.getAuthorities().stream()
+          .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+
+        return isAdmin ? Role.ADMIN : Role.USER;
     }
 }

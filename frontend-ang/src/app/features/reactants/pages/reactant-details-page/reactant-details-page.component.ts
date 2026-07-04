@@ -14,6 +14,8 @@ import { StructureFlag } from '../../structure-flag.enum';
 import { ReactantStructureSelectModalComponent } from '../../components/reactant-structure-select-modal/reactant-structure-select-modal.component';
 import { FileUploadComponent } from '../../../../shared/file-upload/file-upload.component';
 import { StructureService } from '../../structure.service';
+import { ReactantStructureConfirmModalComponent } from '../../components/reactant-structure-confirm-modal/reactant-structure-confirm-modal.component';
+import { UploadedFileComponent } from '../../../../shared/file-upload/uploaded-file/uploaded-file.component';
 
 export type FormState = 'create' | 'edit';
 
@@ -30,6 +32,8 @@ export type FormState = 'create' | 'edit';
     FileUploadComponent,
     ReactantStructureSelectModalComponent,
     TRANSLOCO_IMPORTS,
+    ReactantStructureConfirmModalComponent,
+    UploadedFileComponent,
   ],
 })
 export class ReactantDetailsPageComponent implements OnInit, OnDestroy {
@@ -42,11 +46,12 @@ export class ReactantDetailsPageComponent implements OnInit, OnDestroy {
   structureFiles: File[] = [];
 
   currentFlag?: StructureFlag;
-  activeFile: File | null = null;
 
   isRefreshDisabled: boolean = false;
 
   isStructureSelectionModalOpen: boolean = false;
+  isStructureConfirmModalOpen: boolean = false;
+  uploadedStructureFile: File | null = null;
 
   protected readonly StructureFlag = StructureFlag;
 
@@ -88,10 +93,6 @@ export class ReactantDetailsPageComponent implements OnInit, OnDestroy {
           this.reactant = details;
           this.structures = details.structures;
           this.currentFlag = this.determineStateFlag(this.structures);
-          const activeStruct = this.structures?.find((s) => s.flag === StructureFlag.ACTIVE);
-          this.activeFile = activeStruct
-            ? this.structureService.parseFile(activeStruct, details.shortName)
-            : null;
           this.structureFiles = [];
 
           details.structures?.forEach((s) => {
@@ -135,8 +136,12 @@ export class ReactantDetailsPageComponent implements OnInit, OnDestroy {
 
   get showUpload(): boolean {
     return !(
-      this.currentFlag === StructureFlag.PENDING || this.currentFlag === StructureFlag.READY
+      this.currentFlag === StructureFlag.PENDING || this.currentFlag === StructureFlag.READY || this.currentFlag === StructureFlag.ACTIVE
     );
+  }
+
+  get showUploadedFile(): boolean {
+    return this.currentFlag === StructureFlag.ACTIVE
   }
 
   updateSmiles(smiles: string) {
@@ -191,9 +196,39 @@ export class ReactantDetailsPageComponent implements OnInit, OnDestroy {
   }
 
   handleUploadedFiles(files: File[]) {
-    this.structureFiles = files;
     if (files.length === 1) {
-      this.currentFlag = StructureFlag.ACTIVE;
+      this.uploadedStructureFile = files[0];
+      this.isStructureConfirmModalOpen = true;
+    }
+  }
+
+  cancelUploadedStructure() {
+    this.isStructureConfirmModalOpen = false;
+    this.uploadedStructureFile = null;
+    this.structureFiles = [];
+  }
+
+  confirmUploadedStructure() {
+    this.isStructureConfirmModalOpen = false;
+    if (!this.uploadedStructureFile) return;
+    this.structureFiles = [this.uploadedStructureFile];
+    this.uploadedStructureFile = null;
+    if (this.reactant) {
+      this.structureService.uploadStructure(this.reactant.uuid, this.structureFiles[0]).subscribe({
+        next: (value) => {
+          this.notification.success(
+            this.transloco.translate('reactants.details.notifications.uploadTitle'),
+            this.transloco.translate('reactants.details.notifications.uploadMessage'),
+          );
+          this.refreshStatus();
+        },
+        error: (err) => {
+          this.notification.error(
+            this.transloco.translate('reactants.details.notifications.uploadErrorTitle'),
+            this.transloco.translate('reactants.details.notifications.uploadErrorMessage', {error: err.error || err.message || err}),
+          );
+        },
+      });
     }
   }
 
@@ -205,8 +240,7 @@ export class ReactantDetailsPageComponent implements OnInit, OnDestroy {
     this.structureService.generateStructureFromApi(this.reactant.uuid).subscribe({
       next: (value) => {
         this.notification.success(
-          this.transloco.translate('reactants.details.notifications.generateTitle'),
-          this.transloco.translate('reactants.details.notifications.generateMessage'),
+          this.transloco.translate('reactants.details.notifications.generateTitle')
         );
         this.refreshStatus();
       },
@@ -249,7 +283,10 @@ export class ReactantDetailsPageComponent implements OnInit, OnDestroy {
           });
         }
         this.loadingStructures = false;
-        this.notification.success('Refresh Succeeded', '', 1000);
+        this.notification.success(
+          this.transloco.translate('reactants.details.notifications.pageRefreshTitle'), "",
+          1000
+        );
         this.cd.markForCheck();
       },
     });
@@ -262,14 +299,21 @@ export class ReactantDetailsPageComponent implements OnInit, OnDestroy {
   handleStructureSelection(selectedStructure: StructureDto | null) {
     this.isStructureSelectionModalOpen = false;
 
+    //TODO: overthink structure rejection. if reject selectedStructure = null
+
     if (selectedStructure && selectedStructure.id) {
       this.structureService.selectStructure(selectedStructure.id).subscribe({
         next: () => {
-          this.notification.success('Erfolg', 'Die Struktur wurde freigegeben.');
+          this.notification.success(
+            this.transloco.translate('reactants.details.notifications.structureSelectTitle')
+          );
           this.refreshStatus();
         },
         error: (err) => {
-          this.notification.error('Fehler', 'Konnte Struktur nicht freigeben.');
+          this.notification.error(
+            this.transloco.translate('reactants.details.notifications.structureSelectErrorTitle'),
+            this.transloco.translate('reactants.details.notifications.structureSelectErrorMessage'),
+          );
           this.refreshStatus();
         },
       });

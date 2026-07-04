@@ -90,7 +90,7 @@ export class ExperimentDetailsPageComponent implements OnInit {
                 this.transloco.translate(
                   'experiments.details.notifications.permissionErrorMessage',
                   {
-                    error: err.message || err.error || err,
+                    error: err.error || err.message || err,
                   },
                 ),
               ),
@@ -106,9 +106,9 @@ export class ExperimentDetailsPageComponent implements OnInit {
           this.notification.error(
             this.transloco.translate('experiments.details.notifications.errorTitle'),
             this.transloco.translate('experiments.details.notifications.loadExpError', {
-              error: err.message || err.error || err,
+              error: err.error || err.message || err,
             }),
-          )
+          );
         }
       });
       //TODO: load experiment data from backend

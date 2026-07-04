@@ -115,7 +115,7 @@ export class ReactantFormComponent implements OnInit, OnDestroy {
         this.notification.error(
           this.transloco.translate('reactants.details.notifications.typeLoadErrorTitle'),
           this.transloco.translate('reactants.details.notifications.typeLoadErrorMessage', {
-            error: err.message || err.error || err,
+            error: err.error || err.message || err,
           }),
         );
       },
@@ -296,7 +296,7 @@ export class ReactantFormComponent implements OnInit, OnDestroy {
             this.transloco.translate('reactants.details.notifications.archiveFailedTitle'),
             this.transloco.translate('reactants.details.notifications.archiveFailedMessage', {
               name: this.reactantForm.get('shortName')?.value,
-              error: err.message || err.error || err,
+              error: err.error || err.message || err,
             }),
           ),
       });
