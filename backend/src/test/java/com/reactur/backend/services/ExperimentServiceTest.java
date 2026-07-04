@@ -13,8 +13,13 @@ import com.reactur.backend.entities.User;
 import com.reactur.backend.exeptions.ResourceNotFoundException;
 import com.reactur.backend.exeptions.UnprocessableEntityException;
 import com.reactur.backend.mappers.ExperimentMapper;
+import com.reactur.backend.mappers.MeasurementDataMapper;
+import com.reactur.backend.mappers.MetadataMapper;
 import com.reactur.backend.mappers.ReactantMapper;
 import com.reactur.backend.mappers.UserMapper;
+import com.reactur.backend.mappers.options.InstrumentMapper;
+import com.reactur.backend.mappers.options.ModalityMapper;
+import com.reactur.backend.mappers.options.SolventMapper;
 import com.reactur.backend.repositories.AuditLogRepository;
 import com.reactur.backend.repositories.ExperimentRepository;
 
@@ -66,8 +71,13 @@ class ExperimentServiceTest {
 
   // We actually want to use here the mapper rather than a Mock. This way we also test the Mapper.
   @Spy private ExperimentMapper experimentMapper = Mappers.getMapper(ExperimentMapper.class);
+  @Spy private MetadataMapper metadataMapper = Mappers.getMapper(MetadataMapper.class);
+  @Spy private MeasurementDataMapper measurementDataMapper = Mappers.getMapper(MeasurementDataMapper.class);
   @Spy private ReactantMapper reactantMapper = Mappers.getMapper(ReactantMapper.class);
   @Spy private UserMapper userMapper = Mappers.getMapper(UserMapper.class);
+  @Spy private SolventMapper solventMapper = Mappers.getMapper(SolventMapper.class);
+  @Spy private InstrumentMapper instrumentMapper = Mappers.getMapper(InstrumentMapper.class);
+  @Spy private ModalityMapper modalityMapper = Mappers.getMapper(ModalityMapper.class);
 
   // Mockito will take the mocked Repositories
   // and inject them into this real Service instance.
@@ -78,7 +88,15 @@ class ExperimentServiceTest {
 
   @BeforeEach
   void setUp() {
-    // Manually wire the nested mappers into the main ExperimentMapper
+    // Manually wire the nested mappers into the corresponding mapper(s)
+
+    ReflectionTestUtils.setField(metadataMapper, "userMapper", userMapper);
+    ReflectionTestUtils.setField(metadataMapper, "solventMapper", solventMapper);
+    ReflectionTestUtils.setField(metadataMapper, "instrumentMapper", instrumentMapper);
+    ReflectionTestUtils.setField(metadataMapper, "modalityMapper", modalityMapper);
+
+    ReflectionTestUtils.setField(experimentMapper, "metadataMapper", metadataMapper);
+    ReflectionTestUtils.setField(experimentMapper, "measurementDataMapper", measurementDataMapper);
     ReflectionTestUtils.setField(experimentMapper, "reactantMapper", reactantMapper);
     ReflectionTestUtils.setField(experimentMapper, "userMapper", userMapper);
   }

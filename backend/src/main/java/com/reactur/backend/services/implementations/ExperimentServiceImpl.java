@@ -32,6 +32,7 @@ import com.reactur.backend.enums.Role;
 import org.springframework.security.access.AccessDeniedException;
 import java.time.Instant;
 
+import java.util.List;
 import java.util.UUID;
 
 @RequiredArgsConstructor
@@ -241,6 +242,25 @@ public class ExperimentServiceImpl implements ExperimentService {
     }
 
     return experimentMapper.experimentToGetExperimentDto(experiment);
+  }
+
+  @Override
+  public GetExperimentDto[] getArchivedExperiments(String requestingUserId, Role requestingUserRole) {
+    log.trace("Fetching archived experiments for user: {} with role: {}", requestingUserId, requestingUserRole);
+
+    List<Experiment> archivedExperiments;
+
+    if (requestingUserRole == Role.ADMIN) {
+      log.debug("Admin role detected. Fetching ALL archived experiments.");
+      archivedExperiments = experimentRepository.findByArchivedAtIsNotNull();
+    } else {
+      log.debug("Standard role detected. Fetching archived experiments specifically for user.");
+      archivedExperiments = experimentRepository.findArchivedExperimentsForUser(requestingUserId);
+    }
+
+    return archivedExperiments.stream()
+      .map(experimentMapper::experimentToGetExperimentDto)
+      .toArray(GetExperimentDto[]::new);
   }
 
 }

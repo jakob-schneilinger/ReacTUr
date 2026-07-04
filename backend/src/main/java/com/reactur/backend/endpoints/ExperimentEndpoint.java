@@ -85,11 +85,19 @@ public class ExperimentEndpoint {
         throw new UnsupportedOperationException();
     }
 
+    // TODO: I decided that normal users get the archived Experiments where they are the creator or the scientist...
+    //  and ADMINS get all archived experiments that exist
     @GetMapping("/archived")
-    public ResponseEntity<GetExperimentDto[]> getArchivedExperiments() {
+    public ResponseEntity<GetExperimentDto[]> getArchivedExperiments(
+      Authentication authentication,
+      @AuthenticationPrincipal Jwt jwt
+    ) {
+        log.info("GET /api/experiment/archived called by User ID: {}", jwt.getSubject());
 
-        //TODO:
-        throw new UnsupportedOperationException();
+        Role userRole = extractUserRole(authentication);
+        GetExperimentDto[] archivedExperiments = experimentService.getArchivedExperiments(jwt.getSubject(), userRole);
+
+        return ResponseEntity.ok(archivedExperiments);
     }
 
     @DeleteMapping("/{uuid}")

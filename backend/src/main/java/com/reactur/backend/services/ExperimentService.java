@@ -20,4 +20,6 @@ public interface ExperimentService {
   void archiveExperiment(UUID experimentId, String requestingUserId, Role requestingUserRole);
 
   GetExperimentDto restoreExperiment(UUID experimentId, String requestingUserId, Role requestingUserRole);
+
+  GetExperimentDto[] getArchivedExperiments(String requestingUserId, Role requestingUserRole);
 }

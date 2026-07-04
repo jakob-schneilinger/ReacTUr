@@ -13,7 +13,15 @@ import com.reactur.backend.entities.options.Solvent;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
-@Mapper(componentModel = "spring", uses = {ReactantMapper.class, UserMapper.class})
+@Mapper(
+  componentModel = "spring",
+  uses = {
+    ReactantMapper.class,
+    UserMapper.class,
+    MetadataMapper.class,
+    MeasurementDataMapper.class
+  }
+)
 public interface ExperimentMapper {
 
   // Main Experiment Mapping
@@ -22,24 +30,4 @@ public interface ExperimentMapper {
   @Mapping(target = "attachments", ignore = true)  // TODO? Handled later via dedicated attachment endpoint
   GetExperimentDto experimentToGetExperimentDto(Experiment experiment);
 
-  // Nested Metadata Mapping
-  @Mapping(target = "uuid", source = "id")
-  GetMetadataDto metadataToGetMetadataDto(Metadata metadata);
-
-  // Nested Result Mapping
-  @Mapping(target = "pFO_rateConstant", source = "pfoRateConstant")
-  @Mapping(target = "error", source = "errorValue")
-  MeasurementDataDto resultToMeasurementDataDto(ExperimentResult result);
-
-  @Mapping(source = "id", target = "uuid")
-  SolventDto solventToSolventDto(Solvent solvent);
-
-  @Mapping(source = "id", target = "uuid")
-  InstrumentDto instrumentToInstrumentDto(Instrument instrument);
-
-  @Mapping(source = "id", target = "uuid")
-  ModalityDto modalityToModalityDto(Modality modality);
 }
-
-// TODO: Separate this into different mapper classes, as we also added here reactants and other staff that
-//  shouldn't be here
