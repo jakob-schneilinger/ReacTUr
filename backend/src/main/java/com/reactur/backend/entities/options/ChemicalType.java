@@ -12,6 +12,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.time.Instant;
 import java.util.UUID;
 
 @Entity
@@ -21,7 +22,6 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-// TODO: ArchivedAt instead of isActive
 public class ChemicalType {
 
     @Id
@@ -31,7 +31,6 @@ public class ChemicalType {
     @Column(name = "name", unique = true, nullable = false)
     private String name;
 
-    @Column(name = "is_active", nullable = false)
-    @Builder.Default
-    private Boolean isActive = true;
+    @Column(name = "archived_at")
+    private Instant archivedAt;
 }
