@@ -1,6 +1,9 @@
 package com.reactur.backend.endpoints;
 
-import com.reactur.backend.dtos.ExperimentDtos.*;
+import com.reactur.backend.dtos.experiments.GetExperimentDto;
+import com.reactur.backend.dtos.experiments.MeasurementDataDto;
+import com.reactur.backend.dtos.experiments.SaveExperimentDto;
+import com.reactur.backend.dtos.experiments.SaveMetadataDto;
 import com.reactur.backend.enums.Role;
 import com.reactur.backend.exeptions.ResourceNotFoundException;
 import com.reactur.backend.security.SecurityConfig;

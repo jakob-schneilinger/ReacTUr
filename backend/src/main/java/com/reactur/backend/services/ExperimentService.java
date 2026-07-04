@@ -1,7 +1,7 @@
 package com.reactur.backend.services;
 
-import com.reactur.backend.dtos.ExperimentDtos.GetExperimentDto;
-import com.reactur.backend.dtos.ExperimentDtos.SaveExperimentDto;
+import com.reactur.backend.dtos.experiments.GetExperimentDto;
+import com.reactur.backend.dtos.experiments.SaveExperimentDto;
 import com.reactur.backend.enums.Role;
 import org.springframework.stereotype.Service;
 

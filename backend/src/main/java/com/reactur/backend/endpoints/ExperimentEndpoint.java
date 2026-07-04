@@ -1,9 +1,9 @@
 package com.reactur.backend.endpoints;
 
 import com.reactur.backend.dtos.AuditLogDto;
-import com.reactur.backend.dtos.ExperimentDtos.GetExperimentDto;
-import com.reactur.backend.dtos.ExperimentDtos.SaveExperimentDto;
-import com.reactur.backend.dtos.ExperimentDtos.SearchParametersDto;
+import com.reactur.backend.dtos.experiments.GetExperimentDto;
+import com.reactur.backend.dtos.experiments.SaveExperimentDto;
+import com.reactur.backend.dtos.experiments.SearchParametersDto;
 import com.reactur.backend.enums.Role;
 import com.reactur.backend.services.ExperimentService;
 import jakarta.validation.Valid;
