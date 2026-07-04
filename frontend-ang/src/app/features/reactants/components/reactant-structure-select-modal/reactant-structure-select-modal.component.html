@@ -1,22 +1,19 @@
 <app-modal
   [isOpen]="true"
-  [title]="'reactants.structureSelectionModal.title' | transloco"
+  [title]="'reactants.details.modals.structureSelect.title' | transloco"
   size="xl"
   (close)="close.emit()">
 
-  <div body class="container-fluid py-3">
+  <div body class="container-fluid">
 
     <div class="row text-center mb-4">
-      <p class="text-muted">
-        {{ 'reactants.structureSelectionModal.description' | transloco }}
+      <p class="text-muted" [innerHTML]="'reactants.details.modals.structureSelect.description' | transloco">
       </p>
     </div>
 
     <div class="row justify-content-center">
       @for (struct of pendingStructures; track struct.id) {
-        <div class="col-md-6 mb-4 d-flex flex-column align-items-center">
-
-          <h6 class="text-primary mb-3">{{ struct.name }}</h6>
+        <div class="col-md-6 d-flex flex-column align-items-center">
 
           <div class="border rounded p-3 mb-3 w-100" style="min-height: 300px;">
             @if (structureService.parseFile(struct, "placeholder"); as file) {
@@ -28,8 +25,8 @@
             }
           </div>
 
-          <button type="button" class="btn btn-primary primary" (click)="selectStructure(struct)">
-            {{ 'reactants.structureSelectionModal.buttons.select' | transloco }}
+          <button type="button" class="primary" (click)="selectStructure(struct)">
+            {{ 'reactants.details.modals.structureSelect.buttons.select' | transloco }}
           </button>
 
         </div>
@@ -39,12 +36,12 @@
 
   <ng-container footer>
 
-    <button type="button" class="btn btn-danger btn-outline-danger me-auto" (click)="rejectStructures()">
-      {{ 'reactants.structureSelectionModal.buttons.rejectAll' | transloco }}
+    <button type="button" class="error" (click)="rejectStructures()">
+      {{ 'reactants.details.modals.structureSelect.buttons.rejectAll' | transloco }}
     </button>
 
-    <button type="button" class="btn btn-secondary" (click)="close.emit()">
-      {{ 'reactants.structureSelectionModal.buttons.cancel' | transloco }}
+    <button type="button" class="" (click)="close.emit()">
+      {{ 'reactants.details.modals.structureSelect.buttons.cancel' | transloco }}
     </button>
 
   </ng-container>
