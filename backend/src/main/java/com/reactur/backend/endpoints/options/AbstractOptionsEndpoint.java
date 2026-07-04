@@ -2,6 +2,7 @@ package com.reactur.backend.endpoints.options;
 
 import com.reactur.backend.dtos.options.OptionDto;
 import com.reactur.backend.services.options.OptionService;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -30,7 +31,7 @@ public abstract class AbstractOptionsEndpoint<T extends OptionDto> {
 
     @PostMapping()
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<List<T>> createOptions(@RequestBody T optionDto) {
+    public ResponseEntity<List<T>> createOptions(@RequestBody @Valid T optionDto) {
         return ResponseEntity.status(HttpStatus.CREATED).body(service.createOptions(optionDto));
     }
 

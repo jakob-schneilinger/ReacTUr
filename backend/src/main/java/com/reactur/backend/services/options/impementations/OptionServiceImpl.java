@@ -2,10 +2,13 @@ package com.reactur.backend.services.options.impementations;
 
 import com.reactur.backend.dtos.options.OptionDto;
 import com.reactur.backend.entities.options.BaseOption;
+import com.reactur.backend.exeptions.ResourceConflictException;
+import com.reactur.backend.exeptions.ResourceNotFoundException;
 import com.reactur.backend.mappers.BaseMapper;
 import com.reactur.backend.repositories.options.OptionRepository;
 import com.reactur.backend.services.options.OptionService;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
@@ -21,21 +24,37 @@ public abstract class OptionServiceImpl<E extends BaseOption, T extends OptionDt
 
     @Override
     public List<T> getKnownOptions() {
-        throw new UnsupportedOperationException("TDD: Needs implementation");
+        List<E> entities = repository.findAll();
+        return mapper.toDtoList(entities);
     }
 
     @Override
     public List<T> createOptions(T optionDto) {
-        throw new UnsupportedOperationException("TDD: Needs implementation");
+        if (repository.existsByNameIgnoreCase(optionDto.name())) {
+            throw new ResourceConflictException("An option with the name '" + optionDto.name() + "' already exists.");
+        }
+
+        E entity = mapper.toEntity(optionDto);
+        repository.save(entity);
+
+        return getKnownOptions();
     }
 
     @Override
     public void archiveOption(UUID uuid) {
-        throw new UnsupportedOperationException("TDD: Needs implementation");
+        E entity = repository.findById(uuid)
+                .orElseThrow(() -> new ResourceNotFoundException("Option with ID " + uuid + " not found."));
+
+        entity.setArchivedAt(Instant.now());
+        repository.save(entity);
     }
 
     @Override
     public void restoreOption(UUID uuid) {
-        throw new UnsupportedOperationException("TDD: Needs implementation");
+        E entity = repository.findById(uuid)
+                .orElseThrow(() -> new ResourceNotFoundException("Option with ID " + uuid + " not found."));
+
+        entity.setArchivedAt(null);
+        repository.save(entity);
     }
 }

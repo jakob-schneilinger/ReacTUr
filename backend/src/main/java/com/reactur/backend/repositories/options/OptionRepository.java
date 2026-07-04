@@ -8,4 +8,6 @@ import java.util.UUID;
 
 @NoRepositoryBean
 public interface OptionRepository <E extends BaseOption> extends JpaRepository<E, UUID> {
+
+    boolean existsByNameIgnoreCase(String name);
 }

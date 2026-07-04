@@ -86,7 +86,8 @@ public class ReactantServiceImpl implements ReactantService {
         Reactant saved = reactantRepository.save(reactant);
         List<StructureDto> structures = structureService.getStructuresByReactant(uuid);
 
-        return reactantMapper.toDetailDto(saved, structures);    }
+        return reactantMapper.toDetailDto(saved, structures);
+    }
 
     @Override
     @Transactional(readOnly = true)
