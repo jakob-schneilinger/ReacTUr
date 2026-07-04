@@ -125,15 +125,6 @@
         "confirm": "Restore"
       }
     },
-    "structureSelectionModal": {
-      "title": "Select 3D Structure",
-      "description": "The API has generated these structures. Please review the 3D models and select the correct structure for this reactant.",
-      "buttons": {
-        "select": "Apply this structure",
-        "rejectAll": "Discard all",
-        "cancel": "Cancel"
-      }
-    },
     "notifications": {
       "fetchError": "Reactants unavailable",
       "fetchArchivedError": "Archived Reactants unavailable",
@@ -188,6 +179,23 @@
         }
       },
       "modals": {
+        "structureSelect": {
+          "title": "Select 3D Structure",
+          "description": "The API has generated these structures. Please review the 3D models and select the correct structure for this reactant.<br><strong>Saving this structure file is a permanent action.</strong>",
+          "buttons": {
+            "select": "Apply this structure",
+            "rejectAll": "Discard all",
+            "cancel": "Cancel"
+          }
+        },
+        "structureConfirm": {
+          "title": "Confirm uploaded 3D Structure",
+          "description": "Please review the uploaded 3D structure. <strong>Saving this structure file is a permanent action.</strong> <br>If you want to change the structure, please cancel and upload a new file.",
+          "buttons": {
+            "confirm": "Confirm",
+            "cancel": "Cancel"
+          }
+        },
         "archive": {
           "title": "Archive Reactant",
           "message": "Are you sure you want to permanently archive the reactant {{name}}?",
@@ -205,6 +213,7 @@
         "loadError": "Failed to load reactant data",
         "typeLoadErrorTitle": "Type Loading Error",
         "typeLoadErrorMessage": "Please refresh page! Error: {{error}}",
+        "pageRefreshTitle": "Page Refreshed",
         "savedTitle": "Reactant Saved",
         "savedMessage": "Reactant was saved successfully!",
         "saveErrorTitle": "Save failed",
@@ -212,7 +221,26 @@
         "archivedTitle": "Reactant Archived",
         "archivedMessage": "The reactant \"{{name}}\" was successfully archived.",
         "archiveFailedTitle": "Archive Failed",
-        "archiveFailedMessage": "Archiving of Reactant \"{{name}}\" failed! Error: {{error}}"
+        "archiveFailedMessage": "Archiving of Reactant \"{{name}}\" failed! Error: {{error}}",
+        "uploadTitle": "Upload Successful",
+        "uploadMessage": "Successfully uploaded 3D structure file.",
+        "uploadErrorTitle": "Upload Failed",
+        "uploadErrorMessage": "Upload of 3D structure file failed! Error: {{error}}",
+        "generateTitle": "Started 3D Structure Generation",
+        "generateErrorTitle": "Starting Generation Failed",
+        "generateErrorMessage": "Error: {{error}}",
+        "structureSelectTitle": "Selection Successful",
+        "structureSelectErrorTitle": "Structure Selection Failed",
+        "structureSelectErrorMessage": "Failed to select structure! Error: {{error}}"
+      },
+      "structure": {
+        "failedGenerate": "Failed to generate structure.",
+        "tryAgainButton": "Try Again",
+        "generating": "Generating 3D structure... Please wait.",
+        "refreshButton": "Refresh Status",
+        "generateComplete": "Structure generation complete.",
+        "selectStructureButton": "Select Structure",
+        "generateStructureButton": "Generate Structure from SMILES"
       }
     },
     "structure": {
@@ -244,6 +272,10 @@
         "casNumber": "CAS Number",
         "comment": "Comment",
         "references": "References"
+      },
+      "structure": {
+        "generate": "3D structures are being generated in the background or are awaiting approval.",
+        "generateFailed": "3D structure generation failed."
       },
       "emptyFiles": "No structural files attached.",
       "buttons": {

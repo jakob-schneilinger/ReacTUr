@@ -1,0 +1,22 @@
+@use "styles/global" as *;
+@use "styles/variables" as *;
+
+.border {
+  background-color: var(--bs-gray-100, #f8f9fa);
+  position: relative;
+  overflow: hidden;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  .col-md-6 {
+    flex: none;
+    flex-shrink: 0;
+    width: 100%;
+  }
+}
+
+@media (max-width: 991px) {
+  .border-start {
+    border-left: none !important;
+  }
+}

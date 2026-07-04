@@ -130,7 +130,7 @@ export class ExperimentDetailsFormComponent implements OnInit, OnDestroy, OnChan
         'Connection Error',
       this.transloco.translate('experiments.details.notifications.optionLoadErrorMessage', {
         category: category,
-        error: err.message || err.error || err,
+        error: err.error || err.message || err,
       }),
     );
   }
