@@ -420,6 +420,64 @@ class ExperimentServiceTest {
     Mockito.verify(experimentRepository, Mockito.never()).save(any());
   }
 
+  @Test
+  void getArchivedExperiments_whenUserIsAdmin_fetchesAllArchived() {
+    String adminId = "admin-999";
+
+    // Create a couple of mock archived experiments
+    Experiment exp1 = createMockEntityForSecurity(randomUUID(), "creator-1", "scientist-1", Instant.now());
+    Experiment exp2 = createMockEntityForSecurity(randomUUID(), "creator-2", "scientist-2", Instant.now());
+
+    when(experimentRepository.findByArchivedAtIsNotNull()).thenReturn(java.util.List.of(exp1, exp2));
+
+    GetExperimentDto[] result = experimentService.getArchivedExperiments(adminId, Role.ADMIN);
+
+    // Assert that the admin repository method was called
+    Mockito.verify(experimentRepository).findByArchivedAtIsNotNull();
+    Mockito.verify(experimentRepository, Mockito.never()).findArchivedExperimentsForUser(any());
+
+    // Assert array mapping
+    assertNotNull(result, "Resulting array should not be null");
+    assertEquals(2, result.length, "Should return exactly two archived experiments");
+    assertEquals(exp1.getId(), result[0].uuid(), "First mapped DTO should match first entity ID");
+    assertEquals(exp2.getId(), result[1].uuid(), "Second mapped DTO should match second entity ID");
+  }
+
+  @Test
+  void getArchivedExperiments_whenUserIsStandardUser_fetchesUserSpecificArchived() {
+    String userId = "standard-user-123";
+
+    // Create a mock archived experiment belonging to this user
+    Experiment exp1 = createMockEntityForSecurity(randomUUID(), userId, "some-scientist", Instant.now());
+
+    when(experimentRepository.findArchivedExperimentsForUser(userId)).thenReturn(java.util.List.of(exp1));
+
+    GetExperimentDto[] result = experimentService.getArchivedExperiments(userId, Role.USER);
+
+    // Assert that the user-specific repository method was called
+    Mockito.verify(experimentRepository).findArchivedExperimentsForUser(userId);
+    Mockito.verify(experimentRepository, Mockito.never()).findByArchivedAtIsNotNull();
+
+    // Assert array mapping
+    assertNotNull(result, "Resulting array should not be null");
+    assertEquals(1, result.length, "Should return exactly one archived experiment");
+    assertEquals(exp1.getId(), result[0].uuid());
+  }
+
+  @Test
+  void getArchivedExperiments_whenEmptyResults_returnsEmptyArray() {
+    String userId = "lonely-user-000";
+
+    // Repository returns an empty list
+    when(experimentRepository.findArchivedExperimentsForUser(userId)).thenReturn(java.util.Collections.emptyList());
+
+    GetExperimentDto[] result = experimentService.getArchivedExperiments(userId, Role.USER);
+
+    // Assert empty mapping is handled safely
+    assertNotNull(result);
+    assertEquals(0, result.length, "Array should be completely empty");
+    Mockito.verify(experimentRepository).findArchivedExperimentsForUser(userId);
+  }
 
   private SaveExperimentDto createDummyExperimentDto() {
     SaveMetadataDto metadata = new SaveMetadataDto(

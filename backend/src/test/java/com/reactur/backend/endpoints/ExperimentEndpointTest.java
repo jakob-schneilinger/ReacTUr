@@ -260,4 +260,59 @@ class ExperimentEndpointTest {
       .andExpect(status().isForbidden());
   }
 
+  @Test
+  void getArchivedExperiments_whenAuthorizedAsUser_returns200OkWithData() throws Exception {
+    String userId = "standard-user-123";
+    GetExperimentDto experiment1 = new GetExperimentDto(UUID.randomUUID(), "10.1000/rxn001", null, null, null, null, null, null, null);
+    GetExperimentDto experiment2 = new GetExperimentDto(UUID.randomUUID(), "10.1000/rxn002", null, null, null, null, null, null, null);
+    GetExperimentDto[] mockedResponse = { experiment1, experiment2 };
+
+    Mockito.when(experimentService.getArchivedExperiments(Mockito.eq(userId), Mockito.eq(Role.USER)))
+      .thenReturn(mockedResponse);
+
+    mockMvc.perform(get("/api/experiment/archived")
+        .with(jwt().jwt(builder -> builder.subject(userId))))
+      .andExpect(status().isOk())
+      .andExpect(jsonPath("$.length()").value(2))
+      .andExpect(jsonPath("$[0].doi").value("10.1000/rxn001"))
+      .andExpect(jsonPath("$[1].doi").value("10.1000/rxn002"));
+
+    Mockito.verify(experimentService).getArchivedExperiments(userId, Role.USER);
+  }
+
+  @Test
+  void getArchivedExperiments_whenAuthorizedAsAdmin_returns200OkWithData() throws Exception {
+    String adminId = "admin-user-999";
+    GetExperimentDto[] mockedResponse = {
+      new GetExperimentDto(UUID.randomUUID(), "10.1000/rxn999", null, null, null, null, null, null, null)
+    };
+
+    Mockito.when(experimentService.getArchivedExperiments(Mockito.eq(adminId), Mockito.eq(Role.ADMIN)))
+      .thenReturn(mockedResponse);
+
+    mockMvc.perform(get("/api/experiment/archived")
+        .with(jwt().jwt(builder -> builder.subject(adminId)).authorities(new org.springframework.security.core.authority.SimpleGrantedAuthority("ROLE_ADMIN"))))
+      .andExpect(status().isOk())
+      .andExpect(jsonPath("$.length()").value(1))
+      .andExpect(jsonPath("$[0].doi").value("10.1000/rxn999"));
+
+    Mockito.verify(experimentService).getArchivedExperiments(adminId, Role.ADMIN);
+  }
+
+  @Test
+  void getArchivedExperiments_whenEmpty_returns200OkWithEmptyArray() throws Exception {
+    String userId = "lonely-user-000";
+    GetExperimentDto[] mockedResponse = new GetExperimentDto[0];
+
+    Mockito.when(experimentService.getArchivedExperiments(Mockito.eq(userId), Mockito.eq(Role.USER)))
+      .thenReturn(mockedResponse);
+
+    mockMvc.perform(get("/api/experiment/archived")
+        .with(jwt().jwt(builder -> builder.subject(userId))))
+      .andExpect(status().isOk())
+      .andExpect(jsonPath("$.length()").value(0));
+
+    Mockito.verify(experimentService).getArchivedExperiments(userId, Role.USER);
+  }
+
 }
