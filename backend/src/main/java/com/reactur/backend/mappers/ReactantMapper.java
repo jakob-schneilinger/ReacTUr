@@ -12,21 +12,24 @@ import org.mapstruct.Mapping;
 
 import java.util.List;
 
-//TODO: Activate chemicalType when available
-
 @Mapper(componentModel = "spring")
 public interface ReactantMapper {
 
     @Mapping(source = "reactant.id", target = "uuid")
-    @Mapping(target = "chemicalType", ignore = true)
+    @Mapping(source = "reactant.type", target = "chemicalType")
     @Mapping(source = "structure", target = "structures")
     ReactantDetailDto toDetailDto(Reactant reactant, List<StructureDto> structure);
 
     @Mapping(source = "reactant.id", target = "uuid")
-    @Mapping(target = "chemicalType", ignore = true)
+    @Mapping(source = "reactant.type", target = "chemicalType")
     ReactantDto toDto(Reactant reactant, StructureFlag flag);
 
+    // TODO: Set a default Fallback, probably with a better flag than NULL
+    // MapStruct Fallback: If no flag is provided, pass null.
+    default ReactantDto toDto(Reactant reactant) {
+        return toDto(reactant, null);
+    }
+
     @Mapping(source = "id", target = "uuid")
-    @Mapping(target = "archivedAt", ignore = true) // TODO: Entity uses isActive, DTO expects archivedAt
     ChemicalTypeDto toChemicalTypeDto(ChemicalType chemicalType);
 }

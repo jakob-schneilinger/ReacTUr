@@ -43,7 +43,7 @@ import java.util.UUID;
 import com.reactur.backend.enums.Role;
 import org.springframework.security.access.AccessDeniedException;
 import java.time.Instant;
-import com.reactur.backend.entities.ExperimentEntities.Metadata;
+import com.reactur.backend.entities.experiment.Metadata;
 
 import static java.util.UUID.randomUUID;
 import static org.junit.jupiter.api.Assertions.assertEquals;
