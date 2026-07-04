@@ -18,7 +18,6 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.hibernate.annotations.SQLRestriction;
 
 import java.time.Instant;
 import java.time.LocalDate;
@@ -31,7 +30,6 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@SQLRestriction("archived_at IS NULL")
 public class Metadata {
 
     @Id

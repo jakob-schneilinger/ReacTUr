@@ -63,14 +63,19 @@
           <div class="mt-3">
             @if (failedStructures.length > 0) {
               <div class="alert alert-danger d-flex align-items-center py-2" role="alert">
-                <i class="bi bi-exclamation-triangle-fill me-2"></i> <div>3D structure generation failed.</div>
+                <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                <div>
+                  {{ 'reactants.viewModal.structure.generateFailed' | transloco }}
+                </div>
               </div>
             }
 
             @if (pendingStructures.length > 0) {
               <div class="alert alert-warning d-flex align-items-center py-2" role="alert">
                 <i class="bi bi-hourglass-split me-2"></i>
-                <div>3D structures are being generated in the background or are awaiting approval.</div>
+                <div>
+                  {{ 'reactants.viewModal.structure.generate' | transloco }}
+                </div>
               </div>
             }
           </div>

@@ -30,9 +30,9 @@
             </app-reactant-structure>
             @if (isEditMode) {
               <div class="info-banner align-self-center mt-4 d-flex flex-column align-items-center">
-                <p>Generating 3D structure... Please wait.</p>
+                <p>{{ 'reactants.details.structure.generating' | transloco }}</p>
                 <button type="button" class="primary" (click)="refreshStatus()" [disabled]="isRefreshDisabled">
-                  Refresh Status
+                  {{ 'reactants.details.structure.refreshButton' | transloco }}
                 </button>
               </div>
             }
@@ -44,9 +44,9 @@
             </app-reactant-structure>
             @if (isEditMode) {
               <div class="action-banner align-self-center mt-4 d-flex flex-column align-items-center">
-                <p>Structure generation complete.</p>
+                <p>{{ 'reactants.details.structure.generateComplete' | transloco }}</p>
                 <button type="button" (click)="openStructureSelectionModal()">
-                  Select Structure
+                  {{ 'reactants.details.structure.selectStructureButton' | transloco }}
                 </button>
               </div>
             }
@@ -70,9 +70,9 @@
             </app-reactant-structure>
             @if (isEditMode) {
               <div class="error-banner align-self-center mt-4 d-flex flex-column align-items-center">
-                <p>Failed to generate structure.</p>
+                <p>{{ 'reactants.details.structure.failedGenerate' | transloco }}</p>
                 <button type="button" (click)="generateStructureFromSmiles()">
-                  Try Again
+                  {{ 'reactants.details.structure.tryAgainButton' | transloco }}
                 </button>
               </div>
             }
@@ -86,7 +86,7 @@
             @if (isEditMode) {
               <div class="generate-actions align-self-center mt-4">
                 <button type="button" class="primary" (click)="generateStructureFromSmiles()">
-                  Generate Structure from SMILES
+                  {{ 'reactants.details.structure.generateStructureButton' | transloco }}
                 </button>
               </div>
             }
@@ -94,16 +94,24 @@
         }
       }
 
-      @if (showUpload) {
-        <app-file-upload
-          [showTable]="false"
-          [allowedExtensions]="['xyz']"
-          [existingFiles]="structureFiles"
-          [maxFileSizeMB]="1"
-          [maxFiles]="1"
-          [removePossible]="false"
-          (filesChanged)="handleUploadedFiles($event)" >
-        </app-file-upload>
+      @if (isEditMode) {
+        @if (showUpload) {
+          <app-file-upload
+            [showTable]="false"
+            [allowedExtensions]="['xyz']"
+            [existingFiles]="structureFiles"
+            [maxFileSizeMB]="1"
+            [maxFiles]="1"
+            [removePossible]="false"
+            (filesChanged)="handleUploadedFiles($event)" >
+          </app-file-upload>
+        } @else if (showUploadedFile) {
+          <app-uploaded-file
+            class="mt-4"
+            [file]="structureFiles[0]"
+            [removePossible]="false">
+          </app-uploaded-file>
+        }
       }
     </div>
 
@@ -118,4 +126,13 @@
     (structureSelected)="handleStructureSelection($event)"
     (close)="isStructureSelectionModalOpen = false">
   </app-reactant-structure-select-modal>
+}
+
+@if (isStructureConfirmModalOpen && uploadedStructureFile) {
+  <app-reactant-structure-confirm-modal
+    [structure]="this.uploadedStructureFile"
+    [baseSmiles]="smiles"
+    (confirm)="confirmUploadedStructure()"
+    (cancel)="cancelUploadedStructure()">
+  </app-reactant-structure-confirm-modal>
 }

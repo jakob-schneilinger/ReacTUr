@@ -1,0 +1,39 @@
+<app-modal
+  [isOpen]="true"
+  [title]="'reactants.details.modals.structureConfirm.title' | transloco"
+  size="xl"
+  (close)="cancel.emit()">
+
+  <div body class="container-fluid">
+
+    <div class="row text-center mb-4">
+      <p class="text-muted" [innerHTML]="'reactants.details.modals.structureConfirm.description' | transloco">
+      </p>
+    </div>
+
+    <div class="row justify-content-center">
+      @if (structure)  {
+        <div class="col-md-6 d-flex flex-column align-items-center">
+
+          <div class="border rounded p-3 mb-3 w-100" style="min-height: 300px;">
+            <app-reactant-structure
+              [structure]="structure"
+              [smiles]="baseSmiles"
+              [show3D]="true">
+            </app-reactant-structure>
+          </div>
+        </div>
+      }
+    </div>
+  </div>
+
+  <ng-container footer>
+    <button type="button" class="" (click)="onCancel()">
+      {{ 'reactants.details.modals.structureConfirm.buttons.cancel' | transloco }}
+    </button>
+    <button type="button" class="primary" (click)="onConfirm()">
+      {{ 'reactants.details.modals.structureConfirm.buttons.confirm' | transloco }}
+    </button>
+  </ng-container>
+
+</app-modal>
