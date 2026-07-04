@@ -1,8 +1,10 @@
 package com.reactur.backend.services;
 
 import com.reactur.backend.dtos.reactants.StructureDto;
+import com.reactur.backend.entities.options.ChemicalType;
 import com.reactur.backend.enums.StructureFlag;
 import com.reactur.backend.repositories.UserRepository;
+import com.reactur.backend.repositories.options.ChemicalTypeRepository;
 import com.reactur.backend.validators.ReactantValidator;
 import com.reactur.backend.dtos.reactants.CreateReactantDto;
 import com.reactur.backend.dtos.reactants.ReactantDetailDto;
@@ -53,6 +55,9 @@ class ReactantServiceTest {
     @Mock
     private StructureService structureService;
 
+    @Mock
+    private ChemicalTypeRepository chemicalTypeRepository;
+
     @Spy
     private ReactantMapper reactantMapper = Mappers.getMapper(ReactantMapper.class);
 
@@ -65,6 +70,8 @@ class ReactantServiceTest {
     private Reactant mockReactant;
     private final UUID VALID_UUID = UUID.randomUUID();
     private final String MOCK_USER_ID = "keycloak-123";
+    private ChemicalType mockChemicalType;
+    private final UUID VALID_CHEMICAL_TYPE_ID = UUID.randomUUID();
 
     @BeforeEach
     void setUp() {
@@ -74,20 +81,25 @@ class ReactantServiceTest {
         mockUser = new User();
         mockUser.setId(MOCK_USER_ID);
 
+        mockChemicalType = new ChemicalType();
+        mockChemicalType.setId(VALID_CHEMICAL_TYPE_ID);
+        mockChemicalType.setName("Solvent");
+
         sampleCreateDto = new CreateReactantDto(
-                "CCO", UUID.randomUUID(), "Ethanol",
+                "CCO", VALID_CHEMICAL_TYPE_ID, "Ethanol",
                 List.of("EtOH", "Alkohol"), "Ethyl alcohol", "64-17-5",
                 "LFQSCWFLJHTTHZ-UHFFFAOYSA-N", "A test comment", List.of("Ref1", "Ref2")
         );
 
         sampleUpdateDto = new UpdateReactantDto(
-                "CCO", UUID.randomUUID(), "Ethanol",
+                "CCO", VALID_CHEMICAL_TYPE_ID, "Ethanol",
                 List.of("EtOH", "Alkohol"), "Ethyl alcohol", "64-17-5",
                 "LFQSCWFLJHTTHZ-UHFFFAOYSA-N", "A test comment", List.of("Ref1", "Ref2")
         );
 
         mockReactant = Reactant.builder()
                 .id(VALID_UUID)
+                .type(mockChemicalType)
                 .shortName("Ethanol")
                 .smiles("CCO")
                 .chemicalName("Ethyl alcohol")
@@ -99,7 +111,6 @@ class ReactantServiceTest {
                 .createdBy(mockUser)
                 .build();
     }
-
     @Test
     void createReactant_ShouldSaveSuccessfully_WhenValidData() {
         when(userRepository.findById(MOCK_USER_ID)).thenReturn(Optional.of(mockUser));
@@ -109,6 +120,7 @@ class ReactantServiceTest {
             saved.setId(VALID_UUID);
             return saved;
         });
+        when(chemicalTypeRepository.findById(VALID_CHEMICAL_TYPE_ID)).thenReturn(Optional.of(mockChemicalType));
 
         ReactantDetailDto result = reactantService.createReactant(sampleCreateDto, MOCK_USER_ID);
 
@@ -119,6 +131,17 @@ class ReactantServiceTest {
         assertIterableEquals(List.of("EtOH", "Alkohol"), result.additionalShortNames());
         assertTrue(result.structures().isEmpty());
         verify(reactantRepository, times(1)).save(any(Reactant.class));
+    }
+
+    @Test
+    void createReactant_ShouldThrowResourceNotFound_WhenChemicalTypeDoesNotExist() {
+        when(userRepository.findById(MOCK_USER_ID)).thenReturn(Optional.of(mockUser));
+        when(reactantRepository.hasNameConflict(anyCollection())).thenReturn(false);
+
+        when(chemicalTypeRepository.findById(VALID_CHEMICAL_TYPE_ID)).thenReturn(Optional.empty());
+
+        assertThrows(ResourceNotFoundException.class, () -> reactantService.createReactant(sampleCreateDto, MOCK_USER_ID));
+        verify(reactantRepository, never()).save(any(Reactant.class));
     }
 
     @Test

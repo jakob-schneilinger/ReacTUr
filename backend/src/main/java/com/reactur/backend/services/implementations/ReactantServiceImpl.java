@@ -1,8 +1,10 @@
 package com.reactur.backend.services.implementations;
 
 import com.reactur.backend.dtos.reactants.StructureDto;
+import com.reactur.backend.entities.options.ChemicalType;
 import com.reactur.backend.enums.StructureFlag;
 import com.reactur.backend.repositories.UserRepository;
+import com.reactur.backend.repositories.options.ChemicalTypeRepository;
 import com.reactur.backend.services.ReactantService;
 import com.reactur.backend.services.StructureService;
 import com.reactur.backend.validators.ReactantValidator;
@@ -34,6 +36,7 @@ public class ReactantServiceImpl implements ReactantService {
     private final ReactantValidator reactantValidator;
     private final ReactantMapper reactantMapper;
     private final StructureService structureService;
+    private final ChemicalTypeRepository chemicalTypeRepository;
 
     @Override
     @Transactional
@@ -43,9 +46,13 @@ public class ReactantServiceImpl implements ReactantService {
 
         User activeUser = userRepository.findById(userId).orElseThrow(() -> new ResourceNotFoundException("Current User could not be found"));
 
+        ChemicalType chemicalType = chemicalTypeRepository.findById(saveReactant.chemicalType())
+                .orElseThrow(() -> new ResourceNotFoundException("ChemicalType with ID " + saveReactant.chemicalType() + " not found"));
+
         Reactant reactant = Reactant.builder()
                 .shortName(saveReactant.shortName())
                 .smiles(saveReactant.smiles())
+                .type(chemicalType)
                 .inChiKey(saveReactant.inChiKey() != null ? saveReactant.inChiKey() : "")
                 .chemicalName(saveReactant.chemicalName() != null ? saveReactant.chemicalName() : "")
                 .casNumber(saveReactant.casNumber() != null ? saveReactant.casNumber() : "")
@@ -66,6 +73,12 @@ public class ReactantServiceImpl implements ReactantService {
                 .orElseThrow(() -> new ResourceNotFoundException("Reactant with ID " + uuid + " not found"));
 
         reactantValidator.validateForUpdate(uuid, patchDto, reactant);
+
+        if (patchDto.chemicalType() != null) {
+            ChemicalType chemicalType = chemicalTypeRepository.findById(patchDto.chemicalType())
+                    .orElseThrow(() -> new ResourceNotFoundException("ChemicalType with ID " + patchDto.chemicalType() + " not found"));
+            reactant.setType(chemicalType);
+        }
 
         // PATCH: Update if not null. "" clears strings, [] empties lists.
         if (patchDto.shortName() != null) reactant.setShortName(patchDto.shortName());

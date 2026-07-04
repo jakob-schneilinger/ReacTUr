@@ -13,10 +13,12 @@ import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 @Slf4j
 @RestControllerAdvice
@@ -48,26 +50,6 @@ public class GlobalExceptionHandler {
         log.warn("Resource not found: {}", ex.getMessage());
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
     }
-
-    /* TODO: Alternatives using MAP for better legibility in the frontend
-    @ExceptionHandler(ResourceConflictException.class)
-    public ResponseEntity<Map<String, String>> handleResourceConflictException(ResourceConflictException ex) {
-        log.warn("Resource conflict: {}", ex.getMessage());
-        Map<String, String> response = new HashMap<>();
-        response.put("error", "Conflict");
-        response.put("message", ex.getMessage());
-        return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
-    }
-
-    @ExceptionHandler(ResourceConflictException.class)
-    public ResponseEntity<Map<String, String>> handleResourceConflictException(ResourceConflictException ex) {
-        log.warn("Resource conflict: {}", ex.getMessage());
-        Map<String, String> response = new HashMap<>();
-        response.put("error", "Conflict");
-        response.put("message", ex.getMessage());
-        return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
-    }
-     */
 
     @ExceptionHandler(FileStorageException.class)
     public ResponseEntity<String> handleFileStorageException(FileStorageException ex) {
@@ -144,6 +126,20 @@ public class GlobalExceptionHandler {
 
         return ResponseEntity.status(HttpStatus.UNSUPPORTED_MEDIA_TYPE)
                 .body(String.format("The requested media type is not supported for this endpoint. Details: %s", ex.getMessage()));
+    }
+
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ResponseEntity<String> handleMethodArgumentTypeMismatchException(MethodArgumentTypeMismatchException ex) {
+        log.warn("Type mismatch for parameter '{}': {}", ex.getName(), ex.getMessage());
+
+        if (ex.getRequiredType() != null && ex.getRequiredType().isAssignableFrom(UUID.class)) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(String.format("Invalid UUID format for parameter '%s'. Please provide a valid UUID.", ex.getName()));
+        }
+
+        String requiredTypeName = ex.getRequiredType() != null ? ex.getRequiredType().getSimpleName() : "unknown";
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(String.format("Parameter '%s' must be of type %s.", ex.getName(), requiredTypeName));
     }
 
     @ExceptionHandler(Exception.class)
