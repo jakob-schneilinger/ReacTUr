@@ -315,4 +315,85 @@ class ExperimentEndpointTest {
     Mockito.verify(experimentService).getArchivedExperiments(userId, Role.USER);
   }
 
+  @Test
+  void updateExperiment_whenInputIsValid_returns200Ok() throws Exception {
+    UUID experimentId = UUID.randomUUID();
+    UUID reactantA = UUID.randomUUID();
+    UUID reactantB = UUID.randomUUID();
+
+    SaveMetadataDto validMetadata = new SaveMetadataDto(
+      LocalDate.now().minusDays(1),
+      "mock-scientist-id-456",
+      25.0,
+      UUID.randomUUID(),
+      1.5,
+      2.0,
+      UUID.randomUUID(),
+      UUID.randomUUID(),
+      450.0,
+      "Updated comment"
+    );
+    MeasurementDataDto validMeasurement = new MeasurementDataDto(
+      1.2, 5.5, 0.1, false
+    );
+    SaveExperimentDto validRequestDto = new SaveExperimentDto(
+      reactantA, reactantB, validMetadata, validMeasurement, "10.1000/rxn-updated"
+    );
+
+    GetExperimentDto expectedResponseDto = new GetExperimentDto(
+      experimentId, "10.1000/rxn-updated", null, null, null, null, null, null, null
+    );
+
+    Mockito.when(experimentService.updateExperiment(
+      Mockito.eq(experimentId),
+      any(SaveExperimentDto.class),
+      Mockito.anyString(),
+      any(Role.class)
+    )).thenReturn(expectedResponseDto);
+
+    mockMvc.perform(put("/api/experiment/" + experimentId)
+        .with(csrf())
+        .with(jwt().jwt(builder -> builder.subject("mock-keycloak-id-123")))
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(objectMapper.writeValueAsString(validRequestDto)))
+      .andExpect(status().isOk())
+      .andExpect(jsonPath("$.uuid").value(experimentId.toString()))
+      .andExpect(jsonPath("$.doi").value("10.1000/rxn-updated"));
+
+    Mockito.verify(experimentService).updateExperiment(
+      Mockito.eq(experimentId),
+      any(SaveExperimentDto.class),
+      Mockito.eq("mock-keycloak-id-123"),
+      Mockito.eq(Role.USER)
+    );
+  }
+
+  @Test
+  void updateExperiment_whenServiceThrowsForbidden_returns403() throws Exception {
+    UUID experimentId = UUID.randomUUID();
+    SaveExperimentDto validRequestDto = createDummySaveExperimentDto();
+
+    Mockito.when(experimentService.updateExperiment(
+      Mockito.eq(experimentId),
+      any(SaveExperimentDto.class),
+      Mockito.anyString(),
+      any(Role.class)
+    )).thenThrow(new AccessDeniedException("Forbidden"));
+
+    mockMvc.perform(put("/api/experiment/" + experimentId)
+        .with(csrf())
+        .with(jwt().jwt(builder -> builder.subject("snooper-123")))
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(objectMapper.writeValueAsString(validRequestDto)))
+      .andExpect(status().isForbidden());
+  }
+
+  private SaveExperimentDto createDummySaveExperimentDto() {
+    SaveMetadataDto metadata = new SaveMetadataDto(
+      LocalDate.now(), "scientist-id", 25.0, UUID.randomUUID(), 1.0, 1.0, null, null, null, null
+    );
+    MeasurementDataDto measurement = new MeasurementDataDto(null, 1.0, 0.1, false);
+    return new SaveExperimentDto(UUID.randomUUID(), UUID.randomUUID(), metadata, measurement, "10.1000/rxn");
+  }
+
 }

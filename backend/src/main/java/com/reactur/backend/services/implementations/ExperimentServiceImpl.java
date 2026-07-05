@@ -263,4 +263,9 @@ public class ExperimentServiceImpl implements ExperimentService {
       .toArray(GetExperimentDto[]::new);
   }
 
+  @Override
+  public GetExperimentDto updateExperiment(UUID experimentId, SaveExperimentDto experimentDto, String requestingUserId, Role requestingUserRole) {
+    return null;
+  }
+
 }

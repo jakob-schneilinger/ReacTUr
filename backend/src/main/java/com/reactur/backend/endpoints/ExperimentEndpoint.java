@@ -16,7 +16,6 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -50,11 +49,20 @@ public class ExperimentEndpoint {
         return ResponseEntity.status(HttpStatus.CREATED).body(createdExperiment);
     }
 
-    @PatchMapping("/{uuid}")
-    public ResponseEntity<GetExperimentDto> patchExperiment(@PathVariable UUID uuid, SaveExperimentDto experimentDto) {
+    // Javadoc: Just the creator or the scientist, or an admin, are allowed to update the experiment
+    @PutMapping("/{uuid}")
+    public ResponseEntity<GetExperimentDto> updateExperiment(
+      @PathVariable UUID uuid,
+      @Valid @RequestBody SaveExperimentDto experimentDto,
+      Authentication authentication,
+      @AuthenticationPrincipal Jwt jwt
+    ) {
+        log.info("PUT /api/experiment/{} called by User ID: {}", uuid, jwt.getSubject());
 
-        //TODO:
-        throw new UnsupportedOperationException();
+        Role userRole = extractUserRole(authentication);
+        GetExperimentDto updatedExperiment = experimentService.updateExperiment(uuid, experimentDto, jwt.getSubject(), userRole);
+
+        return ResponseEntity.ok(updatedExperiment);
     }
 
     @GetMapping("/{uuid}")
@@ -85,7 +93,7 @@ public class ExperimentEndpoint {
         throw new UnsupportedOperationException();
     }
 
-    // TODO: I decided that normal users get the archived Experiments where they are the creator or the scientist...
+    // Javadoc: I decided that normal users get the archived Experiments where they are the creator or the scientist...
     //  and ADMINS get all archived experiments that exist
     @GetMapping("/archived")
     public ResponseEntity<GetExperimentDto[]> getArchivedExperiments(

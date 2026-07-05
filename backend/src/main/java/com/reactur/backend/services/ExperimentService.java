@@ -22,4 +22,11 @@ public interface ExperimentService {
   GetExperimentDto restoreExperiment(UUID experimentId, String requestingUserId, Role requestingUserRole);
 
   GetExperimentDto[] getArchivedExperiments(String requestingUserId, Role requestingUserRole);
+
+  GetExperimentDto updateExperiment(
+    UUID experimentId,
+    SaveExperimentDto experimentDto,
+    String requestingUserId,
+    Role requestingUserRole
+  );
 }
