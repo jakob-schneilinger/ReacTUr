@@ -104,7 +104,6 @@ export class ReactantFormComponent implements OnInit, OnDestroy {
           }
         }
 
-        console.log('displayTypes', displayTypes);
         this.filteredChemicalTypes = displayTypes;
         this.filteredChemicalTypeNames = this.filteredChemicalTypes.map((t) => t.name);
 
@@ -209,7 +208,6 @@ export class ReactantFormComponent implements OnInit, OnDestroy {
 
   inListValidator(): ValidatorFn {
     return (control: AbstractControl): ValidationErrors | null => {
-      console.log('inListValidator', control);
       if (!control.value) return null;
 
       const isValid = this.filteredChemicalTypeNames.includes(control.value);
