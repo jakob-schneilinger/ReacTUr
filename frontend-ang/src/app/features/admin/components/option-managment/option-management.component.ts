@@ -79,18 +79,24 @@ export class OptionManagementComponent implements OnInit {
           err.message || err.error || err,
         );
         this.isLoading = false;
+        this.cdr.markForCheck();
       },
     });
   }
 
   toggleOptionStatus(option: SelectionOptionDto): void {
     const newStatus = !!option.archivedAt;
-    this.optionService.updateSelectionOptionStatus(option.uuid, newStatus).subscribe({
-      next: (updatedOption) => {
-        option.archivedAt = updatedOption.archivedAt;
+    this.optionService.updateSelectionOptionStatus(this.selectedCategory, option.uuid, newStatus).subscribe({
+      next: () => {
+        if (newStatus) {
+          option.archivedAt = null;
+        } else {
+          option.archivedAt = new Date().toISOString();
+        }
         this.notification.success(
           this.transloco.translate('admin.option.notifications.statusUpdated'),
         );
+        this.cdr.markForCheck();
       },
       error: (err) =>
         this.notification.error(
