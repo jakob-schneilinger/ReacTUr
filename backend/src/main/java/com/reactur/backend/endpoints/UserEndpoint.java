@@ -26,7 +26,6 @@ public class UserEndpoint {
     private final UserService userService;
 
     @GetMapping
-    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<List<GetUserDto>> getAllUsers() {
         return ResponseEntity.ok(userService.getAllUsers());
     }
