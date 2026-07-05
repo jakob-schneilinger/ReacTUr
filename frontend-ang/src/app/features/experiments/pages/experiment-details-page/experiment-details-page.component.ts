@@ -138,24 +138,31 @@ export class ExperimentDetailsPageComponent implements OnInit {
 
   async onFilesUploaded(files: File[]): Promise<void> {
     // TODO: handle experiment file upload (probably save everything and upload after user click on submit
+    if (this.state !== 'create') return;
+
+    const currentFileNames = new Set(files.map((f) => f.name));
+    for (const processedName of this.processedMetadataFiles) {
+      if (!currentFileNames.has(processedName)) {
+        this.processedMetadataFiles.delete(processedName);
+      }
+    }
 
     let metadataSet = false;
-    if (this.state === 'create') {
-      for (const file of files) {
-        if (!file.name.toLowerCase().endsWith('.csv')) {
-          continue;
-        }
+    for (const file of files) {
+      if (!file.name.toLowerCase().endsWith('.csv')) {
+        continue;
+      }
 
-        if (this.processedMetadataFiles.has(file.name)) {
-          continue;
-        }
+      if (this.processedMetadataFiles.has(file.name)) {
+        continue;
+      }
 
+      this.processedMetadataFiles.add(file.name);
+      if (!metadataSet) {
         const metadata = await this.experimentFileService.extractMetadataFromFile(file);
 
-        this.processedMetadataFiles.add(file.name);
-
-        if (metadata && !metadataSet) {
-          console.log('Metadata extracted:', metadata);
+        if (metadata) {
+          console.log('Metadata extracted from:', file.name, metadata);
           this.pendingMetadata = metadata;
           this.pendingFileName = file.name;
           this.isConfirmMetadataModalOpen = true;
