@@ -2,7 +2,7 @@ import { CommonModule } from '@angular/common';
 import { LayoutComponent } from '../../../../core/layout/layout.component';
 import { ExperimentDetailsFormComponent } from '../../components/experiment-details-form/experiment-details-form.component';
 import { FileUploadComponent } from '../../../../shared/file-upload/file-upload.component';
-import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit, ViewChild } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { AuthService } from '../../../../core/auth/auth.service';
 import { NotificationService } from '../../../../core/layout/notification/notification.service';
@@ -10,6 +10,10 @@ import { ExperimentService } from '../../experiment.service';
 import { GetExperimentDto } from '../../experiment.dto';
 import { GetUserDto } from '../../../../shared/dtos/user.dto';
 import { TranslocoService } from '@jsverse/transloco';
+import ExperimentFileService from '../../experiment-file.service';
+import {
+  ExtractedMetadataConfirmModalComponent
+} from '../../components/extracted-metadata-confirm-modal/extracted-metadata-confirm-modal.component';
 
 export type FormState = 'create' | 'edit';
 
@@ -18,24 +22,39 @@ export type FormState = 'create' | 'edit';
   templateUrl: './experiment-details-page.component.html',
   styleUrls: ['./experiment-details-page.component.scss'],
   standalone: true,
-  imports: [CommonModule, LayoutComponent, ExperimentDetailsFormComponent, FileUploadComponent],
+  imports: [
+    CommonModule,
+    LayoutComponent,
+    ExperimentDetailsFormComponent,
+    FileUploadComponent,
+    ExtractedMetadataConfirmModalComponent,
+  ],
 })
 export class ExperimentDetailsPageComponent implements OnInit {
-  constructor(
-    private authService: AuthService,
-    private router: Router,
-    private route: ActivatedRoute,
-    private notification: NotificationService,
-    private experimentService: ExperimentService,
-    private cdr: ChangeDetectorRef,
-    private transloco: TranslocoService,
-  ) {}
+  @ViewChild(ExperimentDetailsFormComponent) formComponent!: ExperimentDetailsFormComponent;
 
   state: FormState = 'create';
   user: GetUserDto | null = null;
   role: string = 'USER';
 
   experiment: GetExperimentDto | undefined;
+
+  isConfirmMetadataModalOpen = false;
+  pendingMetadata: any = null;
+  pendingFileName: string = "";
+
+  private processedMetadataFiles = new Set<string>();
+
+  constructor(
+    private authService: AuthService,
+    private router: Router,
+    private route: ActivatedRoute,
+    private notification: NotificationService,
+    private experimentService: ExperimentService,
+    private experimentFileService: ExperimentFileService,
+    private cdr: ChangeDetectorRef,
+    private transloco: TranslocoService,
+  ) {}
 
   get formState() {
     return this.state;
@@ -99,8 +118,8 @@ export class ExperimentDetailsPageComponent implements OnInit {
       }
       this.experimentService.getExperiment(experimentUuid).subscribe({
         next: (value: GetExperimentDto) => {
-          this.experiment = value
-          this.cdr.markForCheck()
+          this.experiment = value;
+          this.cdr.markForCheck();
         },
         error: (err: any) => {
           this.notification.error(
@@ -109,11 +128,57 @@ export class ExperimentDetailsPageComponent implements OnInit {
               error: err.error || err.message || err,
             }),
           );
-        }
+        },
       });
       //TODO: load experiment data from backend
     } else {
       this.state = 'create';
     }
+  }
+
+  async onFilesUploaded(files: File[]): Promise<void> {
+    // TODO: handle experiment file upload (probably save everything and upload after user click on submit
+
+    let metadataSet = false;
+    if (this.state === 'create') {
+      for (const file of files) {
+        if (!file.name.toLowerCase().endsWith('.csv')) {
+          continue;
+        }
+
+        if (this.processedMetadataFiles.has(file.name)) {
+          continue;
+        }
+
+        const metadata = await this.experimentFileService.extractMetadataFromFile(file);
+
+        this.processedMetadataFiles.add(file.name);
+
+        if (metadata && !metadataSet) {
+          console.log('Metadata extracted:', metadata);
+          this.pendingMetadata = metadata;
+          this.pendingFileName = file.name;
+          this.isConfirmMetadataModalOpen = true;
+          this.cdr.markForCheck();
+          metadataSet = true;
+        }
+      }
+    }
+  }
+
+  confirmMetadataUse(selectedMetadata: Record<string, any>): void {
+    if (selectedMetadata && this.formComponent) {
+      this.formComponent.patchExtractedMetadata(selectedMetadata);
+    }
+
+    this.isConfirmMetadataModalOpen = false;
+    this.pendingMetadata = null;
+    this.pendingFileName = '';
+  }
+
+  declineMetadataUse(): void {
+    this.isConfirmMetadataModalOpen = false;
+    this.pendingMetadata = null;
+    this.pendingFileName = '';
   }
 }

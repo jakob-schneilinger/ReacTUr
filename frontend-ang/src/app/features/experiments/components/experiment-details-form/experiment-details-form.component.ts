@@ -198,6 +198,32 @@ export class ExperimentDetailsFormComponent implements OnInit, OnDestroy, OnChan
     });
   }
 
+  public patchExtractedMetadata(metadata: any): void {
+    if (metadata.date) {
+      // yyyy/mm/dd
+      if (metadata.date.includes('/')) {
+        metadata.date = metadata.date.replace(/\//g, '-');
+      }
+      // dd.mm.yyyy
+      else if (metadata.date.includes('.')) {
+        const parts = metadata.date.split('.');
+        if (parts.length === 3) {
+          metadata.date = `${parts[2]}-${parts[1]}-${parts[0]}`;
+        }
+      }
+    }
+
+    this.experimentForm.patchValue(metadata);
+
+    this.experimentForm.markAsDirty();
+    this.experimentForm.updateValueAndValidity();
+
+    this.notification.success(
+      'Metadata Applied',
+      'Form fields have been populated from the uploaded file.'
+    );
+  }
+
   private inListValidator(validOptions: string[]): ValidatorFn {
     return (control: AbstractControl): ValidationErrors | null => {
       if (!control.value) return null;
@@ -272,6 +298,11 @@ export class ExperimentDetailsFormComponent implements OnInit, OnDestroy, OnChan
       this.experimentForm.markAllAsTouched();
     }
   }
+
+
+  // ####################
+  // ## MODAL HANDLING ##
+  // ####################
 
   onCancel(): void {
     if (this.experimentForm.dirty) {

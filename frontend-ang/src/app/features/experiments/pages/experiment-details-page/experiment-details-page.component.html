@@ -22,10 +22,20 @@
     <!-- Rechte Spalte -->
     <div rightContent>
       <app-file-upload
-        [allowedExtensions]="['txt', 'csv', 'dsx']"
-        [maxFileSizeMB]="20">
+        [allowedExtensions]="['txt', 'csv', 'dsx', 'prism', 'pzfx']"
+        [maxFileSizeMB]="20"
+        (filesChanged)="onFilesUploaded($event)">
       </app-file-upload>
     </div>
 
   </app-layout>
 </div>
+
+@if (isConfirmMetadataModalOpen) {
+  <app-extracted-metadata-confirm-modal
+    [fileName]="pendingFileName"
+    [metadata]="pendingMetadata"
+    (confirm)="confirmMetadataUse($event)"
+    (cancel)="declineMetadataUse()">
+  </app-extracted-metadata-confirm-modal>
+}
