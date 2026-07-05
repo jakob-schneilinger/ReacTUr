@@ -34,68 +34,24 @@ export class OptionService {
   constructor(
     private httpClient: HttpClient,
     private globals: Globals,
-    private authService: AuthService,
   ) {
     this.optionBaseUri = this.globals.backendUri;
   }
 
   getSelectionOptions(category: OptionCategory): Observable<BaseOptionDto[]> {
-    return of([...this.mockData[category]]).pipe(delay(200));
-
-    // TODO: Restore when backend exists
-    return this.httpClient.get<BaseOptionDto[]>(`${this.optionBaseUri}/options/${category}`);
+    return this.httpClient.get<BaseOptionDto[]>(`${this.optionBaseUri}/${category}`);
   }
 
+  // createSelectionOption in backend
   addSelectionOption(category: OptionCategory, name: string): Observable<BaseOptionDto> {
-    const newOption: BaseOptionDto = {
-      uuid: `${category}-${Math.random().toString(36).substring(2, 9)}`,
-      name: name,
-      archivedAt: null,
-    };
-
-    this.mockData[category].push(newOption);
-    return of({ ...newOption }).pipe(delay(200));
-
-    // TODO: Restore when backend exists
-    const payload = { category, name, archivedAt: null };
-    return this.httpClient.post<BaseOptionDto>(`${this.optionBaseUri}/options`, payload);
+    return this.httpClient.post<BaseOptionDto>(`${this.optionBaseUri}/${category}`, { name });
   }
 
-  updateSelectionOptionStatus(uuid: string, isActive: boolean): Observable<BaseOptionDto> {
-    let foundCategory: OptionCategory | null = null;
-    let targetOption: BaseOptionDto | undefined;
-
-    for (const category of Object.keys(this.mockData) as OptionCategory[]) {
-      targetOption = this.mockData[category].find((opt) => opt.uuid === uuid);
-      if (targetOption) {
-        foundCategory = category;
-        break;
-      }
+  updateSelectionOptionStatus(category: OptionCategory, uuid: string, isActive: boolean): Observable<void> {
+    if (isActive) {
+      return this.httpClient.put<void>(`${this.optionBaseUri}/${category}/${uuid}/restore`, {});
+    } else {
+      return this.httpClient.delete<void>(`${this.optionBaseUri}/${category}/${uuid}`);
     }
-
-    if (!targetOption || !foundCategory) {
-      return throwError(() => new Error(`Option with uuid ${uuid} not found.`));
-    }
-
-    if (!isActive && (foundCategory === 'chemical_type' || foundCategory === 'solvent')) {
-      const activeItemsCount = this.mockData[foundCategory].filter(
-        (opt) => opt.archivedAt === null && opt.uuid !== uuid,
-      ).length;
-
-      if (activeItemsCount === 0) {
-        return throwError(
-          () => new Error(`${foundCategory.toUpperCase()} must have at least ONE active option.`),
-        );
-      }
-    }
-
-    targetOption.archivedAt = isActive ? null : new Date().toISOString();
-
-    return of({ ...targetOption }).pipe(delay(200));
-
-    // TODO: Restore when backend exists
-    return this.httpClient.patch<BaseOptionDto>(`${this.optionBaseUri}/options/${uuid}/status`, {
-      isActive,
-    });
   }
 }

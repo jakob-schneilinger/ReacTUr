@@ -126,12 +126,28 @@ export class ReactantOverviewPageComponent implements OnInit {
 
   onSearch(): void {
     const term = this.searchTerm.toLowerCase().trim();
+
+    const priorityFlags: StructureFlag[] = [
+      StructureFlag.PENDING,
+      StructureFlag.FAILED,
+      StructureFlag.READY,
+    ];
+
+    this.filteredReactants = this.activeReactants.sort((a, b) => {
+      const aHasPriority = a.flag ? priorityFlags.includes(a.flag) : false;
+      const bHasPriority = b.flag ? priorityFlags.includes(b.flag) : false;
+
+      if (aHasPriority && !bHasPriority) return -1;
+      if (!aHasPriority && bHasPriority) return 1;
+
+      return a.shortName.localeCompare(b.shortName);
+    });
+
     if (!term) {
-      this.filteredReactants = [...this.activeReactants];
       return;
     }
 
-    this.filteredReactants = this.activeReactants.filter(
+    this.filteredReactants = this.filteredReactants.filter(
       (reactant) =>
         reactant.shortName.toLowerCase().includes(term) ||
         reactant.smiles.toLowerCase().includes(term) ||
