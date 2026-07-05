@@ -94,18 +94,16 @@ export class AdvancedSearchComponent implements OnChanges, OnInit {
       wavelength_Min: this.params.wavelength_Min,
       wavelength_Max: this.params.wavelength_Max,
       comment: this.params.comment,
-      measurementSearch: [],
+      measurementSearch: undefined,
     };
 
     if (this.params.rateConstantMin != null || this.params.rateConstantMax != null) {
-      searchDto.measurementSearch = [
-        {
-          rateConstantMin: this.params.rateConstantMin,
-          rateConstantMax: this.params.rateConstantMax,
-          pFO_rateConstantMin: this.params.pFO_rateConstantMin,
-          pFO_rateConstantMax: this.params.pFO_rateConstantMax,
-        },
-      ];
+      searchDto.measurementSearch = {
+        rateConstantMin: this.params.rateConstantMin,
+        rateConstantMax: this.params.rateConstantMax,
+        pFO_rateConstantMin: this.params.pFO_rateConstantMin,
+        pFO_rateConstantMax: this.params.pFO_rateConstantMax,
+      };
     }
 
     this.searchChanged.emit(searchDto);

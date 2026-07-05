@@ -24,7 +24,7 @@ import java.util.UUID;
  * @param wavelengthMin      The minimum wavelength.
  * @param wavelengthMax      The maximum wavelength.
  * @param comment            Text to search for within comments.
- * @param measurementSearch  Array of specific measurement range filters.
+ * @param measurementSearch  Object of specific measurement range filters.
  */
 public record SearchParametersDto(
         List<UUID> reactantA,
@@ -44,6 +44,6 @@ public record SearchParametersDto(
         Double wavelengthMin,
         Double wavelengthMax,
         String comment,
-        List<MeasurementSearchDto> measurementSearch
+        MeasurementSearchDto measurementSearch
 ) {
 }

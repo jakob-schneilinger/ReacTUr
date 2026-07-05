@@ -25,5 +25,5 @@ export interface SearchParametersDto {
   wavelength_Min?: number;
   wavelength_Max?: number;
   comment?: string;
-  measurementSearch?: MeasurementSearchDto[]; //TODO: wieso array?
+  measurementSearch?: MeasurementSearchDto; //TODO: wieso array?
 }
