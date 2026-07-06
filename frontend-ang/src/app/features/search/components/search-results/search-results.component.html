@@ -49,6 +49,22 @@
 
             <!-- Mandatory Metadata -->
             <div class="meta-group">
+              <h4 class="group-title">Measurements</h4>
+              <div class="group-content">
+                <div class="detail-item">
+                  <strong>Rate Constant:</strong>
+                  {{ exp.measurementData.rateConstant }} ± {{ exp.measurementData.error }}{{ exp.measurementData.isErrorPercentage ? '%' : '' }}
+                </div>
+                @if (exp.measurementData.pFO_rateConstant != null) {
+                  <div class="detail-item">
+                    <strong>pFO Rate Constant:</strong>
+                    {{ exp.measurementData.pFO_rateConstant }}
+                  </div>
+                }
+              </div>
+            </div>
+
+            <div class="meta-group">
               <h4 class="group-title">Core Parameters</h4>
               <div class="group-content">
                 <div class="detail-item"><strong>Date:</strong> {{ exp.metadata.date | date:'shortDate' }}</div>
@@ -59,7 +75,6 @@
               </div>
             </div>
 
-            <!-- Optional Metadata -->
             <div class="meta-group" *ngIf="exp.metadata.instrument || exp.metadata.modality || exp.metadata.wavelength">
               <h4 class="group-title">Additional Information</h4>
               <div class="group-content">
@@ -70,16 +85,13 @@
             </div>
           </div>
 
-          <!-- Comments Section -->
           @if (exp.metadata.comment) {
             <div class="comment-section">
               <strong>Notes:</strong> {{ exp.metadata.comment }}
             </div>
           }
 
-          <!-- Footer -->
           <div class="card-footer">
-            <!-- Buttons -->
             <button class="btn-custom btn-view" (click)="viewDetails(exp.uuid)">
               View details
             </button>

@@ -13,7 +13,7 @@ import {
 } from './mock.data';
 
 import { MOCK_REACTANTS } from './mock-reactants';
-
+/*
 export const MOCK_EXPERIMENTS: GetExperimentDto[] = [
   {
     uuid: '5d955cec-c2c1-4551-8070-07c5717505c8',
@@ -321,7 +321,7 @@ export const MOCK_EXPERIMENTS: GetExperimentDto[] = [
     ],
   },
 ];
-
+*/
 
 function generateMockMeasurement(): MeasurementDto {
   const x: number[] = [];
@@ -347,8 +347,10 @@ function generateMockMeasurement(): MeasurementDto {
     y: [y1, y2, y3, y4]
   };
 }
-
+/*
 export const MOCK_EXPERIMENT_DATA: ExperimentDataDto[] = MOCK_EXPERIMENTS.map((exp) => ({
   experimentId: exp.uuid,
   measurements: [generateMockMeasurement()],
 }));
+
+*/

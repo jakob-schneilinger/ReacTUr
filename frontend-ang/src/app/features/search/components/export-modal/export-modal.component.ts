@@ -103,8 +103,9 @@ export class ExportModalComponent implements OnInit {
   private cd: ChangeDetectorRef,) {}
 
   ngOnInit() {
-    const idsToLoad = this.selectedExperiments.map(exp => exp.uuid);
+    const idsToLoad = this.selectedExperiments.map((exp) => exp.uuid);
 
+    /*
     this.experimentService.getBulkExperimentData(idsToLoad).subscribe(heavyData => {
 
       this.fullExportData = this.selectedExperiments.map((exp) => {
@@ -118,6 +119,8 @@ export class ExportModalComponent implements OnInit {
       this.updatePreview();
       this.cd.markForCheck();
     });
+
+     */
   }
 
   toggleFormat(format: 'json' | 'csv') {

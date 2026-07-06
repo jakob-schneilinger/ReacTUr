@@ -29,7 +29,7 @@ export interface GetExperimentDto extends DetailsDto {
   metadata: GetMetadataDto;
   measurementData: MeasurementDataDto;
   createdBy: GetUserDto;
-  attachments: ExperimentAttachmentsDto[];
+  attachments: ExperimentAttachmentDto[];
 }
 
 export interface SaveExperimentDto {
@@ -40,11 +40,13 @@ export interface SaveExperimentDto {
   doi: string;
 }
 
-export interface ExperimentAttachmentsDto {
+export interface ExperimentAttachmentDto {
+  uuid: string;
   fileName: string;
   fileType: string;
   fileSizeBytes: number;
   downloadUrl: string;
+  checksum?: string;
 }
 
 export interface MeasurementDataDto {

@@ -5,7 +5,7 @@ import { Component, Input, Output, EventEmitter, OnInit, ChangeDetectorRef } fro
 import { NotificationService } from '../../../../core/layout/notification/notification.service';
 import { Router } from '@angular/router';
 import {
-  ExperimentAttachmentsDto,
+  ExperimentAttachmentDto,
   GetExperimentDto,
 } from '../../experiment.dto';
 import { ExperimentService } from '../../experiment.service';
@@ -62,8 +62,9 @@ export class ExperimentViewModalComponent implements OnInit {
     if (uuid) this.router.navigate(['/experiments', uuid]);
   }
 
-  loadFile(attachment: ExperimentAttachmentsDto): File {
+  loadFile(attachment: ExperimentAttachmentDto): File {
     //TODO: load file with attachment download url
+    // TODO: do this.
     return new File([], attachment.downloadUrl + ' -> ' + attachment.fileName, undefined);
   }
 

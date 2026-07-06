@@ -1,3 +1,6 @@
+@use "styles/global" as *;
+@use "styles/variables" as *;
+
 .custom-backdrop {
   background-color: rgba(0, 0, 0, 0.5);
 }

@@ -32,8 +32,8 @@ export type FormState = 'create' | 'edit';
     ExperimentDetailsFormComponent,
     FileUploadComponent,
     ExtractedMetadataConfirmModalComponent,
-    ExperimentHistoryModalComponent
-  ]
+    ExperimentHistoryModalComponent,
+  ],
 })
 export class ExperimentDetailsPageComponent implements OnInit {
   @ViewChild(ExperimentDetailsFormComponent) formComponent!: ExperimentDetailsFormComponent;
@@ -46,8 +46,15 @@ export class ExperimentDetailsPageComponent implements OnInit {
 
   isConfirmMetadataModalOpen = false;
   pendingMetadata: any = null;
-  pendingFileName: string = "";
+  pendingFileName: string = '';
 
+  isHistoryModalOpen = false;
+  experimentAuditLogs: ExperimentHistoryDto[] = [];
+  isLoadingHistory = false;
+
+  pendingFiles: File[] = [];
+
+  private uploadedFileFingerprints = new Set<string>();
   private processedMetadataFiles = new Set<string>();
 
   constructor(
@@ -99,7 +106,6 @@ export class ExperimentDetailsPageComponent implements OnInit {
         return;
       }
 
-
       this.experimentService.getExperiment(experimentUuid).subscribe({
         next: (value: GetExperimentDto) => {
           this.experiment = value;
@@ -116,46 +122,17 @@ export class ExperimentDetailsPageComponent implements OnInit {
           return;
         },
       });
-
-      /*
-      if (this.role != 'ADMIN') {
-        if (this.user?.email) {
-          // TODO: check role and permissions, switch to 'view' if not enough permission
-          this.authService.hasExperimentPermission(experimentUuid, this.user?.id).subscribe({
-            next: (hasPermission) =>
-              hasPermission
-                ? console.log('User has permission to edit experiment')
-                : console.warn('User does not have permission to edit experiment'),
-            error: (err) =>
-              this.notification.error(
-                this.transloco.translate('experiments.details.notifications.permissionErrorTitle'),
-                this.transloco.translate(
-                  'experiments.details.notifications.permissionErrorMessage',
-                  {
-                    error: err.error || err.message || err,
-                  },
-                ),
-              ),
-          });
-        }
-      }
-      */
-      //TODO: load experiment data from backend
     } else {
       this.state = 'create';
     }
   }
-
-  isHistoryModalOpen = false;
-  experimentAuditLogs: ExperimentHistoryDto[] = [];
-  isLoadingHistory = false;
 
   openHistoryModal(): void {
     if (this.state === 'create' || !this.experiment?.uuid) return;
 
     this.isHistoryModalOpen = true;
 
-      this.isLoadingHistory = true;
+    this.isLoadingHistory = true;
 
     this.experimentService.getExperimentHistory(this.experiment.uuid).subscribe({
       next: (history) => {
@@ -164,19 +141,60 @@ export class ExperimentDetailsPageComponent implements OnInit {
         this.cdr.markForCheck();
       },
       error: (err) => {
-        console.log(err)
-        this.notification.error(
-          'Error',
-          'Could not load experiment history'
-        );
+        console.log(err);
+        this.notification.error('Error', 'Could not load experiment history');
         this.isLoadingHistory = false;
         this.cdr.markForCheck();
-      }
+      },
     });
   }
 
   async onFilesUploaded(files: File[]): Promise<void> {
-    // TODO: handle experiment file upload (probably save everything and upload after user click on submit
+    if (this.state === 'create') {
+      this.pendingFiles = files;
+    } else {
+      const newFiles = files.filter((file) => {
+        const fingerprint = this.getFileFingerprint(file);
+        return !this.uploadedFileFingerprints.has(fingerprint);
+      });
+
+      if (newFiles.length > 0) {
+        await this.uploadDirectly(newFiles);
+      }
+
+      this.syncUploadedSet(files);
+    }
+
+    await this.handleExtract(files);
+  }
+
+  private async uploadDirectly(newFiles: File[]): Promise<void> {
+    if (this.experiment) {
+      for (const file of newFiles) {
+        this.experimentFileService.uploadFile(this.experiment.uuid, file).subscribe({
+          next: (response) => {
+            const fingerprint = this.getFileFingerprint(file);
+            this.uploadedFileFingerprints.add(fingerprint);
+          },
+          error: (error) => {
+            console.error(`Failed to upload ${file.name}:`, error);
+          },
+        });
+      }
+    }
+  }
+
+  private syncUploadedSet(currentFiles: File[]): void {
+    const currentFingerprints = new Set(currentFiles.map((f) => this.getFileFingerprint(f)));
+
+    for (const uploadedFingerprint of this.uploadedFileFingerprints) {
+      if (!currentFingerprints.has(uploadedFingerprint)) {
+        this.uploadedFileFingerprints.delete(uploadedFingerprint);
+      }
+    }
+  }
+
+  private async handleExtract(files: File[]) {
     if (this.state !== 'create') return;
 
     const currentFileNames = new Set(files.map((f) => f.name));
@@ -210,6 +228,10 @@ export class ExperimentDetailsPageComponent implements OnInit {
         }
       }
     }
+  }
+
+  private getFileFingerprint(file: File): string {
+    return `${file.name}-${file.size}-${file.lastModified}`;
   }
 
   confirmMetadataUse(selectedMetadata: Record<string, any>): void {
