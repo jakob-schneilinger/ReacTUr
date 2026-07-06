@@ -34,6 +34,21 @@
     "loginButton": "Login with TU SSO"
   },
 
+  "planning": {
+    "title": "Experiment Planning (Kinetics)",
+    "subtitle": "Simulate 2nd order reactions based on different starting concentrations.",
+    "reactionParams": "Reaction Parameters",
+    "rateConstant": "Rate Constant (k)",
+    "rateConstantHelp": "e.g., from previous experiments",
+    "concA": "Starting Conc. [A]₀",
+    "concB": "Starting Conc. [B]₀",
+    "duration": "Simulation Duration",
+    "simulateBtn": "Simulate Kinetics",
+    "halfLife": "50% Conversion (Half-Life)",
+    "reactionEnd": "99% Conversion (Reaction End)",
+    "emptyChart": "Enter parameters and click 'Simulate Kinetics' to view the reaction profile."
+  },
+
   "admin": {
     "user": {
       "title": "User Management",

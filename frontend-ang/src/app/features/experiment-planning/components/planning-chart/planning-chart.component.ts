@@ -4,12 +4,12 @@ import { CommonModule } from '@angular/common';
 import { NgxEchartsModule } from 'ngx-echarts';
 import { EChartsOption } from 'echarts';
 import { KineticsDataPoint } from '../../kinetics-calculator.service';
+import { TRANSLOCO_IMPORTS } from '../../../../core/global/transloco-imports';
 
 @Component({
   selector: 'app-planning-chart',
   standalone: true,
-  // WICHTIG: NgxEchartsModule importieren
-  imports: [CommonModule, NgxEchartsModule],
+  imports: [CommonModule, NgxEchartsModule, TRANSLOCO_IMPORTS],
   templateUrl: './planning-chart.component.html',
   styleUrls: ['./planning-chart.component.scss']
 })
@@ -26,7 +26,9 @@ export class PlanningChartComponent implements OnChanges {
 
   private updateChart() {
     this.chartOptions = {
-      tooltip: { trigger: 'axis' },
+      tooltip: {
+        trigger: 'axis'
+      },
       legend: { data: ['Conc [A]', 'Conc [B]', 'Product', 'Conversion %'] },
       xAxis: {
         type: 'category',
@@ -36,9 +38,9 @@ export class PlanningChartComponent implements OnChanges {
       yAxis: [
         {
           type: 'value',
-          name: 'Concentration (M)',
+          name: 'Concentration (mM)',
           position: 'left',
-          axisLabel: { formatter: (val: number) => val.toExponential(2) } // Wissenschaftliche Notation (1e-5)
+          axisLabel: { formatter: (val: number) => (val * 1000).toFixed(1) }
         },
         {
           type: 'value',
@@ -49,15 +51,22 @@ export class PlanningChartComponent implements OnChanges {
         }
       ],
       series: [
-        { name: 'Conc [A]', type: 'line', data: this.data.map(d => d.a) },
-        { name: 'Conc [B]', type: 'line', data: this.data.map(d => d.b) },
-        { name: 'Product', type: 'line', data: this.data.map(d => d.product) },
         {
-          name: 'Conversion %',
-          type: 'line',
-          yAxisIndex: 1, // Nutzt die rechte Achse
-          lineStyle: { type: 'dashed' },
-          data: this.data.map(d => d.conversion)
+          name: 'Conc [A]', type: 'line', data: this.data.map(d => d.a),
+          tooltip: { valueFormatter: (val: any) => (val * 1000).toFixed(2) + ' mM' }
+        },
+        {
+          name: 'Conc [B]', type: 'line', data: this.data.map(d => d.b),
+          tooltip: { valueFormatter: (val: any) => (val * 1000).toFixed(2) + ' mM' }
+        },
+        {
+          name: 'Product', type: 'line', data: this.data.map(d => d.product),
+          tooltip: { valueFormatter: (val: any) => (val * 1000).toFixed(2) + ' mM' }
+        },
+        {
+          name: 'Conversion %', type: 'line', yAxisIndex: 1, lineStyle: { type: 'dashed' },
+          data: this.data.map(d => d.conversion),
+          tooltip: { valueFormatter: (val: any) => val.toFixed(1) + ' %' }
         }
       ]
     };

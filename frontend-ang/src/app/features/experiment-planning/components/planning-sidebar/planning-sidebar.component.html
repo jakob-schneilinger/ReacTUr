@@ -1,49 +1,43 @@
 <div class="card shadow-sm">
   <div class="card-header bg-light">
-    <h5 class="mb-0">Reaction Parameters</h5>
+    <h5 class="mb-0">{{ 'planning.reactionParams' | transloco }}</h5>
   </div>
   <div class="card-body">
 
     <div class="mb-3">
-      <label class="form-label fw-bold">Rate Constant (k)</label>
+      <label class="form-label fw-bold">{{ 'planning.rateConstant' | transloco }}</label>
       <div class="input-group">
         <input type="number" class="form-control" [(ngModel)]="kValue">
         <span class="input-group-text">M⁻¹s⁻¹</span>
       </div>
-      <div class="form-text">e.g., from previous experiments</div>
+      <div class="form-text">{{ 'planning.rateConstantHelp' | transloco }}</div>
     </div>
-
     <hr>
-
     <div class="mb-3">
-      <label class="form-label fw-bold">Starting Conc. [A]₀</label>
+      <label class="form-label fw-bold">{{ 'planning.concA' | transloco }}</label>
       <div class="input-group">
-        <input type="number" step="0.000001" class="form-control" [(ngModel)]="concA">
-        <span class="input-group-text">M</span>
+        <input type="number" step="0.1" class="form-control" [(ngModel)]="concA_mM">
+        <span class="input-group-text">mM</span>
       </div>
     </div>
-
     <div class="mb-3">
-      <label class="form-label fw-bold">Starting Conc. [B]₀</label>
+      <label class="form-label fw-bold">{{ 'planning.concB' | transloco }}</label>
       <div class="input-group">
-        <input type="number" step="0.000001" class="form-control" [(ngModel)]="concB">
-        <span class="input-group-text">M</span>
+        <input type="number" step="0.1" class="form-control" [(ngModel)]="concB_mM">
+        <span class="input-group-text">mM</span>
       </div>
     </div>
-
     <hr>
-
     <div class="mb-4">
-      <label class="form-label fw-bold">Simulation Duration</label>
+      <label class="form-label fw-bold">{{ 'planning.duration' | transloco }}</label>
       <div class="input-group">
-        <input type="number" class="form-control" [(ngModel)]="duration">
-        <span class="input-group-text">sec</span>
+        <input type="number" step="0.5" class="form-control" [(ngModel)]="durationHours">
+        <span class="input-group-text">h</span>
       </div>
     </div>
 
     <button class="btn btn-primary w-100" (click)="onSimulateClick()">
-      <i class="bi bi-play-fill me-1"></i> Simulate Kinetics
+      <i class="bi bi-play-fill me-1"></i> {{ 'planning.simulateBtn' | transloco }}
     </button>
-
   </div>
 </div>

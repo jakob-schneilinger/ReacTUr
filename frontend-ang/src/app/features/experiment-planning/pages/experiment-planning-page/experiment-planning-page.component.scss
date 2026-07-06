@@ -244,3 +244,16 @@
   outline: none !important;
   box-shadow: none !important;
 }
+
+.layout-wrapper {
+  display: block;
+  width: 80%;
+  height: calc(100vh);
+  padding-top: 64px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.container-fluid {
+  padding: 60px 24px;
+}
