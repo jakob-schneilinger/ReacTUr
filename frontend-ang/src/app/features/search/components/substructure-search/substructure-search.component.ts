@@ -204,4 +204,9 @@ export class SubstructureSearchComponent {
     this.matchedReactantsList = this.matchedReactantsList.filter((r) => r.uuid !== reactant.uuid);
     this.matchedReactants.emit(this.matchedReactantsList.map((r) => r.uuid));
   }
+
+  clearMatchedReactants() {
+    this.matchedReactantsList = [];
+    this.matchedReactants.emit([]);
+  }
 }

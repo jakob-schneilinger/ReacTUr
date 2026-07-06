@@ -50,7 +50,7 @@
                   type="text"
                   class="form-control border-start-0 font-monospace"
                   placeholder="Draw or paste sequence..."
-                  [(ngModel)]="child.smiles">
+                  [(ngModel)]="child.query">
 
                 <button class="btn btn-outline-secondary bg-white substructure-btn" type="button" (click)="openDraw(child)" title="Draw Substructure">
                   <i class="bi bi-pencil-square"></i>
@@ -90,7 +90,13 @@
 
   @if (matchedReactantsList.length > 0) {
     <div class="matched-reactants-container mt-4 pt-3 border-top">
-      <label class="form-label text-muted fw-bold mb-3">Search Results</label>
+      <div class="d-flex align-items-start justify-content-between">
+        <label class="form-label text-muted fw-bold mb-3">Search Results</label>
+        <button class="btn btn-link text-danger p-0 ms-1 remove-condition-btn"
+                (click)="clearMatchedReactants()">
+          <i class="bi bi-trash"></i>
+        </button>
+      </div>
       <div class="selected-reactants-list d-flex flex-column gap-2 mb-3">
         @for (reactant of matchedReactantsList; track reactant.uuid) {
           <div class="selected-reactant-card shadow-sm position-relative border rounded p-2 bg-white">
