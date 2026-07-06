@@ -33,7 +33,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.javers.core.Javers;
 import org.javers.core.commit.CommitMetadata;
 import org.javers.core.diff.Change;
-import org.javers.core.diff.changetype.ValueChange;
+import org.javers.core.metamodel.object.InstanceId;
 import org.javers.repository.jql.QueryBuilder;
 import org.jspecify.annotations.NonNull;
 import org.springframework.data.domain.Page;
@@ -529,11 +529,42 @@ public class ExperimentServiceImpl implements ExperimentService {
       CommitMetadata commit = entry.getKey();
       Map<String, String> diffMap = new HashMap<>();
 
+      String commitType = "UPDATE";
+
       for (Change change : entry.getValue()) {
-        if (change instanceof ValueChange valChange) {
+
+        if (change instanceof org.javers.core.diff.changetype.NewObject) {
+          commitType = "CREATE";
+        }
+
+        if (change instanceof org.javers.core.diff.changetype.ValueChange valChange) {
+          String propName = valChange.getPropertyName();
+
+          if ("id".equals(propName) && valChange.getLeft() == null) {
+            commitType = "CREATE";
+          }
+
+          if ("archivedAt".equals(propName)) {
+            if (valChange.getLeft() == null && valChange.getRight() != null) {
+              commitType = "ARCHIVE";
+            } else if (valChange.getLeft() != null && valChange.getRight() == null) {
+              commitType = "RESTORE";
+            }
+          }
+
           diffMap.put(
-                  valChange.getPropertyName(),
+                  propName,
                   valChange.getLeft() + " -> " + valChange.getRight()
+          );
+        } else if (change instanceof org.javers.core.diff.changetype.ReferenceChange refChange) {
+          String propName = refChange.getPropertyName();
+
+          Object leftId = refChange.getLeft() instanceof InstanceId instanceId ? instanceId.getCdoId() : null;
+          Object rightId = refChange.getRight() instanceof InstanceId instanceId ? instanceId.getCdoId() : null;
+
+          diffMap.put(
+                  propName,
+                  (leftId != null ? leftId : "null") + " -> " + (rightId != null ? rightId : "null")
           );
         }
       }
@@ -541,7 +572,7 @@ public class ExperimentServiceImpl implements ExperimentService {
       historyList.add(new ExperimentHistoryDto(
               commit.getAuthor(),
               commit.getCommitDateInstant(),
-              diffMap.isEmpty() ? "INITIAL_CREATE" : "UPDATE",
+              commitType,
               diffMap
       ));
     }

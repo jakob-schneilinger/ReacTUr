@@ -1,0 +1,72 @@
+<app-modal
+  [isOpen]="isOpen"
+  title="Experiment History"
+  size="lg"
+  [scrollable]="true"
+  (close)="onClose()">
+
+  <div body class="timeline-container">
+    @if (!history || history.length === 0) {
+      <div class="text-center text-muted p-4">
+        No history available for this experiment.
+      </div>
+    } @else {
+      <div class="timeline">
+        @for (commit of history; track commit.commitDate) {
+          <div class="timeline-item">
+
+            <div class="timeline-icon" [ngClass]="commit.commitType.toLowerCase()">
+              <i class="bi"
+                 [class.bi-plus-circle-fill]="commit.commitType === 'CREATE'"
+                 [class.bi-pencil-fill]="commit.commitType === 'UPDATE'"
+                 [class.bi-archive-fill]="commit.commitType === 'ARCHIVE'"
+                 [class.bi-arrow-counterclockwise]="commit.commitType === 'RESTORE'">
+              </i>
+            </div>
+
+            <div class="timeline-content shadow-sm border rounded p-3 mb-4 bg-white">
+              <div class="d-flex justify-content-between align-items-center mb-1">
+                <h6 class="mb-0 fw-bold" [ngClass]="'text-' + commit.commitType.toLowerCase()">
+                  {{ commit.commitType }}
+                </h6>
+                <small class="text-muted">{{ commit.commitDate | date:'medium' }}</small>
+              </div>
+
+              <div class="text-muted small mb-3 pb-2 border-bottom">
+                <i class="bi bi-person me-1"></i> {{ commit.authorId }}
+              </div>
+
+              <div class="changes-list">
+                <table class="table table-sm table-borderless mb-0">
+                  <tbody>
+                    @for (key of getChangeKeys(commit.changes); track key) {
+                      <tr>
+                        <td class="fw-semibold text-secondary w-25 align-middle">{{ getTranslationKey(key) | transloco }}</td>
+                        <td class="align-middle">
+                          @if (commit.commitType !== 'CREATE') {
+                            <span class="text-danger text-decoration-line-through me-2">
+                              {{ splitChange(commit.changes[key]).oldVal }}
+                            </span>
+                            <i class="bi bi-arrow-right text-muted me-2"></i>
+                          }
+                          <span class="text-success fw-medium">
+                            {{ splitChange(commit.changes[key]).newVal }}
+                          </span>
+                        </td>
+                      </tr>
+                    }
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+          </div>
+        }
+      </div>
+    }
+  </div>
+
+  <ng-container footer>
+    <button type="button" class="btn btn-secondary px-4" (click)="onClose()">Close</button>
+  </ng-container>
+</app-modal>

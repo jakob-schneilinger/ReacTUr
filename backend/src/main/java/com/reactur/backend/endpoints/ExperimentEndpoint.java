@@ -5,6 +5,7 @@ import com.reactur.backend.dtos.experiments.GetExperimentDto;
 import com.reactur.backend.dtos.experiments.SaveExperimentDto;
 import com.reactur.backend.dtos.experiments.SearchParametersDto;
 import com.reactur.backend.enums.Role;
+import com.reactur.backend.services.ExperimentHistoryService;
 import com.reactur.backend.services.ExperimentService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -36,6 +37,8 @@ public class ExperimentEndpoint {
     // TODO: JavaDoc
 
     private final ExperimentService experimentService;
+    private final ExperimentHistoryService experimentHistoryService;
+
 
     @PostMapping
     public ResponseEntity<GetExperimentDto> createExperiment(
@@ -106,7 +109,7 @@ public class ExperimentEndpoint {
     //  Current one: Logs related to experiment with uuid
     @GetMapping("/{uuid}/history")
     public ResponseEntity<List<ExperimentHistoryDto>> getAuditLogs(@PathVariable UUID uuid, @AuthenticationPrincipal Jwt jwt) {
-        List<ExperimentHistoryDto> history = experimentService.getExperimentHistory(uuid);
+        List<ExperimentHistoryDto> history = experimentHistoryService.getExperimentHistory(uuid);
         return ResponseEntity.ok(history);
     }
 
