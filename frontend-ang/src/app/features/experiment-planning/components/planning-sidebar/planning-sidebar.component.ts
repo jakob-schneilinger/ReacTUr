@@ -18,9 +18,9 @@ export class PlanningSidebarComponent {
   kValue: number = 75;
   concA: number = 10;
   concB: number = 20;
-  concUnit: ConcUnit = 'mM';
+  concUnit: ConcUnit = 'µM';
 
-  durationHours: number = 2;
+  durationHours: number = 1;
   durationMinutes: number = 0;
 
   @Output() simulate = new EventEmitter<{k: number, a0: number, b0: number, duration: number, unit: ConcUnit}>();
@@ -62,11 +62,14 @@ export class PlanningSidebarComponent {
   }
 
   checkEmptyDuration() {
-    if (this.durationHours === null || this.durationHours === undefined) {
+    if (this.durationHours === null || this.durationHours === undefined || this.durationHours < 0) {
       this.durationHours = 0;
     }
-    if (this.durationMinutes === null || this.durationMinutes === undefined) {
+    if (this.durationMinutes === null || this.durationMinutes === undefined || this.durationMinutes < 0) {
       this.durationMinutes = 0;
+    }
+    else if (this.durationMinutes > 59) {
+      this.durationMinutes = 59;
     }
   }
 }
