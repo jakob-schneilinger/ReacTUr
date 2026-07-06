@@ -18,17 +18,19 @@ interface MetadataItem {
 })
 export class ExtractedMetadataConfirmModalComponent implements OnChanges {
   @Input() metadata: Record<string, any> | null = null;
-  @Input() fileName: string = "";
+  @Input() fileName: string = '';
 
   // custom sort order
   @Input() sortOrder: string[] = [
+    'reactantA',
+    'reactantB',
+    'concentrationA',
+    'concentrationB',
+    'temperature',
+    'wavelength',
     'date',
     'instrument',
     'modality',
-    'wavelength',
-    'temperature',
-    'concentrationA',
-    'concentrationB',
     'comment',
   ];
 

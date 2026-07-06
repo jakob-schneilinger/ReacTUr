@@ -15,7 +15,6 @@ class ExperimentFileService {
     this.experimentFileBaseUri = this.globals.backendUri + '/file'; //TODO: Set correct path
   }
 
-
   /**
    * Extracts metadata from a file and returns it as an object.
    * @param file the file to extract metadata from.
@@ -40,6 +39,10 @@ class ExperimentFileService {
 
           for (let i = 0; i < lines.length; i++) {
             const line = lines[i].trim();
+
+            if (line.startsWith('#')) {
+              inRemarks = false;
+            }
 
             if (line.startsWith('#Date:')) {
               metadata.date = line.replace('#Date:', '').trim();
@@ -67,13 +70,31 @@ class ExperimentFileService {
               inRemarks = false;
             } else if (inRemarks) {
               remarks.push(line);
-              const concMatch = line.match(/([\d.]+)\s*mM/i);
-              if (concMatch) {
-                const val = parseFloat(concMatch[1]);
+
+              // extract reactant name and concentration
+              const reactantMatch = line.match(/^([^:]+):\s*([\d.]+)\s*mM/i);
+
+              if (reactantMatch) {
+                const reactantName = reactantMatch[1].trim();
+                const val = parseFloat(reactantMatch[2]);
+
                 if (metadata.concentrationA === undefined) {
+                  metadata.reactantA = reactantName;
                   metadata.concentrationA = val;
                 } else if (metadata.concentrationB === undefined) {
+                  metadata.reactantB = reactantName;
                   metadata.concentrationB = val;
+                }
+              } else {
+                // fallback for lines that just have concentration but no reactant name
+                const concMatch = line.match(/([\d.]+)\s*mM/i);
+                if (concMatch) {
+                  const val = parseFloat(concMatch[1]);
+                  if (metadata.concentrationA === undefined) {
+                    metadata.concentrationA = val;
+                  } else if (metadata.concentrationB === undefined) {
+                    metadata.concentrationB = val;
+                  }
                 }
               }
             }
