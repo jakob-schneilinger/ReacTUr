@@ -41,22 +41,30 @@
               <dd class="col-sm-8 text-break">{{ meta.comment || '-' }}</dd>
             </dl>
           }
+
+          <h6 class="border-bottom pb-2 mb-3 mt-4 text-primary">Measurement Data</h6>
+
+          @if (selectedExperiment.measurementData; as mData) {
+            <dl class="row">
+              <dt class="col-sm-4">Rate Constant</dt>
+              <dd class="col-sm-8 text-break">{{ mData.rateConstant }}</dd>
+
+              <dt class="col-sm-4">Error</dt>
+              <dd class="col-sm-8 text-break">
+                &plusmn; {{ mData.error }}{{ mData.isErrorPercentage ? '%' : '' }}
+              </dd>
+
+              <dt class="col-sm-4">pFO Rate Constant</dt>
+              <dd class="col-sm-8 text-break">
+                {{ mData.pFO_rateConstant ?? '-' }}
+              </dd>
+            </dl>
+          } @else {
+            <div class="text-muted small mb-4">No measurement data available.</div>
+          }
         </div>
 
         <div class="col-md-6 border-start ps-4" style="min-height: 600px">
-
-          <h6 class="border-bottom pb-2 mb-3 text-primary">Files</h6>
-
-          @if (selectedExperiment.attachments) {
-            @for (attachment of selectedExperiment.attachments; track $index) {
-              <app-uploaded-file
-                [file]="loadFile(attachment)"
-                [removePossible]="false">
-              </app-uploaded-file>
-            }
-          } @else {
-            <div class="text-muted small mb-4">No files attached.</div>
-          }
 
           <h6 class="border-bottom pb-2 mb-3 mt-4 text-primary">Reactants</h6>
 
@@ -64,7 +72,7 @@
             <div class="text-muted small">No reactants associated with this experiment.</div>
           } @else {
             <div class="list-group">
-              <div class="list-group-item d-flex flex-row justify-content-between align-items-center mb-2 border rounded">
+              <div class="reactant list-group-item d-flex flex-row justify-content-between align-items-center mb-2 border rounded" [routerLink]="['/reactants', selectedExperiment.reactantA.uuid]">
                 <div class="d-flex flex-column justify-content-between">
                   <h6 class="mb-1 text-primary">{{ selectedExperiment.reactantA.shortName }}</h6>
                   <p class="mb-1 small text-truncate" title="{{ selectedExperiment.reactantA.smiles }}">
@@ -76,7 +84,7 @@
                 </div>
                 <span class="badge bg-secondary">{{ selectedExperiment.reactantA.chemicalType?.name }}</span>
               </div>
-              <div class="list-group-item d-flex flex-row justify-content-between align-items-center mb-2 border rounded">
+              <div class="reactant list-group-item d-flex flex-row justify-content-between align-items-center mb-2 border rounded"  [routerLink]="['/reactants', selectedExperiment.reactantB.uuid]">
                 <div class="d-flex flex-column justify-content-between">
                   <h6 class="mb-1 text-primary">{{ selectedExperiment.reactantB.shortName }}</h6>
                   <p class="mb-1 small text-truncate" title="{{ selectedExperiment.reactantB.smiles }}">
@@ -89,6 +97,19 @@
                 <span class="badge bg-secondary">{{ selectedExperiment.reactantB.chemicalType?.name }}</span>
               </div>
             </div>
+          }
+
+          <h6 class="border-bottom pb-2 mb-3 text-primary">Files</h6>
+
+          @if (modalFiles.length > 0) {
+            @for (file of modalFiles; track $index) {
+              <app-uploaded-file
+                [file]="file"
+                [removePossible]="false">
+              </app-uploaded-file>
+            }
+          } @else {
+            <div class="text-muted small mb-4">No files attached.</div>
           }
 
         </div>

@@ -42,12 +42,6 @@ public class ReactantValidator {
             }
         }
 
-        if (saveReactant.inChiKey() != null && !saveReactant.inChiKey().isBlank()) {
-            if (reactantRepository.existsByInChiKey(saveReactant.inChiKey())) {
-                conflictErrors.add("inChiKey " + saveReactant.inChiKey() + " is already taken.");
-            }
-        }
-
         if (!conflictErrors.isEmpty()) {
             throw new ResourceConflictException(conflictErrors);
         }

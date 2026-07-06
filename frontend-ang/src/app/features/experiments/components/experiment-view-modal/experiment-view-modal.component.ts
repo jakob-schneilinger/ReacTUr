@@ -1,13 +1,19 @@
 import { CommonModule } from '@angular/common';
 import { AppModalComponent } from '../../../../shared/modal/app-modal.component';
 import { UploadedFileComponent } from '../../../../shared/file-upload/uploaded-file/uploaded-file.component';
-import { Component, Input, Output, EventEmitter, OnInit, ChangeDetectorRef } from '@angular/core';
-import { NotificationService } from '../../../../core/layout/notification/notification.service';
-import { Router } from '@angular/router';
 import {
-  ExperimentAttachmentDto,
-  GetExperimentDto,
-} from '../../experiment.dto';
+  Component,
+  Input,
+  Output,
+  EventEmitter,
+  OnInit,
+  ChangeDetectorRef,
+  OnChanges,
+  SimpleChanges,
+} from '@angular/core';
+import { NotificationService } from '../../../../core/layout/notification/notification.service';
+import { Router, RouterLink } from '@angular/router';
+import { ExperimentAttachmentDto, GetExperimentDto } from '../../experiment.dto';
 import { ExperimentService } from '../../experiment.service';
 
 @Component({
@@ -15,12 +21,14 @@ import { ExperimentService } from '../../experiment.service';
   templateUrl: './experiment-view-modal.component.html',
   styleUrls: ['./experiment-view-modal.component.scss'],
   standalone: true,
-  imports: [CommonModule, AppModalComponent, UploadedFileComponent],
+  imports: [CommonModule, AppModalComponent, UploadedFileComponent, RouterLink],
 })
-export class ExperimentViewModalComponent implements OnInit {
+export class ExperimentViewModalComponent implements OnInit, OnChanges {
   @Input() selectedExperiment: GetExperimentDto | undefined;
   @Input() hasWritePermission: boolean = false;
   @Output() close = new EventEmitter<void>();
+
+  modalFiles: File[] = [];
 
   constructor(
     private router: Router,
@@ -29,43 +37,31 @@ export class ExperimentViewModalComponent implements OnInit {
     private cd: ChangeDetectorRef,
   ) {}
 
-  ngOnInit() {
-    if (this.selectedExperiment) {
-      /*
-      this.selectedExperiment.attachments
-      this.experimentService.getFiles(this.selectedExperiment.id).subscribe({
-        next: (files: File[]) => {
-          setTimeout(() => {
+  ngOnInit() {}
 
-            if (this.selectedExperiment) {
-              this.selectedExperiment.files = files;
-            }
-            this.cd.markForCheck();
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['selectedExperiment'] && this.selectedExperiment) {
+      this.generateFakeFiles();
+    }
+  }
 
+  private generateFakeFiles(): void {
+    this.modalFiles = [];
 
-          });
-        },
-        error: (err: any) => {
-          setTimeout(() => {
-            this.notification.error(
-              'File Error',
-              `Unable to fetch Experiment Files! Error: ${err}`,
-            );
-          });
-        },
-      });
-      */
+    if (!this.selectedExperiment?.attachments) return;
+
+    for (const attachment of this.selectedExperiment.attachments) {
+      const fakeFile = new File([''], attachment.fileName);
+
+      (fakeFile as any).isFake = true;
+      (fakeFile as any).urlId = attachment.uuid;
+
+      this.modalFiles.push(fakeFile);
     }
   }
 
   editExperiment(uuid: string | undefined): void {
     if (uuid) this.router.navigate(['/experiments', uuid]);
-  }
-
-  loadFile(attachment: ExperimentAttachmentDto): File {
-    //TODO: load file with attachment download url
-    // TODO: do this.
-    return new File([], attachment.downloadUrl + ' -> ' + attachment.fileName, undefined);
   }
 
   get headerText(): string {
@@ -82,8 +78,8 @@ export class ExperimentViewModalComponent implements OnInit {
         queryParams: {
           k: experiment.measurementData.rateConstant,
           nameA: experiment.reactantA?.shortName || 'A',
-          nameB: experiment.reactantB?.shortName || 'B'
-        }
+          nameB: experiment.reactantB?.shortName || 'B',
+        },
       });
       this.close.emit();
     }
