@@ -98,19 +98,19 @@
         display: flex;
         flex-direction: column;
         gap: 0.4rem;
-
-        .detail-item {
-          font-size: 0.875rem;
-          color: #334155;
-          display: flex;
-          justify-content: space-between;
-
-          strong {
-            color: #64748b;
-            font-weight: 500;
-          }
-        }
       }
+    }
+  }
+
+  .detail-item {
+    font-size: 0.875rem;
+    color: #334155;
+    display: flex;
+    justify-content: space-between;
+
+    strong {
+      color: #343e4a;
+      font-weight: 500;
     }
   }
 
@@ -189,6 +189,11 @@
       }
     }
   }
+}
+
+.show-details-btn {
+  font-size: 0.75rem;
+  padding: 0;
 }
 
 .export-container {

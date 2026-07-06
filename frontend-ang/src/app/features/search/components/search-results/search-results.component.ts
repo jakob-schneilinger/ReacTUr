@@ -10,7 +10,6 @@ import { GetUserDto } from '../../../../shared/dtos/user.dto';
 
 export type SearchState = 'initial' | 'no-results' | 'has-results';
 
-
 @Component({
   selector: 'app-experiment-results',
   templateUrl: './search-results.component.html',
@@ -31,6 +30,8 @@ export class SearchResultsComponent {
   @Output() pageSizeChange = new EventEmitter<number>();
 
   selectedIds = new Set<string>();
+  expandedCardIds = new Set<string>();
+
   isViewModalOpen: boolean = false;
   selectedExperimentForView: GetExperimentDto | undefined;
   hasWritePermission: boolean = false;
@@ -46,28 +47,18 @@ export class SearchResultsComponent {
     return (this.currentPage + 1) * this.pageSize < this.totalElements;
   }
 
-  /*
-  ngOnChanges(changes: SimpleChanges): void {
-    if (changes['experiments']) {
-      this.cleanupSelection();
+  toggleCardDetails(expId: string, event: Event) {
+    event.stopPropagation();
+    if (this.expandedCardIds.has(expId)) {
+      this.expandedCardIds.delete(expId);
+    } else {
+      this.expandedCardIds.add(expId);
     }
   }
 
-  private cleanupSelection(): void {
-    if (!this.experiments || this.experiments.length === 0) {
-      this.selectedIds.clear();
-      return;
-    }
-
-    const visibleIds = new Set(this.experiments.map((exp) => exp.uuid));
-
-    for (const id of this.selectedIds) {
-      if (!visibleIds.has(id)) {
-        this.selectedIds.delete(id);
-      }
-    }
+  isCardExpanded(expId: string): boolean {
+    return this.expandedCardIds.has(expId);
   }
-   */
 
   toggleSelection(expId: string) {
     if (this.selectedIds.has(expId)) {

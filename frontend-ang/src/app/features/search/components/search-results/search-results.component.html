@@ -45,53 +45,46 @@
           </div>
 
           <!-- Metadata Grid -->
-          <div class="metadata-groups">
-
-            <!-- Mandatory Metadata -->
-            <div class="meta-group">
-              <h4 class="group-title">Measurements</h4>
-              <div class="group-content">
-                <div class="detail-item">
-                  <strong>Rate Constant:</strong>
-                  {{ exp.measurementData.rateConstant }} ± {{ exp.measurementData.error }}{{ exp.measurementData.isErrorPercentage ? '%' : '' }}
-                </div>
-                @if (exp.measurementData.pFO_rateConstant != null) {
-                  <div class="detail-item">
-                    <strong>pFO Rate Constant:</strong>
-                    {{ exp.measurementData.pFO_rateConstant }}
-                  </div>
-                }
-              </div>
+          <div class="metadata-groups" style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem 1rem; margin-bottom: 0.5rem;">
+            <div class="detail-item">
+              Rate Constant:
+              <strong>{{ exp.measurementData.rateConstant }} ± {{ exp.measurementData.error }}{{ exp.measurementData.isErrorPercentage ? '%' : '' }}</strong>
             </div>
-
-            <div class="meta-group">
-              <h4 class="group-title">Core Parameters</h4>
-              <div class="group-content">
-                <div class="detail-item"><strong>Date:</strong> {{ exp.metadata.date | date:'shortDate' }}</div>
-                <div class="detail-item"><strong>Solvent:</strong> {{ exp.metadata.solvent.name }}</div>
-                <div class="detail-item"><strong>Temp:</strong> {{ exp.metadata.temperature }} °C</div>
-                <div class="detail-item"><strong>Conc. {{ exp.reactantA.shortName}}:</strong> {{ exp.metadata.concentrationA }} mM</div>
-                <div class="detail-item"><strong>Conc. {{ exp.reactantB.shortName}}:</strong> {{ exp.metadata.concentrationB }} mM</div>
-              </div>
-            </div>
-
-            <div class="meta-group" *ngIf="exp.metadata.instrument || exp.metadata.modality || exp.metadata.wavelength">
-              <h4 class="group-title">Additional Information</h4>
-              <div class="group-content">
-                <div class="detail-item" *ngIf="exp.metadata.instrument"><strong>Instrument:</strong> {{ exp.metadata.instrument.name }}</div>
-                <div class="detail-item" *ngIf="exp.metadata.modality"><strong>Modality:</strong> {{ exp.metadata.modality.name }}</div>
-                <div class="detail-item" *ngIf="exp.metadata.wavelength != null"><strong>Wavelength:</strong> {{ exp.metadata.wavelength }} nm</div>
-              </div>
-            </div>
+            <div class="detail-item">Date: <strong>{{ exp.metadata.date | date:'shortDate' }}</strong></div>
+            <div class="detail-item">Solvent: <strong>{{ exp.metadata.solvent.name }}</strong></div>
+            <div class="detail-item">Temp: <strong>{{ exp.metadata.temperature }} °C</strong></div>
+            <div class="detail-item">Conc. {{ exp.reactantA.shortName}}: <strong>{{ exp.metadata.concentrationA }} mM</strong></div>
+            <div class="detail-item">Conc. {{ exp.reactantB.shortName}}: <strong>{{ exp.metadata.concentrationB }} mM</strong></div>
           </div>
 
-          @if (exp.metadata.comment) {
-            <div class="comment-section">
-              <strong>Notes:</strong> {{ exp.metadata.comment }}
+          @if (exp.measurementData.pFO_rateConstant != null || exp.metadata.instrument || exp.metadata.modality || exp.metadata.wavelength) {
+            <div class="toggle-details-wrapper" style="text-align: center;">
+              <button class="plain show-details-btn" (click)="toggleCardDetails(exp.uuid, $event)">
+                {{ isCardExpanded(exp.uuid) ? 'Hide details' : 'Show details' }}
+                <i class="bi" [ngClass]="isCardExpanded(exp.uuid) ? 'bi-chevron-up' : 'bi-chevron-down'"></i>
+              </button>
             </div>
+
+            @if (isCardExpanded(exp.uuid)) {
+              <div class="metadata-groups" style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem 1rem; padding-top: 0.25rem; border-top: 1px dashed #eee; margin-bottom: 0.5rem;">
+                <div class="detail-item" *ngIf="exp.measurementData.pFO_rateConstant != null">pFO Rate Constant: <strong>{{ exp.measurementData.pFO_rateConstant }}</strong></div>
+                <div class="detail-item" *ngIf="exp.metadata.instrument">Instrument: <strong>{{ exp.metadata.instrument.name }}</strong></div>
+                <div class="detail-item" *ngIf="exp.metadata.modality">Modality: <strong>{{ exp.metadata.modality.name }}</strong></div>
+                <div class="detail-item" *ngIf="exp.metadata.wavelength != null">Wavelength: <strong>{{ exp.metadata.wavelength }} nm</strong></div>
+              </div>
+
+
+
+              @if (exp.metadata.comment) {
+                <div class="comment-section" style="margin-top: 0.5rem; background-color: #f8f9fa; padding: 0.5rem; border-radius: 4px;">
+                  <strong>Notes:</strong> {{ exp.metadata.comment }}
+                </div>
+              }
+
+            }
           }
 
-          <div class="card-footer">
+          <div class="card-footer" style="margin-top: 0.25rem;">
             <button class="btn-custom btn-view" (click)="viewDetails(exp.uuid)">
               View details
             </button>
