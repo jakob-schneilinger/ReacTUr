@@ -1,10 +1,10 @@
-
 import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { NgxEchartsModule } from 'ngx-echarts';
 import { EChartsOption } from 'echarts';
 import { KineticsDataPoint } from '../../kinetics-calculator.service';
 import { TRANSLOCO_IMPORTS } from '../../../../core/global/transloco-imports';
+import { ConcUnit } from '../planning-sidebar/planning-sidebar.component';
 
 @Component({
   selector: 'app-planning-chart',
@@ -15,32 +15,36 @@ import { TRANSLOCO_IMPORTS } from '../../../../core/global/transloco-imports';
 })
 export class PlanningChartComponent implements OnChanges {
   @Input() data: KineticsDataPoint[] = [];
+  @Input() unit: ConcUnit = 'mM';
 
   chartOptions: EChartsOption = {};
 
   ngOnChanges(changes: SimpleChanges): void {
-    if (changes['data'] && this.data.length > 0) {
+    if ((changes['data'] || changes['unit']) && this.data.length > 0) {
       this.updateChart();
     }
   }
 
   private updateChart() {
+    const scale = this.unit === 'M' ? 1 : this.unit === 'mM' ? 1e3 : 1e6;
+    const u = this.unit;
+
     this.chartOptions = {
       tooltip: {
         trigger: 'axis'
       },
       legend: { data: ['Conc [A]', 'Conc [B]', 'Product', 'Conversion %'] },
       xAxis: {
-        type: 'category',
-        data: this.data.map(d => d.timeLabel),
-        name: 'Time'
+        type: 'value',
+        name: 'Time (min)',
+        nameLocation: 'middle',
+        nameGap: 30
       },
       yAxis: [
         {
           type: 'value',
-          name: 'Concentration (mM)',
-          position: 'left',
-          axisLabel: { formatter: (val: number) => (val * 1000).toFixed(1) }
+          name: `Concentration (${u})`,
+          position: 'left'
         },
         {
           type: 'value',
@@ -52,21 +56,28 @@ export class PlanningChartComponent implements OnChanges {
       ],
       series: [
         {
-          name: 'Conc [A]', type: 'line', data: this.data.map(d => d.a),
-          tooltip: { valueFormatter: (val: any) => (val * 1000).toFixed(2) + ' mM' }
+          name: 'Conc [A]', type: 'line',
+          data: this.data.map(d => [d.time / 60, d.a * scale]),
+          showSymbol: false,
+          tooltip: { valueFormatter: (val: any) => Number(val).toFixed(2) + ' ' + u }
         },
         {
-          name: 'Conc [B]', type: 'line', data: this.data.map(d => d.b),
-          tooltip: { valueFormatter: (val: any) => (val * 1000).toFixed(2) + ' mM' }
+          name: 'Conc [B]', type: 'line',
+          data: this.data.map(d => [d.time / 60, d.b * scale]),
+          showSymbol: false,
+          tooltip: { valueFormatter: (val: any) => Number(val).toFixed(2) + ' ' + u }
         },
         {
-          name: 'Product', type: 'line', data: this.data.map(d => d.product),
-          tooltip: { valueFormatter: (val: any) => (val * 1000).toFixed(2) + ' mM' }
+          name: 'Product', type: 'line',
+          data: this.data.map(d => [d.time / 60, d.product * scale]),
+          showSymbol: false,
+          tooltip: { valueFormatter: (val: any) => Number(val).toFixed(2) + ' ' + u }
         },
         {
           name: 'Conversion %', type: 'line', yAxisIndex: 1, lineStyle: { type: 'dashed' },
-          data: this.data.map(d => d.conversion),
-          tooltip: { valueFormatter: (val: any) => val.toFixed(1) + ' %' }
+          data: this.data.map(d => [d.time / 60, d.conversion]),
+          showSymbol: false,
+          tooltip: { valueFormatter: (val: any) => Number(val).toFixed(1) + ' %' }
         }
       ]
     };

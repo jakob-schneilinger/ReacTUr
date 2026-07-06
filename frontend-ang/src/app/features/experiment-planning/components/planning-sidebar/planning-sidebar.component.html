@@ -12,27 +12,54 @@
       </div>
       <div class="form-text">{{ 'planning.rateConstantHelp' | transloco }}</div>
     </div>
+
     <hr>
+
     <div class="mb-3">
       <label class="form-label fw-bold">{{ 'planning.concA' | transloco }}</label>
       <div class="input-group">
-        <input type="number" step="0.1" class="form-control" [(ngModel)]="concA_mM">
-        <span class="input-group-text">mM</span>
+        <input type="number" step="0.1" class="form-control" [(ngModel)]="concA">
+        <select class="form-select flex-grow-0 w-auto bg-light"
+                [ngModel]="concUnit"
+                (ngModelChange)="onUnitChange($event)">
+          <option value="M">M</option>
+          <option value="mM">mM</option>
+          <option value="µM">µM</option>
+        </select>
       </div>
     </div>
+
     <div class="mb-3">
       <label class="form-label fw-bold">{{ 'planning.concB' | transloco }}</label>
       <div class="input-group">
-        <input type="number" step="0.1" class="form-control" [(ngModel)]="concB_mM">
-        <span class="input-group-text">mM</span>
+        <input type="number" step="0.1" class="form-control" [(ngModel)]="concB">
+        <select class="form-select flex-grow-0 w-auto bg-light"
+                [ngModel]="concUnit"
+                (ngModelChange)="onUnitChange($event)">
+          <option value="M">M</option>
+          <option value="mM">mM</option>
+          <option value="µM">µM</option>
+        </select>
       </div>
     </div>
+
     <hr>
+
     <div class="mb-4">
       <label class="form-label fw-bold">{{ 'planning.duration' | transloco }}</label>
-      <div class="input-group">
-        <input type="number" step="0.5" class="form-control" [(ngModel)]="durationHours">
-        <span class="input-group-text">h</span>
+      <div class="row g-2">
+        <div class="col-6">
+          <div class="input-group">
+            <input type="number" min="0" class="form-control" [(ngModel)]="durationHours" (blur)="checkEmptyDuration()">
+            <span class="input-group-text">h</span>
+          </div>
+        </div>
+        <div class="col-6">
+          <div class="input-group">
+            <input type="number" min="0" max="59" class="form-control" [(ngModel)]="durationMinutes" (blur)="checkEmptyDuration()">
+            <span class="input-group-text">min</span>
+          </div>
+        </div>
       </div>
     </div>
 

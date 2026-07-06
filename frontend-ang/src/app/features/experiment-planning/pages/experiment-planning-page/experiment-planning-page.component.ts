@@ -1,7 +1,7 @@
 import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
-import { PlanningSidebarComponent } from '../../components/planning-sidebar/planning-sidebar.component';
+import { ConcUnit, PlanningSidebarComponent } from '../../components/planning-sidebar/planning-sidebar.component';
 import { PlanningKpiComponent } from '../../components/planning-kpi/planning-kpi.component';
 import { PlanningChartComponent } from '../../components/planning-chart/planning-chart.component';
 import { TRANSLOCO_IMPORTS } from '../../../../core/global/transloco-imports';
@@ -24,15 +24,16 @@ export class ExperimentPlanningPageComponent {
 
   private kineticsService = inject(KineticsCalculatorService);
 
-  // State für die Child-Components
   chartData: KineticsDataPoint[] = [];
   halfLifeTime: string | null = null;
   completionTime: string | null = null;
 
-  // Wird aufgerufen, wenn in der Sidebar auf "Simulate" geklickt wird
-  onSimulate(params: {k: number, a0: number, b0: number, duration: number}) {
+  selectedUnit: ConcUnit = 'mM';
 
-    // 1. Daten berechnen (wir nehmen z.B. 200 Schritte für einen smoothen Graphen)
+  onSimulate(params: {k: number, a0: number, b0: number, duration: number, unit: ConcUnit}) {
+
+    this.selectedUnit = params.unit;
+
     const requestParams: KineticsParams = {
       k: params.k,
       a0: params.a0,
@@ -43,26 +44,14 @@ export class ExperimentPlanningPageComponent {
 
     this.chartData = this.kineticsService.calculateKinetics(requestParams);
 
-    // 2. KPIs berechnen (50% und 99% Zeiten aus dem Array fischen)
-    this.calculateKpis();
+    this.calculateKpis(params.k, params.a0, params.b0);
   }
 
-  private calculateKpis() {
-    this.halfLifeTime = null;
-    this.completionTime = null;
+  private calculateKpis(k: number, a0: number, b0: number) {
+    const t50 = this.kineticsService.calculateExactTimeForConversion(k, a0, b0, 0.50);
+    const t99 = this.kineticsService.calculateExactTimeForConversion(k, a0, b0, 0.99);
 
-    for (const point of this.chartData) {
-      if (!this.halfLifeTime && point.conversion >= 50) {
-        this.halfLifeTime = point.timeLabel;
-      }
-      if (!this.completionTime && point.conversion >= 99) {
-        this.completionTime = point.timeLabel;
-      }
-    }
-
-    // Wenn 99% nicht erreicht wurden im Zeitraum
-    if (!this.completionTime) {
-      this.completionTime = "> " + this.chartData[this.chartData.length - 1].timeLabel;
-    }
+    this.halfLifeTime = this.kineticsService.formatTime(t50);
+    this.completionTime = this.kineticsService.formatTime(t99);
   }
 }
