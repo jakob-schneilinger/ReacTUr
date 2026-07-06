@@ -1,5 +1,6 @@
 package com.reactur.backend.services.implementations;
 
+import com.reactur.backend.dtos.experiments.ExperimentHistoryDto;
 import com.reactur.backend.dtos.experiments.GetExperimentDto;
 import com.reactur.backend.dtos.experiments.SaveExperimentDto;
 import com.reactur.backend.dtos.experiments.SearchParametersDto;
@@ -29,6 +30,12 @@ import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.Predicate;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.javers.core.Javers;
+import org.javers.core.commit.CommitMetadata;
+import org.javers.core.diff.Change;
+import org.javers.core.metamodel.object.InstanceId;
+import org.javers.repository.jql.QueryBuilder;
+import org.jspecify.annotations.NonNull;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -40,8 +47,11 @@ import org.springframework.security.access.AccessDeniedException;
 import java.time.Instant;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @Slf4j
@@ -56,6 +66,7 @@ public class ExperimentServiceImpl implements ExperimentService {
   private final UserRepository userRepository;
   private final AuditLogRepository auditLogRepository;
   private final ExperimentMapper experimentMapper;
+  private final Javers javers;
 
   @Override
   @Transactional
@@ -478,6 +489,94 @@ public class ExperimentServiceImpl implements ExperimentService {
 
       return cb.and(predicates.toArray(new Predicate[0]));
     };
+  }
+
+  public List<ExperimentHistoryDto> getExperimentHistory(UUID experimentUuid) {
+    Experiment experiment = experimentRepository.findById(experimentUuid)
+            .orElseThrow(() -> new ResourceNotFoundException("Experiment not found"));
+
+      List<Change> allChanges = new ArrayList<>(javers.findChanges(
+              QueryBuilder.byInstanceId(experimentUuid, Experiment.class).build()
+      ));
+
+    if (experiment.getMetadata() != null) {
+      allChanges.addAll(javers.findChanges(
+              QueryBuilder.byInstanceId(experiment.getMetadata().getId(), Metadata.class).build()
+      ));
+    }
+
+    if (experiment.getResult() != null) {
+      allChanges.addAll(javers.findChanges(
+              QueryBuilder.byInstanceId(experiment.getResult().getId(), ExperimentResult.class).build()
+      ));
+    }
+
+    Map<CommitMetadata, List<Change>> changesByCommit = allChanges.stream()
+            .filter(change -> change.getCommitMetadata().isPresent())
+            .collect(Collectors.groupingBy(change -> change.getCommitMetadata().get()));
+
+    List<ExperimentHistoryDto> historyList = getExperimentHistoryDtos(changesByCommit);
+
+    historyList.sort((a, b) -> b.commitDate().compareTo(a.commitDate()));
+
+    return historyList;
+  }
+
+  private static @NonNull List<ExperimentHistoryDto> getExperimentHistoryDtos(Map<CommitMetadata, List<Change>> changesByCommit) {
+    List<ExperimentHistoryDto> historyList = new ArrayList<>();
+
+    for (Map.Entry<CommitMetadata, List<Change>> entry : changesByCommit.entrySet()) {
+      CommitMetadata commit = entry.getKey();
+      Map<String, String> diffMap = new HashMap<>();
+
+      String commitType = "UPDATE";
+
+      for (Change change : entry.getValue()) {
+
+        if (change instanceof org.javers.core.diff.changetype.NewObject) {
+          commitType = "CREATE";
+        }
+
+        if (change instanceof org.javers.core.diff.changetype.ValueChange valChange) {
+          String propName = valChange.getPropertyName();
+
+          if ("id".equals(propName) && valChange.getLeft() == null) {
+            commitType = "CREATE";
+          }
+
+          if ("archivedAt".equals(propName)) {
+            if (valChange.getLeft() == null && valChange.getRight() != null) {
+              commitType = "ARCHIVE";
+            } else if (valChange.getLeft() != null && valChange.getRight() == null) {
+              commitType = "RESTORE";
+            }
+          }
+
+          diffMap.put(
+                  propName,
+                  valChange.getLeft() + " -> " + valChange.getRight()
+          );
+        } else if (change instanceof org.javers.core.diff.changetype.ReferenceChange refChange) {
+          String propName = refChange.getPropertyName();
+
+          Object leftId = refChange.getLeft() instanceof InstanceId instanceId ? instanceId.getCdoId() : null;
+          Object rightId = refChange.getRight() instanceof InstanceId instanceId ? instanceId.getCdoId() : null;
+
+          diffMap.put(
+                  propName,
+                  (leftId != null ? leftId : "null") + " -> " + (rightId != null ? rightId : "null")
+          );
+        }
+      }
+
+      historyList.add(new ExperimentHistoryDto(
+              commit.getAuthor(),
+              commit.getCommitDateInstant(),
+              commitType,
+              diffMap
+      ));
+    }
+    return historyList;
   }
 
 }

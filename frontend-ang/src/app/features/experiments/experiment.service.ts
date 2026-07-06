@@ -8,6 +8,7 @@ import { ExperimentDataDto, GetExperimentDto, SaveExperimentDto } from './experi
 import { SearchParametersDto } from '../search/search.dto';
 import { MOCK_EXPERIMENT_DATA, MOCK_EXPERIMENTS } from '../../mock/mock-experiments';
 import { AuditLogDto } from '../../shared/dtos/audit.dto';
+import { ExperimentHistoryDto } from './experiment-history.dto';
 
 @Injectable({
   providedIn: 'root',
@@ -78,6 +79,10 @@ export class ExperimentService {
     const mockExp = MOCK_EXPERIMENTS.find((e) => e.uuid === uuid) || MOCK_EXPERIMENTS[0];
     //return of(mockExp).pipe(delay(500));
     return this.httpClient.put<GetExperimentDto>(`${this.experimentBaseUri}/${uuid}/restore`, {});
+  }
+
+  getExperimentHistory(uuid: string): Observable<ExperimentHistoryDto[]> {
+    return this.httpClient.get<ExperimentHistoryDto[]>(`${this.experimentBaseUri}/${uuid}/history`);
   }
 
   // --- DATA ENDPOINTS ---

@@ -14,6 +14,10 @@ import ExperimentFileService from '../../experiment-file.service';
 import {
   ExtractedMetadataConfirmModalComponent
 } from '../../components/extracted-metadata-confirm-modal/extracted-metadata-confirm-modal.component';
+import { ExperimentHistoryDto } from '../../experiment-history.dto';
+import {
+  ExperimentHistoryModalComponent
+} from '../../components/experiment-history-modal/experiment-history-modal.component';
 
 export type FormState = 'create' | 'edit';
 
@@ -28,7 +32,8 @@ export type FormState = 'create' | 'edit';
     ExperimentDetailsFormComponent,
     FileUploadComponent,
     ExtractedMetadataConfirmModalComponent,
-  ],
+    ExperimentHistoryModalComponent
+  ]
 })
 export class ExperimentDetailsPageComponent implements OnInit {
   @ViewChild(ExperimentDetailsFormComponent) formComponent!: ExperimentDetailsFormComponent;
@@ -139,6 +144,35 @@ export class ExperimentDetailsPageComponent implements OnInit {
     } else {
       this.state = 'create';
     }
+  }
+
+  isHistoryModalOpen = false;
+  experimentAuditLogs: ExperimentHistoryDto[] = [];
+  isLoadingHistory = false;
+
+  openHistoryModal(): void {
+    if (this.state === 'create' || !this.experiment?.uuid) return;
+
+    this.isHistoryModalOpen = true;
+
+      this.isLoadingHistory = true;
+
+    this.experimentService.getExperimentHistory(this.experiment.uuid).subscribe({
+      next: (history) => {
+        this.experimentAuditLogs = history;
+        this.isLoadingHistory = false;
+        this.cdr.markForCheck();
+      },
+      error: (err) => {
+        console.log(err)
+        this.notification.error(
+          'Error',
+          'Could not load experiment history'
+        );
+        this.isLoadingHistory = false;
+        this.cdr.markForCheck();
+      }
+    });
   }
 
   async onFilesUploaded(files: File[]): Promise<void> {

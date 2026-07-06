@@ -332,7 +332,8 @@
           "error": "Error",
           "isErrorPercentage": "Percentage Error",
           "pfoRateConstant": "Pseudo First Order Rate Constant",
-          "doi": "Digital Object Identifier (DOI)"
+          "doi": "Digital Object Identifier (DOI)",
+          "createdBy": "Created By"
         },
         "placeholders": {
           "value": "Value",

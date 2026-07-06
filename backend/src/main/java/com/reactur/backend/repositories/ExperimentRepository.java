@@ -1,6 +1,7 @@
 package com.reactur.backend.repositories;
 
 import com.reactur.backend.entities.experiment.Experiment;
+import org.javers.spring.annotation.JaversSpringDataAuditable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
@@ -11,6 +12,7 @@ import java.util.List;
 import java.util.UUID;
 
 @Repository
+@JaversSpringDataAuditable
 public interface ExperimentRepository extends JpaRepository<Experiment, UUID>, JpaSpecificationExecutor<Experiment> {
 
   List<Experiment> findByArchivedAtIsNotNull();

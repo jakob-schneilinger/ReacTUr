@@ -46,7 +46,7 @@ public class Reactant {
     @JoinColumn(name = "type_id")
     private ChemicalType type;
 
-    @Column(name = "in_chi_key", unique = true)
+    @Column(name = "in_chi_key")
     private String inChiKey;
 
     @Column(name = "chemical_name")

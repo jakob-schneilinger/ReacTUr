@@ -6,6 +6,10 @@
     <div leftContent>
       <h2>{{experimentTitle}}</h2>
 
+      <button class="btn btn-outline-primary" (click)="openHistoryModal()">
+        <i class="bi bi-clock-history"></i> Show History
+      </button>
+
       @if (formState === 'create' || experiment) {
         <app-experiment-details-form
           class="experiment-details-form"
@@ -39,3 +43,9 @@
     (cancel)="declineMetadataUse()">
   </app-extracted-metadata-confirm-modal>
 }
+
+<app-experiment-history-modal
+  [isOpen]="isHistoryModalOpen"
+  [history]="experimentAuditLogs"
+  (close)="isHistoryModalOpen = false">
+</app-experiment-history-modal>
