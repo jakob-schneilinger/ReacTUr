@@ -25,10 +25,13 @@ import com.reactur.backend.repositories.ReactantRepository;
 import com.reactur.backend.repositories.options.SolventRepository;
 import com.reactur.backend.repositories.UserRepository;
 import com.reactur.backend.services.ExperimentService;
+import jakarta.persistence.criteria.Join;
+import jakarta.persistence.criteria.Predicate;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -36,6 +39,7 @@ import com.reactur.backend.enums.Role;
 import org.springframework.security.access.AccessDeniedException;
 import java.time.Instant;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -364,8 +368,116 @@ public class ExperimentServiceImpl implements ExperimentService {
   }
 
   @Override
-  public Page<GetExperimentDto> searchExperiments(SearchParametersDto searchParams, Pageable pageable, String requestingUserId, Role requestingUserRole) {
-    return null;
+  public Page<GetExperimentDto> searchExperiments(
+    SearchParametersDto searchParams,
+    Pageable pageable,
+    String requestingUserId,
+    Role requestingUserRole
+  ) {
+    log.trace("Executing dynamic search for experiments by user: {}", requestingUserId);
+
+    // Dynamic SQL WHERE clause
+    Specification<Experiment> spec = buildSearchSpecification(searchParams);
+
+    // Execute the paginated query
+    Page<Experiment> experimentPage = experimentRepository.findAll(spec, pageable);
+
+    // Map entities to DTOs while preserving the Page structure
+    return experimentPage.map(experimentMapper::experimentToGetExperimentDto);
+  }
+
+  // Dynamic Query Builder
+  private Specification<Experiment> buildSearchSpecification(SearchParametersDto params) {
+    return (root, query, cb) -> {
+      List<Predicate> predicates = new ArrayList<>();
+
+      // GLOBAL RULE: Never show archived experiments in active search
+      predicates.add(cb.isNull(root.get("archivedAt")));
+
+      if (params == null) {
+        return cb.and(predicates.toArray(new Predicate[0]));
+      }
+
+      // Reactant commutativity rule
+      boolean hasA = params.reactantA() != null && !params.reactantA().isEmpty();
+      boolean hasB = params.reactantB() != null && !params.reactantB().isEmpty();
+
+      if (hasA && hasB) {
+        // (A in listA AND B in listB) OR (A in listB AND B in listA)
+        Predicate directMatch = cb.and(
+          root.get("reactantA").get("id").in(params.reactantA()),
+          root.get("reactantB").get("id").in(params.reactantB())
+        );
+        Predicate crossMatch = cb.and(
+          root.get("reactantA").get("id").in(params.reactantB()),
+          root.get("reactantB").get("id").in(params.reactantA())
+        );
+        predicates.add(cb.or(directMatch, crossMatch));
+      } else if (hasA) {
+        // Look for ListA in EITHER Reactant A or Reactant B column
+        predicates.add(cb.or(
+          root.get("reactantA").get("id").in(params.reactantA()),
+          root.get("reactantB").get("id").in(params.reactantA())
+        ));
+      } else if (hasB) {
+        // Look for ListB in EITHER Reactant A or Reactant B column
+        predicates.add(cb.or(
+          root.get("reactantA").get("id").in(params.reactantB()),
+          root.get("reactantB").get("id").in(params.reactantB())
+        ));
+      }
+
+      // METADATA JOINS (We only join if we need to filter on metadata fields)
+      Join<Experiment, Metadata> metadataJoin = root.join("metadata");
+
+      if (params.dateMin() != null) predicates.add(cb.greaterThanOrEqualTo(metadataJoin.get("date"), params.dateMin()));
+      if (params.dateMax() != null) predicates.add(cb.lessThanOrEqualTo(metadataJoin.get("date"), params.dateMax()));
+
+      if (params.temperatureMin() != null) predicates.add(cb.greaterThanOrEqualTo(metadataJoin.get("temperature"), params.temperatureMin()));
+      if (params.temperatureMax() != null) predicates.add(cb.lessThanOrEqualTo(metadataJoin.get("temperature"), params.temperatureMax()));
+
+      if (params.concentrationA_Min() != null) predicates.add(cb.greaterThanOrEqualTo(metadataJoin.get("concentrationA"), params.concentrationA_Min()));
+      if (params.concentrationA_Max() != null) predicates.add(cb.lessThanOrEqualTo(metadataJoin.get("concentrationA"), params.concentrationA_Max()));
+
+      if (params.concentrationB_Min() != null) predicates.add(cb.greaterThanOrEqualTo(metadataJoin.get("concentrationB"), params.concentrationB_Min()));
+      if (params.concentrationB_Max() != null) predicates.add(cb.lessThanOrEqualTo(metadataJoin.get("concentrationB"), params.concentrationB_Max()));
+
+      if (params.wavelengthMin() != null) predicates.add(cb.greaterThanOrEqualTo(metadataJoin.get("wavelength"), params.wavelengthMin()));
+      if (params.wavelengthMax() != null) predicates.add(cb.lessThanOrEqualTo(metadataJoin.get("wavelength"), params.wavelengthMax()));
+
+      if (params.comment() != null && !params.comment().isBlank()) {
+        // case-insensitive search
+        predicates.add(cb.like(cb.lower(metadataJoin.get("comment")), "%" + params.comment().toLowerCase() + "%"));
+      }
+
+      // METADATA LISTS (OR Logic via IN clauses)
+      if (params.scientist() != null && !params.scientist().isEmpty()) {
+        predicates.add(metadataJoin.get("scientist").get("id").in(params.scientist()));
+      }
+      if (params.solvent() != null) {
+        predicates.add(cb.equal(metadataJoin.get("solvent").get("id"), params.solvent()));
+      }
+      if (params.instrument() != null) {
+        predicates.add(cb.equal(metadataJoin.get("instrument").get("id"), params.instrument()));
+      }
+      if (params.modality() != null) {
+        predicates.add(cb.equal(metadataJoin.get("modality").get("id"), params.modality()));
+      }
+
+      // RESULT JOINS (For MeasurementSearchDto)
+      if (params.measurementSearch() != null) {
+        jakarta.persistence.criteria.Join<Experiment, ExperimentResult> resultJoin = root.join("result");
+        var mSearch = params.measurementSearch();
+
+        if (mSearch.rateConstantMin() != null) predicates.add(cb.greaterThanOrEqualTo(resultJoin.get("rateConstant"), mSearch.rateConstantMin()));
+        if (mSearch.rateConstantMax() != null) predicates.add(cb.lessThanOrEqualTo(resultJoin.get("rateConstant"), mSearch.rateConstantMax()));
+
+        if (mSearch.pFO_rateConstantMin() != null) predicates.add(cb.greaterThanOrEqualTo(resultJoin.get("pfoRateConstant"), mSearch.pFO_rateConstantMin()));
+        if (mSearch.pFO_rateConstantMax() != null) predicates.add(cb.lessThanOrEqualTo(resultJoin.get("pfoRateConstant"), mSearch.pFO_rateConstantMax()));
+      }
+
+      return cb.and(predicates.toArray(new Predicate[0]));
+    };
   }
 
 }

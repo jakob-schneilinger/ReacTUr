@@ -4,6 +4,7 @@ import com.reactur.backend.dtos.experiments.GetExperimentDto;
 import com.reactur.backend.dtos.experiments.MeasurementDataDto;
 import com.reactur.backend.dtos.experiments.SaveExperimentDto;
 import com.reactur.backend.dtos.experiments.SaveMetadataDto;
+import com.reactur.backend.dtos.experiments.SearchParametersDto;
 import com.reactur.backend.entities.experiment.Experiment;
 import com.reactur.backend.entities.Reactant;
 import com.reactur.backend.entities.experiment.ExperimentResult;
@@ -42,8 +43,14 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -609,6 +616,37 @@ class ExperimentServiceTest {
 
     // Ensure we never attempted to save the corrupted state
     Mockito.verify(experimentRepository, Mockito.never()).save(any());
+  }
+
+  @Test
+  void searchExperiments_executesPaginatedQueryAndReturnsMappedDtos() {
+    // 1. Setup Request Data
+    SearchParametersDto searchDto = new SearchParametersDto(
+      List.of(randomUUID()), // reactant A
+      null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null
+    );
+    Pageable pageable = PageRequest.of(0, 10);
+    String userId = "user-123";
+
+    // 2. Setup Mock Database Response
+    Experiment mockExperiment = createMockEntityForSecurity(randomUUID(), userId, "scientist-1", null);
+    Page<Experiment> mockEntityPage =
+      new PageImpl<>(List.of(mockExperiment));
+
+    // When the repository executes ANY Specification with ANY Pageable, return our mock page
+    when(experimentRepository.findAll(any(Specification.class), any(Pageable.class)))
+      .thenReturn(mockEntityPage);
+
+    // 3. Execute
+    Page<GetExperimentDto> resultPage =
+      experimentService.searchExperiments(searchDto, pageable, userId, Role.USER);
+
+    // 4. Assert
+    assertNotNull(resultPage, "Page should not be null");
+    assertEquals(1, resultPage.getTotalElements(), "Page should contain exactly 1 mapped DTO");
+
+    // Verify the repository was actually called with a Specification and the Pageable
+    Mockito.verify(experimentRepository).findAll(any(Specification.class), Mockito.eq(pageable));
   }
 
   private SaveExperimentDto createDummyExperimentDto() {
