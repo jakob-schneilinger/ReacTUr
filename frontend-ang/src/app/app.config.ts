@@ -7,6 +7,22 @@ import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { routes } from './app.routes';
 import { TranslocoHttpLoader } from './transloco-loader';
 import { provideTransloco } from '@jsverse/transloco';
+import { provideEchartsCore } from 'ngx-echarts';
+import * as echarts from 'echarts/core';
+import { CanvasRenderer } from 'echarts/renderers';
+import { GridComponent, LegendComponent, TitleComponent, TooltipComponent } from 'echarts/components';
+import { BarChart, LineChart, PieChart } from 'echarts/charts';
+
+echarts.use([
+  BarChart,
+  LineChart,
+  PieChart,
+  TitleComponent,
+  TooltipComponent,
+  GridComponent,
+  LegendComponent,
+  CanvasRenderer
+]);
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -18,6 +34,7 @@ export const appConfig: ApplicationConfig = {
         sendAccessToken: true,
       },
     }),
+    provideEchartsCore({ echarts }),
     importProvidersFrom(NgbModule),
     provideTransloco({
       config: {
