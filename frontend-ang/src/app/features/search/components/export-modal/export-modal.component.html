@@ -134,13 +134,14 @@
             }
           </div>
 
-          <div class="col-md-8 p-0 bg-light d-flex flex-column preview-panel">
-            <div class="p-3 border-bottom d-flex justify-content-between align-items-center bg-white">
+          <div class="col-md-8 p-0 bg-light d-flex flex-column preview-panel overflow-hidden">
+
+            <div class="p-3 border-bottom d-flex justify-content-between align-items-center bg-white flex-shrink-0">
               <div>
                 <span class="fw-bold text-secondary me-2">{{ 'exportModal.preview.title' | transloco }}</span>
                 <span class="badge bg-secondary">
-                  {{ 'exportModal.preview.showingItems' | transloco:{ count: (selectedExperiments.length > 5 ? 5 : selectedExperiments.length) } }}
-                </span>
+        {{ 'exportModal.preview.showingItems' | transloco:{ count: (selectedExperiments.length > 5 ? 5 : selectedExperiments.length) } }}
+      </span>
               </div>
 
               <button class="btn btn-sm btn-outline-secondary" (click)="copyToClipboard()" [disabled]="isCopying || isCopied">
@@ -154,18 +155,18 @@
               </button>
             </div>
 
-            <div class="flex-grow-1 p-3 overflow-auto position-relative">
+            <div class="flex-grow-1 p-3 d-flex flex-column position-relative" style="min-height: 0;">
               @if (exportFormat === "json") {
-                <pre class="bg-dark text-light p-3 rounded code-preview"><code>{{ previewData }}</code></pre>
+                <pre class="bg-dark text-light p-3 rounded code-preview flex-grow-1 m-0" style="overflow-y: auto; min-height: 0;"><code>{{ previewData }}</code></pre>
               } @else {
-                <div class="p-0 bg-light d-flex flex-column preview-panel h-100">
+                <div class="d-flex flex-column flex-grow-1" style="min-height: 0;">
                   <div
                     cdkDropList
                     id="tableHeaderList"
                     [cdkDropListData]="selectedColumns"
                     cdkDropListOrientation="horizontal"
                     (cdkDropListDropped)="drop($event)"
-                    class="d-flex bg-white border rounded p-2 mb-3 align-items-center"
+                    class="d-flex bg-white border rounded p-2 mb-3 align-items-center flex-shrink-0"
                     style="min-height: 60px; overflow-x: auto;">
 
                     @if (selectedColumns.length === 0) {
@@ -182,7 +183,7 @@
                     }
                   </div>
 
-                  <div class="table-responsive bg-white border rounded flex-grow-1">
+                  <div class="table-responsive bg-white border rounded flex-grow-1" style="overflow-y: auto; min-height: 0;">
                     <table class="table table-sm table-striped m-0">
                       <thead>
                       <tr>

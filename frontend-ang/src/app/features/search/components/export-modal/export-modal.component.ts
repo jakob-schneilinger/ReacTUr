@@ -6,6 +6,9 @@ import { Component, Input, Output, EventEmitter, OnInit, ChangeDetectorRef } fro
 import { GetExperimentDto } from '../../../experiments/experiment.dto';
 import { TRANSLOCO_IMPORTS } from '../../../../core/global/transloco-imports';
 import { TranslocoService } from '@jsverse/transloco';
+import { catchError, forkJoin, of } from 'rxjs';
+import { ReactantService } from '../../../reactants/reactant.service';
+import { ReactantDetailDto } from '../../../reactants/reactant.dto';
 
 export interface ExportField {
   id: string;
@@ -28,9 +31,11 @@ export class ExportModalComponent implements OnInit {
   isCopied: boolean = false;
   isCopying: boolean = false;
 
-  // JSON Checkbox State (um alle Felder erweitert)
+  isLoading: boolean = true;
+  reactantDetailsMap: Map<string, ReactantDetailDto> = new Map();
+
   exportFields = {
-    core: { doi: true, createdBy: true, attachments: false },
+    core: { doi: true, attachments: false },
     reactants: { names: true, smiles: true, structures: true, type: true },
     kinetics: { rateConstant: true, pFO_rateConstant: false, error: true, isErrorPercentage: false },
     metadata: {
@@ -47,11 +52,9 @@ export class ExportModalComponent implements OnInit {
     }
   };
 
-  // 1. Definiere ALLE möglichen Felder für CSV Chips
   private readonly ALL_FIELDS: ExportField[] = [
     { id: 'uuid', labelKey: 'exportModal.fields.uuid', category: 'core' },
     { id: 'doi', labelKey: 'exportModal.fields.doi', category: 'core' },
-    { id: 'createdBy', labelKey: 'exportModal.fields.createdBy', category: 'core' },
 
     { id: 'reactantA_name', labelKey: 'exportModal.fields.reactantAName', category: 'reactants' },
     { id: 'reactantA_smiles', labelKey: 'exportModal.fields.reactantASmiles', category: 'reactants' },
@@ -80,7 +83,6 @@ export class ExportModalComponent implements OnInit {
     { id: 'expComment', labelKey: 'exportModal.fields.expComment', category: 'metadata' }
   ];
 
-  // 2. Standard-Auswahl
   private readonly DEFAULT_COLUMN_IDS = [
     'reactantA_name', 'reactantB_name',
     'reactantA_smiles', 'reactantB_smiles',
@@ -97,12 +99,49 @@ export class ExportModalComponent implements OnInit {
 
   constructor(
     private cd: ChangeDetectorRef,
-    private translocoService: TranslocoService
+    private translocoService: TranslocoService,
+    private reactantService: ReactantService
   ) {}
 
   ngOnInit() {
     this.initializeDragAndDropLists();
-    this.updatePreview();
+    this.loadReactantDetails();
+  }
+
+  private loadReactantDetails() {
+    this.isLoading = true;
+    const uniqueReactantUuids = new Set<string>();
+
+    this.selectedExperiments.forEach(exp => {
+      if (exp.reactantA?.uuid) uniqueReactantUuids.add(exp.reactantA.uuid);
+      if (exp.reactantB?.uuid) uniqueReactantUuids.add(exp.reactantB.uuid);
+    });
+
+    if (uniqueReactantUuids.size === 0) {
+      this.isLoading = false;
+      this.updatePreview();
+      return;
+    }
+
+    const requests = Array.from(uniqueReactantUuids).map(uuid =>
+      this.reactantService.getReactantDetail(uuid).pipe(
+        catchError(err => {
+          console.error(`Failed to load details for reactant ${uuid}`, err);
+          return of(null);
+        })
+      )
+    );
+
+    forkJoin(requests).subscribe(details => {
+      details.forEach(detail => {
+        if (detail && detail.uuid) {
+          this.reactantDetailsMap.set(detail.uuid, detail);
+        }
+      });
+      this.isLoading = false;
+      this.updatePreview();
+      this.cd.detectChanges();
+    });
   }
 
   private initializeDragAndDropLists() {
@@ -149,6 +188,8 @@ export class ExportModalComponent implements OnInit {
   }
 
   updatePreview() {
+    if (this.isLoading) return; // Warten, bis Daten da sind
+
     if (this.exportFormat === 'json') {
       this.previewData = this.getFormattedJson(true);
     } else {
@@ -162,44 +203,63 @@ export class ExportModalComponent implements OnInit {
     const filteredItems = itemsToProcess.map(exp => {
       const filteredExp: any = { uuid: exp.uuid };
 
-      if (this.exportFields.core.doi) filteredExp.doi = exp.doi;
-      if (this.exportFields.core.createdBy) filteredExp.createdBy = exp.createdBy;
+      if (this.exportFields.core.doi && exp.doi) filteredExp.doi = exp.doi;
       if (this.exportFields.core.attachments && exp.attachments) filteredExp.attachments = exp.attachments;
 
-      filteredExp.reactants = {};
+      const reactantsObj: any = {};
       ['reactantA', 'reactantB'].forEach(r => {
         const reactantData = exp[r as keyof GetExperimentDto] as any;
         if (reactantData) {
-          filteredExp.reactants[r] = {};
-          if (this.exportFields.reactants.names) filteredExp.reactants[r].shortName = reactantData.shortName;
-          if (this.exportFields.reactants.smiles) filteredExp.reactants[r].smiles = reactantData.smiles;
-          if (this.exportFields.reactants.type) filteredExp.reactants[r].type = this.extractNestedLabel(reactantData.chemicalType);
-          if (this.exportFields.reactants.structures && reactantData.structures) {
-            filteredExp.reactants[r].structures = reactantData.structures;
+          const rObj: any = {};
+          if (this.exportFields.reactants.names) rObj.shortName = reactantData.shortName;
+          if (this.exportFields.reactants.smiles) rObj.smiles = reactantData.smiles;
+          if (this.exportFields.reactants.type) rObj.type = this.extractNestedLabel(reactantData.chemicalType);
+
+          // NEU: Greife auf die Map zu, um die 3D Struktur ins JSON zu packen
+          if (this.exportFields.reactants.structures) {
+            const detail = this.reactantDetailsMap.get(reactantData.uuid);
+            if (detail?.structures && detail.structures.length > 0) {
+              rObj.structures = detail.structures;
+            }
+          }
+
+          if (Object.keys(rObj).length > 0) {
+            reactantsObj[r] = rObj;
           }
         }
       });
+      if (Object.keys(reactantsObj).length > 0) {
+        filteredExp.reactants = reactantsObj;
+      }
 
       if (exp.measurementData) {
-        filteredExp.kinetics = {};
-        if (this.exportFields.kinetics.rateConstant) filteredExp.kinetics.rateConstant = exp.measurementData.rateConstant;
-        if (this.exportFields.kinetics.pFO_rateConstant) filteredExp.kinetics.pFO_rateConstant = exp.measurementData.pFO_rateConstant;
-        if (this.exportFields.kinetics.error) filteredExp.kinetics.error = exp.measurementData.error;
-        if (this.exportFields.kinetics.isErrorPercentage) filteredExp.kinetics.isErrorPercentage = exp.measurementData.isErrorPercentage;
+        const kineticsObj: any = {};
+        if (this.exportFields.kinetics.rateConstant) kineticsObj.rateConstant = exp.measurementData.rateConstant;
+        if (this.exportFields.kinetics.pFO_rateConstant) kineticsObj.pFO_rateConstant = exp.measurementData.pFO_rateConstant;
+        if (this.exportFields.kinetics.error) kineticsObj.error = exp.measurementData.error;
+        if (this.exportFields.kinetics.isErrorPercentage) kineticsObj.isErrorPercentage = exp.measurementData.isErrorPercentage;
+
+        if (Object.keys(kineticsObj).length > 0) {
+          filteredExp.kinetics = kineticsObj;
+        }
       }
 
       if (exp.metadata) {
-        filteredExp.metadata = {};
-        if (this.exportFields.metadata.date) filteredExp.metadata.date = exp.metadata.date;
-        if (this.exportFields.metadata.scientist) filteredExp.metadata.scientist = exp.metadata.scientist;
-        if (this.exportFields.metadata.temperature) filteredExp.metadata.temperature = exp.metadata.temperature;
-        if (this.exportFields.metadata.solvent) filteredExp.metadata.solvent = exp.metadata.solvent;
-        if (this.exportFields.metadata.concentrationA) filteredExp.metadata.concentrationA = exp.metadata.concentrationA;
-        if (this.exportFields.metadata.concentrationB) filteredExp.metadata.concentrationB = exp.metadata.concentrationB;
-        if (this.exportFields.metadata.instrument) filteredExp.metadata.instrument = exp.metadata.instrument;
-        if (this.exportFields.metadata.modality) filteredExp.metadata.modality = exp.metadata.modality;
-        if (this.exportFields.metadata.wavelength) filteredExp.metadata.wavelength = exp.metadata.wavelength;
-        if (this.exportFields.metadata.comment) filteredExp.metadata.comment = exp.metadata.comment;
+        const metaObj: any = {};
+        if (this.exportFields.metadata.date) metaObj.date = exp.metadata.date;
+        if (this.exportFields.metadata.scientist) metaObj.scientist = exp.metadata.scientist;
+        if (this.exportFields.metadata.temperature) metaObj.temperature = exp.metadata.temperature;
+        if (this.exportFields.metadata.solvent) metaObj.solvent = exp.metadata.solvent;
+        if (this.exportFields.metadata.concentrationA) metaObj.concentrationA = exp.metadata.concentrationA;
+        if (this.exportFields.metadata.concentrationB) metaObj.concentrationB = exp.metadata.concentrationB;
+        if (this.exportFields.metadata.instrument) metaObj.instrument = exp.metadata.instrument;
+        if (this.exportFields.metadata.modality) metaObj.modality = exp.metadata.modality;
+        if (this.exportFields.metadata.wavelength) metaObj.wavelength = exp.metadata.wavelength;
+        if (this.exportFields.metadata.comment) metaObj.comment = exp.metadata.comment;
+
+        if (Object.keys(metaObj).length > 0) {
+          filteredExp.metadata = metaObj;
+        }
       }
 
       return filteredExp;
@@ -236,22 +296,26 @@ export class ExportModalComponent implements OnInit {
   }
 
   private getCellValue(exp: GetExperimentDto, colId: string): any {
-    const mapStructures = (structures: any[]) => structures ? structures.map(s => s.structure).join(' | ') : '';
+    const getStructures = (reactant: any) => {
+      if (!reactant || !reactant.uuid) return '';
+      const detail = this.reactantDetailsMap.get(reactant.uuid);
+      return detail?.structures ? detail.structures.map(s => s.structure).join(' | ') : '';
+    };
+
     const m = exp.metadata || {};
 
     switch (colId) {
       case 'uuid': return exp.uuid || '';
       case 'doi': return exp.doi || '';
-      case 'createdBy': return exp.createdBy?.email || '';
 
       case 'reactantA_name': return exp.reactantA?.shortName || '';
       case 'reactantA_smiles': return exp.reactantA?.smiles || '';
-      case 'reactantA_struct': return mapStructures((exp.reactantA as any)?.structures);
+      case 'reactantA_struct': return getStructures(exp.reactantA);
       case 'reactantA_type': return this.extractNestedLabel(exp.reactantA?.chemicalType);
 
       case 'reactantB_name': return exp.reactantB?.shortName || '';
       case 'reactantB_smiles': return exp.reactantB?.smiles || '';
-      case 'reactantB_struct': return mapStructures((exp.reactantB as any)?.structures);
+      case 'reactantB_struct': return getStructures(exp.reactantB);
       case 'reactantB_type': return this.extractNestedLabel(exp.reactantB?.chemicalType);
 
       case 'rateConstant': return exp.measurementData?.rateConstant ?? '';
@@ -274,7 +338,6 @@ export class ExportModalComponent implements OnInit {
     }
   }
 
-  // Hilfsfunktion: Holt den Namen des DTOs (Instrument, Modality, ChemicalType etc.)
   private extractNestedLabel(obj: any): string {
     if (!obj) return '';
     if (typeof obj === 'string') return obj;
