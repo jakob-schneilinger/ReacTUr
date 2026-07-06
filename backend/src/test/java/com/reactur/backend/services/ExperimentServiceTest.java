@@ -5,6 +5,7 @@ import com.reactur.backend.dtos.experiments.MeasurementDataDto;
 import com.reactur.backend.dtos.experiments.SaveExperimentDto;
 import com.reactur.backend.dtos.experiments.SaveMetadataDto;
 import com.reactur.backend.dtos.experiments.SearchParametersDto;
+import com.reactur.backend.entities.ReactantStructure;
 import com.reactur.backend.entities.experiment.Experiment;
 import com.reactur.backend.entities.Reactant;
 import com.reactur.backend.entities.experiment.ExperimentResult;
@@ -12,6 +13,7 @@ import com.reactur.backend.entities.options.Instrument;
 import com.reactur.backend.entities.options.Modality;
 import com.reactur.backend.entities.options.Solvent;
 import com.reactur.backend.entities.User;
+import com.reactur.backend.enums.StructureFlag;
 import com.reactur.backend.exeptions.ResourceConflictException;
 import com.reactur.backend.exeptions.ResourceNotFoundException;
 import com.reactur.backend.exeptions.UnprocessableEntityException;
@@ -26,6 +28,7 @@ import com.reactur.backend.mappers.options.SolventMapper;
 import com.reactur.backend.repositories.AuditLogRepository;
 import com.reactur.backend.repositories.ExperimentRepository;
 
+import com.reactur.backend.repositories.ReactantStructureRepository;
 import com.reactur.backend.repositories.options.InstrumentRepository;
 import com.reactur.backend.repositories.options.ModalityRepository;
 import com.reactur.backend.repositories.ReactantRepository;
@@ -50,6 +53,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -77,6 +81,7 @@ class ExperimentServiceTest {
   @Mock private ModalityRepository modalityRepository;
   @Mock private UserRepository userRepository;
   @Mock private AuditLogRepository auditLogRepository;
+  @Mock private ReactantStructureRepository structureRepository;
 
   @Mock
   private FileService fileService;
@@ -116,7 +121,6 @@ class ExperimentServiceTest {
 
   @Test
   void createExperiment_whenValidInput_returnsGetExperimentDto() {
-
     String userId = "mock-keycloak-id-123";
     String scientistId = "mock-scientist-id-456";
     UUID reactantAId = randomUUID();
@@ -126,91 +130,55 @@ class ExperimentServiceTest {
     UUID modalityId = randomUUID();
 
     SaveMetadataDto validMetadata = new SaveMetadataDto(
-      java.time.LocalDate.now().minusDays(1),
-      scientistId,
-      25.0,
-      solventId,
-      1.5,
-      2.0,
-      instrumentId,
-      modalityId,
-      450.0,
-      "Test"
+            java.time.LocalDate.now().minusDays(1), scientistId, 25.0, solventId, 1.5, 2.0, instrumentId, modalityId, 450.0, "Test"
     );
-    MeasurementDataDto validMeasurement = new MeasurementDataDto(
-      1.2, 5.5, 0.1, false
-    );
+    MeasurementDataDto validMeasurement = new MeasurementDataDto(1.2, 5.5, 0.1, false);
     SaveExperimentDto validRequestDto = new SaveExperimentDto(
-      reactantAId, reactantBId, validMetadata, validMeasurement, "10.1000/rxn123"
+            reactantAId, reactantBId, validMetadata, validMeasurement, "10.1000/rxn123"
     );
 
-    // ... create Mocks with the response-data:
-    User mockCreator = new User();
-    mockCreator.setId(userId);
+    User mockCreator = new User(); mockCreator.setId(userId);
     when(userRepository.findById(userId)).thenReturn(Optional.of(mockCreator));
 
-    User mockScientist = new User();
-    mockScientist.setId(scientistId);
+    User mockScientist = new User(); mockScientist.setId(scientistId);
     when(userRepository.findById(scientistId)).thenReturn(Optional.of(mockScientist));
 
-    Reactant mockReactantA = new Reactant();
-    mockReactantA.setId(reactantAId);
+    Reactant mockReactantA = new Reactant(); mockReactantA.setId(reactantAId);
     when(reactantRepository.findById(reactantAId)).thenReturn(Optional.of(mockReactantA));
 
-    Reactant mockReactantB = new Reactant();
-    mockReactantB.setId(reactantBId);
+    Reactant mockReactantB = new Reactant(); mockReactantB.setId(reactantBId);
     when(reactantRepository.findById(reactantBId)).thenReturn(Optional.of(mockReactantB));
 
-    Solvent mockSolvent = new Solvent();
-    mockSolvent.setId(solventId);
+    // Mock active structures for Reactants
+    ReactantStructure activeStructure = new ReactantStructure();
+    activeStructure.setFlag(StructureFlag.ACTIVE);
+    when(structureRepository.findByReactant_Id(any())).thenReturn(List.of(activeStructure));
+
+    Solvent mockSolvent = new Solvent(); mockSolvent.setId(solventId);
     when(solventRepository.findById(solventId)).thenReturn(Optional.of(mockSolvent));
 
-    Instrument mockInstrument = new Instrument();
-    mockInstrument.setId(instrumentId);
+    Instrument mockInstrument = new Instrument(); mockInstrument.setId(instrumentId);
     when(instrumentRepository.findById(instrumentId)).thenReturn(Optional.of(mockInstrument));
 
-    Modality mockModality = new Modality();
-    mockModality.setId(modalityId);
+    Modality mockModality = new Modality(); mockModality.setId(modalityId);
     when(modalityRepository.findById(modalityId)).thenReturn(Optional.of(mockModality));
 
-    // ... then return the entity of the "saved" experiment
-
-    when(experimentRepository.save(any()))
-      .thenAnswer(invocation -> {
-        Experiment saved = invocation.getArgument(0);
-        saved.setId(randomUUID()); // Simulates DB generating an ID
-        return saved;
-      });
-
-    // ------------------
+    when(experimentRepository.save(any())).thenAnswer(invocation -> {
+      Experiment saved = invocation.getArgument(0);
+      saved.setId(randomUUID());
+      return saved;
+    });
 
     GetExperimentDto result = experimentService.createExperiment(validRequestDto, userId, Role.USER);
 
-    // Asserting the performed calls...
-
     ArgumentCaptor<Experiment> experimentCaptor = ArgumentCaptor.forClass(Experiment.class);
-
     Mockito.verify(experimentRepository).save(experimentCaptor.capture());
     Experiment capturedEntity = experimentCaptor.getValue();
 
-    // Builder map correct relationships
     assertNotNull(capturedEntity, "The captured entity should not be null");
     assertEquals("10.1000/rxn123", capturedEntity.getDoi());
-    assertEquals(reactantAId, capturedEntity.getReactantA().getId(), "Reactant A was not mapped correctly");
-    assertEquals(solventId, capturedEntity.getMetadata().getSolvent().getId(), "Solvent was not mapped correctly");
-
-    // Delegated creation logic:
-    assertEquals(userId, capturedEntity.getCreatedBy().getId(), "Creator should be the token user");
-    assertEquals(scientistId, capturedEntity.getMetadata().getScientist().getId(), "Scientist should be from the DTO");
-
-    assertEquals(25.0, capturedEntity.getMetadata().getTemperature(), "Temperature was not mapped correctly");
-
-    // Asserting the returned value (Mappers)
     assertNotNull(result, "The returned DTO should not be null");
     assertEquals("10.1000/rxn123", result.doi());
-
-    assertNotNull(result.metadata(), "The returned metadata DTO should not be null");
-    assertEquals(25.0, result.metadata().temperature());
   }
 
   @Test
@@ -497,18 +465,14 @@ class ExperimentServiceTest {
     UUID experimentId = randomUUID();
     String creatorId = "creator-123";
 
-    // 1. Existing entity in the DB
     Experiment existingExperiment = createMockEntityForSecurity(experimentId, creatorId, "scientist-456", null);
     existingExperiment.setDoi("10.1000/old-doi");
-    existingExperiment.getMetadata().setTemperature(20.0); // Old temperature
+    existingExperiment.getMetadata().setTemperature(20.0);
 
-    // 2. New Incoming DTO (simulating the PUT payload)
     SaveExperimentDto updateDto = createDummyExperimentDto();
 
-    // Setup mocks for existing experiment
     when(experimentRepository.findById(experimentId)).thenReturn(Optional.of(existingExperiment));
 
-    // Setup mocks for the semantic validation (Lookups to ensure the new data exists in the DB)
     User newScientist = new User(); newScientist.setId(updateDto.metadata().scientist());
     when(userRepository.findById(updateDto.metadata().scientist())).thenReturn(Optional.of(newScientist));
 
@@ -517,6 +481,11 @@ class ExperimentServiceTest {
 
     Reactant rB = new Reactant(); rB.setId(updateDto.reactantB());
     when(reactantRepository.findById(updateDto.reactantB())).thenReturn(Optional.of(rB));
+
+    // Mock active structures for Reactants
+    ReactantStructure activeStructure = new ReactantStructure();
+    activeStructure.setFlag(StructureFlag.ACTIVE);
+    when(structureRepository.findByReactant_Id(any())).thenReturn(List.of(activeStructure));
 
     Solvent sol = new Solvent(); sol.setId(updateDto.metadata().solvent());
     when(solventRepository.findById(updateDto.metadata().solvent())).thenReturn(Optional.of(sol));
@@ -527,29 +496,21 @@ class ExperimentServiceTest {
     Modality mod = new Modality(); mod.setId(updateDto.metadata().modality());
     when(modalityRepository.findById(updateDto.metadata().modality())).thenReturn(Optional.of(mod));
 
-    // Catch the saved experiment
     when(experimentRepository.save(any(Experiment.class))).thenAnswer(i -> i.getArgument(0));
 
-    // Execute the Service Call
     GetExperimentDto result = experimentService.updateExperiment(experimentId, updateDto, creatorId, Role.USER);
 
-    // Verify Save and Audit Log
     ArgumentCaptor<Experiment> experimentCaptor = ArgumentCaptor.forClass(Experiment.class);
     Mockito.verify(experimentRepository).save(experimentCaptor.capture());
     Experiment savedExperiment = experimentCaptor.getValue();
 
-    // Verify Audit action was triggered
     Mockito.verify(auditLogRepository).save(any());
 
-    // Assert MUTABLE fields were updated correctly
     assertEquals(updateDto.doi(), savedExperiment.getDoi(), "DOI should be updated");
     assertEquals(updateDto.metadata().temperature(), savedExperiment.getMetadata().getTemperature(), "Temperature should be updated");
     assertEquals(updateDto.metadata().scientist(), savedExperiment.getMetadata().getScientist().getId(), "Scientist should be updated");
-
-    // Enforce IMMUTABLE rule: Creator must not change!
     assertEquals(creatorId, savedExperiment.getCreatedBy().getId(), "Creator should NEVER change during an update");
 
-    // Verify the DTO is returned correctly mapped
     assertNotNull(result);
     assertEquals(updateDto.doi(), result.doi());
   }

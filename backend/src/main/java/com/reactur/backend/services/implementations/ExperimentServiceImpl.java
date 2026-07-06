@@ -5,6 +5,7 @@ import com.reactur.backend.dtos.experiments.GetExperimentDto;
 import com.reactur.backend.dtos.experiments.SaveExperimentDto;
 import com.reactur.backend.dtos.experiments.SearchParametersDto;
 import com.reactur.backend.entities.AuditLog;
+import com.reactur.backend.entities.ReactantStructure;
 import com.reactur.backend.entities.experiment.Experiment;
 import com.reactur.backend.entities.experiment.ExperimentResult;
 import com.reactur.backend.entities.experiment.Metadata;
@@ -14,6 +15,7 @@ import com.reactur.backend.entities.options.Modality;
 import com.reactur.backend.entities.options.Solvent;
 import com.reactur.backend.entities.User;
 import com.reactur.backend.enums.AuditAction;
+import com.reactur.backend.enums.StructureFlag;
 import com.reactur.backend.exeptions.ResourceConflictException;
 import com.reactur.backend.exeptions.ResourceNotFoundException;
 import com.reactur.backend.exeptions.UnprocessableEntityException;
@@ -21,6 +23,7 @@ import com.reactur.backend.exeptions.ValidationException;
 import com.reactur.backend.mappers.ExperimentMapper;
 import com.reactur.backend.repositories.AuditLogRepository;
 import com.reactur.backend.repositories.ExperimentRepository;
+import com.reactur.backend.repositories.ReactantStructureRepository;
 import com.reactur.backend.repositories.options.InstrumentRepository;
 import com.reactur.backend.repositories.options.ModalityRepository;
 import com.reactur.backend.repositories.ReactantRepository;
@@ -68,6 +71,7 @@ public class ExperimentServiceImpl implements ExperimentService {
   private final UserRepository userRepository;
   private final AuditLogRepository auditLogRepository;
   private final ExperimentMapper experimentMapper;
+  private final ReactantStructureRepository structureRepository;
   private final FileService fileService;
   private final Javers javers;
 
@@ -105,6 +109,9 @@ public class ExperimentServiceImpl implements ExperimentService {
     if (reactantA.getId().equals(reactantB.getId())) {
       throw new ValidationException("Reactants A and B cannot be the same.");
     }
+
+    validateReactantHasActiveStructure(reactantA, "A");
+    validateReactantHasActiveStructure(reactantB, "B");
 
     Solvent solvent = solventRepository.findById(experimentDto.metadata().solvent())
       .orElseThrow(() -> new UnprocessableEntityException("Solvent does not exist."));
@@ -335,6 +342,9 @@ public class ExperimentServiceImpl implements ExperimentService {
       log.warn("Reactant A and B cannot be the same in an update.");
       throw new ValidationException("Reactant A and B cannot be the same in an update.");
     }
+
+    validateReactantHasActiveStructure(reactantA, "A");
+    validateReactantHasActiveStructure(reactantB, "B");
 
     Solvent solvent = solventRepository.findById(experimentDto.metadata().solvent())
       .orElseThrow(() -> new UnprocessableEntityException("Solvent does not exist."));
@@ -600,4 +610,23 @@ public class ExperimentServiceImpl implements ExperimentService {
     return historyList;
   }
 
+  /**
+   * Validates that a given Reactant has at least one associated ReactantStructure
+   * with the flag set to ACTIVE via the repository.
+   *
+   * @param reactant The Reactant to validate.
+   * @param label A label (e.g., "A" or "B") for clearer error messages.
+   */
+  private void validateReactantHasActiveStructure(Reactant reactant, String label) {
+    List<ReactantStructure> structures = structureRepository.findByReactant_Id(reactant.getId());
+
+    boolean hasActiveStructure = structures.stream()
+            .anyMatch(structure -> structure.getFlag() == StructureFlag.ACTIVE);
+
+    if (!hasActiveStructure) {
+      throw new UnprocessableEntityException(
+              "Reactant " + label + " (ID: " + reactant.getId() + ") cannot be used. It does not have an ACTIVE 3D structure."
+      );
+    }
+  }
 }
