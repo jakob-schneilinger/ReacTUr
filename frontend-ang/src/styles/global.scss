@@ -107,6 +107,20 @@ button {
 
     }
   }
+
+  &.primary-plain {
+    color: $primary;
+    background-color: white;
+
+    &:disabled {
+      color: $light_gray;
+    }
+
+    &:hover:not([disabled]) {
+      color: $primary_hover;
+      background-color: $background;
+    }
+  }
 }
 
 span.error {

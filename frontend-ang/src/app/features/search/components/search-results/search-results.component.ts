@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { ExperimentViewModalComponent } from '../../../experiments/components/experiment-view-modal/experiment-view-modal.component';
-import { Component, Input, Output, EventEmitter, OnChanges, SimpleChanges } from '@angular/core';
+import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { GetExperimentDto } from '../../../experiments/experiment.dto';
 import { NotificationService } from '../../../../core/layout/notification/notification.service';
 import { AuthService } from '../../../../core/auth/auth.service';
@@ -18,16 +18,17 @@ export type SearchState = 'initial' | 'no-results' | 'has-results';
   standalone: true,
   imports: [CommonModule, RouterModule, ExperimentViewModalComponent, HasRoleDirective],
 })
-export class SearchResultsComponent implements OnChanges {
+export class SearchResultsComponent {
   @Input() state: SearchState = 'initial';
   @Input() experiments: GetExperimentDto[] = [];
   @Input() currentPage: number = 0;
   @Input() totalElements: number = 0;
-  @Input() pageSize: number = 10;
+  @Input() pageSize: number = 25;
 
   @Output() pageChange = new EventEmitter<number>();
   @Output() getExport = new EventEmitter<string[]>();
   @Output() searchScientist = new EventEmitter<GetUserDto>();
+  @Output() pageSizeChange = new EventEmitter<number>();
 
   selectedIds = new Set<string>();
   isViewModalOpen: boolean = false;
@@ -45,6 +46,7 @@ export class SearchResultsComponent implements OnChanges {
     return (this.currentPage + 1) * this.pageSize < this.totalElements;
   }
 
+  /*
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['experiments']) {
       this.cleanupSelection();
@@ -65,6 +67,7 @@ export class SearchResultsComponent implements OnChanges {
       }
     }
   }
+   */
 
   toggleSelection(expId: string) {
     if (this.selectedIds.has(expId)) {
@@ -121,5 +124,11 @@ export class SearchResultsComponent implements OnChanges {
 
   searchForScientist(scientist: GetUserDto) {
     this.searchScientist.emit(scientist);
+  }
+
+  onPageSizeChange(event: Event) {
+    const selectElement = event.target as HTMLSelectElement;
+    const newSize = Number(selectElement.value);
+    this.pageSizeChange.emit(newSize);
   }
 }

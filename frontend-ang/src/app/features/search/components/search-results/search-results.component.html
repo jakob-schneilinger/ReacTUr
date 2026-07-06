@@ -10,23 +10,26 @@
     </div>
   } @else if (state === 'has-results') {
     <!-- Action Bar -->
-    <div class="results-action-bar" *appHasRole="['SUPERVISOR', 'ADMIN']">
-      <div class="left-actions">
-        <span class="results-count">{{ experiments.length }} results found</span>
+    <div class="export-container" *appHasRole="['SUPERVISOR', 'ADMIN']">
+      <div class="results-action-bar-filler"></div>
+      <div class="results-action-bar" *appHasRole="['SUPERVISOR', 'ADMIN']">
+        <div class="left-actions">
+          <span class="results-count">{{ experiments.length }} results found</span>
 
-        <!-- Select All Checkbox -->
-        <div class="select-all-wrapper" (click)="toggleSelectAll()">
-          <i class="bi" [ngClass]="allSelected ? 'bi-check-square-fill text-success' : 'bi-square'"></i>
-          <span>{{ allSelected ? 'Deselect All' : 'Select All' }}</span>
+          <!-- Select All Checkbox -->
+          <div class="select-all-wrapper" (click)="toggleSelectAll()">
+            <i class="bi" [ngClass]="allSelected ? 'bi-check-square-fill text-success' : 'bi-square'"></i>
+            <span>{{ allSelected ? 'Deselect All' : 'Select All' }}</span>
+          </div>
         </div>
-      </div>
 
-      <!-- Export Button -->
-      <button class="btn-export"
-              [disabled]="selectedIds.size === 0"
-              (click)="onExportClicked()">
-        Export ({{ selectedIds.size }}) <i class="bi bi-arrow-right-short"></i>
-      </button>
+        <!-- Export Button -->
+        <button class="btn-export"
+                [disabled]="selectedIds.size === 0"
+                (click)="onExportClicked()">
+          Export ({{ selectedIds.size }}) <i class="bi bi-arrow-right-short"></i>
+        </button>
+      </div>
     </div>
 
     <div class="cards-grid">
@@ -95,20 +98,33 @@
     </div>
     @if (totalElements > 0) {
       <div class="pagination-container d-flex justify-content-between align-items-center mt-4">
-      <span class="">
-        Showing {{ (currentPage * pageSize) + 1 }} to
-        {{ (currentPage * pageSize) + experiments.length }} of {{ totalElements }} entries
-      </span>
+        <div class="d-flex align-items-center gap-3">
+          <span>
+            Showing {{ (currentPage * pageSize) + 1 }} to
+            {{ (currentPage * pageSize) + experiments.length }} of {{ totalElements }} entries
+          </span>
+
+          <div class="d-flex align-items-center gap-2">
+            <select class="form-select form-select-sm" style="width: auto;" [value]="pageSize" (change)="onPageSizeChange($event)">
+              <option [value]="1">1</option>
+              <option [value]="5">5</option>
+              <option [value]="10">10</option>
+              <option [value]="25">25</option>
+              <option [value]="50">50</option>
+            </select>
+            <span class="text-muted small">per page</span>
+          </div>
+        </div>
 
         <div class="btn-group">
-          <button class="plain"
-                  [hidden]="currentPage === 0"
+          <button class="primary-plain"
+                  [disabled]="currentPage === 0"
                   (click)="pageChange.emit(currentPage - 1)">
             <i class="bi bi-chevron-left"></i> Previous
           </button>
 
-          <button class="plain"
-                  [hidden]="!hasNextPage"
+          <button class="primary-plain"
+                  [disabled]="!hasNextPage"
                   (click)="pageChange.emit(currentPage + 1)">
             Next <i class="bi bi-chevron-right"></i>
           </button>

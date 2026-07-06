@@ -55,7 +55,8 @@
         [pageSize]="pageSize"
         (getExport)="handleExport($event)"
         (searchScientist)="handleSearchScientist($event)"
-        (pageChange)="handlePageChange($event)">
+        (pageChange)="handlePageChange($event)"
+        (pageSizeChange)="handlePageSizeChange($event)">
       </app-experiment-results>
     </div>
   </app-layout>

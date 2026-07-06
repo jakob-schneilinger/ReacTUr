@@ -24,7 +24,7 @@ export class SearchService {
   searchExperiments(
     searchParams: SearchParametersDto,
     page: number = 0,
-    size: number = 20,
+    size: number = 25,
   ): Observable<Page<GetExperimentDto>> {
     let params = this.buildHttpParams(searchParams);
 

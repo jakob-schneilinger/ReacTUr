@@ -45,7 +45,7 @@ export class SearchPageComponent implements OnInit {
   searchScientist?: GetUserDto;
 
   currentPage: number = 0;
-  pageSize: number = 1;
+  pageSize: number = 25;
   totalElements: number = 0;
 
   constructor(
@@ -135,5 +135,11 @@ export class SearchPageComponent implements OnInit {
     this.isAdvancedSearchOpen = true;
     console.log('Test1', scientist); //TODO: do real request
     this.searchScientist = scientist;
+  }
+
+  handlePageSizeChange(newSize: number) {
+    this.pageSize = newSize;
+    this.currentPage = 0;
+    this.executeSearch();
   }
 }
