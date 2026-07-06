@@ -1,0 +1,22 @@
+.header-section {
+  border-bottom: 1px solid #dee2e6;
+  padding-bottom: 1.25rem;
+}
+
+.experiment-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1.5rem;
+  margin-top: 1rem;
+}
+
+.empty-state {
+  padding: 4rem 2rem;
+  background-color: #f8f9fa;
+  border-radius: 12px;
+  border: 2px dashed #dee2e6;
+}
+
+.grid-full-width {
+  grid-column: 1 / -1;
+}

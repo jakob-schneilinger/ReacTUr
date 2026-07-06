@@ -51,14 +51,21 @@
         @if (isLoggedIn) {
           <button ngbDropdownItem disabled>{{'header.greetings' | transloco}}, {{ user?.firstName }}</button>
           <div class="dropdown-divider"></div>
-          <button ngbDropdownItem (click)="logout()" class="text-danger logout-button">
+
+          <button ngbDropdownItem routerLink="/my-experiments" class="d-flex align-items-center justify-content-between">
+            {{ 'header.myExperiments' | transloco }}
+            <i class="bi bi-journal-text ms-2"></i>
+          </button>
+          <div class="dropdown-divider"></div>
+
+          <button ngbDropdownItem (click)="logout()" class="text-danger logout-button d-flex align-items-center justify-content-between">
             {{ 'header.logout' | transloco }}
-            <i id="logout_icon" [title]="'header.logout' | transloco" class="bi bi-box-arrow-right"></i>
+            <i id="logout_icon" [title]="'header.logout' | transloco" class="bi bi-box-arrow-right ms-2"></i>
           </button>
         } @else {
-          <button ngbDropdownItem routerLink="/login">
+          <button ngbDropdownItem routerLink="/login" class="d-flex align-items-center justify-content-between">
             {{ 'header.login' | transloco }}
-            <i id="login_icon" [title]="'header.login' | transloco" class="bi bi-box-arrow-right"></i>
+            <i id="login_icon" [title]="'header.login' | transloco" class="bi bi-box-arrow-right ms-2"></i>
           </button>
         }
       </div>

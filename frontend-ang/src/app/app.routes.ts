@@ -12,6 +12,9 @@ import { UnauthorizedPageComponent } from './features/login/pages/unauthorized-p
 import {
   ExperimentPlanningPageComponent
 } from './features/experiment-planning/pages/experiment-planning-page/experiment-planning-page.component';
+import {
+  MyExperimentsPageComponent
+} from './features/experiments/pages/my-experiments-page/my-experiments-page.component';
 
 export const routes: Routes = [
   { path: 'search', component: SearchPageComponent, canActivate: [AuthGuard] },
@@ -34,6 +37,11 @@ export const routes: Routes = [
     component: ReactantDetailsPageComponent,
     canActivate: [AuthGuard, RoleGuard],
     data: { state: 'create', roles: ['ADMIN', 'SUPERVISOR'] },
+  },
+  {
+    path: 'my-experiments',
+    component: MyExperimentsPageComponent,
+    canActivate: [AuthGuard]
   },
   {
     path: 'reactants/:uuid',

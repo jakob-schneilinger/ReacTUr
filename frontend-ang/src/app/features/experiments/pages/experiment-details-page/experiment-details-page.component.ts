@@ -14,7 +14,7 @@ import ExperimentFileService from '../../experiment-file.service';
 import { ExtractedMetadataConfirmModalComponent } from '../../components/extracted-metadata-confirm-modal/extracted-metadata-confirm-modal.component';
 import { ExperimentHistoryDto } from '../../experiment-history.dto';
 import { ExperimentHistoryModalComponent } from '../../components/experiment-history-modal/experiment-history-modal.component';
-import { firstValueFrom } from 'rxjs';
+import { firstValueFrom, Observable } from 'rxjs';
 
 export type FormState = 'create' | 'edit';
 
@@ -145,7 +145,7 @@ export class ExperimentDetailsPageComponent implements OnInit {
   }
 
   onSaveExperiment(savePayload: SaveExperimentDto) {
-    const request$ =
+    const request$: Observable<GetExperimentDto> =
       this.state === 'create'
         ? this.experimentService.createExperiment(savePayload)
         : this.experimentService.updateExperiment(this.experiment!.uuid, savePayload);
@@ -164,11 +164,8 @@ export class ExperimentDetailsPageComponent implements OnInit {
                 console.log(`File uploaded successfully: ${file.name}`);
                 this.router.navigate(['/experiments', savedExperiment.uuid]);
               },
-              error: (error) => {
-                this.notification.error(
-                  'File Upload Error',
-                  `Experiment saved, but failed to upload file: ${file.name}`,
-                );
+              error: (err: any) => {
+                console.log(err);
                 this.router.navigate(['/experiments', savedExperiment.uuid]);
               },
             });
@@ -179,7 +176,7 @@ export class ExperimentDetailsPageComponent implements OnInit {
           this.formComponent.experimentForm.markAsPristine();
         }
       },
-      error: (err) => {
+      error: (err: any) => {
         this.notification.error(
           this.transloco.translate('experiments.details.notifications.savedErrorTitle'),
           this.transloco.translate('experiments.details.notifications.savedErrorMessage'),
@@ -201,7 +198,7 @@ export class ExperimentDetailsPageComponent implements OnInit {
         this.isLoadingHistory = false;
         this.cdr.markForCheck();
       },
-      error: (err) => {
+      error: (err: any) => {
         console.log(err);
         this.notification.error('Error', 'Could not load experiment history');
         this.isLoadingHistory = false;
@@ -239,7 +236,7 @@ export class ExperimentDetailsPageComponent implements OnInit {
         try {
           await firstValueFrom(this.experimentFileService.archiveFile(fileIdentifier));
           this.uploadedFilesMap.delete(fingerprint);
-        } catch (error) {
+        } catch (error: any) {
           console.error(`Failed to delete file ${fileIdentifier}:`, error);
           this.notification.error('Delete Error', `Could not delete file.`);
         }
@@ -260,7 +257,7 @@ export class ExperimentDetailsPageComponent implements OnInit {
         const fileId = response.uuid || file.name;
 
         this.uploadedFilesMap.set(this.getFileFingerprint(file), fileId);
-      } catch (error) {
+      } catch (error: any) {
         console.error(`Failed to upload ${file.name}:`, error);
         this.notification.error('Upload Error', `Failed to upload: ${file.name}`);
       }

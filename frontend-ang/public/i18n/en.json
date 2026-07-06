@@ -10,7 +10,8 @@
     "greetings": "Hello",
     "logout": "Logout",
     "experimentPlanning": "Experiment Planning",
-    "login": "Login"
+    "login": "Login",
+    "myExperiments": "My Experiments"
   },
 
   "selectionOptions": {
@@ -399,6 +400,18 @@
         "archivedMessage": "Experiment was archived successfully!",
         "archiveFailedTitle": "Archive Failed",
         "archiveFailedMessage": "Archiving of Experiment failed! Error: {{error}}"
+      }
+    },
+    "my": {
+      "title": "My Experiments",
+      "active": "Active Experiments",
+      "archived": "Archived",
+      "loading": "Loading experiments",
+      "noActive": "You currently have no active experiments.",
+      "noArchived": "No archived experiments available.",
+      "notifications": {
+        "errorTitle": "Error Loading",
+        "loadError": "Your experiments could not be loaded."
       }
     }
   },

@@ -1,12 +1,13 @@
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { AuthService } from '../../core/auth/auth.service';
 import { Globals } from '../../core/global/globals';
 
 import { ExperimentDataDto, GetExperimentDto, SaveExperimentDto } from './experiment.dto';
 import { AuditLogDto } from '../../shared/dtos/audit.dto';
 import { ExperimentHistoryDto } from './experiment-history.dto';
+import { Page } from '../search/page.dto';
 
 @Injectable({
   providedIn: 'root',
@@ -43,10 +44,6 @@ export class ExperimentService {
     return this.httpClient.get<GetExperimentDto>(`${this.experimentBaseUri}/${uuid}`);
   }
 
-  getAuditLogs(uuid: string): Observable<AuditLogDto[]> {
-    return this.httpClient.get<AuditLogDto[]>(`${this.experimentBaseUri}/${uuid}/audit_logs`);
-  }
-
   // normal user gets own archived experiments, admin gets all
   getArchivedExperiments(): Observable<GetExperimentDto[]> {
     return this.httpClient.get<GetExperimentDto[]>(`${this.experimentBaseUri}/archived`);
@@ -66,4 +63,12 @@ export class ExperimentService {
     return this.httpClient.get<ExperimentHistoryDto[]>(`${this.experimentBaseUri}/${uuid}/history`);
   }
 
+  getExperimentsByScientist(scientistUuid: string, page: number = 0, size: number = 10): Observable<Page<GetExperimentDto>> {
+    const params = new HttpParams()
+      .set('scientist', scientistUuid)
+      .set('page', page.toString())
+      .set('size', size.toString());
+
+    return this.httpClient.get<Page<GetExperimentDto>>(`${this.experimentBaseUri}`, { params });
+  }
 }
