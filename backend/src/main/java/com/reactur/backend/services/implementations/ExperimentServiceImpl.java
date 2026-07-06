@@ -17,6 +17,7 @@ import com.reactur.backend.enums.AuditAction;
 import com.reactur.backend.exeptions.ResourceConflictException;
 import com.reactur.backend.exeptions.ResourceNotFoundException;
 import com.reactur.backend.exeptions.UnprocessableEntityException;
+import com.reactur.backend.exeptions.ValidationException;
 import com.reactur.backend.mappers.ExperimentMapper;
 import com.reactur.backend.repositories.AuditLogRepository;
 import com.reactur.backend.repositories.ExperimentRepository;
@@ -98,6 +99,10 @@ public class ExperimentServiceImpl implements ExperimentService {
 
     Reactant reactantB = reactantRepository.findById(experimentDto.reactantB())
       .orElseThrow(() -> new UnprocessableEntityException("Reactant B does not exist."));
+
+    if (reactantA.getId().equals(reactantB.getId())) {
+      throw new ValidationException("Reactants A and B cannot be the same.");
+    }
 
     Solvent solvent = solventRepository.findById(experimentDto.metadata().solvent())
       .orElseThrow(() -> new UnprocessableEntityException("Solvent does not exist."));
@@ -320,6 +325,11 @@ public class ExperimentServiceImpl implements ExperimentService {
 
     Reactant reactantB = reactantRepository.findById(experimentDto.reactantB())
       .orElseThrow(() -> new UnprocessableEntityException("Reactant B does not exist."));
+
+    if (reactantA.getId().equals(reactantB.getId())) {
+      log.warn("Reactant A and B cannot be the same in an update.");
+      throw new ValidationException("Reactant A and B cannot be the same in an update.");
+    }
 
     Solvent solvent = solventRepository.findById(experimentDto.metadata().solvent())
       .orElseThrow(() -> new UnprocessableEntityException("Solvent does not exist."));
