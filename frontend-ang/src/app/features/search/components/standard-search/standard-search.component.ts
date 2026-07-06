@@ -6,6 +6,7 @@ import { ReactantDto } from '../../../reactants/reactant.dto';
 import { ReactantService } from '../../../reactants/reactant.service';
 import { ExperimentService } from '../../../experiments/experiment.service';
 import { NotificationService } from '../../../../core/layout/notification/notification.service';
+import { StructureFlag } from '../../../reactants/structure-flag.enum';
 
 @Component({
   selector: 'app-experiment-search',
@@ -66,7 +67,7 @@ export class StandardSearchComponent implements OnInit {
   ngOnInit() {
     this.reactantService.getAllReactants().subscribe({
       next: (value) => {
-        this.availableReactants = value;
+        this.availableReactants = value.filter((r) => r.flag === StructureFlag.ACTIVE);
         this.cdr.markForCheck();
       },
       error: (err) => {

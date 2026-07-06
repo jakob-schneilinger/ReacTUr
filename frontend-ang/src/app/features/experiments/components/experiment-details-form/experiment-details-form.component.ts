@@ -1,18 +1,26 @@
 import { CommonModule } from '@angular/common';
-import { FormControl, ReactiveFormsModule } from '@angular/forms';
+import {
+  AbstractControl,
+  FormBuilder,
+  FormControl,
+  FormGroup,
+  ReactiveFormsModule,
+  ValidationErrors,
+  ValidatorFn,
+  Validators,
+} from '@angular/forms';
 import { AppConfirmModalComponent } from '../../../../shared/modal/confirm-modal.component';
 import {
   ChangeDetectorRef,
   Component,
-  Input,
-  Output,
   EventEmitter,
+  Input,
   OnChanges,
   OnDestroy,
   OnInit,
+  Output,
   SimpleChanges,
 } from '@angular/core';
-import { FormBuilder, FormGroup, Validators, ValidatorFn, AbstractControl, ValidationErrors } from '@angular/forms';
 import { Router } from '@angular/router';
 import { NotificationService } from '../../../../core/layout/notification/notification.service';
 import { AuthService } from '../../../../core/auth/auth.service';
@@ -32,6 +40,7 @@ import {
 } from '../../../../shared/dtos/selection-option.dto';
 import { UserService } from '../../../../shared/services/user.service';
 import { OptionSelectorComponent } from '../../../../shared/option-selector/option-selector.component';
+import { StructureFlag } from '../../../reactants/structure-flag.enum';
 
 export type FormState = 'create' | 'edit';
 
@@ -271,7 +280,7 @@ export class ExperimentDetailsFormComponent implements OnInit, OnDestroy, OnChan
   private loadReactants(): void {
     this.reactantService.getAllReactants().subscribe({
       next: (value) => {
-        this.availableReactants = value;
+        this.availableReactants = value.filter((r) => r.flag === StructureFlag.ACTIVE);
         this.isReactantsLoaded = true;
         this.cdr.markForCheck();
       },
