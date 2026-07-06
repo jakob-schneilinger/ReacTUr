@@ -162,12 +162,14 @@ export class ExperimentDetailsPageComponent implements OnInit {
             this.experimentFileService.uploadFile(savedExperiment.uuid, file).subscribe({
               next: (response) => {
                 console.log(`File uploaded successfully: ${file.name}`);
+                this.router.navigate(['/experiments', savedExperiment.uuid]);
               },
               error: (error) => {
                 this.notification.error(
                   'File Upload Error',
                   `Experiment saved, but failed to upload file: ${file.name}`,
                 );
+                this.router.navigate(['/experiments', savedExperiment.uuid]);
               },
             });
           }
@@ -176,8 +178,6 @@ export class ExperimentDetailsPageComponent implements OnInit {
         if (this.formComponent) {
           this.formComponent.experimentForm.markAsPristine();
         }
-
-        this.router.navigate(['/experiments', savedExperiment.uuid]);
       },
       error: (err) => {
         this.notification.error(
