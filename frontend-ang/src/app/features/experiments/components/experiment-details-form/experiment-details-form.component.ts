@@ -133,7 +133,18 @@ export class ExperimentDetailsFormComponent implements OnInit, OnDestroy, OnChan
   private loadUsers() {
     this.userService.getAllUsers().subscribe({
       next: (users) => {
-        this.knownUsers = users.filter((u) => u.role !== 'UNAUTHORIZED' && !u.deactivatedAt);
+        let displayUsers = users.filter((u) => u.role !== 'UNAUTHORIZED' && !u.deactivatedAt);
+
+        if (this.experiment?.metadata?.scientist) {
+          const currentScientistId = this.experiment.metadata.scientist.id;
+          const isMissing = !displayUsers.some((u) => u.id === currentScientistId);
+
+          if (isMissing) {
+            displayUsers.push(this.experiment.metadata.scientist);
+          }
+        }
+
+        this.knownUsers = displayUsers;
         this.knownUserNames = this.knownUsers.map((o) => o.firstName + ' ' + o.lastName);
         this.filteredUserNames = [...this.knownUserNames];
 
@@ -163,7 +174,18 @@ export class ExperimentDetailsFormComponent implements OnInit, OnDestroy, OnChan
     // Fetch Solvents
     this.optionService.getSelectionOptions('solvent').subscribe({
       next: (opts) => {
-        this.knownSolvents = opts.filter((o) => !o.archivedAt);
+        let displaySolvents = opts.filter((o) => !o.archivedAt);
+
+        if (this.experiment?.metadata?.solvent) {
+          const currentUuid = this.experiment.metadata.solvent.uuid;
+          const isMissing = !displaySolvents.some((o) => o.uuid === currentUuid);
+
+          if (isMissing) {
+            displaySolvents.push(this.experiment.metadata.solvent);
+          }
+        }
+
+        this.knownSolvents = displaySolvents;
         this.knownSolventNames = this.knownSolvents.map((o) => o.name);
         this.filteredSolventNames = [...this.knownSolventNames];
         const solventControl = this.experimentForm.get('solvent');
@@ -180,7 +202,18 @@ export class ExperimentDetailsFormComponent implements OnInit, OnDestroy, OnChan
     // Fetch Instruments
     this.optionService.getSelectionOptions('instrument').subscribe({
       next: (opts) => {
-        this.knownInstruments = opts.filter((o) => !o.archivedAt);
+        let displayInstruments = opts.filter((o) => !o.archivedAt);
+
+        if (this.experiment?.metadata?.instrument) {
+          const currentUuid = this.experiment.metadata.instrument.uuid;
+          const isMissing = !displayInstruments.some((o) => o.uuid === currentUuid);
+
+          if (isMissing) {
+            displayInstruments.push(this.experiment.metadata.instrument);
+          }
+        }
+
+        this.knownInstruments = displayInstruments;
         this.knownInstrumentNames = this.knownInstruments.map((o) => o.name);
         this.filteredInstrumentNames = [...this.knownInstrumentNames];
         const instrumentControl = this.experimentForm.get('instrument');
@@ -194,7 +227,18 @@ export class ExperimentDetailsFormComponent implements OnInit, OnDestroy, OnChan
     // Fetch Modalities
     this.optionService.getSelectionOptions('modality').subscribe({
       next: (opts) => {
-        this.knownModalities = opts.filter((o) => !o.archivedAt);
+        let displayModalities = opts.filter((o) => !o.archivedAt);
+
+        if (this.experiment?.metadata?.modality) {
+          const currentUuid = this.experiment.metadata.modality.uuid;
+          const isMissing = !displayModalities.some((o) => o.uuid === currentUuid);
+
+          if (isMissing) {
+            displayModalities.push(this.experiment.metadata.modality);
+          }
+        }
+
+        this.knownModalities = displayModalities;
         this.knownModalityNames = this.knownModalities.map((o) => o.name);
         this.filteredModalityNames = [...this.knownModalityNames];
         const modalityControl = this.experimentForm.get('modality');
