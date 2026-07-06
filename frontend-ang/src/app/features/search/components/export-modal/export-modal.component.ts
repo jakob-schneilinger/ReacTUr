@@ -3,12 +3,13 @@ import { FormsModule } from '@angular/forms';
 import { CdkDropList, CdkDrag, CdkDragDrop, moveItemInArray, transferArrayItem } from '@angular/cdk/drag-drop';
 import { Component, Input, Output, EventEmitter, OnInit, ChangeDetectorRef } from '@angular/core';
 import { GetExperimentDto } from '../../../experiments/experiment.dto';
-import { ExperimentService } from '../../../experiments/experiment.service';
+import { TRANSLOCO_IMPORTS } from '../../../../core/global/transloco-imports';
+import { TranslocoService } from '@jsverse/transloco';
 
 export interface ExportField {
   id: string;
-  label: string;
-  category: 'core' | 'additional' | 'data';
+  labelKey: string;
+  category: 'core' | 'reactants' | 'kinetics' | 'metadata';
 }
 
 @Component({
@@ -16,7 +17,8 @@ export interface ExportField {
   templateUrl: './export-modal.component.html',
   styleUrls: ['./export-modal.component.scss'],
   standalone: true,
-  imports: [CommonModule, FormsModule, CdkDropList, CdkDrag],
+  imports: [CommonModule, FormsModule, CdkDropList, CdkDrag, TRANSLOCO_IMPORTS,
+  ],
 })
 export class ExportModalComponent implements OnInit {
   @Input() selectedExperiments: GetExperimentDto[] = [];
@@ -25,102 +27,62 @@ export class ExportModalComponent implements OnInit {
   exportFormat: 'json' | 'csv' = 'json';
   isCopied: boolean = false;
   isCopying: boolean = false;
-  isLoading: boolean = true;
-  fullExportData: any[] = [];
 
   exportFields = {
-    core: {
-      reactants: true,
-      date: true,
-      scientist: true,
-      temperature: true,
-      solvent: true
-    },
-    additional: {
-      instrument: false,
-      modality: false,
-      wavelength: false,
-      comment: false
-    }
+    core: { doi: true, createdBy: true, attachments: false },
+    reactants: { names: true, smiles: true, structures: true },
+    kinetics: { rateConstant: true, pFO_rateConstant: false, error: true },
+    metadata: { temperature: true, solvent: true, instrument: false }
   };
 
   availableFields: ExportField[] = [
-    { id: 'uuid', label: 'ID', category: 'core' },
-    { id: 'reactants', label: 'Reactants', category: 'core' },
-    { id: 'date', label: 'Date', category: 'core' },
-    { id: 'scientist', label: 'Scientist', category: 'core' },
-    { id: 'temperature', label: 'Temperature', category: 'core' },
-    { id: 'solvent', label: 'Solvent', category: 'core' },
-    { id: 'instrument', label: 'Instrument', category: 'additional' },
-    { id: 'measurements', label: 'Measurements (x, y1, y2...)', category: 'data' }
+    { id: 'uuid', labelKey: 'exportModal.fields.uuid', category: 'core' },
+    { id: 'doi', labelKey: 'exportModal.fields.doi', category: 'core' },
+    { id: 'createdBy', labelKey: 'exportModal.fields.createdBy', category: 'core' },
+    { id: 'reactantA_name', labelKey: 'exportModal.fields.reactantAName', category: 'reactants' },
+    { id: 'reactantA_smiles', labelKey: 'exportModal.fields.reactantASmiles', category: 'reactants' },
+    { id: 'reactantA_struct', labelKey: 'exportModal.fields.reactantAStruct', category: 'reactants' },
+    { id: 'reactantB_name', labelKey: 'exportModal.fields.reactantBName', category: 'reactants' },
+    { id: 'reactantB_smiles', labelKey: 'exportModal.fields.reactantBSmiles', category: 'reactants' },
+    { id: 'reactantB_struct', labelKey: 'exportModal.fields.reactantBStruct', category: 'reactants' },
+    { id: 'rateConstant', labelKey: 'exportModal.fields.rateConstant', category: 'kinetics' },
+    { id: 'pfo', labelKey: 'exportModal.fields.pfo', category: 'kinetics' },
+    { id: 'error', labelKey: 'exportModal.fields.error', category: 'kinetics' },
+    { id: 'temperature', labelKey: 'exportModal.fields.temperature', category: 'metadata' },
+    { id: 'solvent', labelKey: 'exportModal.fields.solvent', category: 'metadata' },
   ];
 
   selectedColumns: ExportField[] = [];
+  previewData: string = '';
+  tableData: any[][] = [];
+
+  constructor(
+    private cd: ChangeDetectorRef,
+    private translocoService: TranslocoService
+  ) {}
+
+  ngOnInit() {
+    this.updatePreview();
+  }
 
   drop(event: CdkDragDrop<ExportField[]>) {
     if (event.previousContainer === event.container) {
       moveItemInArray(event.container.data, event.previousIndex, event.currentIndex);
     } else {
-      const itemToMove = event.previousContainer.data[event.previousIndex];
-
-      if (itemToMove.id === 'measurements') {
-        this.availableFields.splice(event.previousIndex, 1);
-
-        this.selectedColumns.splice(event.currentIndex, 0,
-          { id: 'x', label: 'Time (x)', category: 'data' },
-          { id: 'y1', label: 'y1', category: 'data' },
-          { id: 'y2', label: 'y2', category: 'data' },
-          { id: 'y3', label: 'y3', category: 'data' }
-        );
-      } else {
-        transferArrayItem(
-          event.previousContainer.data,
-          event.container.data,
-          event.previousIndex,
-          event.currentIndex,
-        );
-      }
+      transferArrayItem(
+        event.previousContainer.data,
+        event.container.data,
+        event.previousIndex,
+        event.currentIndex,
+      );
     }
-
     this.updatePreview();
   }
 
   removeColumn(index: number) {
     const removedItem = this.selectedColumns.splice(index, 1)[0];
-    if (!['x', 'y1', 'y2', 'y3'].includes(removedItem.id)) {
-      this.availableFields.push(removedItem);
-    } else if (removedItem.id === 'x') {
-      this.availableFields.push({ id: 'measurements', label: 'Measurements (x, y1, y2...)', category: 'data' });
-    }
+    this.availableFields.push(removedItem);
     this.updatePreview();
-  }
-
-  previewData: string = '';
-  tableData: any[][] = [];
-  csvString: string = '';
-
-  constructor(private experimentService: ExperimentService,
-  private cd: ChangeDetectorRef,) {}
-
-  ngOnInit() {
-    const idsToLoad = this.selectedExperiments.map((exp) => exp.uuid);
-
-    /*
-    this.experimentService.getBulkExperimentData(idsToLoad).subscribe(heavyData => {
-
-      this.fullExportData = this.selectedExperiments.map((exp) => {
-        const matchingHeavyData = heavyData.find((hd) => hd.experimentId === exp.uuid);
-        return {
-          ...exp,
-          measurements: matchingHeavyData ? matchingHeavyData.measurements : [],
-        };
-      });
-      this.isLoading = false;
-      this.updatePreview();
-      this.cd.markForCheck();
-    });
-
-     */
   }
 
   toggleFormat(format: 'json' | 'csv') {
@@ -133,8 +95,6 @@ export class ExportModalComponent implements OnInit {
   }
 
   updatePreview() {
-    if (this.isLoading) return;
-
     if (this.exportFormat === 'json') {
       this.previewData = this.getFormattedJson(true);
     } else {
@@ -143,44 +103,42 @@ export class ExportModalComponent implements OnInit {
   }
 
   private getFormattedJson(isPreview: boolean): string {
-    const itemsToProcess = isPreview ? this.fullExportData.slice(0, 2) : this.fullExportData;
+    const itemsToProcess = isPreview ? this.selectedExperiments.slice(0, 2) : this.selectedExperiments;
 
     const filteredItems = itemsToProcess.map(exp => {
-      const filteredExp: any = { id: exp.id };
+      const filteredExp: any = { uuid: exp.uuid };
 
-      if (this.exportFields.core.reactants) filteredExp.reactants = exp.reactants;
+      if (this.exportFields.core.doi) filteredExp.doi = exp.doi;
+      if (this.exportFields.core.createdBy) filteredExp.createdBy = exp.createdBy;
+      if (this.exportFields.core.attachments && exp.attachments) filteredExp.attachments = exp.attachments;
 
-      const meta: any = {};
-      if (this.exportFields.core.date) meta.date = exp.metadata.date;
-      if (this.exportFields.core.scientist) meta.scientist = exp.metadata.scientist;
-      if (this.exportFields.core.temperature) meta.temperature = exp.metadata.temperature;
-      if (this.exportFields.core.solvent) meta.solvent = exp.metadata.solvent;
-
-      if (this.exportFields.additional.instrument && exp.metadata.instrument) meta.instrument = exp.metadata.instrument;
-      if (this.exportFields.additional.modality && exp.metadata.modality) meta.modality = exp.metadata.modality;
-      if (this.exportFields.additional.wavelength && exp.metadata.wavelength) meta.wavelength = exp.metadata.wavelength;
-      if (this.exportFields.additional.comment && exp.metadata.comment) meta.comment = exp.metadata.comment;
-
-      if (Object.keys(meta).length > 0) filteredExp.metadata = meta;
-
-      if (exp.measurements && exp.measurements.length > 0) {
-        filteredExp.measurements = exp.measurements.map((m: any) => {
-          const processed: any = {
-            name: m.name,
-            xLabel: m.xLabel,
-            yLabels: m.yLabels,
-          };
-
-          if (isPreview) {
-            processed.x = m.x.slice(0, 3);
-            processed.y = m.y.map((yCol: any[]) => yCol.slice(0, 3));
-            processed._previewNote = `... (${m.x.length - 3} more datapoints omitted in preview)`;
-          } else {
-            processed.x = m.x;
-            processed.y = m.y;
+      filteredExp.reactants = {};
+      ['reactantA', 'reactantB'].forEach(r => {
+        const reactantData = exp[r as keyof GetExperimentDto] as any;
+        if (reactantData) {
+          filteredExp.reactants[r] = {};
+          if (this.exportFields.reactants.names) filteredExp.reactants[r].shortName = reactantData.shortName;
+          if (this.exportFields.reactants.smiles) filteredExp.reactants[r].smiles = reactantData.smiles;
+          if (this.exportFields.reactants.structures && reactantData.structures) {
+            filteredExp.reactants[r].structures = reactantData.structures;
           }
-          return processed;
-        });
+        }
+      });
+
+      if (exp.measurementData) {
+        filteredExp.kinetics = {};
+        if (this.exportFields.kinetics.rateConstant) filteredExp.kinetics.rateConstant = exp.measurementData.rateConstant;
+        if (this.exportFields.kinetics.pFO_rateConstant) filteredExp.kinetics.pFO_rateConstant = exp.measurementData.pFO_rateConstant;
+        if (this.exportFields.kinetics.error) {
+          filteredExp.kinetics.error = exp.measurementData.error;
+          filteredExp.kinetics.isErrorPercentage = exp.measurementData.isErrorPercentage;
+        }
+      }
+
+      if (exp.metadata) {
+        filteredExp.metadata = {};
+        if (this.exportFields.metadata.temperature) filteredExp.metadata.temperature = exp.metadata.temperature;
+        if (this.exportFields.metadata.solvent) filteredExp.metadata.solvent = exp.metadata.solvent;
       }
 
       return filteredExp;
@@ -191,152 +149,73 @@ export class ExportModalComponent implements OnInit {
 
   private getFullCsvString(separator: string = ','): string {
     if (this.selectedColumns.length === 0) return '';
-    const allRows = this.buildCsvRows(this.fullExportData);
-    const headers = this.selectedColumns.map(col => col.label).join(separator);
-    const csvBody = allRows.map(row => row.join(separator)).join('\n');
+    const allRows = this.buildCsvRows(this.selectedExperiments);
 
+    // Nutzt den TranslocoService, um die Header-Keys in echte Strings zu übersetzen
+    const headers = this.selectedColumns
+      .map(col => this.translocoService.translate(col.labelKey))
+      .join(separator);
+
+    const csvBody = allRows.map(row => row.map(cell => `"${cell}"`).join(separator)).join('\n');
     return headers + '\n' + csvBody;
   }
 
   private generateCsvPreview() {
     if (this.selectedColumns.length === 0) {
       this.tableData = [];
-      this.csvString = '';
       return;
     }
-    const allRows = this.buildCsvRows(this.fullExportData);
-
+    const allRows = this.buildCsvRows(this.selectedExperiments);
     this.tableData = allRows.slice(0, 15);
-
-    const headers = this.selectedColumns.map(col => col.label).join(',');
-    const csvBody = allRows.map(row => row.join(',')).join('\n');
-    this.csvString = headers + '\n' + csvBody;
   }
 
-  private buildCsvRows(experiments: any[]): any[][] {
-    const rows: any[][] = [];
-
-    const hasMeasurements = this.selectedColumns.some(c => ['x', 'y1', 'y2', 'y3'].includes(c.id));
-
-    for (const exp of experiments) {
-      if (hasMeasurements && exp.measurements && exp.measurements.length > 0) {
-        for (const measurement of exp.measurements) {
-          for (let i = 0; i < measurement.x.length; i++) {
-            const row = this.selectedColumns.map(col => this.getCellValue(exp, measurement, i, col.id));
-            rows.push(row);
-          }
-        }
-      } else {
-        const row = this.selectedColumns.map(col => this.getCellValue(exp, null, 0, col.id));
-        rows.push(row);
-      }
-    }
-
-    return rows;
+  private buildCsvRows(experiments: GetExperimentDto[]): any[][] {
+    return experiments.map(exp => {
+      return this.selectedColumns.map(col => this.getCellValue(exp, col.id));
+    });
   }
 
-  private getCellValue(exp: any, measurement: any, index: number, colId: string): any {
+  private getCellValue(exp: GetExperimentDto, colId: string): any {
+    const mapStructures = (structures: any[]) => structures ? structures.map(s => s.structure).join(' | ') : '';
+
     switch (colId) {
-      case 'id': return exp.id;
-      case 'reactants': return exp.reactants ? `"${exp.reactants.map((r: any) => r.shortName).join(' + ')}"` : '';
-      case 'date': return exp.metadata?.date ? new Date(exp.metadata.date).toLocaleDateString() : '';
-      case 'scientist': return exp.metadata?.scientist || '';
-      case 'temperature': return exp.metadata?.temperature || '';
-      case 'solvent': return exp.metadata?.solvent || '';
-      case 'instrument': return exp.metadata?.instrument || '';
+      case 'uuid': return exp.uuid || '';
+      case 'doi': return exp.doi || '';
+      case 'createdBy': return exp.createdBy?.email || '';
 
-      case 'x': return measurement ? measurement.x[index] : '';
-      case 'y1': return measurement?.y[0] ? measurement.y[0][index] : '';
-      case 'y2': return measurement?.y[1] ? measurement.y[1][index] : '';
-      case 'y3': return measurement?.y[2] ? measurement.y[2][index] : '';
+      case 'reactantA_name': return exp.reactantA?.shortName || '';
+      case 'reactantA_smiles': return exp.reactantA?.smiles || '';
+      case 'reactantA_struct': return mapStructures((exp.reactantA as any)?.structures);
+
+      case 'reactantB_name': return exp.reactantB?.shortName || '';
+      case 'reactantB_smiles': return exp.reactantB?.smiles || '';
+      case 'reactantB_struct': return mapStructures((exp.reactantB as any)?.structures);
+
+      case 'rateConstant': return exp.measurementData?.rateConstant ?? '';
+      case 'pfo': return exp.measurementData?.pFO_rateConstant ?? '';
+      case 'error': return exp.measurementData?.error != null ? `${exp.measurementData.error}${exp.measurementData.isErrorPercentage ? '%' : ''}` : '';
+
+      case 'temperature': return (exp.metadata as any)?.temperature || '';
+      case 'solvent': return (exp.metadata as any)?.solvent || '';
 
       default: return '';
     }
-  }
-
-  private generateCSV(items: any[]): string {
-    if (items.length === 0) return '';
-
-    const headers = ['ID'];
-    if (this.exportFields.core.reactants) headers.push('Reactants');
-    if (this.exportFields.core.date) headers.push('Date');
-    if (this.exportFields.core.scientist) headers.push('Scientist');
-    if (this.exportFields.core.temperature) headers.push('Temp (°C)');
-    if (this.exportFields.core.solvent) headers.push('Solvent');
-    if (this.exportFields.additional.instrument) headers.push('Instrument');
-    if (this.exportFields.additional.modality) headers.push('Modality');
-    if (this.exportFields.additional.wavelength) headers.push('Wavelength (nm)');
-    if (this.exportFields.additional.comment) headers.push('Comment');
-
-    headers.push('Measurement_Name', 'x', 'y1', 'y2', 'y3', 'y4');
-
-    let csvContent = headers.join(', ') + '\n';
-
-    items.forEach(exp => {
-      const baseRow = [exp.id];
-      if (this.exportFields.core.reactants) baseRow.push(`"${exp.reactants[0]?.shortName} + ${exp.reactants[1]?.shortName}"`);
-
-      const m = exp.metadata || {};
-      if (this.exportFields.core.date) baseRow.push(m.date ? new Date(m.date).toLocaleDateString() : '');
-      if (this.exportFields.core.scientist) baseRow.push(m.scientist || '');
-      if (this.exportFields.core.temperature) baseRow.push(m.temperature || '');
-      if (this.exportFields.core.solvent) baseRow.push(m.solvent || '');
-      if (this.exportFields.additional.instrument) baseRow.push(m.instrument || '');
-      if (this.exportFields.additional.modality) baseRow.push(m.modality || '');
-      if (this.exportFields.additional.wavelength) baseRow.push(m.wavelength || '');
-      if (this.exportFields.additional.comment) baseRow.push(`"${m.comment || ''}"`);
-
-      if (exp.measurements && exp.measurements.length > 0) {
-        exp.measurements.forEach((measurement: any) => {
-          for (let i = 0; i < measurement.x.length; i++) {
-            const row = [
-              ...baseRow,
-              measurement.name,
-              measurement.x[i],
-              measurement.y[0]?.[i],
-              measurement.y[1]?.[i],
-              measurement.y[2]?.[i],
-              measurement.y[3]?.[i]
-            ];
-            csvContent += row.join(', ') + '\n';
-          }
-          if (measurement._previewNote) {
-            csvContent += `... (${measurement._previewNote})\n`;
-          }
-        });
-      } else {
-        csvContent += [...baseRow, '', '', '', '', '', ''].join(', ') + '\n';
-      }
-    });
-
-    return csvContent;
   }
 
   async copyToClipboard() {
     this.isCopying = true;
     this.cd.detectChanges();
     try {
-      let textToCopy = '';
-
-      if (this.exportFormat === 'json') {
-        textToCopy = this.getFormattedJson(false);
-      } else {
-        textToCopy = this.getFullCsvString('\t');
+      const textToCopy = this.exportFormat === 'json' ? this.getFormattedJson(false) : this.getFullCsvString('\t');
+      if (textToCopy) {
+        await navigator.clipboard.writeText(textToCopy);
+        this.isCopied = true;
       }
-
-      if (!textToCopy) {
-        this.isCopying = false;
-        return;
-      }
-
-      await navigator.clipboard.writeText(textToCopy);
-      this.isCopied = true;
     } catch (err) {
       console.error('Failed to copy text: ', err);
     } finally {
       this.isCopying = false;
       this.cd.detectChanges();
-
       setTimeout(() => {
         this.isCopied = false;
         this.cd.detectChanges();
@@ -345,21 +224,10 @@ export class ExportModalComponent implements OnInit {
   }
 
   downloadFile() {
-    let content = '';
-    let filename = '';
-    let mimeType = '';
-
     const timestamp = new Date().toISOString().slice(0,10);
-
-    if (this.exportFormat === 'json') {
-      content = this.getFormattedJson(false);
-      filename = `experiments_${timestamp}.json`;
-      mimeType = 'application/json';
-    } else {
-      content = this.getFullCsvString(',');
-      filename = `experiments_${timestamp}.csv`;
-      mimeType = 'text/csv;charset=utf-8;';
-    }
+    const content = this.exportFormat === 'json' ? this.getFormattedJson(false) : this.getFullCsvString(',');
+    const filename = `experiments_${timestamp}.${this.exportFormat}`;
+    const mimeType = this.exportFormat === 'json' ? 'application/json' : 'text/csv;charset=utf-8;';
 
     const blob = new Blob([content], { type: mimeType });
     const url = window.URL.createObjectURL(blob);

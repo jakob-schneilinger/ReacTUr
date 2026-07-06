@@ -401,5 +401,50 @@
         "archiveFailedMessage": "Archiving of Experiment failed! Error: {{error}}"
       }
     }
+  },
+  "exportModal": {
+    "title": "Export {{count}} Experiment(s)",
+    "format": "Format",
+    "json": "JSON",
+    "csv": "CSV",
+    "includeJsonFields": "Include JSON Fields",
+    "availableCsvFields": "Available CSV Fields",
+    "dragDropInstruction": "Drag fields to the table to build your export.",
+    "dragDropPlaceholder": "Drag & Drop fields here...",
+    "categories": {
+      "reactantsStructures": "Reactants & Structures",
+      "kineticsData": "Kinetics / Data",
+      "coreMetadata": "Core & Metadata"
+    },
+    "fields": {
+      "names": "Names",
+      "smiles": "SMILES",
+      "structures": "3D Structures",
+      "rateConstant": "Rate Constant",
+      "pfo": "pFO Rate Constant",
+      "error": "Error / Variance",
+      "doi": "DOI",
+      "temperature": "Temperature",
+      "solvent": "Solvent",
+      "uuid": "UUID",
+      "createdBy": "Created By",
+      "reactantAName": "Reactant A (Name)",
+      "reactantASmiles": "Reactant A (SMILES)",
+      "reactantAStruct": "Reactant A (Structures)",
+      "reactantBName": "Reactant B (Name)",
+      "reactantBSmiles": "Reactant B (SMILES)",
+      "reactantBStruct": "Reactant B (Structures)"
+    },
+    "preview": {
+      "title": "Data Preview",
+      "showingItems": "Showing first {{count}} items",
+      "copying": "Copying...",
+      "copied": "Copied!",
+      "copyFullData": "Copy Full Data"
+    },
+    "buttons": {
+      "cancel": "Cancel",
+      "download": "Download {{format}}"
+    }
   }
 }
