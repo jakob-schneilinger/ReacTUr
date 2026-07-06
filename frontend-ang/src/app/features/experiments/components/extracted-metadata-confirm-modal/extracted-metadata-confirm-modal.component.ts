@@ -39,6 +39,19 @@ export class ExtractedMetadataConfirmModalComponent implements OnChanges {
 
   displayData: MetadataItem[] = [];
 
+  readonly metadataLabels: Record<string, string> = {
+    date: 'Date',
+    temperature: 'Temperature (°C)',
+    instrument: 'Instrument',
+    modality: 'Cell Type',
+    wavelength: 'Wavelength (nm)',
+    reactantA: 'Reactant A',
+    concentrationA: 'Concentration A (mM)',
+    reactantB: 'Reactant B',
+    concentrationB: 'Concentration B (mM)',
+    comment: 'Remarks',
+  };
+
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['metadata'] && this.metadata) {
       this.processMetadata(this.metadata);

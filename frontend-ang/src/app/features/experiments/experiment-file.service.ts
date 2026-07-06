@@ -47,7 +47,8 @@ class ExperimentFileService {
             if (line.startsWith('#Date:')) {
               metadata.date = line.replace('#Date:', '').trim();
             } else if (line.startsWith('#Temperature:')) {
-              const match = line.match(/([\d.]+)/);
+              // expect "C"
+              const match = line.match(/([\d.]+)\s*C/i);
               if (match) metadata.temperature = parseFloat(match[1]);
             } else if (line.startsWith('#User: ')) {
               const user = line.replace('#User: ', '').trim();
@@ -55,7 +56,8 @@ class ExperimentFileService {
             } else if (line.startsWith('#Cell type:')) {
               metadata.modality = line.replace('#Cell type:', '').trim();
             } else if (line.startsWith('Wavelength,Wavelength:')) {
-              const match = line.match(/Wavelength:\s*([\d.]+)/);
+              // expect 'nm'
+              const match = line.match(/Wavelength:\s*([\d.]+)\s*nm/i);
               if (match) {
                 const wavelength = parseFloat(match[1]);
                 if (wavelength == 280) {
@@ -71,8 +73,8 @@ class ExperimentFileService {
             } else if (inRemarks) {
               remarks.push(line);
 
-              // extract reactant name and concentration
-              const reactantMatch = line.match(/^([^:]+):\s*([\d.]+)\s*mM/i);
+              // Extract reactant name and concentration (mM)
+              const reactantMatch = line.match(/^([^:]+):\s*([\d.]+)\s*(mM)/i);
 
               if (reactantMatch) {
                 const reactantName = reactantMatch[1].trim();
@@ -86,8 +88,8 @@ class ExperimentFileService {
                   metadata.concentrationB = val;
                 }
               } else {
-                // fallback for lines that just have concentration but no reactant name
-                const concMatch = line.match(/([\d.]+)\s*mM/i);
+                // expect "mM"
+                const concMatch = line.match(/([\d.]+)\s*(mM)/i);
                 if (concMatch) {
                   const val = parseFloat(concMatch[1]);
                   if (metadata.concentrationA === undefined) {

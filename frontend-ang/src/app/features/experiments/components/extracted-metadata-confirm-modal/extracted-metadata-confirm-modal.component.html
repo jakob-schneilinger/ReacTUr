@@ -27,7 +27,7 @@
                          (click)="$event.stopPropagation()"
                          (change)="toggleSelection(item)">
                 </td>
-                <td class="metadata-key">{{ item.key | titlecase }}</td>
+                <td class="metadata-key">{{ metadataLabels[item.key] || item.key }}</td>
                 <td class="metadata-value">{{ item.value }}</td>
               </tr>
             }
