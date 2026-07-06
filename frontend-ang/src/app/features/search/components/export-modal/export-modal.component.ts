@@ -348,7 +348,7 @@ export class ExportModalComponent implements OnInit {
     this.isCopying = true;
     this.cd.detectChanges();
     try {
-      const textToCopy = this.exportFormat === 'json' ? this.getFormattedJson(false) : this.getFullCsvString('\t');
+      const textToCopy = this.exportFormat === 'json' ? this.getFormattedJson(false) : this.getFullCsvString(',');
       if (textToCopy) {
         await navigator.clipboard.writeText(textToCopy);
         this.isCopied = true;
