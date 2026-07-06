@@ -3,7 +3,6 @@ package com.reactur.backend.dtos;
 import com.reactur.backend.enums.Role;
 
 import java.time.Instant;
-import java.util.UUID;
 
 /**
  * DTO representing a system user.

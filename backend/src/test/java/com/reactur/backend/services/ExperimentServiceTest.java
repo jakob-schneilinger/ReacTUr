@@ -25,7 +25,6 @@ import com.reactur.backend.mappers.UserMapper;
 import com.reactur.backend.mappers.options.InstrumentMapper;
 import com.reactur.backend.mappers.options.ModalityMapper;
 import com.reactur.backend.mappers.options.SolventMapper;
-import com.reactur.backend.repositories.AuditLogRepository;
 import com.reactur.backend.repositories.ExperimentRepository;
 
 import com.reactur.backend.repositories.ReactantStructureRepository;
@@ -80,7 +79,6 @@ class ExperimentServiceTest {
   @Mock private InstrumentRepository instrumentRepository;
   @Mock private ModalityRepository modalityRepository;
   @Mock private UserRepository userRepository;
-  @Mock private AuditLogRepository auditLogRepository;
   @Mock private ReactantStructureRepository structureRepository;
 
   @Mock
@@ -95,7 +93,6 @@ class ExperimentServiceTest {
   @Spy private SolventMapper solventMapper = Mappers.getMapper(SolventMapper.class);
   @Spy private InstrumentMapper instrumentMapper = Mappers.getMapper(InstrumentMapper.class);
   @Spy private ModalityMapper modalityMapper = Mappers.getMapper(ModalityMapper.class);
-
 
   // Mockito will take the mocked Repositories
   // and inject them into this real Service instance.
@@ -338,7 +335,6 @@ class ExperimentServiceTest {
 
     assertNotNull(mockExperiment.getArchivedAt(), "Archived timestamp should be set");
     Mockito.verify(experimentRepository).save(mockExperiment);
-    Mockito.verify(auditLogRepository).save(any());
   }
 
   @Test
@@ -366,7 +362,6 @@ class ExperimentServiceTest {
     );
 
     Mockito.verify(experimentRepository, Mockito.never()).save(any());
-    Mockito.verify(auditLogRepository, Mockito.never()).save(any());
   }
 
 
@@ -384,7 +379,6 @@ class ExperimentServiceTest {
 
     Assertions.assertNull(mockExperiment.getArchivedAt(), "Archived timestamp should be cleared");
     Mockito.verify(experimentRepository).save(mockExperiment);
-    Mockito.verify(auditLogRepository).save(any());
   }
 
   @Test
@@ -504,8 +498,7 @@ class ExperimentServiceTest {
     Mockito.verify(experimentRepository).save(experimentCaptor.capture());
     Experiment savedExperiment = experimentCaptor.getValue();
 
-    Mockito.verify(auditLogRepository).save(any());
-
+    // Assert MUTABLE fields were updated correctly
     assertEquals(updateDto.doi(), savedExperiment.getDoi(), "DOI should be updated");
     assertEquals(updateDto.metadata().temperature(), savedExperiment.getMetadata().getTemperature(), "Temperature should be updated");
     assertEquals(updateDto.metadata().scientist(), savedExperiment.getMetadata().getScientist().getId(), "Scientist should be updated");
@@ -652,5 +645,4 @@ class ExperimentServiceTest {
       .archivedAt(archivedAt)
       .build();
   }
-
 }

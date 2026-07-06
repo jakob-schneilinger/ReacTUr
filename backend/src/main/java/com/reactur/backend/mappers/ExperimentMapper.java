@@ -2,15 +2,7 @@ package com.reactur.backend.mappers;
 
 import com.reactur.backend.dtos.experiments.ExperimentAttachmentDto;
 import com.reactur.backend.dtos.experiments.GetExperimentDto;
-import com.reactur.backend.dtos.experiments.GetMetadataDto;
-import com.reactur.backend.dtos.experiments.MeasurementDataDto;
-import com.reactur.backend.dtos.options.InstrumentDto;
-import com.reactur.backend.dtos.options.ModalityDto;
-import com.reactur.backend.dtos.options.SolventDto;
 import com.reactur.backend.entities.experiment.*;
-import com.reactur.backend.entities.options.Instrument;
-import com.reactur.backend.entities.options.Modality;
-import com.reactur.backend.entities.options.Solvent;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 

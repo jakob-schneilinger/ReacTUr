@@ -8,6 +8,7 @@ import com.reactur.backend.dtos.experiments.SearchParametersDto;
 import com.reactur.backend.enums.Role;
 import com.reactur.backend.exeptions.ResourceNotFoundException;
 import com.reactur.backend.security.SecurityConfig;
+import com.reactur.backend.services.ExperimentHistoryService;
 import com.reactur.backend.services.ExperimentService;
 import com.reactur.backend.repositories.UserRepository;
 import org.junit.jupiter.api.Assertions;
@@ -58,6 +59,9 @@ class ExperimentEndpointTest {
 
   @MockitoBean
   private JwtDecoder jwtDecoder;
+
+  @MockitoBean
+  private ExperimentHistoryService experimentHistoryService;
 
   @Test
   void createExperiment_whenInputIsValid_returns201Created() throws Exception {

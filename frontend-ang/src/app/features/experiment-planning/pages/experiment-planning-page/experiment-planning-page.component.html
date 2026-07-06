@@ -9,7 +9,12 @@
 
     <div class="row">
       <div class="col-md-3">
-        <app-planning-sidebar (simulate)="onSimulate($event)"></app-planning-sidebar>
+        <app-planning-sidebar
+          [kValue]="initialKValue"
+          [nameA]="nameA"
+          [nameB]="nameB"
+          (simulate)="onSimulate($event)">
+        </app-planning-sidebar>
       </div>
 
       <div class="col-md-9">
@@ -26,7 +31,12 @@
           <div class="col-12">
             <div class="card shadow-sm">
               <div class="card-body">
-                <app-planning-chart [data]="chartData" [unit]="selectedUnit"></app-planning-chart>
+                <app-planning-chart
+                  [data]="chartData"
+                  [unit]="selectedUnit"
+                  [nameA]="nameA"
+                  [nameB]="nameB">
+                </app-planning-chart>
               </div>
             </div>
           </div>
