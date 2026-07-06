@@ -55,7 +55,7 @@
       </div>
 
       @if (suggestions.length > 0) {
-        <div class="list-group position-absolute w-100 mt-1 custom-dropdown-menu shadow z-3">
+        <div class="list-group position-absolute w-100 mt-1 custom-dropdown-menu shadow" [style.z-index]="1050+zIndex">
           @for (item of suggestions; track item.shortName) {
             <button type="button" class="list-group-item list-group-item-action custom-dropdown-item border-0" (click)="selectReactant(item)">
               <div class="d-flex w-100 justify-content-between align-items-center mb-1">

@@ -15,6 +15,7 @@
       [reactantLimit]="1"
       [initialValue]="initValA"
       [clearSignal]="triggerClearA"
+      [zIndex]="2"
       (selectionChanged)="onReactantChange('A', $event)">
     </app-reactant-selector>
 
@@ -32,6 +33,7 @@
       [reactantLimit]="1"
       [initialValue]="initValB"
       [clearSignal]="triggerClearB"
+      [zIndex]="1"
       (selectionChanged)="onReactantChange('B', $event)">
     </app-reactant-selector>
 

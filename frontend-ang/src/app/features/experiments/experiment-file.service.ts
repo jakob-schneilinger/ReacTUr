@@ -98,7 +98,7 @@ class ExperimentFileService {
               remarks.push(line);
 
               // Extract reactant name and concentration (mM)
-              const reactantMatch = line.match(/^([^:]+):\s*([\d.]+)\s*(mM)/i);
+              const reactantMatch = line.match(/^([^:]+):.*?([\d.]+)\s*(mM|nM)/i);
 
               if (reactantMatch) {
                 const reactantName = reactantMatch[1].trim();

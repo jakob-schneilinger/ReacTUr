@@ -15,6 +15,7 @@ export class ReactantSelectorComponent implements OnInit {
   @Input() label: string = 'Reactant';
   @Input() availableReactants: ReactantDto[] = [];
   @Input() reactantLimit: number = 0;
+  @Input() zIndex: number = 0;
 
   @Input() set initialValue(vals: string[]) {
     if (vals && vals.length > 0) this.initReactants(vals);
@@ -40,15 +41,28 @@ export class ReactantSelectorComponent implements OnInit {
   ngOnInit() {}
 
   initReactants(vals: string[]) {
+    console.log('initReactants', vals);
     this.selectedReactants = [];
+    let matchFound = false;
     vals.forEach((val) => {
       const match = this.availableReactants.find(
         (r) => r.shortName.toLowerCase() === val.toLowerCase() || r.uuid === val,
       );
       if (match && !this.selectedReactants.includes(match)) {
         this.selectedReactants.push(match);
+        matchFound = true;
       }
     });
+    console.log('matchFound', matchFound);
+
+    if (matchFound) {
+      this.emitChange();
+    } else {
+      if (vals.length === 1) {
+        this.searchTerm = vals[0];
+        this.onSearchInput();
+      }
+    }
   }
 
   onSearchInput() {

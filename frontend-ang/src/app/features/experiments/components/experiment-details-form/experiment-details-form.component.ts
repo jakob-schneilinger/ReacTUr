@@ -259,6 +259,15 @@ export class ExperimentDetailsFormComponent implements OnInit, OnDestroy, OnChan
       }
     }
 
+    if (metadata.reactantA) {
+      this.initValA = [metadata.reactantA];
+      delete metadata.reactantA;
+    }
+    if (metadata.reactantB) {
+      this.initValB = [metadata.reactantB];
+      delete metadata.reactantB;
+    }
+
     this.experimentForm.patchValue(metadata);
 
     this.experimentForm.markAsDirty();
