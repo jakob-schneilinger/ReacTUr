@@ -275,7 +275,7 @@ export class ExperimentDetailsFormComponent implements OnInit, OnDestroy, OnChan
       modality: ['', [this.inListValidator(this.knownModalityNames)]],
       wavelength: ['', Validators.min(0)],
       doi: [''],
-      comment: [''],
+      comment: ['', Validators.maxLength(1000)],
     });
 
     if (this.experiment && isEditMode) {

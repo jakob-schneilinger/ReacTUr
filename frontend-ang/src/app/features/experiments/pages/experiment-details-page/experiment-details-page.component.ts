@@ -90,7 +90,7 @@ export class ExperimentDetailsPageComponent implements OnInit {
           this.transloco.translate('experiments.details.notifications.errorTitle'),
           this.transloco.translate('experiments.details.notifications.loadError'),
         );
-        this.router.navigate(['/search'], { skipLocationChange: true });
+        this.router.navigate(['/search']);
         return;
       }
 
@@ -107,7 +107,7 @@ export class ExperimentDetailsPageComponent implements OnInit {
               error: err.error || err.message || err,
             }),
           );
-          this.router.navigate(['/search'], { skipLocationChange: true });
+          this.router.navigate(['/search']);
           return;
         },
       });

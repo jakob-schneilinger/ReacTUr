@@ -363,7 +363,8 @@
           "invalidInstrument": "Please select a valid instrument from the list.",
           "invalidModality": "Please select a valid modality from the list.",
           "wavelengthInvalid": "Wavelength invalid.",
-          "wavelengthNegative": "Wavelength can not be negative."
+          "wavelengthNegative": "Wavelength can not be negative.",
+          "commentLength": "Comment can not be longer than 1000 characters."
         },
         "dateTitle": "Show date selection"
       },
