@@ -348,6 +348,7 @@
         "errors": {
           "reactantARequired": "Reactant A is required.",
           "reactantBRequired": "Reactant B is required.",
+          "reactantNotUnique": "Reactant A and B must be unique.",
           "dateRequired": "Date is required.",
           "scientistRequired": "Scientist name is required.",
           "temperatureRequired": "Temperature is required.",

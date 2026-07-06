@@ -21,7 +21,10 @@
         </app-reactant-selector>
 
       @if (isInvalid('reactantA')) {
-        <div class="error-message">{{ 'experiments.details.form.errors.reactantARequired' | transloco }}</div>
+        <div class="error-message">
+          @if (experimentForm.get('reactantA')?.hasError('required')) { {{ 'experiments.details.form.errors.reactantARequired' | transloco }} }
+          @if (experimentForm.get('reactantA')?.hasError('notUnique')) { {{ 'experiments.details.form.errors.reactantNotUnique' | transloco }} }
+        </div>
       }
     </div>
   }
@@ -41,7 +44,10 @@
         </app-reactant-selector>
 
       @if (isInvalid('reactantB')) {
-        <div class="error-message">{{ 'experiments.details.form.errors.reactantBRequired' | transloco }}</div>
+        <div class="error-message">
+          @if (experimentForm.get('reactantB')?.hasError('required')) { {{ 'experiments.details.form.errors.reactantBRequired' | transloco }} }
+          @if (experimentForm.get('reactantB')?.hasError('notUnique')) { {{ 'experiments.details.form.errors.reactantNotUnique' | transloco }} }
+        </div>
       }
     </div>
   }

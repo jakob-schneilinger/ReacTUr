@@ -314,8 +314,8 @@ export class ExperimentDetailsFormComponent implements OnInit, OnDestroy, OnChan
 
     this.experimentForm = this.fb.group({
       // Reactants
-      reactantA: ['', Validators.required],
-      reactantB: ['', Validators.required],
+      reactantA: ['', [Validators.required, this.reactantUniqueValidator("A")]],
+      reactantB: ['', [Validators.required, this.reactantUniqueValidator("B")]],
 
       // Required Metadata
       date: [this.currentDate, Validators.required],
@@ -407,6 +407,16 @@ export class ExperimentDetailsFormComponent implements OnInit, OnDestroy, OnChan
       'Metadata Applied',
       'Form fields have been populated from the uploaded file.',
     );
+  }
+
+  private reactantUniqueValidator(identifier: string): ValidatorFn {
+    return (control: AbstractControl): ValidationErrors | null => {
+      const value = control.value;
+      const otherReactantValue = identifier === "A" ? this.experimentForm?.get('reactantB')?.value : this.experimentForm?.get('reactantA')?.value;
+      const isUnique = value !== otherReactantValue;
+      return isUnique ? null : { notUnique: { value: control.value } };
+    };
+
   }
 
   private inListValidator(validOptions: string[]): ValidatorFn {
