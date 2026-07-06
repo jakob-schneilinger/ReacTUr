@@ -4,12 +4,15 @@ import com.reactur.backend.dtos.experiments.GetExperimentDto;
 import com.reactur.backend.dtos.experiments.MeasurementDataDto;
 import com.reactur.backend.dtos.experiments.SaveExperimentDto;
 import com.reactur.backend.dtos.experiments.SaveMetadataDto;
+import com.reactur.backend.dtos.experiments.SearchParametersDto;
 import com.reactur.backend.entities.experiment.Experiment;
 import com.reactur.backend.entities.Reactant;
+import com.reactur.backend.entities.experiment.ExperimentResult;
 import com.reactur.backend.entities.options.Instrument;
 import com.reactur.backend.entities.options.Modality;
 import com.reactur.backend.entities.options.Solvent;
 import com.reactur.backend.entities.User;
+import com.reactur.backend.exeptions.ResourceConflictException;
 import com.reactur.backend.exeptions.ResourceNotFoundException;
 import com.reactur.backend.exeptions.UnprocessableEntityException;
 import com.reactur.backend.mappers.ExperimentMapper;
@@ -40,8 +43,14 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -479,6 +488,167 @@ class ExperimentServiceTest {
     Mockito.verify(experimentRepository).findArchivedExperimentsForUser(userId);
   }
 
+  @Test
+  void updateExperiment_whenValidAndAuthorized_updatesFieldsAndReturnsDto() {
+    UUID experimentId = randomUUID();
+    String creatorId = "creator-123";
+
+    // 1. Existing entity in the DB
+    Experiment existingExperiment = createMockEntityForSecurity(experimentId, creatorId, "scientist-456", null);
+    existingExperiment.setDoi("10.1000/old-doi");
+    existingExperiment.getMetadata().setTemperature(20.0); // Old temperature
+
+    // 2. New Incoming DTO (simulating the PUT payload)
+    SaveExperimentDto updateDto = createDummyExperimentDto();
+
+    // Setup mocks for existing experiment
+    when(experimentRepository.findById(experimentId)).thenReturn(Optional.of(existingExperiment));
+
+    // Setup mocks for the semantic validation (Lookups to ensure the new data exists in the DB)
+    User newScientist = new User(); newScientist.setId(updateDto.metadata().scientist());
+    when(userRepository.findById(updateDto.metadata().scientist())).thenReturn(Optional.of(newScientist));
+
+    Reactant rA = new Reactant(); rA.setId(updateDto.reactantA());
+    when(reactantRepository.findById(updateDto.reactantA())).thenReturn(Optional.of(rA));
+
+    Reactant rB = new Reactant(); rB.setId(updateDto.reactantB());
+    when(reactantRepository.findById(updateDto.reactantB())).thenReturn(Optional.of(rB));
+
+    Solvent sol = new Solvent(); sol.setId(updateDto.metadata().solvent());
+    when(solventRepository.findById(updateDto.metadata().solvent())).thenReturn(Optional.of(sol));
+
+    Instrument inst = new Instrument(); inst.setId(updateDto.metadata().instrument());
+    when(instrumentRepository.findById(updateDto.metadata().instrument())).thenReturn(Optional.of(inst));
+
+    Modality mod = new Modality(); mod.setId(updateDto.metadata().modality());
+    when(modalityRepository.findById(updateDto.metadata().modality())).thenReturn(Optional.of(mod));
+
+    // Catch the saved experiment
+    when(experimentRepository.save(any(Experiment.class))).thenAnswer(i -> i.getArgument(0));
+
+    // Execute the Service Call
+    GetExperimentDto result = experimentService.updateExperiment(experimentId, updateDto, creatorId, Role.USER);
+
+    // Verify Save and Audit Log
+    ArgumentCaptor<Experiment> experimentCaptor = ArgumentCaptor.forClass(Experiment.class);
+    Mockito.verify(experimentRepository).save(experimentCaptor.capture());
+    Experiment savedExperiment = experimentCaptor.getValue();
+
+    // Verify Audit action was triggered
+    Mockito.verify(auditLogRepository).save(any());
+
+    // Assert MUTABLE fields were updated correctly
+    assertEquals(updateDto.doi(), savedExperiment.getDoi(), "DOI should be updated");
+    assertEquals(updateDto.metadata().temperature(), savedExperiment.getMetadata().getTemperature(), "Temperature should be updated");
+    assertEquals(updateDto.metadata().scientist(), savedExperiment.getMetadata().getScientist().getId(), "Scientist should be updated");
+
+    // Enforce IMMUTABLE rule: Creator must not change!
+    assertEquals(creatorId, savedExperiment.getCreatedBy().getId(), "Creator should NEVER change during an update");
+
+    // Verify the DTO is returned correctly mapped
+    assertNotNull(result);
+    assertEquals(updateDto.doi(), result.doi());
+  }
+
+  @Test
+  void updateExperiment_whenUnauthorizedUser_throwsAccessDeniedException() {
+    UUID experimentId = randomUUID();
+    String snooperId = "snooper-000";
+
+    Experiment existingExperiment = createMockEntityForSecurity(experimentId, "creator-123", "scientist-456", null);
+    SaveExperimentDto updateDto = createDummyExperimentDto();
+
+    when(experimentRepository.findById(experimentId)).thenReturn(Optional.of(existingExperiment));
+
+    assertThrows(AccessDeniedException.class, () ->
+      experimentService.updateExperiment(experimentId, updateDto, snooperId, Role.USER)
+    );
+
+    Mockito.verify(experimentRepository, Mockito.never()).save(any());
+  }
+
+  @Test
+  void updateExperiment_whenArchived_throwsIllegalStateException() {
+    UUID experimentId = randomUUID();
+    String creatorId = "creator-123";
+
+    // Experiment is archived! (archivedAt is not null)
+    Experiment archivedExperiment = createMockEntityForSecurity(experimentId, creatorId, "scientist-456", Instant.now());
+    SaveExperimentDto updateDto = createDummyExperimentDto();
+
+    when(experimentRepository.findById(experimentId)).thenReturn(Optional.of(archivedExperiment));
+
+    // We expect a ResourceConflictException because the entity is in a "frozen" state
+    ResourceConflictException exception = assertThrows(ResourceConflictException.class, () ->
+      experimentService.updateExperiment(experimentId, updateDto, creatorId, Role.USER)
+    );
+
+    assertTrue(exception.getMessage().toLowerCase().contains("archived"), "Exception message should mention the archived state");
+    Mockito.verify(experimentRepository, Mockito.never()).save(any());
+  }
+
+  @Test
+  void updateExperiment_whenReactantNotFound_throwsUnprocessableEntityException() {
+    UUID experimentId = randomUUID();
+    String creatorId = "creator-123";
+
+    // 1. Existing entity in the DB
+    Experiment existingExperiment = createMockEntityForSecurity(experimentId, creatorId, "scientist-456", null);
+    SaveExperimentDto updateDto = createDummyExperimentDto();
+
+    // 2. Setup mocks
+    when(experimentRepository.findById(experimentId)).thenReturn(Optional.of(existingExperiment));
+
+    // Mock the scientist lookup so it passes and reaches the reactant lookup
+    User newScientist = new User();
+    newScientist.setId(updateDto.metadata().scientist());
+    when(userRepository.findById(updateDto.metadata().scientist())).thenReturn(Optional.of(newScientist));
+
+    // Mock Reactant A returning empty (simulating it does not exist in the DB)
+    when(reactantRepository.findById(updateDto.reactantA())).thenReturn(Optional.empty());
+
+    // 3. Execute and Assert
+    UnprocessableEntityException exception = assertThrows(UnprocessableEntityException.class, () ->
+      experimentService.updateExperiment(experimentId, updateDto, creatorId, Role.USER)
+    );
+
+    assertTrue(exception.getMessage().contains("Reactant A does not exist"), "Exception should specify which entity is missing");
+
+    // Ensure we never attempted to save the corrupted state
+    Mockito.verify(experimentRepository, Mockito.never()).save(any());
+  }
+
+  @Test
+  void searchExperiments_executesPaginatedQueryAndReturnsMappedDtos() {
+    // 1. Setup Request Data
+    SearchParametersDto searchDto = new SearchParametersDto(
+      List.of(randomUUID()), // reactant A
+      null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null
+    );
+    Pageable pageable = PageRequest.of(0, 10);
+    String userId = "user-123";
+
+    // 2. Setup Mock Database Response
+    Experiment mockExperiment = createMockEntityForSecurity(randomUUID(), userId, "scientist-1", null);
+    Page<Experiment> mockEntityPage =
+      new PageImpl<>(List.of(mockExperiment));
+
+    // When the repository executes ANY Specification with ANY Pageable, return our mock page
+    when(experimentRepository.findAll(any(Specification.class), any(Pageable.class)))
+      .thenReturn(mockEntityPage);
+
+    // 3. Execute
+    Page<GetExperimentDto> resultPage =
+      experimentService.searchExperiments(searchDto, pageable, userId, Role.USER);
+
+    // 4. Assert
+    assertNotNull(resultPage, "Page should not be null");
+    assertEquals(1, resultPage.getTotalElements(), "Page should contain exactly 1 mapped DTO");
+
+    // Verify the repository was actually called with a Specification and the Pageable
+    Mockito.verify(experimentRepository).findAll(any(Specification.class), Mockito.eq(pageable));
+  }
+
   private SaveExperimentDto createDummyExperimentDto() {
     SaveMetadataDto metadata = new SaveMetadataDto(
       java.time.LocalDate.now().minusDays(1),
@@ -507,13 +677,15 @@ class ExperimentServiceTest {
 
     Metadata metadata = Metadata.builder().scientist(scientist).build();
 
+    ExperimentResult result = ExperimentResult.builder().build();
+
     return Experiment.builder()
       .id(experimentId)
       .createdBy(creator)
       .metadata(metadata)
+      .result(result)
       .archivedAt(archivedAt)
       .build();
   }
-
 
 }

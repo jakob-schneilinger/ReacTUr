@@ -9,6 +9,8 @@ import com.reactur.backend.services.ExperimentService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -16,7 +18,6 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -50,13 +51,24 @@ public class ExperimentEndpoint {
         return ResponseEntity.status(HttpStatus.CREATED).body(createdExperiment);
     }
 
-    @PatchMapping("/{uuid}")
-    public ResponseEntity<GetExperimentDto> patchExperiment(@PathVariable UUID uuid, SaveExperimentDto experimentDto) {
+    // Javadoc: Just the creator or the scientist, or an admin, are allowed to update the experiment
+    // Notes:
+    @PutMapping("/{uuid}")
+    public ResponseEntity<GetExperimentDto> updateExperiment(
+      @PathVariable UUID uuid,
+      @Valid @RequestBody SaveExperimentDto experimentDto,
+      Authentication authentication,
+      @AuthenticationPrincipal Jwt jwt
+    ) {
+        log.info("PUT /api/experiment/{} called by User ID: {}", uuid, jwt.getSubject());
 
-        //TODO:
-        throw new UnsupportedOperationException();
+        Role userRole = extractUserRole(authentication);
+        GetExperimentDto updatedExperiment = experimentService.updateExperiment(uuid, experimentDto, jwt.getSubject(), userRole);
+
+        return ResponseEntity.ok(updatedExperiment);
     }
 
+    // If archived, just the creator, scientist or an admin can retrieve the experiment.
     @GetMapping("/{uuid}")
     public ResponseEntity<GetExperimentDto> getExperiment(
       @PathVariable UUID uuid,
@@ -71,13 +83,26 @@ public class ExperimentEndpoint {
         return ResponseEntity.ok(experiment);
     }
 
+    // Should archived-experiments also show up? ---> Let's say no
     @GetMapping()
-    public ResponseEntity<GetExperimentDto[]> searchExperiments(SearchParametersDto searchParams) {
+    public ResponseEntity<Page<GetExperimentDto>> searchExperiments(
+      @Valid SearchParametersDto searchParams,
+      Pageable pageable,
+      Authentication authentication,
+      @AuthenticationPrincipal Jwt jwt
+    ) {
+        log.info("GET /api/experiment (search) called by User ID: {}", jwt.getSubject());
 
-        //TODO:
-        throw new UnsupportedOperationException();
+        Role userRole = extractUserRole(authentication);
+
+        Page<GetExperimentDto> searchResults =
+          experimentService.searchExperiments(searchParams, pageable, jwt.getSubject(), userRole);
+
+        return ResponseEntity.ok(searchResults);
     }
 
+    // TODO: Endpoint to get Logs by *Date*, by *User* and by Experiment
+    //  Current one: Logs related to experiment with uuid
     @GetMapping("/{uuid}/audit_logs")
     public ResponseEntity<AuditLogDto[]> getAuditLogs(@PathVariable UUID uuid) {
 
@@ -85,7 +110,7 @@ public class ExperimentEndpoint {
         throw new UnsupportedOperationException();
     }
 
-    // TODO: I decided that normal users get the archived Experiments where they are the creator or the scientist...
+    // Javadoc: I decided that normal users get the archived Experiments where they are the creator or the scientist...
     //  and ADMINS get all archived experiments that exist
     @GetMapping("/archived")
     public ResponseEntity<GetExperimentDto[]> getArchivedExperiments(
