@@ -26,6 +26,7 @@ import com.reactur.backend.repositories.ReactantRepository;
 import com.reactur.backend.repositories.options.SolventRepository;
 import com.reactur.backend.repositories.UserRepository;
 import com.reactur.backend.services.ExperimentService;
+import com.reactur.backend.services.FileService;
 import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.Predicate;
 import lombok.RequiredArgsConstructor;
@@ -66,6 +67,7 @@ public class ExperimentServiceImpl implements ExperimentService {
   private final UserRepository userRepository;
   private final AuditLogRepository auditLogRepository;
   private final ExperimentMapper experimentMapper;
+  private final FileService fileService;
   private final Javers javers;
 
   @Override
@@ -165,7 +167,7 @@ public class ExperimentServiceImpl implements ExperimentService {
 
     // ...finally returning the saved element
 
-    return experimentMapper.experimentToGetExperimentDto(savedExperiment);
+    return experimentMapper.experimentToGetExperimentDto(savedExperiment, fileService.getAttachmentsOfExperiment(savedExperiment.getId()));
   }
 
 
@@ -189,7 +191,7 @@ public class ExperimentServiceImpl implements ExperimentService {
       }
     }
 
-    return experimentMapper.experimentToGetExperimentDto(experiment);
+    return experimentMapper.experimentToGetExperimentDto(experiment, fileService.getAttachmentsOfExperiment(experiment.getId()));
   }
 
 
@@ -260,7 +262,7 @@ public class ExperimentServiceImpl implements ExperimentService {
       auditLogRepository.save(auditLog);
     }
 
-    return experimentMapper.experimentToGetExperimentDto(experiment);
+    return experimentMapper.experimentToGetExperimentDto(experiment, fileService.getAttachmentsOfExperiment(experiment.getId()));
   }
 
   @Override
@@ -278,8 +280,11 @@ public class ExperimentServiceImpl implements ExperimentService {
     }
 
     return archivedExperiments.stream()
-      .map(experimentMapper::experimentToGetExperimentDto)
-      .toArray(GetExperimentDto[]::new);
+            .map(exp -> experimentMapper.experimentToGetExperimentDto(
+                    exp,
+                    fileService.getAttachmentsOfExperiment(exp.getId())
+            ))
+            .toArray(GetExperimentDto[]::new);
   }
 
   @Override
@@ -375,7 +380,10 @@ public class ExperimentServiceImpl implements ExperimentService {
 
     log.info("Successfully updated Experiment with internal ID: {}", savedExperiment.getId());
 
-    return experimentMapper.experimentToGetExperimentDto(savedExperiment);
+    return experimentMapper.experimentToGetExperimentDto(
+            savedExperiment,
+            fileService.getAttachmentsOfExperiment(savedExperiment.getId())
+    );
   }
 
   @Override
@@ -394,7 +402,10 @@ public class ExperimentServiceImpl implements ExperimentService {
     Page<Experiment> experimentPage = experimentRepository.findAll(spec, pageable);
 
     // Map entities to DTOs while preserving the Page structure
-    return experimentPage.map(experimentMapper::experimentToGetExperimentDto);
+    return experimentPage.map(exp -> experimentMapper.experimentToGetExperimentDto(
+            exp,
+            fileService.getAttachmentsOfExperiment(exp.getId())
+    ));
   }
 
   // Dynamic Query Builder

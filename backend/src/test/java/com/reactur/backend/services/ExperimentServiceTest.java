@@ -78,6 +78,9 @@ class ExperimentServiceTest {
   @Mock private UserRepository userRepository;
   @Mock private AuditLogRepository auditLogRepository;
 
+  @Mock
+  private FileService fileService;
+
   // We actually want to use here the mapper rather than a Mock. This way we also test the Mapper.
   @Spy private ExperimentMapper experimentMapper = Mappers.getMapper(ExperimentMapper.class);
   @Spy private MetadataMapper metadataMapper = Mappers.getMapper(MetadataMapper.class);
@@ -87,6 +90,7 @@ class ExperimentServiceTest {
   @Spy private SolventMapper solventMapper = Mappers.getMapper(SolventMapper.class);
   @Spy private InstrumentMapper instrumentMapper = Mappers.getMapper(InstrumentMapper.class);
   @Spy private ModalityMapper modalityMapper = Mappers.getMapper(ModalityMapper.class);
+
 
   // Mockito will take the mocked Repositories
   // and inject them into this real Service instance.
