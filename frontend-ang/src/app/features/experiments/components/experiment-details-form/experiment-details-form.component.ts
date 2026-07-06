@@ -300,6 +300,10 @@ export class ExperimentDetailsFormComponent implements OnInit, OnDestroy, OnChan
       wavelength: exp.metadata?.wavelength,
       doi: exp.doi,
       comment: exp.metadata?.comment,
+      rateConstant: exp.measurementData?.rateConstant,
+      pFO_rateConstant: exp.measurementData?.pFO_rateConstant,
+      error: exp.measurementData?.error,
+      isErrorPercentage: exp.measurementData?.isErrorPercentage,
     });
 
     if (exp.reactantA) {
