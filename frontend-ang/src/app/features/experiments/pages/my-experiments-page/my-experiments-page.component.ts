@@ -4,11 +4,10 @@ import { NotificationService } from '../../../../core/layout/notification/notifi
 import { GetExperimentDto } from '../../experiment.dto';
 import { GetUserDto } from '../../../../shared/dtos/user.dto';
 import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
-
-// TODO: Importiere hier die Card-Component, die du auch auf der Suchseite nutzt!
 import { SearchResultsComponent } from '../../../search/components/search-results/search-results.component';
 import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { TRANSLOCO_IMPORTS } from '../../../../core/global/transloco-imports';
 import { LayoutComponent } from '../../../../core/layout/layout.component';
 
 type ViewMode = 'active' | 'archived';
@@ -18,12 +17,12 @@ type ViewMode = 'active' | 'archived';
   standalone: true,
   imports: [
     CommonModule,
-    LayoutComponent,
     TranslocoModule,
-    SearchResultsComponent
+    TRANSLOCO_IMPORTS,
+    SearchResultsComponent,
   ],
   templateUrl: './my-experiments-page.component.html',
-  styleUrls: ['./my-experiments-page.component.scss']
+  styleUrls: ['./my-experiments-page.component.scss'],
 })
 export class MyExperimentsPageComponent implements OnInit {
   viewMode: ViewMode = 'active';
@@ -31,12 +30,15 @@ export class MyExperimentsPageComponent implements OnInit {
   isLoading = false;
   currentUser: GetUserDto | null = null;
 
+  leftHalf: GetExperimentDto[] = [];
+  rightHalf: GetExperimentDto[] = [];
+
   constructor(
     private experimentService: ExperimentService,
     private authService: AuthService,
     private notification: NotificationService,
     private transloco: TranslocoService,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
   ) {}
 
   ngOnInit(): void {
@@ -51,8 +53,14 @@ export class MyExperimentsPageComponent implements OnInit {
         this.isLoading = false;
         this.notification.error('Error', 'Could not load user data');
         this.cdr.markForCheck();
-      }
+      },
     });
+  }
+
+  private splitExperiments(): void {
+    const halfIndex = Math.ceil(this.experiments.length / 2);
+    this.leftHalf = this.experiments.slice(0, halfIndex);
+    this.rightHalf = this.experiments.slice(halfIndex);
   }
 
   toggleViewMode(mode: ViewMode): void {
@@ -68,17 +76,11 @@ export class MyExperimentsPageComponent implements OnInit {
     this.experiments = [];
     this.cdr.markForCheck();
 
-    const request$ =
-      this.viewMode === 'archived'
-        ? this.experimentService.getArchivedExperiments()
-        : this.experimentService.getExperimentsByScientist(this.currentUser.id);
-
-
     if (this.viewMode === 'archived') {
       this.experimentService.getArchivedExperiments().subscribe({
-        next: value => {
+        next: (value) => {
           this.experiments = value;
-
+          this.splitExperiments();
           this.isLoading = false;
           this.cdr.markForCheck();
         },
@@ -89,13 +91,13 @@ export class MyExperimentsPageComponent implements OnInit {
             this.transloco.translate('experiments.my.notifications.loadError'),
           );
           this.cdr.markForCheck();
-        }
+        },
       });
     } else {
       this.experimentService.getExperimentsByScientist(this.currentUser.id).subscribe({
         next: value => {
           this.experiments = value.content;
-
+          this.splitExperiments();
           this.isLoading = false;
           this.cdr.markForCheck();
         },
@@ -106,7 +108,8 @@ export class MyExperimentsPageComponent implements OnInit {
             this.transloco.translate('experiments.my.notifications.loadError'),
           );
           this.cdr.markForCheck();
-        }});
+        },
+      });
     }
   }
 }

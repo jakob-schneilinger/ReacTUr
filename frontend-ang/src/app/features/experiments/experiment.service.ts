@@ -63,7 +63,7 @@ export class ExperimentService {
     return this.httpClient.get<ExperimentHistoryDto[]>(`${this.experimentBaseUri}/${uuid}/history`);
   }
 
-  getExperimentsByScientist(scientistUuid: string, page: number = 0, size: number = 10): Observable<Page<GetExperimentDto>> {
+  getExperimentsByScientist(scientistUuid: string, page: number = 0, size: number = 100): Observable<Page<GetExperimentDto>> {
     const params = new HttpParams()
       .set('scientist', scientistUuid)
       .set('page', page.toString())

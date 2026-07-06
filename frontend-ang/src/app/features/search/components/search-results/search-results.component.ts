@@ -1,12 +1,16 @@
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { ExperimentViewModalComponent } from '../../../experiments/components/experiment-view-modal/experiment-view-modal.component';
-import { Component, Input, Output, EventEmitter } from '@angular/core';
+import { Component, Input, Output, EventEmitter, ChangeDetectorRef } from '@angular/core';
 import { GetExperimentDto } from '../../../experiments/experiment.dto';
 import { NotificationService } from '../../../../core/layout/notification/notification.service';
 import { AuthService } from '../../../../core/auth/auth.service';
 import { HasRoleDirective } from '../../../../shared/directives/has-role.directive';
 import { GetUserDto } from '../../../../shared/dtos/user.dto';
+import { ExperimentService } from '../../../experiments/experiment.service';
+import { ReactantDto } from '../../../reactants/reactant.dto';
+import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
+import { AppConfirmModalComponent } from '../../../../shared/modal/confirm-modal.component';
 
 export type SearchState = 'initial' | 'no-results' | 'has-results';
 
@@ -15,9 +19,17 @@ export type SearchState = 'initial' | 'no-results' | 'has-results';
   templateUrl: './search-results.component.html',
   styleUrls: ['./search-results.component.scss'],
   standalone: true,
-  imports: [CommonModule, RouterModule, ExperimentViewModalComponent, HasRoleDirective],
+  imports: [
+    CommonModule,
+    RouterModule,
+    ExperimentViewModalComponent,
+    HasRoleDirective,
+    AppConfirmModalComponent,
+  ],
 })
 export class SearchResultsComponent {
+  @Input() disableExport: boolean = false;
+  @Input() showPages: boolean = true;
   @Input() state: SearchState = 'initial';
   @Input() experiments: GetExperimentDto[] = [];
   @Input() currentPage: number = 0;
@@ -39,9 +51,15 @@ export class SearchResultsComponent {
 
   user: GetUserDto | null = null;
 
+  restoreExperimentUuid: string = "";
+  isRestoreExperimentModalOpen: boolean = false;
+
   constructor(
     private notification: NotificationService,
     private authService: AuthService,
+    private experimentService: ExperimentService,
+    private transloco: TranslocoService,
+    private cdr: ChangeDetectorRef,
   ) {}
 
   get hasNextPage(): boolean {
@@ -126,5 +144,36 @@ export class SearchResultsComponent {
     const selectElement = event.target as HTMLSelectElement;
     const newSize = Number(selectElement.value);
     this.pageSizeChange.emit(newSize);
+  }
+
+  cancelRestore() {
+    this.isRestoreExperimentModalOpen = false;
+    this.restoreExperimentUuid = "";
+  }
+
+  restoreExperiment(uuid: string): void {
+    if (!uuid) return;
+
+    this.restoreExperimentUuid = uuid;
+    this.isRestoreExperimentModalOpen = true;
+  }
+
+  executeRestore() {
+    if (!this.restoreExperimentUuid) return;
+    this.experimentService.restoreExperiment(this.restoreExperimentUuid).subscribe({
+      next: (value) => {
+        this.notification.success('Experiment restored', 'Experiment restored successfully');
+        this.experiments = this.experiments.filter(
+          (exp) => exp.uuid !== this.restoreExperimentUuid,
+        );
+        this.cancelRestore();
+        this.cdr.markForCheck();
+      },
+      error: (err) => {
+        this.notification.error('Error', 'Could not restore experiment');
+        this.cancelRestore();
+        this.cdr.markForCheck();
+      },
+    });
   }
 }

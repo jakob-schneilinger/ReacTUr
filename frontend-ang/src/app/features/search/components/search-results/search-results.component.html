@@ -10,33 +10,35 @@
     </div>
   } @else if (state === 'has-results') {
     <!-- Action Bar -->
-    <div class="export-container" *appHasRole="['SUPERVISOR', 'ADMIN']">
-      <div class="results-action-bar-filler"></div>
-      <div class="results-action-bar" *appHasRole="['SUPERVISOR', 'ADMIN']">
-        <div class="left-actions">
-          <span class="results-count">{{ experiments.length }} results on page ({{ totalElements }} total)</span>
+    @if (!disableExport) {
+      <div class="export-container" *appHasRole="['SUPERVISOR', 'ADMIN']">
+        <div class="results-action-bar-filler"></div>
+        <div class="results-action-bar" *appHasRole="['SUPERVISOR', 'ADMIN']">
+          <div class="left-actions">
+            <span class="results-count">{{ experiments.length }} results on page ({{ totalElements }} total)</span>
 
-          <!-- Select All Checkbox -->
-          <div class="select-all-wrapper" (click)="toggleSelectAll()">
-            <i class="bi" [ngClass]="allSelected ? 'bi-check-square-fill text-success' : 'bi-square'"></i>
-            <span>{{ allSelected ? 'Deselect Page' : 'Select Page' }}</span>
+            <!-- Select All Checkbox -->
+            <div class="select-all-wrapper" (click)="toggleSelectAll()">
+              <i class="bi" [ngClass]="allSelected ? 'bi-check-square-fill text-success' : 'bi-square'"></i>
+              <span>{{ allSelected ? 'Deselect Page' : 'Select Page' }}</span>
+            </div>
+          </div>
+
+          <div class="right-actions d-flex gap-2">
+            <button class="btn-export"
+                    [disabled]="selectedExperiments.size === 0"
+                    (click)="onExportClicked()">
+              Export Selected ({{ selectedExperiments.size }})
+            </button>
+
+            <button class="btn-export outline"
+                    (click)="onExportAllClicked()">
+              Export All ({{ totalElements }})
+            </button>
           </div>
         </div>
-
-        <div class="right-actions d-flex gap-2">
-          <button class="btn-export"
-                  [disabled]="selectedExperiments.size === 0"
-                  (click)="onExportClicked()">
-            Export Selected ({{ selectedExperiments.size }})
-          </button>
-
-          <button class="btn-export outline"
-                  (click)="onExportAllClicked()">
-            Export All ({{ totalElements }})
-          </button>
-        </div>
       </div>
-    </div>
+    }
 
     <div class="cards-grid">
       @for (exp of experiments; track exp.uuid) {
@@ -95,19 +97,31 @@
               View details
             </button>
 
-            <button type="button"
-                    class="btn-custom"
-                    [ngClass]="isSelected(exp.uuid) ? 'btn-remove' : 'btn-add'"
-                    (click)="toggleSelection(exp)"
-                    *appHasRole="['SUPERVISOR', 'ADMIN']">
-              <i class="bi" [ngClass]="isSelected(exp.uuid) ? 'bi-dash-lg' : 'bi-plus-lg'"></i>
-              {{ isSelected(exp.uuid) ? 'Remove' : 'Add' }}
-            </button>
+            @if (!disableExport) {
+              <button type="button"
+                      class="btn-custom"
+                      [ngClass]="isSelected(exp.uuid) ? 'btn-remove' : 'btn-add'"
+                      (click)="toggleSelection(exp)"
+                      *appHasRole="['SUPERVISOR', 'ADMIN']">
+                <i class="bi" [ngClass]="isSelected(exp.uuid) ? 'bi-dash-lg' : 'bi-plus-lg'"></i>
+                {{ isSelected(exp.uuid) ? 'Remove' : 'Add' }}
+              </button>
+            }
+
+            @if (!!exp.archivedAt) {
+              <button type="button"
+                      class="btn-custom"
+                      (click)="restoreExperiment(exp.uuid)">
+                <i class="bi bi-arrow-counterclockwise"></i>
+                Restore
+              </button>
+            }
+
           </div>
         </div>
       }
     </div>
-    @if (totalElements > 0) {
+    @if (totalElements > 0 && showPages) {
       <div class="pagination-container d-flex justify-content-between align-items-center mt-4">
         <div class="d-flex align-items-center gap-3">
           <span class="text-muted small">
@@ -152,4 +166,17 @@
     [hasWritePermission]="hasWritePermission"
     (close)="closeViewModal()">
   </app-experiment-view-modal>
+}
+
+
+@if (isRestoreExperimentModalOpen) {
+  <app-confirm-modal
+    [isOpen]="true"
+    [title]="'Restore Experiment'"
+    [message]="'Are you sure you want to restore this experiment'"
+    [confirmLabel]="'Restore'"
+    confirmButtonClass="primary"
+    (confirm)="executeRestore()"
+    (cancel)="cancelRestore()">
+  </app-confirm-modal>
 }

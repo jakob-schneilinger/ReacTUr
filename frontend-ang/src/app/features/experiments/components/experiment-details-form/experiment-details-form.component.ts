@@ -41,6 +41,7 @@ import {
 import { UserService } from '../../../../shared/services/user.service';
 import { OptionSelectorComponent } from '../../../../shared/option-selector/option-selector.component';
 import { StructureFlag } from '../../../reactants/structure-flag.enum';
+import { ExperimentService } from '../../experiment.service';
 
 export type FormState = 'create' | 'edit';
 
@@ -105,6 +106,7 @@ export class ExperimentDetailsFormComponent implements OnInit, OnDestroy, OnChan
     private optionService: OptionService,
     private userService: UserService,
     private reactantService: ReactantService,
+    private experimentService: ExperimentService,
     private cdr: ChangeDetectorRef,
     private transloco: TranslocoService,
   ) {}
@@ -555,10 +557,17 @@ export class ExperimentDetailsFormComponent implements OnInit, OnDestroy, OnChan
 
   executeArchive(): void {
     this.isArchiveExperimentModalOpen = false;
-    // TODO: Call backend Archive
-    this.notification.success('Experiment Archived', 'Experiment was archived successfully!');
-    this.experimentForm.reset();
-    this.router.navigate(['/search']);
+    if (!this.experiment) return;
+    this.experimentService.archiveExperiment(this.experiment.uuid).subscribe({
+      next: value => {
+        this.notification.success('Experiment Archived', 'Experiment was archived successfully!');
+        this.experimentForm.reset();
+        this.router.navigate(['/search']);
+      },
+      error: err => {
+        this.notification.error('Experiment Archive Error', 'Unable to archive experiment!');
+      }
+    })
   }
 
   closeModals(): void {
