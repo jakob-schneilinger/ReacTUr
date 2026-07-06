@@ -14,14 +14,14 @@
 
           <div class="col-md-4 p-4 border-end settings-panel">
             <h6 class="fw-bold mb-3">{{ 'exportModal.format' | transloco }}</h6>
-            <div class="btn-group w-100 mb-4" role="group">
-              <input type="radio" class="btn-check" name="btnradio" id="btnradio1"
-                     [checked]="exportFormat === 'json'" (change)="toggleFormat('json')">
-              <label class="btn-outline-primary" for="btnradio1">{{ 'exportModal.json' | transloco }}</label>
 
-              <input type="radio" class="btn-check" name="btnradio" id="btnradio2"
-                     [checked]="exportFormat === 'csv'" (change)="toggleFormat('csv')">
-              <label class="btn-outline-primary" for="btnradio2">{{ 'exportModal.csv' | transloco }}</label>
+            <div class="custom-toggle mb-4">
+              <label class="toggle-btn" [class.active]="exportFormat === 'json'" (click)="toggleFormat('json')">
+                {{ 'exportModal.json' | transloco }}
+              </label>
+              <label class="toggle-btn" [class.active]="exportFormat === 'csv'" (click)="toggleFormat('csv')">
+                {{ 'exportModal.csv' | transloco }}
+              </label>
             </div>
 
             @if (exportFormat === "json") {
@@ -32,6 +32,10 @@
                 <div class="form-check form-switch mb-2">
                   <input class="form-check-input" type="checkbox" id="f_names" [(ngModel)]="exportFields.reactants.names" (change)="onFieldChange()">
                   <label class="form-check-label" for="f_names">{{ 'exportModal.fields.names' | transloco }}</label>
+                </div>
+                <div class="form-check form-switch mb-2">
+                  <input class="form-check-input" type="checkbox" id="f_type" [(ngModel)]="exportFields.reactants.type" (change)="onFieldChange()">
+                  <label class="form-check-label" for="f_type">Chemical Type</label>
                 </div>
                 <div class="form-check form-switch mb-2">
                   <input class="form-check-input" type="checkbox" id="f_smiles" [(ngModel)]="exportFields.reactants.smiles" (change)="onFieldChange()">
@@ -57,6 +61,10 @@
                   <input class="form-check-input" type="checkbox" id="f_err" [(ngModel)]="exportFields.kinetics.error" (change)="onFieldChange()">
                   <label class="form-check-label" for="f_err">{{ 'exportModal.fields.error' | transloco }}</label>
                 </div>
+                <div class="form-check form-switch mb-2">
+                  <input class="form-check-input" type="checkbox" id="f_errPerc" [(ngModel)]="exportFields.kinetics.isErrorPercentage" (change)="onFieldChange()">
+                  <label class="form-check-label" for="f_errPerc">{{ 'exportModal.fields.isErrorPercentage' | transloco }}</label>
+                </div>
               </div>
 
               <div class="field-group">
@@ -66,12 +74,44 @@
                   <label class="form-check-label" for="f_doi">{{ 'exportModal.fields.doi' | transloco }}</label>
                 </div>
                 <div class="form-check form-switch mb-2">
+                  <input class="form-check-input" type="checkbox" id="f_date" [(ngModel)]="exportFields.metadata.date" (change)="onFieldChange()">
+                  <label class="form-check-label" for="f_date">{{ 'exportModal.fields.date' | transloco }}</label>
+                </div>
+                <div class="form-check form-switch mb-2">
+                  <input class="form-check-input" type="checkbox" id="f_sci" [(ngModel)]="exportFields.metadata.scientist" (change)="onFieldChange()">
+                  <label class="form-check-label" for="f_sci">{{ 'exportModal.fields.scientist' | transloco }}</label>
+                </div>
+                <div class="form-check form-switch mb-2">
                   <input class="form-check-input" type="checkbox" id="f_temp" [(ngModel)]="exportFields.metadata.temperature" (change)="onFieldChange()">
                   <label class="form-check-label" for="f_temp">{{ 'exportModal.fields.temperature' | transloco }}</label>
                 </div>
                 <div class="form-check form-switch mb-2">
                   <input class="form-check-input" type="checkbox" id="f_solv" [(ngModel)]="exportFields.metadata.solvent" (change)="onFieldChange()">
                   <label class="form-check-label" for="f_solv">{{ 'exportModal.fields.solvent' | transloco }}</label>
+                </div>
+                <div class="form-check form-switch mb-2">
+                  <input class="form-check-input" type="checkbox" id="f_concA" [(ngModel)]="exportFields.metadata.concentrationA" (change)="onFieldChange()">
+                  <label class="form-check-label" for="f_concA">{{ 'exportModal.fields.concentrationA' | transloco }}</label>
+                </div>
+                <div class="form-check form-switch mb-2">
+                  <input class="form-check-input" type="checkbox" id="f_concB" [(ngModel)]="exportFields.metadata.concentrationB" (change)="onFieldChange()">
+                  <label class="form-check-label" for="f_concB">{{ 'exportModal.fields.concentrationB' | transloco }}</label>
+                </div>
+                <div class="form-check form-switch mb-2">
+                  <input class="form-check-input" type="checkbox" id="f_inst" [(ngModel)]="exportFields.metadata.instrument" (change)="onFieldChange()">
+                  <label class="form-check-label" for="f_inst">{{ 'exportModal.fields.instrument' | transloco }}</label>
+                </div>
+                <div class="form-check form-switch mb-2">
+                  <input class="form-check-input" type="checkbox" id="f_mod" [(ngModel)]="exportFields.metadata.modality" (change)="onFieldChange()">
+                  <label class="form-check-label" for="f_mod">{{ 'exportModal.fields.modality' | transloco }}</label>
+                </div>
+                <div class="form-check form-switch mb-2">
+                  <input class="form-check-input" type="checkbox" id="f_wave" [(ngModel)]="exportFields.metadata.wavelength" (change)="onFieldChange()">
+                  <label class="form-check-label" for="f_wave">{{ 'exportModal.fields.wavelength' | transloco }}</label>
+                </div>
+                <div class="form-check form-switch mb-2">
+                  <input class="form-check-input" type="checkbox" id="f_comm" [(ngModel)]="exportFields.metadata.comment" (change)="onFieldChange()">
+                  <label class="form-check-label" for="f_comm">{{ 'exportModal.fields.expComment' | transloco }}</label>
                 </div>
               </div>
             } @else {
@@ -86,7 +126,7 @@
                 class="d-flex flex-wrap gap-2 mb-4">
 
                 @for (field of availableFields; track field.id) {
-                  <div cdkDrag class="badge bg-light text-dark border p-2 cursor-grab" style="cursor: grab;">
+                  <div cdkDrag class="badge bg-light text-dark border p-2 cursor-grab">
                     {{ field.labelKey | transloco }}
                   </div>
                 }
@@ -135,7 +175,7 @@
                     }
 
                     @for (col of selectedColumns ; track $index) {
-                      <div cdkDrag class="badge bg-primary me-2 p-2 d-flex align-items-center" style="cursor: grab; white-space: nowrap;">
+                      <div cdkDrag class="badge bg-primary me-2 p-2 d-flex align-items-center cursor-grab" style="white-space: nowrap;">
                         {{ col.labelKey | transloco }}
                         <i class="bi bi-x-circle ms-2" style="cursor: pointer;" (click)="removeColumn($index)"></i>
                       </div>
@@ -171,8 +211,8 @@
       </div>
 
       <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" (click)="close.emit()">{{ 'exportModal.buttons.cancel' | transloco }}</button>
-        <button type="button" class="btn btn-primary" (click)="downloadFile()">
+        <button type="button" class="btn btn-secondary plain" (click)="close.emit()">{{ 'exportModal.buttons.cancel' | transloco }}</button>
+        <button type="button" class="btn btn-primary primary" (click)="downloadFile()">
           <i class="bi bi-download me-2"></i> {{ 'exportModal.buttons.download' | transloco:{ format: (exportFormat | uppercase) } }}
         </button>
       </div>
