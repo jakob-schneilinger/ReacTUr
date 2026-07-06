@@ -49,6 +49,7 @@ export class ExperimentDetailsPageComponent implements OnInit {
   experimentAuditLogs: ExperimentHistoryDto[] = [];
   isLoadingHistory = false;
 
+  fakeFiles: File[] = [];
   pendingFiles: File[] = [];
   filesDirty: boolean = false;
 
@@ -103,6 +104,7 @@ export class ExperimentDetailsPageComponent implements OnInit {
       this.experimentService.getExperiment(experimentUuid).subscribe({
         next: (value: GetExperimentDto) => {
           this.experiment = value;
+          this.loadFakeFiles();
           this.cdr.markForCheck();
         },
         error: (err: any) => {
@@ -119,6 +121,27 @@ export class ExperimentDetailsPageComponent implements OnInit {
     } else {
       this.state = 'create';
     }
+  }
+
+  private loadFakeFiles() {
+    if (!this.experiment || !this.experiment.attachments) return;
+    if (this.experiment.attachments.length === 0) return;
+
+    let files: File[] = [];
+    for (const attachment of this.experiment.attachments) {
+      const fakeFile = new File([''], attachment.fileName, { type: `application/${attachment.fileType}` });
+
+      (fakeFile as any).isFake = true;
+      (fakeFile as any).urlId = attachment.uuid;
+
+      files.push(fakeFile);
+
+      this.uploadedFilesMap.set(this.getFileFingerprint(fakeFile), attachment.uuid);
+    }
+
+    console.log('Fake Files:', files);
+    this.fakeFiles = files;
+    this.onFilesUploaded(this.fakeFiles)
   }
 
   onSaveExperiment(savePayload: SaveExperimentDto) {
@@ -188,7 +211,6 @@ export class ExperimentDetailsPageComponent implements OnInit {
   }
 
   async onFilesUploaded(files: File[]): Promise<void> {
-
     if (this.state === 'create') {
       this.filesDirty = true;
       this.pendingFiles = files;
@@ -212,16 +234,14 @@ export class ExperimentDetailsPageComponent implements OnInit {
   private async handleDeletedFiles(currentFingerprints: Set<string>): Promise<void> {
     if (!this.experiment) return;
 
-    for (const [fingerprint, fileName] of this.uploadedFilesMap.entries()) {
+    for (const [fingerprint, fileIdentifier] of this.uploadedFilesMap.entries()) {
       if (!currentFingerprints.has(fingerprint)) {
         try {
-          await firstValueFrom(
-            this.experimentFileService.archiveFile(this.experiment.attachments.find((f) => f.fileName === fileName)!.uuid,),
-          );
+          await firstValueFrom(this.experimentFileService.archiveFile(fileIdentifier));
           this.uploadedFilesMap.delete(fingerprint);
         } catch (error) {
-          console.error(`Failed to delete file ${fileName}:`, error);
-          this.notification.error('Delete Error', `Could not delete file: ${fileName}`);
+          console.error(`Failed to delete file ${fileIdentifier}:`, error);
+          this.notification.error('Delete Error', `Could not delete file.`);
         }
       }
     }
@@ -231,10 +251,15 @@ export class ExperimentDetailsPageComponent implements OnInit {
     if (!this.experiment) return;
 
     for (const file of newFiles) {
+      if (!!(file as any).isFake) continue;
       try {
-        await firstValueFrom(this.experimentFileService.uploadFile(this.experiment.uuid, file));
+        const response = await firstValueFrom(
+          this.experimentFileService.uploadFile(this.experiment.uuid, file),
+        );
 
-        this.uploadedFilesMap.set(this.getFileFingerprint(file), file.name);
+        const fileId = response.uuid || file.name;
+
+        this.uploadedFilesMap.set(this.getFileFingerprint(file), fileId);
       } catch (error) {
         console.error(`Failed to upload ${file.name}:`, error);
         this.notification.error('Upload Error', `Failed to upload: ${file.name}`);

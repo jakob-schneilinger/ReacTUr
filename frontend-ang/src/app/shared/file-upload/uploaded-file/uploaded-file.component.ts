@@ -1,5 +1,6 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import ExperimentFileService from '../../../features/experiments/experiment-file.service';
 
 @Component({
   selector: 'app-uploaded-file',
@@ -14,6 +15,13 @@ export class UploadedFileComponent {
   @Output() remove = new EventEmitter<void>();
   @Output() download = new EventEmitter<void>();
 
+  constructor(private experimentFileService: ExperimentFileService) {
+  }
+
+  get isFakeFile(): boolean {
+    return !!(this.file as any).isFake;
+  }
+
   getExtension(filename: string): string {
     return filename.split('.').pop() || 'File';
   }
@@ -23,17 +31,39 @@ export class UploadedFileComponent {
   }
 
   onDownload() {
-    const url = window.URL.createObjectURL(this.file);
-    const a = document.createElement('a');
+    const customFile = this.file as any;
 
-    a.href = url;
-    a.download = this.file.name;
+    if (customFile.isFake && customFile.urlId) {
 
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
+      this.experimentFileService.downloadFile(customFile.urlId).subscribe({
+        next: value => {
+          const url = window.URL.createObjectURL(value);
+          const a = document.createElement('a');
 
-    window.URL.revokeObjectURL(url);
-    this.download.emit();
+          a.href = url;
+          a.download = this.file.name;
+
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+
+          window.URL.revokeObjectURL(url);
+          this.download.emit();
+        }
+      });
+    } else {
+      const url = window.URL.createObjectURL(this.file);
+      const a = document.createElement('a');
+
+      a.href = url;
+      a.download = this.file.name;
+
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+
+      window.URL.revokeObjectURL(url);
+      this.download.emit();
+    }
   }
 }

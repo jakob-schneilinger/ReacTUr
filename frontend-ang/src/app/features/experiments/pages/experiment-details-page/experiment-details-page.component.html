@@ -32,6 +32,7 @@
         <span class="p-3">Save experiment to submit changed files.</span>
       }
       <app-file-upload
+        [existingFiles]="fakeFiles"
         [allowedExtensions]="['txt', 'csv', 'dsx', 'prism', 'pzfx']"
         [maxFileSizeMB]="20"
         (filesChanged)="onFilesUploaded($event)">

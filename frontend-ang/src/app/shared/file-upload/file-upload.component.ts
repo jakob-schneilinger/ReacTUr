@@ -43,11 +43,8 @@ export class FileUploadComponent implements OnInit, OnChanges {
   @Output() filesChanged = new EventEmitter<File[]>();
 
   constructor(
-    private authService: AuthService,
-    private router: Router,
     private route: ActivatedRoute,
     private notification: NotificationService,
-    private experiments: ExperimentService,
   ) {}
 
   files: File[] = [];
@@ -61,17 +58,7 @@ export class FileUploadComponent implements OnInit, OnChanges {
     }
   }
 
-  ngOnInit(): void {
-    this.route.params.subscribe({
-      next: (params) => {
-        const id = params['id'];
-        if (!id) {
-          //TODO: Get already uploaded files
-          //this.experiments.getFiles();
-        }
-      },
-    });
-  }
+  ngOnInit(): void {}
 
   onPasteTableGenerated(file: File) {
     if (this.maxFileSizeMB) {
