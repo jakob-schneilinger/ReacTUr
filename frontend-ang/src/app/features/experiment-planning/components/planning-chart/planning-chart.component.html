@@ -1,0 +1,11 @@
+<div
+  echarts
+  [options]="chartOptions"
+  style="height: 400px; width: 100%;"
+  *ngIf="data.length > 0">
+</div>
+
+<div *ngIf="data.length === 0" class="text-center text-muted p-5">
+  <i class="bi bi-graph-up display-4"></i>
+  <p class="mt-3">Enter parameters and click "Simulate Kinetics" to view the reaction profile.</p>
+</div>

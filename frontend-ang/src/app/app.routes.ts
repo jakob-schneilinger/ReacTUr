@@ -9,6 +9,9 @@ import { ReactantDetailsPageComponent } from './features/reactants/pages/reactan
 import { ReactantOverviewPageComponent } from './features/reactants/pages/reactant-overview-page/reactant-overview-page.component';
 import { AdminPageComponent } from './features/admin/pages/admin-page/admin-page.component';
 import { UnauthorizedPageComponent } from './features/login/pages/unauthorized-page/unauthorized-page.component';
+import {
+  ExperimentPlanningPageComponent
+} from './features/experiment-planning/pages/experiment-planning-page/experiment-planning-page.component';
 
 export const routes: Routes = [
   { path: 'search', component: SearchPageComponent, canActivate: [AuthGuard] },
@@ -37,6 +40,11 @@ export const routes: Routes = [
     component: ReactantDetailsPageComponent,
     canActivate: [AuthGuard, RoleGuard],
     data: { state: 'edit', roles: ['ADMIN', 'SUPERVISOR'] },
+  },
+  {
+    path: 'experiment-planning',
+    component: ExperimentPlanningPageComponent,
+    canActivate: [AuthGuard]
   },
   {
     path: 'admin',

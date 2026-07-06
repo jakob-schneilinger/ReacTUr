@@ -1,0 +1,49 @@
+<div class="card shadow-sm">
+  <div class="card-header bg-light">
+    <h5 class="mb-0">Reaction Parameters</h5>
+  </div>
+  <div class="card-body">
+
+    <div class="mb-3">
+      <label class="form-label fw-bold">Rate Constant (k)</label>
+      <div class="input-group">
+        <input type="number" class="form-control" [(ngModel)]="kValue">
+        <span class="input-group-text">M⁻¹s⁻¹</span>
+      </div>
+      <div class="form-text">e.g., from previous experiments</div>
+    </div>
+
+    <hr>
+
+    <div class="mb-3">
+      <label class="form-label fw-bold">Starting Conc. [A]₀</label>
+      <div class="input-group">
+        <input type="number" step="0.000001" class="form-control" [(ngModel)]="concA">
+        <span class="input-group-text">M</span>
+      </div>
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label fw-bold">Starting Conc. [B]₀</label>
+      <div class="input-group">
+        <input type="number" step="0.000001" class="form-control" [(ngModel)]="concB">
+        <span class="input-group-text">M</span>
+      </div>
+    </div>
+
+    <hr>
+
+    <div class="mb-4">
+      <label class="form-label fw-bold">Simulation Duration</label>
+      <div class="input-group">
+        <input type="number" class="form-control" [(ngModel)]="duration">
+        <span class="input-group-text">sec</span>
+      </div>
+    </div>
+
+    <button class="btn btn-primary w-100" (click)="onSimulateClick()">
+      <i class="bi bi-play-fill me-1"></i> Simulate Kinetics
+    </button>
+
+  </div>
+</div>
