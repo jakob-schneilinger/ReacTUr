@@ -55,18 +55,14 @@
     }
   </div>
 
-  <div class="input-group">
-    <label>{{ 'experiments.details.form.labels.scientist' | transloco }}</label>
-    <div class="search-field">
-      <input type="text" formControlName="scientist" [class.is-invalid]="isInvalid('scientist')" [placeholder]="'experiments.details.form.placeholders.value' | transloco" />
-      @if (experimentForm.get('scientist')?.value) {
-        <span class="icon bi bi-x text-black clear-btn" (click)="clearControl('scientist')"></span>
-      }
-    </div>
-    @if (isInvalid('scientist')) {
-      <div class="error-message">{{ 'experiments.details.form.errors.scientistRequired' | transloco }}</div>
-    }
-  </div>
+  <app-option-selector
+    [control]="scientistControl"
+    [options]="userOptions"
+    [label]="'experiments.details.form.labels.scientist' | transloco"
+    [placeholder]="'experiments.details.form.placeholders.value' | transloco"
+    datalistId="scientistList"
+    [errorMessage]="'experiments.details.form.errors.scientistRequired' | transloco">
+  </app-option-selector>
 
   <div class="input-group">
     <label>{{ 'experiments.details.form.labels.temperature' | transloco }}</label>
@@ -82,35 +78,16 @@
     }
   </div>
 
-  <div class="input-group">
-    <label>{{ 'experiments.details.form.labels.solvent' | transloco }}</label>
-    <div class="search-field">
-      <input
-        type="text"
-        list="solventList"
-        formControlName="solvent"
-        [class.is-invalid]="isInvalid('solvent')"
-        [placeholder]="'experiments.details.form.placeholders.selectOrType' | transloco"
-        autocomplete="off" />
-
-      <datalist id="solventList">
-        @for (solvent of knownSolvents; track solvent) {
-          <option [value]="solvent"></option>
-        }
-      </datalist>
-
-      @if (experimentForm.get('solvent')?.value) {
-        <span class="icon bi bi-x text-black clear-btn" (click)="clearControl('solvent')"></span>
-      }
-    </div>
-
-    @if (isInvalid('solvent') && !experimentForm.get('solvent')?.hasError('notInList')) {
-      <div class="error-message">{{ 'experiments.details.form.errors.solventRequired' | transloco }}</div>
-    }
-    @if (experimentForm.get('solvent')?.hasError('notInList')) {
-      <div class="error-message">{{ 'experiments.details.form.errors.invalidSolvent' | transloco }}</div>
-    }
-  </div>
+  <app-option-selector
+    [control]="solventControl"
+    [options]="knownSolvents"
+    [label]="'experiments.details.form.labels.solvent' | transloco"
+    [placeholder]="'experiments.details.form.placeholders.selectOrType' | transloco"
+    datalistId="solventList"
+    [errorMessage]="solventControl.hasError('notInList')
+    ? ('experiments.details.form.errors.invalidSolvent' | transloco)
+    : ('experiments.details.form.errors.solventRequired' | transloco)">
+  </app-option-selector>
 
   <div class="input-group">
     <label>{{ 'experiments.details.form.labels.concentrationReactantA' | transloco }}</label>
@@ -210,57 +187,23 @@
     }
   </div>
 
-  <div class="input-group">
-    <label>{{ 'experiments.details.form.labels.instrument' | transloco }}</label>
-    <div class="search-field">
-      <input
-        type="text"
-        list="instrumentList"
-        formControlName="instrument"
-        [class.is-invalid]="isInvalid('instrument')"
-        [placeholder]="'experiments.details.form.placeholders.selectOrType' | transloco"
-        autocomplete="off" />
+  <app-option-selector
+    [control]="instrumentControl"
+    [options]="knownInstruments"
+    [label]="'experiments.details.form.labels.instrument' | transloco"
+    [placeholder]="'experiments.details.form.placeholders.selectOrType' | transloco"
+    datalistId="instrumentList"
+    [errorMessage]="'experiments.details.form.errors.invalidInstrument' | transloco">
+  </app-option-selector>
 
-      <datalist id="instrumentList">
-        @for (instrument of knownInstruments; track instrument) {
-          <option [value]="instrument"></option>
-        }
-      </datalist>
-
-      @if (experimentForm.get('instrument')?.value) {
-        <span class="icon bi bi-x text-black clear-btn" (click)="clearControl('instrument')"></span>
-      }
-    </div>
-    @if (experimentForm.get('instrument')?.hasError('notInList')) {
-      <div class="error-message">{{ 'experiments.details.form.errors.invalidInstrument' | transloco }}</div>
-    }
-  </div>
-
-  <div class="input-group">
-    <label>{{ 'experiments.details.form.labels.modality' | transloco }}</label>
-    <div class="search-field">
-      <input
-        type="text"
-        list="modalityList"
-        formControlName="modality"
-        [class.is-invalid]="isInvalid('modality')"
-        [placeholder]="'experiments.details.form.placeholders.selectOrType' | transloco"
-        autocomplete="off" />
-
-      <datalist id="modalityList">
-        @for (modality of knownModalities; track modality) {
-          <option [value]="modality"></option>
-        }
-      </datalist>
-
-      @if (experimentForm.get('modality')?.value) {
-        <span class="icon bi bi-x text-black clear-btn" (click)="clearControl('modality')"></span>
-      }
-    </div>
-    @if (experimentForm.get('modality')?.hasError('notInList')) {
-      <div class="error-message">{{ 'experiments.details.form.errors.invalidModality' | transloco }}</div>
-    }
-  </div>
+  <app-option-selector
+    [control]="modalityControl"
+    [options]="knownModalities"
+    [label]="'experiments.details.form.labels.modality' | transloco"
+    [placeholder]="'experiments.details.form.placeholders.selectOrType' | transloco"
+    datalistId="modalityList"
+    [errorMessage]="'experiments.details.form.errors.invalidModality' | transloco">
+  </app-option-selector>
 
   <div class="input-group">
     <label>{{ 'experiments.details.form.labels.wavelength' | transloco }}</label>

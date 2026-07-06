@@ -3,7 +3,7 @@
   <div class="search-field">
     <input
       type="text"
-      list="chemicalTypesList"
+      [attr.list]="datalistId"
       [formControl]="control"
       [placeholder]="placeholder"
       [class.is-invalid]="control.invalid && control.touched"

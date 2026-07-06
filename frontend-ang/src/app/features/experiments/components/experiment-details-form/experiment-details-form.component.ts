@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { ReactiveFormsModule } from '@angular/forms';
+import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { AppConfirmModalComponent } from '../../../../shared/modal/confirm-modal.component';
 import {
   ChangeDetectorRef,
@@ -24,6 +24,9 @@ import { OptionService } from '../../../../shared/services/option.service';
 import { ReactantSelectorComponent } from '../../../search/components/reactant-selector/reactant-selector.component';
 import { ReactantDto } from '../../../reactants/reactant.dto';
 import { ReactantService } from '../../../reactants/reactant.service';
+import { InstrumentDto, ModalityDto, SolventDto } from '../../../../shared/dtos/selection-option.dto';
+import { UserService } from '../../../../shared/services/user.service';
+import { OptionSelectorComponent } from '../../../../shared/option-selector/option-selector.component';
 
 export type FormState = 'create' | 'edit';
 
@@ -38,6 +41,7 @@ export type FormState = 'create' | 'edit';
     AppConfirmModalComponent,
     TRANSLOCO_IMPORTS,
     ReactantSelectorComponent,
+    OptionSelectorComponent,
   ],
 })
 export class ExperimentDetailsFormComponent implements OnInit, OnDestroy, OnChanges {
@@ -53,13 +57,22 @@ export class ExperimentDetailsFormComponent implements OnInit, OnDestroy, OnChan
 
   experimentForm!: FormGroup;
 
-  knownSolvents: string[] = [];
-  knownInstruments: string[] = [];
-  knownModalities: string[] = [];
+  knownSolvents: SolventDto[] = [];
+  knownInstruments: InstrumentDto[] = [];
+  knownModalities: ModalityDto[] = [];
+  knownUsers: GetUserDto[] = [];
 
-  filteredSolvents: string[] = [];
-  filteredInstruments: string[] = [];
-  filteredModalities: string[] = [];
+  knownSolventNames: string[] = [];
+  knownInstrumentNames: string[] = [];
+  knownModalityNames: string[] = [];
+  knownUserNames: string[] = [];
+
+  filteredSolventNames: string[] = [];
+  filteredInstrumentNames: string[] = [];
+  filteredModalityNames: string[] = [];
+  filteredUserNames: string[] = [];
+
+  userOptions: { id: string; name: string }[] = [];
 
   user: GetUserDto | null = null;
 
@@ -72,11 +85,28 @@ export class ExperimentDetailsFormComponent implements OnInit, OnDestroy, OnChan
     private notification: NotificationService,
     private authService: AuthService,
     private optionService: OptionService,
+    private userService: UserService,
     private reactantService: ReactantService,
     private experimentService: ExperimentService,
     private cdr: ChangeDetectorRef,
     private transloco: TranslocoService,
   ) {}
+
+  get scientistControl(): FormControl {
+    return this.experimentForm.get('scientist') as FormControl;
+  }
+
+  get solventControl(): FormControl {
+    return this.experimentForm.get('solvent') as FormControl;
+  }
+
+  get instrumentControl(): FormControl {
+    return this.experimentForm.get('instrument') as FormControl;
+  }
+
+  get modalityControl(): FormControl {
+    return this.experimentForm.get('modality') as FormControl;
+  }
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['experiment'] && this.experiment && this.experimentForm) {
@@ -94,20 +124,48 @@ export class ExperimentDetailsFormComponent implements OnInit, OnDestroy, OnChan
     this.initForm();
     this.setupReactionAutoFill();
     this.setupErrorValidation();
+    this.loadUsers();
     this.loadOptions();
     this.loadReactants();
+  }
+
+  private loadUsers() {
+    this.userService.getAllUsers().subscribe({
+      next: (users) => {
+        this.knownUsers = users;
+        this.knownUserNames = users.map((o) => o.firstName + ' ' + o.lastName);
+        this.filteredUserNames = [...this.knownUserNames];
+
+        this.userOptions = users.map((u) => ({ id: u.id, name: `${u.firstName} ${u.lastName}` }));
+
+        const scientistControl = this.experimentForm.get('scientist');
+        scientistControl?.setValidators([
+          Validators.required,
+          this.inListValidator(this.knownUserNames),
+        ]);
+        scientistControl?.updateValueAndValidity({ emitEvent: false });
+        this.cdr.markForCheck();
+      },
+      error: (err) => {
+        this.notification.error(
+          'User Error',
+          `Unable to fetch users. Please reload the page! Error: ${err.message || err.error || err} `,
+        );
+      },
+    });
   }
 
   private loadOptions(): void {
     // Fetch Solvents
     this.optionService.getSelectionOptions('solvent').subscribe({
       next: (opts) => {
-        this.knownSolvents = opts.map((o) => o.name);
-        this.filteredSolvents = [...this.knownSolvents];
+        this.knownSolvents = opts;
+        this.knownSolventNames = opts.map((o) => o.name);
+        this.filteredSolventNames = [...this.knownSolventNames];
         const solventControl = this.experimentForm.get('solvent');
         solventControl?.setValidators([
           Validators.required,
-          this.inListValidator(this.knownSolvents),
+          this.inListValidator(this.knownSolventNames),
         ]);
         solventControl?.updateValueAndValidity({ emitEvent: false });
         this.cdr.markForCheck();
@@ -118,10 +176,11 @@ export class ExperimentDetailsFormComponent implements OnInit, OnDestroy, OnChan
     // Fetch Instruments
     this.optionService.getSelectionOptions('instrument').subscribe({
       next: (opts) => {
-        this.knownInstruments = opts.map((o) => o.name);
-        this.filteredInstruments = [...this.knownInstruments];
+        this.knownInstruments = opts;
+        this.knownInstrumentNames = opts.map((o) => o.name);
+        this.filteredInstrumentNames = [...this.knownInstrumentNames];
         const instrumentControl = this.experimentForm.get('instrument');
-        instrumentControl?.setValidators([this.inListValidator(this.knownInstruments)]);
+        instrumentControl?.setValidators([this.inListValidator(this.knownInstrumentNames)]);
         instrumentControl?.updateValueAndValidity({ emitEvent: false });
         this.cdr.markForCheck();
       },
@@ -131,10 +190,11 @@ export class ExperimentDetailsFormComponent implements OnInit, OnDestroy, OnChan
     // Fetch Modalities
     this.optionService.getSelectionOptions('modality').subscribe({
       next: (opts) => {
-        this.knownModalities = opts.map((o) => o.name);
-        this.filteredModalities = [...this.knownModalities];
+        this.knownModalities = opts;
+        this.knownModalityNames = opts.map((o) => o.name);
+        this.filteredModalityNames = [...this.knownModalityNames];
         const modalityControl = this.experimentForm.get('modality');
-        modalityControl?.setValidators([this.inListValidator(this.knownModalities)]);
+        modalityControl?.setValidators([this.inListValidator(this.knownModalityNames)]);
         modalityControl?.updateValueAndValidity({ emitEvent: false });
         this.cdr.markForCheck();
       },
@@ -193,9 +253,12 @@ export class ExperimentDetailsFormComponent implements OnInit, OnDestroy, OnChan
 
       // Required Metadata
       date: [this.currentDate, Validators.required],
-      scientist: [this.fullName, Validators.required],
+      scientist: [
+        this.fullName,
+        [Validators.required, this.inListValidator(this.knownUserNames)],
+      ],
       temperature: ['', Validators.required],
-      solvent: ['', [Validators.required, this.inListValidator(this.knownSolvents)]],
+      solvent: ['', [Validators.required, this.inListValidator(this.knownSolventNames)]],
       concentrationA: ['', [Validators.required, Validators.min(0)]],
       concentrationB: ['', [Validators.required, Validators.min(0)]],
 
@@ -205,8 +268,8 @@ export class ExperimentDetailsFormComponent implements OnInit, OnDestroy, OnChan
 
       // Optional Metadata
       pFO_rateConstant: ['', Validators.min(0)],
-      instrument: ['', [this.inListValidator(this.knownInstruments)]],
-      modality: ['', [this.inListValidator(this.knownModalities)]],
+      instrument: ['', [this.inListValidator(this.knownInstrumentNames)]],
+      modality: ['', [this.inListValidator(this.knownModalityNames)]],
       wavelength: ['', Validators.min(0)],
       doi: [''],
       comment: [''],
@@ -350,6 +413,17 @@ export class ExperimentDetailsFormComponent implements OnInit, OnDestroy, OnChan
     // TODO: send to backend and wait for success
     if (this.experimentForm.valid) {
       const formValue = this.experimentForm.getRawValue();
+
+      formValue.scientist = this.knownUsers.find(
+        (u) =>
+          formValue.scientist.includes(u.lastName + ' ' + u.firstName) ||
+          formValue.scientist.includes(u.firstName + ' ' + u.lastName),
+      )?.id;
+      formValue.solvent = this.knownSolvents.find((s) => s.name === formValue.solvent)?.uuid;
+      formValue.instrument = this.knownInstruments.find(
+        (i) => i.name === formValue.instrument,
+      )?.uuid;
+      formValue.modality = this.knownModalities.find((m) => m.name === formValue.modality)?.uuid;
 
       const saveExperiment: SaveExperimentDto = {
         reactantA: formValue.reactantA,
