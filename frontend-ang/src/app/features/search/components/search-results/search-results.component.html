@@ -104,12 +104,12 @@
     @if (totalElements > 0) {
       <div class="pagination-container d-flex justify-content-between align-items-center mt-4">
         <div class="d-flex align-items-center gap-3">
-          <span>
+          <span class="text-muted small">
             Showing {{ (currentPage * pageSize) + 1 }} to
             {{ (currentPage * pageSize) + experiments.length }} of {{ totalElements }} entries
           </span>
 
-          <div class="d-flex align-items-center gap-2">
+          <div class="d-flex align-items-center gap-1">
             <select class="form-select form-select-sm" style="width: auto;" [value]="pageSize" (change)="onPageSizeChange($event)">
               <option [value]="1">1</option>
               <option [value]="5">5</option>
