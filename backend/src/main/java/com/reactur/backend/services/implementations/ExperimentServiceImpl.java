@@ -12,6 +12,7 @@ import com.reactur.backend.entities.options.Modality;
 import com.reactur.backend.entities.options.Solvent;
 import com.reactur.backend.entities.User;
 import com.reactur.backend.enums.AuditAction;
+import com.reactur.backend.exeptions.ResourceConflictException;
 import com.reactur.backend.exeptions.ResourceNotFoundException;
 import com.reactur.backend.exeptions.UnprocessableEntityException;
 import com.reactur.backend.mappers.ExperimentMapper;
@@ -264,8 +265,99 @@ public class ExperimentServiceImpl implements ExperimentService {
   }
 
   @Override
-  public GetExperimentDto updateExperiment(UUID experimentId, SaveExperimentDto experimentDto, String requestingUserId, Role requestingUserRole) {
-    return null;
+  @Transactional
+  public GetExperimentDto updateExperiment(
+    UUID experimentId,
+    SaveExperimentDto experimentDto,
+    String requestingUserId,
+    Role requestingUserRole
+  ) {
+    log.trace("Attempting to update experiment with ID: {}", experimentId);
+
+    // 1. Fetch Existing (Validation)
+    Experiment existingExperiment = experimentRepository.findById(experimentId)
+      .orElseThrow(() -> new ResourceNotFoundException("Experiment with ID " + experimentId + " not found"));
+
+    // 2. Check Immutable State (Archived experiments are frozen)
+    if (existingExperiment.getArchivedAt() != null) {
+      log.warn("Attempted to update archived experiment {} by user {}", experimentId, requestingUserId);
+      throw new ResourceConflictException("Cannot update an archived experiment. Please restore it first.");
+    }
+
+    // 3. Authorize (Security)
+    boolean isCreator = existingExperiment.getCreatedBy().getId().equals(requestingUserId);
+    boolean isScientist = existingExperiment.getMetadata().getScientist().getId().equals(requestingUserId);
+
+    if (requestingUserRole != Role.ADMIN && !isCreator && !isScientist) {
+      log.warn("Security blocked update attempt on experiment {} by user {}", experimentId, requestingUserId);
+      throw new AccessDeniedException("You do not have permission to update this experiment.");
+    }
+
+    // 4. Semantic Validation (Lookups for new DTO data)
+    User scientist = userRepository.findById(experimentDto.metadata().scientist())
+      .orElseThrow(() -> new UnprocessableEntityException("Scientist with ID " + experimentDto.metadata().scientist() + " not found."));
+
+    Reactant reactantA = reactantRepository.findById(experimentDto.reactantA())
+      .orElseThrow(() -> new UnprocessableEntityException("Reactant A does not exist."));
+
+    Reactant reactantB = reactantRepository.findById(experimentDto.reactantB())
+      .orElseThrow(() -> new UnprocessableEntityException("Reactant B does not exist."));
+
+    Solvent solvent = solventRepository.findById(experimentDto.metadata().solvent())
+      .orElseThrow(() -> new UnprocessableEntityException("Solvent does not exist."));
+
+    Instrument instrument = null;
+    if (experimentDto.metadata().instrument() != null) {
+      instrument = instrumentRepository.findById(experimentDto.metadata().instrument())
+        .orElseThrow(() -> new UnprocessableEntityException("Instrument does not exist."));
+    }
+
+    Modality modality = null;
+    if (experimentDto.metadata().modality() != null) {
+      modality = modalityRepository.findById(experimentDto.metadata().modality())
+        .orElseThrow(() -> new UnprocessableEntityException("Modality does not exist."));
+    }
+
+    log.debug("All chemical and lookup entities successfully validated for update.");
+
+    // 5. Apply Updates (Full Replacement via PUT)
+    // Note: We intentionally DO NOT update `createdBy` or `archivedAt` to enforce immutability.
+    existingExperiment.setDoi(experimentDto.doi());
+    existingExperiment.setReactantA(reactantA);
+    existingExperiment.setReactantB(reactantB);
+
+    Metadata metadata = existingExperiment.getMetadata();
+    metadata.setDate(experimentDto.metadata().date());
+    metadata.setScientist(scientist);
+    metadata.setTemperature(experimentDto.metadata().temperature());
+    metadata.setSolvent(solvent);
+    metadata.setConcentrationA(experimentDto.metadata().concentrationA());
+    metadata.setConcentrationB(experimentDto.metadata().concentrationB());
+    metadata.setInstrument(instrument);
+    metadata.setModality(modality);
+    metadata.setWavelength(experimentDto.metadata().wavelength());
+    metadata.setComment(experimentDto.metadata().comment());
+
+    ExperimentResult result = existingExperiment.getResult();
+    result.setRateConstant(experimentDto.measurementData().rateConstant());
+    result.setPfoRateConstant(experimentDto.measurementData().pFO_rateConstant());
+    result.setErrorValue(experimentDto.measurementData().error());
+    result.setIsErrorPercentage(experimentDto.measurementData().isErrorPercentage());
+
+    // 6. Save & Audit
+    Experiment savedExperiment = experimentRepository.save(existingExperiment);
+
+    AuditLog auditLog = AuditLog.builder()
+      .experimentId(savedExperiment.getId())
+      .userId(requestingUserId)
+      .action(AuditAction.UPDATE)
+      // TODO: Generate JSON diffs for changeFrom/changeTo
+      .build();
+    auditLogRepository.save(auditLog);
+
+    log.info("Successfully updated Experiment with internal ID: {}", savedExperiment.getId());
+
+    return experimentMapper.experimentToGetExperimentDto(savedExperiment);
   }
 
 }

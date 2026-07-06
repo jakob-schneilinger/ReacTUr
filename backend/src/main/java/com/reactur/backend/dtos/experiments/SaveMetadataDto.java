@@ -58,7 +58,7 @@ public record SaveMetadataDto(
   @Positive(message = "Wavelength must be positive")
   Double wavelength,
 
-  @Size(max = 2000, message = "Comment is too long") // Syntactic check to prevent massive text payloads
-  String comment                                     // TODO: Decide Maximal size for the comment
+  @Size(max = 1023, message = "Comment is too long") // Syntactic check to prevent massive text payloads
+  String comment                                     // TODO: Set max-size constraint in DB
 ) {
 }

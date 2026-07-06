@@ -50,6 +50,7 @@ public class ExperimentEndpoint {
     }
 
     // Javadoc: Just the creator or the scientist, or an admin, are allowed to update the experiment
+    // Notes:
     @PutMapping("/{uuid}")
     public ResponseEntity<GetExperimentDto> updateExperiment(
       @PathVariable UUID uuid,
@@ -65,6 +66,7 @@ public class ExperimentEndpoint {
         return ResponseEntity.ok(updatedExperiment);
     }
 
+    // If archived, just the creator, scientist or an admin can retrieve the experiment.
     @GetMapping("/{uuid}")
     public ResponseEntity<GetExperimentDto> getExperiment(
       @PathVariable UUID uuid,
@@ -79,6 +81,7 @@ public class ExperimentEndpoint {
         return ResponseEntity.ok(experiment);
     }
 
+    // Should archived-experiments also show up? ---> Let's say no
     @GetMapping()
     public ResponseEntity<GetExperimentDto[]> searchExperiments(SearchParametersDto searchParams) {
 
@@ -86,6 +89,8 @@ public class ExperimentEndpoint {
         throw new UnsupportedOperationException();
     }
 
+    // TODO: Endpoint to get Logs by *Date*, by *User* and by Experiment
+    //  Current one: Logs related to experiment with uuid
     @GetMapping("/{uuid}/audit_logs")
     public ResponseEntity<AuditLogDto[]> getAuditLogs(@PathVariable UUID uuid) {
 

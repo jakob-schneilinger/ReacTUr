@@ -43,7 +43,7 @@ public record SearchParametersDto(
         UUID modality,
         Double wavelengthMin,
         Double wavelengthMax,
-        String comment,
+        String comment,  // Max length: 1023
         MeasurementSearchDto measurementSearch
 ) {
 }
