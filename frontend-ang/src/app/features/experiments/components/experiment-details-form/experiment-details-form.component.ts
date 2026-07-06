@@ -50,6 +50,7 @@ export class ExperimentDetailsFormComponent implements OnInit, OnDestroy, OnChan
   @Input() experiment?: GetExperimentDto;
 
   availableReactants: ReactantDto[] = [];
+  isReactantsLoaded: boolean = false;
   initValA: string[] = [];
   initValB: string[] = [];
   triggerClearA: number = 0;
@@ -217,9 +218,11 @@ export class ExperimentDetailsFormComponent implements OnInit, OnDestroy, OnChan
     this.reactantService.getAllReactants().subscribe({
       next: (value) => {
         this.availableReactants = value;
+        this.isReactantsLoaded = true;
         this.cdr.markForCheck();
       },
       error: (err) => {
+        this.isReactantsLoaded = true;
         this.notification.error(
           'Reactant Error',
           `Unable to fetch reactants. Please reload the page! Error: ${err.message || err.error || err} `,
@@ -253,10 +256,7 @@ export class ExperimentDetailsFormComponent implements OnInit, OnDestroy, OnChan
 
       // Required Metadata
       date: [this.currentDate, Validators.required],
-      scientist: [
-        this.fullName,
-        [Validators.required, this.inListValidator(this.knownUserNames)],
-      ],
+      scientist: [this.fullName, [Validators.required, this.inListValidator(this.knownUserNames)]],
       temperature: ['', Validators.required],
       solvent: ['', [Validators.required, this.inListValidator(this.knownSolventNames)]],
       concentrationA: ['', [Validators.required, Validators.min(0)]],
@@ -461,6 +461,7 @@ export class ExperimentDetailsFormComponent implements OnInit, OnDestroy, OnChan
             this.transloco.translate('experiments.details.notifications.savedTitle'),
             this.transloco.translate('experiments.details.notifications.savedMessage'),
           );
+          this.router.navigate(['/experiments', value.uuid]);
         },
         error: (err) => {
           this.notification.error(

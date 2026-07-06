@@ -41,7 +41,6 @@ export class ReactantSelectorComponent implements OnInit {
   ngOnInit() {}
 
   initReactants(vals: string[]) {
-    console.log('initReactants', vals);
     this.selectedReactants = [];
     let matchFound = false;
     vals.forEach((val) => {

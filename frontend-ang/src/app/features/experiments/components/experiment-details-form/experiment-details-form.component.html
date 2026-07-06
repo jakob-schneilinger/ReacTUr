@@ -6,41 +6,45 @@
     <div class="divider"></div>
   </div>
 
-  <div class="input-group">
-    <label>{{ 'experiments.details.form.labels.reactantA' | transloco }}</label>
+  @if (isReactantsLoaded) {
+    <div class="input-group">
+      <label>{{ 'experiments.details.form.labels.reactantA' | transloco }}</label>
 
-    <app-reactant-selector
-      [label]="''"
-      [availableReactants]="availableReactants"
-      [reactantLimit]="1"
-      [initialValue]="initValA"
-      [clearSignal]="triggerClearA"
-      [zIndex]="2"
-      (selectionChanged)="onReactantChange('A', $event)">
-    </app-reactant-selector>
+        <app-reactant-selector
+          [label]="''"
+          [availableReactants]="availableReactants"
+          [reactantLimit]="1"
+          [initialValue]="initValA"
+          [clearSignal]="triggerClearA"
+          [zIndex]="2"
+          (selectionChanged)="onReactantChange('A', $event)">
+        </app-reactant-selector>
 
-    @if (isInvalid('reactantA')) {
-      <div class="error-message">{{ 'experiments.details.form.errors.reactantARequired' | transloco }}</div>
-    }
-  </div>
+      @if (isInvalid('reactantA')) {
+        <div class="error-message">{{ 'experiments.details.form.errors.reactantARequired' | transloco }}</div>
+      }
+    </div>
+  }
 
-  <div class="input-group">
-    <label>{{ 'experiments.details.form.labels.reactantB' | transloco }}</label>
 
-    <app-reactant-selector
-      [label]="''"
-      [availableReactants]="availableReactants"
-      [reactantLimit]="1"
-      [initialValue]="initValB"
-      [clearSignal]="triggerClearB"
-      [zIndex]="1"
-      (selectionChanged)="onReactantChange('B', $event)">
-    </app-reactant-selector>
+  @if (isReactantsLoaded) {
+    <div class="input-group">
+      <label>{{ 'experiments.details.form.labels.reactantB' | transloco }}</label>
+        <app-reactant-selector
+          [label]="''"
+          [availableReactants]="availableReactants"
+          [reactantLimit]="1"
+          [initialValue]="initValB"
+          [clearSignal]="triggerClearB"
+          [zIndex]="1"
+          (selectionChanged)="onReactantChange('B', $event)">
+        </app-reactant-selector>
 
-    @if (isInvalid('reactantB')) {
-      <div class="error-message">{{ 'experiments.details.form.errors.reactantBRequired' | transloco }}</div>
-    }
-  </div>
+      @if (isInvalid('reactantB')) {
+        <div class="error-message">{{ 'experiments.details.form.errors.reactantBRequired' | transloco }}</div>
+      }
+    </div>
+  }
 
   <div class="input-group">
     <label>{{ 'experiments.details.form.labels.date' | transloco }}</label>
