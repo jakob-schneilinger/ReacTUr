@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Globals } from '../../core/global/globals';
 import { HttpClient } from '@angular/common/http';
-import { SearchParametersDto } from '../../shared/dtos/search.dto';
+import { SearchParametersDto } from '../search/search.dto';
 import { Observable } from 'rxjs';
 import { GetExperimentDto } from './experiment.dto';
 import { MOCK_EXPERIMENTS } from '../../mock/mock-experiments';

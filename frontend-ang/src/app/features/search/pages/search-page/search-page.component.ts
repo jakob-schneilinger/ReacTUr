@@ -8,9 +8,10 @@ import { ExportModalComponent } from '../../components/export-modal/export-modal
 import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { GetExperimentDto } from '../../../experiments/experiment.dto';
 import { ExperimentService } from '../../../experiments/experiment.service';
-import { SearchParametersDto } from '../../../../shared/dtos/search.dto';
+import { SearchParametersDto } from '../../search.dto';
 import { RDKitService } from '../../../../shared/services/rdkit.service';
 import { GetUserDto } from '../../../../shared/dtos/user.dto';
+import { SearchService } from '../../search.service';
 
 @Component({
   selector: 'app-search-site',
@@ -28,11 +29,8 @@ import { GetUserDto } from '../../../../shared/dtos/user.dto';
   ],
 })
 export class SearchPageComponent implements OnInit {
-  currentSearchState: 'initial' | 'no-results' | 'has-results' = 'initial'; //TODO: Potential für ein Ladespinner dann status loading hinzufügen
+  currentSearchState: 'initial' | 'no-results' | 'has-results' = 'initial';
   foundExperiments: GetExperimentDto[] = [];
-
-  sketcher1: any;
-  sketcher2: any;
 
   clearSignal: number = 0;
 
@@ -46,15 +44,28 @@ export class SearchPageComponent implements OnInit {
 
   searchScientist?: GetUserDto;
 
-  // Service injecten!
+  currentPage: number = 0;
+  pageSize: number = 1;
+  totalElements: number = 0;
+
   constructor(
-    private experimentService: ExperimentService,
+    private searchService: SearchService,
     private rdkitService: RDKitService,
     private cdr: ChangeDetectorRef,
   ) {}
 
   async ngOnInit() {
     await this.rdkitService.initRDKit();
+  }
+
+  handleSearchButton() {
+    this.currentPage = 0;
+    this.executeSearch();
+  }
+
+  handlePageChange(newPage: number) {
+    this.currentPage = newPage;
+    this.executeSearch();
   }
 
   toggleAdvancedSearch() {
@@ -66,16 +77,12 @@ export class SearchPageComponent implements OnInit {
     this.reactantB = terms.reactantB;
     this.metadata.reactantA = terms.reactantA;
     this.metadata.reactantB = terms.reactantB;
-    this.executeSearch();
+    // this.executeSearch();
   }
 
   handleAdvancedSearch(terms: SearchParametersDto) {
     this.metadata = terms;
     // this.executeSearch();
-  }
-
-  handleSearchButton() {
-    this.executeSearch();
   }
 
   private executeSearch() {
@@ -96,17 +103,17 @@ export class SearchPageComponent implements OnInit {
       return;
     }
 
-    // Zeige Ladezustand an, bis das Service antwortet
-    // this.currentSearchState = 'loading';
-    this.experimentService.searchExperiments(this.metadata).subscribe({
-      next: (results) => {
-        console.log(results);
-        if (results.length === 0) {
+    this.searchService.searchExperiments(this.metadata, this.currentPage, this.pageSize).subscribe({
+      next: (pageResults) => {
+        console.log('Search Resuluts Page: ', pageResults);
+        if (pageResults.content.length === 0) {
           this.currentSearchState = 'no-results';
           this.foundExperiments = [];
+          this.totalElements = 0;
         } else {
           this.currentSearchState = 'has-results';
-          this.foundExperiments = results;
+          this.foundExperiments = pageResults.content;
+          this.totalElements = pageResults.totalElements;
         }
         this.cdr.markForCheck();
       },
@@ -126,7 +133,7 @@ export class SearchPageComponent implements OnInit {
 
   handleSearchScientist(scientist: GetUserDto) {
     this.isAdvancedSearchOpen = true;
-    console.log("Test1", scientist)
+    console.log('Test1', scientist); //TODO: do real request
     this.searchScientist = scientist;
   }
 }

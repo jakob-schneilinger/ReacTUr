@@ -9,7 +9,7 @@ import {
   SimpleChanges,
   OnInit,
 } from '@angular/core';
-import { SearchParametersDto, MeasurementSearchDto } from '../../../../shared/dtos/search.dto';
+import { SearchParametersDto, MeasurementSearchDto } from '../../search.dto';
 import { UserService } from '../../../../shared/services/user.service';
 import { NotificationService } from '../../../../core/layout/notification/notification.service';
 import { GetUserDto } from '../../../../shared/dtos/user.dto';

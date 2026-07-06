@@ -4,9 +4,8 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { AuthService } from '../../core/auth/auth.service';
 import { Globals } from '../../core/global/globals';
 
-// Updated DTO Imports
 import { ExperimentDataDto, GetExperimentDto, SaveExperimentDto } from './experiment.dto';
-import { SearchParametersDto } from '../../shared/dtos/search.dto';
+import { SearchParametersDto } from '../search/search.dto';
 import { MOCK_EXPERIMENT_DATA, MOCK_EXPERIMENTS } from '../../mock/mock-experiments';
 import { AuditLogDto } from '../../shared/dtos/audit.dto';
 
@@ -51,13 +50,6 @@ export class ExperimentService {
     const mockExp = MOCK_EXPERIMENTS.find((e) => e.uuid === uuid) || MOCK_EXPERIMENTS[0];
     // return of(mockExp).pipe(delay(500));
     return this.httpClient.get<GetExperimentDto>(`${this.experimentBaseUri}/${uuid}`);
-  }
-
-  searchExperiments(searchParams: SearchParametersDto): Observable<GetExperimentDto[]> {
-    //TODO: remove when backend connected
-    //return this.mockSearchExperiment(searchParams);
-    const params = this.buildHttpParams(searchParams);
-    return this.httpClient.get<GetExperimentDto[]>(this.experimentBaseUri, { params });
   }
 
   getAuditLogs(uuid: string): Observable<AuditLogDto[]> {
@@ -176,26 +168,4 @@ export class ExperimentService {
     return of(results).pipe(delay(500));
   }
 
-  private buildHttpParams(params: SearchParametersDto): HttpParams {
-    let httpParams = new HttpParams();
-    const appendParams = (obj: any, prefix: string = '') => {
-      if (!obj) return;
-      Object.keys(obj).forEach((key) => {
-        const value = obj[key];
-
-        if (value !== null && value !== undefined && value !== '') {
-          const paramKey = prefix ? `${prefix}.${key}` : key;
-
-          if (typeof value === 'object' && !Array.isArray(value) && !(value instanceof Date)) {
-            appendParams(value, paramKey);
-          } else {
-            httpParams = httpParams.set(paramKey, value.toString());
-          }
-        }
-      });
-    };
-
-    appendParams(params);
-    return httpParams;
-  }
 }

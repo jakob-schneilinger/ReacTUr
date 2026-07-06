@@ -50,8 +50,12 @@
       <app-experiment-results
         [state]="currentSearchState"
         [experiments]="foundExperiments"
+        [currentPage]="currentPage"
+        [totalElements]="totalElements"
+        [pageSize]="pageSize"
         (getExport)="handleExport($event)"
-        (searchScientist)="handleSearchScientist($event)">
+        (searchScientist)="handleSearchScientist($event)"
+        (pageChange)="handlePageChange($event)">
       </app-experiment-results>
     </div>
   </app-layout>

@@ -21,6 +21,11 @@ export type SearchState = 'initial' | 'no-results' | 'has-results';
 export class SearchResultsComponent implements OnChanges {
   @Input() state: SearchState = 'initial';
   @Input() experiments: GetExperimentDto[] = [];
+  @Input() currentPage: number = 0;
+  @Input() totalElements: number = 0;
+  @Input() pageSize: number = 10;
+
+  @Output() pageChange = new EventEmitter<number>();
   @Output() getExport = new EventEmitter<string[]>();
   @Output() searchScientist = new EventEmitter<GetUserDto>();
 
@@ -29,12 +34,16 @@ export class SearchResultsComponent implements OnChanges {
   selectedExperimentForView: GetExperimentDto | undefined;
   hasWritePermission: boolean = false;
 
+  user: GetUserDto | null = null;
+
   constructor(
     private notification: NotificationService,
     private authService: AuthService,
   ) {}
 
-  user: GetUserDto | null = null;
+  get hasNextPage(): boolean {
+    return (this.currentPage + 1) * this.pageSize < this.totalElements;
+  }
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['experiments']) {
@@ -89,9 +98,7 @@ export class SearchResultsComponent implements OnChanges {
   viewDetails(uuid: string | undefined): void {
     if (!uuid) return;
 
-
     this.authService.getLoggedInUser().subscribe((value) => (this.user = value));
-
 
     if (!this.user) return;
     this.hasWritePermission = !!this.authService.hasExperimentPermission(uuid, this.user.id);
@@ -113,6 +120,6 @@ export class SearchResultsComponent implements OnChanges {
   }
 
   searchForScientist(scientist: GetUserDto) {
-    this.searchScientist.emit(scientist)
+    this.searchScientist.emit(scientist);
   }
 }

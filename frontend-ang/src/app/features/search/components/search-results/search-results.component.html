@@ -93,8 +93,29 @@
         </div>
       }
     </div>
-  }
+    @if (totalElements > 0) {
+      <div class="pagination-container d-flex justify-content-between align-items-center mt-4">
+      <span class="">
+        Showing {{ (currentPage * pageSize) + 1 }} to
+        {{ (currentPage * pageSize) + experiments.length }} of {{ totalElements }} entries
+      </span>
 
+        <div class="btn-group">
+          <button class="plain"
+                  [hidden]="currentPage === 0"
+                  (click)="pageChange.emit(currentPage - 1)">
+            <i class="bi bi-chevron-left"></i> Previous
+          </button>
+
+          <button class="plain"
+                  [hidden]="!hasNextPage"
+                  (click)="pageChange.emit(currentPage + 1)">
+            Next <i class="bi bi-chevron-right"></i>
+          </button>
+        </div>
+      </div>
+    }
+  }
 </div>
 
 

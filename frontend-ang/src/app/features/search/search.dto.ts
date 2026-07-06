@@ -1,5 +1,4 @@
 
-// new
 export interface MeasurementSearchDto {
   pFO_rateConstantMin?: number;
   pFO_rateConstantMax?: number;
