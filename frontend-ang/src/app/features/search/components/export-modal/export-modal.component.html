@@ -4,7 +4,7 @@
 
       <div class="modal-header">
         <h5 class="modal-title">
-          Export {{ selectedExperiments.length }} Experiment{{ selectedExperiments.length > 1 ? 's' : '' }}
+          {{ 'exportModal.title' | transloco:{ count: selectedExperiments.length } }}
         </h5>
         <button type="button" class="btn-close" (click)="close.emit()" aria-label="Close"></button>
       </div>
@@ -13,66 +13,70 @@
         <div class="row g-0 h-100">
 
           <div class="col-md-4 p-4 border-end settings-panel">
-            <h6 class="fw-bold mb-3">Format</h6>
+            <h6 class="fw-bold mb-3">{{ 'exportModal.format' | transloco }}</h6>
             <div class="btn-group w-100 mb-4" role="group">
               <input type="radio" class="btn-check" name="btnradio" id="btnradio1"
                      [checked]="exportFormat === 'json'" (change)="toggleFormat('json')">
-              <label class="btn-outline-primary" for="btnradio1">JSON</label>
+              <label class="btn-outline-primary" for="btnradio1">{{ 'exportModal.json' | transloco }}</label>
 
               <input type="radio" class="btn-check" name="btnradio" id="btnradio2"
                      [checked]="exportFormat === 'csv'" (change)="toggleFormat('csv')">
-              <label class="btn-outline-primary" for="btnradio2">CSV</label>
+              <label class="btn-outline-primary" for="btnradio2">{{ 'exportModal.csv' | transloco }}</label>
             </div>
 
             @if (exportFormat === "json") {
-              <h6 class="fw-bold mb-3">Include Fields</h6>
+              <h6 class="fw-bold mb-3">{{ 'exportModal.includeJsonFields' | transloco }}</h6>
 
               <div class="field-group mb-4">
-                <label class="text-muted small text-uppercase mb-2">Core Parameters</label>
+                <label class="text-muted small text-uppercase mb-2">{{ 'exportModal.categories.reactantsStructures' | transloco }}</label>
                 <div class="form-check form-switch mb-2">
-                  <input class="form-check-input" type="checkbox" id="f_reactants" [(ngModel)]="exportFields.core.reactants" (change)="onFieldChange()">
-                  <label class="form-check-label" for="f_reactants">Reactants</label>
+                  <input class="form-check-input" type="checkbox" id="f_names" [(ngModel)]="exportFields.reactants.names" (change)="onFieldChange()">
+                  <label class="form-check-label" for="f_names">{{ 'exportModal.fields.names' | transloco }}</label>
                 </div>
                 <div class="form-check form-switch mb-2">
-                  <input class="form-check-input" type="checkbox" id="f_date" [(ngModel)]="exportFields.core.date" (change)="onFieldChange()">
-                  <label class="form-check-label" for="f_date">Date</label>
+                  <input class="form-check-input" type="checkbox" id="f_smiles" [(ngModel)]="exportFields.reactants.smiles" (change)="onFieldChange()">
+                  <label class="form-check-label" for="f_smiles">{{ 'exportModal.fields.smiles' | transloco }}</label>
                 </div>
                 <div class="form-check form-switch mb-2">
-                  <input class="form-check-input" type="checkbox" id="f_sci" [(ngModel)]="exportFields.core.scientist" (change)="onFieldChange()">
-                  <label class="form-check-label" for="f_sci">Scientist</label>
+                  <input class="form-check-input" type="checkbox" id="f_structs" [(ngModel)]="exportFields.reactants.structures" (change)="onFieldChange()">
+                  <label class="form-check-label" for="f_structs">{{ 'exportModal.fields.structures' | transloco }}</label>
+                </div>
+              </div>
+
+              <div class="field-group mb-4">
+                <label class="text-muted small text-uppercase mb-2">{{ 'exportModal.categories.kineticsData' | transloco }}</label>
+                <div class="form-check form-switch mb-2">
+                  <input class="form-check-input" type="checkbox" id="f_rate" [(ngModel)]="exportFields.kinetics.rateConstant" (change)="onFieldChange()">
+                  <label class="form-check-label" for="f_rate">{{ 'exportModal.fields.rateConstant' | transloco }}</label>
                 </div>
                 <div class="form-check form-switch mb-2">
-                  <input class="form-check-input" type="checkbox" id="f_temp" [(ngModel)]="exportFields.core.temperature" (change)="onFieldChange()">
-                  <label class="form-check-label" for="f_temp">Temperature</label>
+                  <input class="form-check-input" type="checkbox" id="f_pfo" [(ngModel)]="exportFields.kinetics.pFO_rateConstant" (change)="onFieldChange()">
+                  <label class="form-check-label" for="f_pfo">{{ 'exportModal.fields.pfo' | transloco }}</label>
                 </div>
                 <div class="form-check form-switch mb-2">
-                  <input class="form-check-input" type="checkbox" id="f_solv" [(ngModel)]="exportFields.core.solvent" (change)="onFieldChange()">
-                  <label class="form-check-label" for="f_solv">Solvent</label>
+                  <input class="form-check-input" type="checkbox" id="f_err" [(ngModel)]="exportFields.kinetics.error" (change)="onFieldChange()">
+                  <label class="form-check-label" for="f_err">{{ 'exportModal.fields.error' | transloco }}</label>
                 </div>
               </div>
 
               <div class="field-group">
-                <label class="text-muted small text-uppercase mb-2">Additional Info</label>
+                <label class="text-muted small text-uppercase mb-2">{{ 'exportModal.categories.coreMetadata' | transloco }}</label>
                 <div class="form-check form-switch mb-2">
-                  <input class="form-check-input" type="checkbox" id="f_inst" [(ngModel)]="exportFields.additional.instrument" (change)="onFieldChange()">
-                  <label class="form-check-label" for="f_inst">Instrument</label>
+                  <input class="form-check-input" type="checkbox" id="f_doi" [(ngModel)]="exportFields.core.doi" (change)="onFieldChange()">
+                  <label class="form-check-label" for="f_doi">{{ 'exportModal.fields.doi' | transloco }}</label>
                 </div>
                 <div class="form-check form-switch mb-2">
-                  <input class="form-check-input" type="checkbox" id="f_mod" [(ngModel)]="exportFields.additional.modality" (change)="onFieldChange()">
-                  <label class="form-check-label" for="f_mod">Modality</label>
+                  <input class="form-check-input" type="checkbox" id="f_temp" [(ngModel)]="exportFields.metadata.temperature" (change)="onFieldChange()">
+                  <label class="form-check-label" for="f_temp">{{ 'exportModal.fields.temperature' | transloco }}</label>
                 </div>
                 <div class="form-check form-switch mb-2">
-                  <input class="form-check-input" type="checkbox" id="f_wave" [(ngModel)]="exportFields.additional.wavelength" (change)="onFieldChange()">
-                  <label class="form-check-label" for="f_wave">Wavelength</label>
-                </div>
-                <div class="form-check form-switch mb-2">
-                  <input class="form-check-input" type="checkbox" id="f_comm" [(ngModel)]="exportFields.additional.comment" (change)="onFieldChange()">
-                  <label class="form-check-label" for="f_comm">Comment</label>
+                  <input class="form-check-input" type="checkbox" id="f_solv" [(ngModel)]="exportFields.metadata.solvent" (change)="onFieldChange()">
+                  <label class="form-check-label" for="f_solv">{{ 'exportModal.fields.solvent' | transloco }}</label>
                 </div>
               </div>
             } @else {
-              <h6 class="fw-bold mb-3">Available Fields</h6>
-              <p class="text-muted small">Drag fields to the table to build your export.</p>
+              <h6 class="fw-bold mb-3">{{ 'exportModal.availableCsvFields' | transloco }}</h6>
+              <p class="text-muted small">{{ 'exportModal.dragDropInstruction' | transloco }}</p>
 
               <div
                 cdkDropList
@@ -82,11 +86,8 @@
                 class="d-flex flex-wrap gap-2 mb-4">
 
                 @for (field of availableFields; track field.id) {
-                  <div
-                    cdkDrag
-                    class="badge bg-light text-dark border p-2 cursor-grab"
-                    style="cursor: grab;">
-                    {{ field.label }}
+                  <div cdkDrag class="badge bg-light text-dark border p-2 cursor-grab" style="cursor: grab;">
+                    {{ field.labelKey | transloco }}
                   </div>
                 }
               </div>
@@ -96,91 +97,73 @@
           <div class="col-md-8 p-0 bg-light d-flex flex-column preview-panel">
             <div class="p-3 border-bottom d-flex justify-content-between align-items-center bg-white">
               <div>
-                <span class="fw-bold text-secondary me-2">Data Preview</span>
-                <span class="badge bg-secondary">Showing first {{ selectedExperiments.length > 5 ? 5 : selectedExperiments.length }} items</span>
+                <span class="fw-bold text-secondary me-2">{{ 'exportModal.preview.title' | transloco }}</span>
+                <span class="badge bg-secondary">
+                  {{ 'exportModal.preview.showingItems' | transloco:{ count: (selectedExperiments.length > 5 ? 5 : selectedExperiments.length) } }}
+                </span>
               </div>
 
               <button class="btn btn-sm btn-outline-secondary" (click)="copyToClipboard()" [disabled]="isCopying || isCopied">
                 @if (isCopying) {
                   <span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
-                  Copying...
+                  {{ 'exportModal.preview.copying' | transloco }}
                 } @else {
                   <i class="bi" [ngClass]="isCopied ? 'bi-check2 text-success' : 'bi-clipboard'"></i>
-                  {{ isCopied ? 'Copied!' : 'Copy Full Data' }}
+                  {{ isCopied ? ('exportModal.preview.copied' | transloco) : ('exportModal.preview.copyFullData' | transloco) }}
                 }
               </button>
             </div>
 
             <div class="flex-grow-1 p-3 overflow-auto position-relative">
-
-              @if (isLoading) {
-                <div class="d-flex flex-column align-items-center justify-content-center h-100 text-secondary">
-                  <div class="spinner-border text-primary mb-3" style="width: 3rem; height: 3rem;" role="status">
-                    <span class="visually-hidden">Loading...</span>
-                  </div>
-                  <span class="fw-bold">Fetching measurement data...</span>
-                  <span class="small mt-1">This may take a moment for large datasets.</span>
-                </div>
+              @if (exportFormat === "json") {
+                <pre class="bg-dark text-light p-3 rounded code-preview"><code>{{ previewData }}</code></pre>
               } @else {
-                @if (exportFormat === "json") {
-                  <pre class="bg-dark text-light p-3 rounded code-preview"><code>{{ previewData }}</code></pre>
-                } @else {
-                  <div class="p-0 bg-light d-flex flex-column preview-panel">
+                <div class="p-0 bg-light d-flex flex-column preview-panel h-100">
+                  <div
+                    cdkDropList
+                    id="tableHeaderList"
+                    [cdkDropListData]="selectedColumns"
+                    cdkDropListOrientation="horizontal"
+                    (cdkDropListDropped)="drop($event)"
+                    class="d-flex bg-white border rounded p-2 mb-3 align-items-center"
+                    style="min-height: 60px; overflow-x: auto;">
 
-                    <div class="flex-grow-1 p-3 overflow-auto">
-
-                      <div
-                        cdkDropList
-                        id="tableHeaderList"
-                        [cdkDropListData]="selectedColumns"
-                        cdkDropListOrientation="horizontal"
-                        (cdkDropListDropped)="drop($event)"
-                        class="d-flex bg-white border rounded p-2 mb-3 align-items-center"
-                        style="min-height: 60px; overflow-x: auto;">
-
-                        @if (selectedColumns.length === 0) {
-                          <div class="text-muted w-100 text-center fst-italic">
-                            Drag & Drop fields here...
-                          </div>
-                        }
-
-                        @for (col of selectedColumns ; track $index) {
-                          <div
-                            cdkDrag
-                            class="badge bg-primary me-2 p-2 d-flex align-items-center"
-                            style="cursor: grab; white-space: nowrap;">
-                            {{ col.label }}
-                            <i class="bi bi-x-circle ms-2" style="cursor: pointer;" (click)="removeColumn($index)"></i>
-                          </div>
-                        }
-
+                    @if (selectedColumns.length === 0) {
+                      <div class="text-muted w-100 text-center fst-italic">
+                        {{ 'exportModal.dragDropPlaceholder' | transloco }}
                       </div>
+                    }
 
-                      <div class="table-responsive bg-white border rounded">
-                        <table class="table table-sm table-striped m-0">
-                          <thead>
+                    @for (col of selectedColumns ; track $index) {
+                      <div cdkDrag class="badge bg-primary me-2 p-2 d-flex align-items-center" style="cursor: grab; white-space: nowrap;">
+                        {{ col.labelKey | transloco }}
+                        <i class="bi bi-x-circle ms-2" style="cursor: pointer;" (click)="removeColumn($index)"></i>
+                      </div>
+                    }
+                  </div>
+
+                  <div class="table-responsive bg-white border rounded flex-grow-1">
+                    <table class="table table-sm table-striped m-0">
+                      <thead>
+                      <tr>
+                        @for (col of selectedColumns; track $index) {
+                          <th>{{ col.labelKey | transloco }}</th>
+                        }
+                      </tr>
+                      </thead>
+                      <tbody>
+                        @for (row of tableData; track $index) {
                           <tr>
-                            @for (col of selectedColumns; track $index) {
-                              <th>{{ col.label }}</th>
+                            @for (cell of row; track $index) {
+                              <td class="text-truncate" style="max-width: 150px;" [title]="cell">{{ cell }}</td>
                             }
                           </tr>
-                          </thead>
-                          <tbody>
-                            @for (row of tableData; track $index) {
-                              <tr [class.header-row]="$index === 0">
-                                @for (cell of row; track $index) {
-                                  <td>{{ cell }}</td>
-                                }
-                              </tr>
-                            }
-                          </tbody>
-                        </table>
-                      </div>
-                    </div>
+                        }
+                      </tbody>
+                    </table>
                   </div>
-                }
+                </div>
               }
-
             </div>
           </div>
 
@@ -188,9 +171,9 @@
       </div>
 
       <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" (click)="close.emit()">Cancel</button>
+        <button type="button" class="btn btn-secondary" (click)="close.emit()">{{ 'exportModal.buttons.cancel' | transloco }}</button>
         <button type="button" class="btn btn-primary" (click)="downloadFile()">
-          <i class="bi bi-download me-2"></i> Download {{ exportFormat | uppercase }}
+          <i class="bi bi-download me-2"></i> {{ 'exportModal.buttons.download' | transloco:{ format: (exportFormat | uppercase) } }}
         </button>
       </div>
 
