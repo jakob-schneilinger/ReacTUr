@@ -124,11 +124,22 @@ export class SearchPageComponent implements OnInit {
     });
   }
 
-  handleExport(selectedUuids: string[]) {
-    this.experimentsToExport = this.foundExperiments.filter((exp) =>
-      selectedUuids.includes(exp.uuid),
-    );
+  handleExport(selectedExperiments: GetExperimentDto[]) {
+    this.experimentsToExport = selectedExperiments;
     this.isExportModalOpen = true;
+  }
+
+  handleExportAll() {
+    this.searchService.searchExperiments(this.metadata, 0, this.totalElements).subscribe({
+      next: (pageResults) => {
+        this.experimentsToExport = pageResults.content;
+        this.isExportModalOpen = true;
+        this.cdr.markForCheck();
+      },
+      error: (err) => {
+        console.error('Failed to fetch all experiments for export', err);
+      },
+    });
   }
 
   handleSearchScientist(scientist: GetUserDto) {
