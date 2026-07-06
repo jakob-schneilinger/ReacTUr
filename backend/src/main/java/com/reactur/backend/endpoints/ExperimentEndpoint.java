@@ -29,17 +29,40 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 import java.util.UUID;
 
+/**
+ * REST controller for managing experimental data within the ReacTUr chemical reaction knowledge base.
+ * <p>
+ * This endpoint provides the external API boundaries for creating, retrieving, updating, and dynamically
+ * querying chemical synthesis experiments. It enforces strict data governance and security rules, ensuring
+ * that active experiments remain globally searchable to prevent duplicated lab work, while restricting
+ * the modification and viewing of archived records to authorized personnel (The creator who included the
+ * experiment in the database, the designated scientist, or system administrators).
+ * </p>
+ *
+ * @see com.reactur.backend.services.ExperimentService
+ */
 @Slf4j
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/api/experiment")
 public class ExperimentEndpoint {
-    // TODO: JavaDoc
-
     private final ExperimentService experimentService;
     private final ExperimentHistoryService experimentHistoryService;
 
 
+    /**
+     * Records a new chemical experiment in the knowledge base.
+     * <p>
+     * The user initiating the request is permanently recorded as the creator. This field
+     * is immutable. Semantic validation is performed to ensure all referenced chemical
+     * entities (reactants, solvents, instruments) exist in the system prior to saving.
+     * </p>
+     *
+     * @param experimentDto  The payload containing the experimental setup, metadata, and kinetics results.
+     * @param authentication The security context containing the user's role authorities.
+     * @param jwt            The Keycloak token containing the requesting user's internal ID.
+     * @return A {@link ResponseEntity} containing the fully populated {@link GetExperimentDto} and a 201 Created status.
+     */
     @PostMapping
     public ResponseEntity<GetExperimentDto> createExperiment(
       @Valid @RequestBody SaveExperimentDto experimentDto,
@@ -55,8 +78,23 @@ public class ExperimentEndpoint {
         return ResponseEntity.status(HttpStatus.CREATED).body(createdExperiment);
     }
 
-    // Javadoc: Just the creator or the scientist, or an admin, are allowed to update the experiment
-    // Notes:
+    /**
+     * Performs a full replacement of the mutable data for an existing active experiment.
+     * <p>
+     * Only the original creator, the tagged scientist, or a system administrator
+     * are authorized to update an experiment.
+     * <br>
+     * Archived experiments are frozen and will trigger a 409 Conflict if an update
+     * is attempted. They must be restored first. The {@code createdBy} and {@code archivedAt} fields
+     * remain immutable during this operation.
+     * </p>
+     *
+     * @param uuid           The unique identifier of the experiment to update.
+     * @param experimentDto  The payload containing the updated experimental setup and results.
+     * @param authentication The security context containing the user's role authorities.
+     * @param jwt            The Keycloak token containing the requesting user's internal ID.
+     * @return A {@link ResponseEntity} containing the updated {@link GetExperimentDto}.
+     */
     @PutMapping("/{uuid}")
     public ResponseEntity<GetExperimentDto> updateExperiment(
       @PathVariable UUID uuid,
@@ -72,7 +110,19 @@ public class ExperimentEndpoint {
         return ResponseEntity.ok(updatedExperiment);
     }
 
-    // If archived, just the creator, scientist or an admin can retrieve the experiment.
+    /**
+     * Retrieves the details of a specific experiment by its UUID.
+     * <p>
+     * Active experiments are globally visible to all authenticated users.
+     * However, if the requested experiment has been archived, access is strictly restricted to
+     * the original creator, the designated scientist, or a system administrator.
+     * </p>
+     *
+     * @param uuid           The unique identifier of the experiment.
+     * @param authentication The security context containing the user's role authorities.
+     * @param jwt            The Keycloak token containing the requesting user's internal ID.
+     * @return A {@link ResponseEntity} containing the requested {@link GetExperimentDto}.
+     */
     @GetMapping("/{uuid}")
     public ResponseEntity<GetExperimentDto> getExperiment(
       @PathVariable UUID uuid,
@@ -87,7 +137,23 @@ public class ExperimentEndpoint {
         return ResponseEntity.ok(experiment);
     }
 
-    // Should archived-experiments also show up? ---> Let's say no
+    /**
+     * Searches and filters active experiments across the knowledge base.
+     * <p>
+     * This endpoint retrieves a paginated list of <b>active</b> experiments (archived records are
+     * excluded from these results). It supports complex filtering based on temporal ranges,
+     * chemical properties, and kinetics results.
+     * <br>
+     * <b>Note on Reactants:</b> Reactant searches evaluate commutatively. Querying for Reactant A
+     * and Reactant B will return matches where the reactants were recorded in either order.
+     * </p>
+     *
+     * @param searchParams   The DTO encapsulating the requested filter criteria.
+     * @param pageable       The Spring Pageable object dictating page size, index, and sorting.
+     * @param authentication The security context containing the user's role authorities.
+     * @param jwt            The Keycloak token containing the requesting user's internal ID.
+     * @return A {@link ResponseEntity} containing a {@link Page} of matching {@link GetExperimentDto}s.
+     */
     @GetMapping()
     public ResponseEntity<Page<GetExperimentDto>> searchExperiments(
       @Valid SearchParametersDto searchParams,
@@ -113,8 +179,18 @@ public class ExperimentEndpoint {
         return ResponseEntity.ok(history);
     }
 
-    // Javadoc: I decided that normal users get the archived Experiments where they are the creator or the scientist...
-    //  and ADMINS get all archived experiments that exist
+    /**
+     * Retrieves a list of archived experiments based on the user's authorization level.
+     * <p>
+     * Standard users will only receive archived experiments where they
+     * are either the original creator or the designated scientist. Users with the {@code ADMIN}
+     * role will retrieve all archived experiments across the entire system.
+     * </p>
+     *
+     * @param authentication The security context containing the user's role authorities.
+     * @param jwt            The Keycloak token containing the requesting user's internal ID.
+     * @return A {@link ResponseEntity} containing an array of {@link GetExperimentDto}s.
+     */
     @GetMapping("/archived")
     public ResponseEntity<GetExperimentDto[]> getArchivedExperiments(
       Authentication authentication,
@@ -128,6 +204,21 @@ public class ExperimentEndpoint {
         return ResponseEntity.ok(archivedExperiments);
     }
 
+    /**
+     * Soft-deletes an active experiment by stamping it with an archive timestamp.
+     * <p>
+     * This operation removes the experiment from public visibility and standard search results.
+     * The data is preserved in the database to maintain referential integrity and audit history.
+     * <br>
+     * Only the original creator, the tagged scientist, or a system
+     * administrator are authorized to archive an experiment.
+     * </p>
+     *
+     * @param uuid           The unique identifier of the experiment to archive.
+     * @param authentication The security context containing the user's role authorities.
+     * @param jwt            The Keycloak token containing the requesting user's internal ID.
+     * @return A {@link ResponseEntity} with a 204 No Content status upon successful archiving.
+     */
     @DeleteMapping("/{uuid}")
     public ResponseEntity<Void> archiveExperiment(
       @PathVariable UUID uuid,
@@ -142,6 +233,21 @@ public class ExperimentEndpoint {
         return ResponseEntity.noContent().build();
     }
 
+    /**
+     * Restores a previously archived experiment back to an active state.
+     * <p>
+     * This operation clears the archive timestamp, making the experiment globally visible
+     * and discoverable in standard searches once again.
+     * <br>
+     * Only the original creator, the tagged scientist, or a system
+     * administrator are authorized to restore an experiment.
+     * </p>
+     *
+     * @param uuid           The unique identifier of the archived experiment to restore.
+     * @param authentication The security context containing the user's role authorities.
+     * @param jwt            The Keycloak token containing the requesting user's internal ID.
+     * @return A {@link ResponseEntity} containing the restored {@link GetExperimentDto}.
+     */
     @PutMapping("/{uuid}/restore")
     public ResponseEntity<GetExperimentDto> restoreExperiment(
       @PathVariable UUID uuid,
@@ -156,13 +262,16 @@ public class ExperimentEndpoint {
         return ResponseEntity.ok(restoredExperiment);
     }
 
-    // TODO: Rewrite
+    // Extracts the highest privileged application role from the Spring Security authentication context.
+    // returns the determined Role. It defaults to USER if not explicitly an ADMIN.
     private Role extractUserRole(Authentication authentication) {
-        if (authentication == null || authentication.getAuthorities() == null) {
+        if (authentication == null) {
             return Role.USER;
         }
+
         boolean isAdmin = authentication.getAuthorities().stream()
-          .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+          .map(org.springframework.security.core.GrantedAuthority::getAuthority)
+          .anyMatch("ROLE_ADMIN"::equals);
 
         return isAdmin ? Role.ADMIN : Role.USER;
     }
