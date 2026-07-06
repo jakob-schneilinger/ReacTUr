@@ -23,7 +23,6 @@ import com.reactur.backend.mappers.UserMapper;
 import com.reactur.backend.mappers.options.InstrumentMapper;
 import com.reactur.backend.mappers.options.ModalityMapper;
 import com.reactur.backend.mappers.options.SolventMapper;
-import com.reactur.backend.repositories.AuditLogRepository;
 import com.reactur.backend.repositories.ExperimentRepository;
 
 import com.reactur.backend.repositories.options.InstrumentRepository;
@@ -76,7 +75,6 @@ class ExperimentServiceTest {
   @Mock private InstrumentRepository instrumentRepository;
   @Mock private ModalityRepository modalityRepository;
   @Mock private UserRepository userRepository;
-  @Mock private AuditLogRepository auditLogRepository;
 
   // We actually want to use here the mapper rather than a Mock. This way we also test the Mapper.
   @Spy private ExperimentMapper experimentMapper = Mappers.getMapper(ExperimentMapper.class);
@@ -366,7 +364,6 @@ class ExperimentServiceTest {
 
     assertNotNull(mockExperiment.getArchivedAt(), "Archived timestamp should be set");
     Mockito.verify(experimentRepository).save(mockExperiment);
-    Mockito.verify(auditLogRepository).save(any());
   }
 
   @Test
@@ -394,7 +391,6 @@ class ExperimentServiceTest {
     );
 
     Mockito.verify(experimentRepository, Mockito.never()).save(any());
-    Mockito.verify(auditLogRepository, Mockito.never()).save(any());
   }
 
 
@@ -412,7 +408,6 @@ class ExperimentServiceTest {
 
     Assertions.assertNull(mockExperiment.getArchivedAt(), "Archived timestamp should be cleared");
     Mockito.verify(experimentRepository).save(mockExperiment);
-    Mockito.verify(auditLogRepository).save(any());
   }
 
   @Test
@@ -533,9 +528,6 @@ class ExperimentServiceTest {
     ArgumentCaptor<Experiment> experimentCaptor = ArgumentCaptor.forClass(Experiment.class);
     Mockito.verify(experimentRepository).save(experimentCaptor.capture());
     Experiment savedExperiment = experimentCaptor.getValue();
-
-    // Verify Audit action was triggered
-    Mockito.verify(auditLogRepository).save(any());
 
     // Assert MUTABLE fields were updated correctly
     assertEquals(updateDto.doi(), savedExperiment.getDoi(), "DOI should be updated");
@@ -687,5 +679,4 @@ class ExperimentServiceTest {
       .archivedAt(archivedAt)
       .build();
   }
-
 }

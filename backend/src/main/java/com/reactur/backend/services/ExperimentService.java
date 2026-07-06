@@ -1,6 +1,5 @@
 package com.reactur.backend.services;
 
-import com.reactur.backend.dtos.experiments.ExperimentHistoryDto;
 import com.reactur.backend.dtos.experiments.GetExperimentDto;
 import com.reactur.backend.dtos.experiments.SaveExperimentDto;
 import com.reactur.backend.dtos.experiments.SearchParametersDto;
@@ -12,13 +11,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
 import java.util.UUID;
 
 /**
- * Service interface defining the business logic and architectural boundaries for the ReacTUr
- * chemical synthesis workflow.
- * <p>
  * This service takes care of the experiment's information data transfer, semantic validation of
  * chemical entities, and role-based access control to ensure efficient and secure
  * experiment management.
@@ -136,14 +131,4 @@ public interface ExperimentService {
     String requestingUserId,
     Role requestingUserRole
   );
-
-  /**
-   * Retrieves the audit history (changelog) for a specific experiment.
-   * Leverages JaVers to extract a chronologically sorted list of commits and their exact property changes.
-   *
-   * @param experimentUuid The unique identifier of the experiment to inspect.
-   * @return A list of {@link ExperimentHistoryDto} objects representing the commit history,
-   * sorted from newest to oldest. Returns an empty list if the experiment has no history.
-   */
-  List<ExperimentHistoryDto> getExperimentHistory(UUID experimentUuid);
 }

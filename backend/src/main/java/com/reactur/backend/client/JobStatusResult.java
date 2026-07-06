@@ -17,10 +17,6 @@ public record JobStatusResult(
         return status != null && status.isFinished();
     }
 
-    public boolean isPending() {
-        return status != null && status.isPending();
-    }
-
     public boolean isFailed() {
         return (status != null && status.isFailed()) || errorMessage != null;
     }
