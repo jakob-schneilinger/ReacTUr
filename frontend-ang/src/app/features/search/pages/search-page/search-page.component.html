@@ -54,6 +54,7 @@
         [totalElements]="totalElements"
         [pageSize]="pageSize"
         (getExport)="handleExport($event)"
+        (getExportAll)="handleExportAll()"
         (searchScientist)="handleSearchScientist($event)"
         (pageChange)="handlePageChange($event)"
         (pageSizeChange)="handlePageSizeChange($event)">

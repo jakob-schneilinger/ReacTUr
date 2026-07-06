@@ -25,11 +25,12 @@ export class SearchResultsComponent {
   @Input() pageSize: number = 25;
 
   @Output() pageChange = new EventEmitter<number>();
-  @Output() getExport = new EventEmitter<string[]>();
+  @Output() getExport = new EventEmitter<GetExperimentDto[]>();
+  @Output() getExportAll = new EventEmitter<void>();
   @Output() searchScientist = new EventEmitter<GetUserDto>();
   @Output() pageSizeChange = new EventEmitter<number>();
 
-  selectedIds = new Set<string>();
+  selectedExperiments = new Map<string, GetExperimentDto>();
   expandedCardIds = new Set<string>();
 
   isViewModalOpen: boolean = false;
@@ -60,33 +61,37 @@ export class SearchResultsComponent {
     return this.expandedCardIds.has(expId);
   }
 
-  toggleSelection(expId: string) {
-    if (this.selectedIds.has(expId)) {
-      this.selectedIds.delete(expId);
+  toggleSelection(exp: GetExperimentDto) {
+    if (this.selectedExperiments.has(exp.uuid)) {
+      this.selectedExperiments.delete(exp.uuid);
     } else {
-      this.selectedIds.add(expId);
+      this.selectedExperiments.set(exp.uuid, exp);
     }
   }
 
-  isSelected(expId: string): boolean {
-    return this.selectedIds.has(expId);
+  isSelected(uuid: string): boolean {
+    return this.selectedExperiments.has(uuid);
   }
 
   get allSelected(): boolean {
     if (this.experiments.length === 0) return false;
-    return this.experiments.every((exp) => this.selectedIds.has(exp.uuid));
+    return this.experiments.every((exp) => this.selectedExperiments.has(exp.uuid));
   }
 
   toggleSelectAll() {
     if (this.allSelected) {
-      this.experiments.forEach((exp) => this.selectedIds.delete(exp.uuid));
+      this.experiments.forEach((exp) => this.selectedExperiments.delete(exp.uuid));
     } else {
-      this.experiments.forEach((exp) => this.selectedIds.add(exp.uuid));
+      this.experiments.forEach((exp) => this.selectedExperiments.set(exp.uuid, exp));
     }
   }
 
   onExportClicked() {
-    this.getExport.emit(Array.from(this.selectedIds));
+    this.getExport.emit(Array.from(this.selectedExperiments.values()));
+  }
+
+  onExportAllClicked() {
+    this.getExportAll.emit();
   }
 
   viewDetails(uuid: string | undefined): void {
