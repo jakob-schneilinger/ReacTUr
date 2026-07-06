@@ -10,6 +10,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -86,10 +87,18 @@ public class ExperimentEndpoint {
     @GetMapping()
     public ResponseEntity<Page<GetExperimentDto>> searchExperiments(
       @Valid SearchParametersDto searchParams,
-      org.springframework.data.domain.Pageable pageable
+      Pageable pageable,
+      Authentication authentication,
+      @AuthenticationPrincipal Jwt jwt
     ) {
-        //TODO:
-        throw new UnsupportedOperationException();
+        log.info("GET /api/experiment (search) called by User ID: {}", jwt.getSubject());
+
+        Role userRole = extractUserRole(authentication);
+
+        Page<GetExperimentDto> searchResults =
+          experimentService.searchExperiments(searchParams, pageable, jwt.getSubject(), userRole);
+
+        return ResponseEntity.ok(searchResults);
     }
 
     // TODO: Endpoint to get Logs by *Date*, by *User* and by Experiment

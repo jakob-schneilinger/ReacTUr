@@ -2,6 +2,7 @@ package com.reactur.backend.services.implementations;
 
 import com.reactur.backend.dtos.experiments.GetExperimentDto;
 import com.reactur.backend.dtos.experiments.SaveExperimentDto;
+import com.reactur.backend.dtos.experiments.SearchParametersDto;
 import com.reactur.backend.entities.AuditLog;
 import com.reactur.backend.entities.experiment.Experiment;
 import com.reactur.backend.entities.experiment.ExperimentResult;
@@ -26,6 +27,8 @@ import com.reactur.backend.repositories.UserRepository;
 import com.reactur.backend.services.ExperimentService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -358,6 +361,11 @@ public class ExperimentServiceImpl implements ExperimentService {
     log.info("Successfully updated Experiment with internal ID: {}", savedExperiment.getId());
 
     return experimentMapper.experimentToGetExperimentDto(savedExperiment);
+  }
+
+  @Override
+  public Page<GetExperimentDto> searchExperiments(SearchParametersDto searchParams, Pageable pageable, String requestingUserId, Role requestingUserRole) {
+    return null;
   }
 
 }

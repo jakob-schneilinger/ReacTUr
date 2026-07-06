@@ -2,7 +2,10 @@ package com.reactur.backend.services;
 
 import com.reactur.backend.dtos.experiments.GetExperimentDto;
 import com.reactur.backend.dtos.experiments.SaveExperimentDto;
+import com.reactur.backend.dtos.experiments.SearchParametersDto;
 import com.reactur.backend.enums.Role;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.UUID;
@@ -29,4 +32,12 @@ public interface ExperimentService {
     String requestingUserId,
     Role requestingUserRole
   );
+
+  Page<GetExperimentDto> searchExperiments(
+    SearchParametersDto searchParams,
+    Pageable pageable,
+    String requestingUserId,
+    Role requestingUserRole
+  );
+
 }

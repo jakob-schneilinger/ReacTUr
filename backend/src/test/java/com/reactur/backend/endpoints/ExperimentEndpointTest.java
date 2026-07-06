@@ -4,6 +4,7 @@ import com.reactur.backend.dtos.experiments.GetExperimentDto;
 import com.reactur.backend.dtos.experiments.MeasurementDataDto;
 import com.reactur.backend.dtos.experiments.SaveExperimentDto;
 import com.reactur.backend.dtos.experiments.SaveMetadataDto;
+import com.reactur.backend.dtos.experiments.SearchParametersDto;
 import com.reactur.backend.enums.Role;
 import com.reactur.backend.exeptions.ResourceNotFoundException;
 import com.reactur.backend.security.SecurityConfig;
@@ -17,6 +18,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
@@ -25,6 +30,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import tools.jackson.databind.ObjectMapper;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.UUID;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -386,6 +392,76 @@ class ExperimentEndpointTest {
         .contentType(MediaType.APPLICATION_JSON)
         .content(objectMapper.writeValueAsString(validRequestDto)))
       .andExpect(status().isForbidden());
+  }
+
+  @Test
+  void searchExperiments_whenValidFiltersAndPagination_returns200OkWithPage() throws Exception {
+    // Setup expected data
+    GetExperimentDto experiment1 = new GetExperimentDto(UUID.randomUUID(), "10.1000/rxn1", null, null, null, null, null, null, null);
+    GetExperimentDto experiment2 = new GetExperimentDto(UUID.randomUUID(), "10.1000/rxn2", null, null, null, null, null, null, null);
+
+    // mock Spring Page containing our data
+    Page<GetExperimentDto> mockPage =
+      new PageImpl<>(
+        List.of(experiment1, experiment2),
+        PageRequest.of(0, 20),
+        2 // Total elements
+      );
+
+    // service call
+    Mockito.when(experimentService.searchExperiments(
+        any(SearchParametersDto.class),
+        any(Pageable.class),
+        Mockito.anyString(),
+        any(Role.class)
+      )) .thenReturn(mockPage);
+
+    // HTTP GET request with query parameters simulating the frontend URL
+    mockMvc.perform(get("/api/experiment")
+        .param("temperatureMin", "20.0")
+        .param("temperatureMax", "30.0")
+        .param("measurementSearch.rateConstantMin", "5.0") // Testing nested object mapping
+        .param("page", "0")
+        .param("size", "20")
+        .with(jwt().jwt(builder -> builder.subject("mock-keycloak-id-123"))))
+      .andExpect(status().isOk())
+      // Verify Spring Page JSON structure
+      .andExpect(jsonPath("$.content.length()").value(2))
+      .andExpect(jsonPath("$.content[0].doi").value("10.1000/rxn1"))
+      .andExpect(jsonPath("$.totalElements").value(2))
+      .andExpect(jsonPath("$.pageable.pageSize").value(20));
+
+    // 4. Verify the DTO was populated correctly by Spring's argument resolver
+    ArgumentCaptor<SearchParametersDto> dtoCaptor = ArgumentCaptor.forClass(SearchParametersDto.class);
+    ArgumentCaptor<Pageable> pageableCaptor = ArgumentCaptor.forClass(Pageable.class);
+
+    Mockito.verify(experimentService).searchExperiments(
+      dtoCaptor.capture(),
+      pageableCaptor.capture(),
+      Mockito.eq("mock-keycloak-id-123"),
+      Mockito.eq(Role.USER)
+    );
+
+    SearchParametersDto capturedDto = dtoCaptor.getValue();
+    Assertions.assertEquals(20.0, capturedDto.temperatureMin());
+    Assertions.assertEquals(30.0, capturedDto.temperatureMax());
+    Assertions.assertNotNull(capturedDto.measurementSearch(), "Nested DTO should be parsed");
+    Assertions.assertEquals(5.0, capturedDto.measurementSearch().rateConstantMin());
+
+    Pageable capturedPageable = pageableCaptor.getValue();
+    Assertions.assertEquals(0, capturedPageable.getPageNumber());
+    Assertions.assertEquals(20, capturedPageable.getPageSize());
+  }
+
+  @Test
+  void searchExperiments_whenInvalidFilterProvided_returns400BadRequest() throws Exception {
+    // Simulating the user sending a negative concentration (which fails our @PositiveOrZero validation)
+    mockMvc.perform(get("/api/experiment")
+        .param("concentrationA_Min", "-5.0")
+        .with(jwt().jwt(builder -> builder.subject("mock-keycloak-id-123"))))
+      .andExpect(status().isBadRequest());
+
+    Mockito.verify(experimentService, Mockito.never()).searchExperiments(any(), any(), any(), any());
   }
 
   private SaveExperimentDto createDummySaveExperimentDto() {
