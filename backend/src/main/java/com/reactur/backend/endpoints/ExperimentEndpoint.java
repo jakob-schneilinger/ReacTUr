@@ -1,6 +1,6 @@
 package com.reactur.backend.endpoints;
 
-import com.reactur.backend.dtos.AuditLogDto;
+import com.reactur.backend.dtos.experiments.ExperimentHistoryDto;
 import com.reactur.backend.dtos.experiments.GetExperimentDto;
 import com.reactur.backend.dtos.experiments.SaveExperimentDto;
 import com.reactur.backend.dtos.experiments.SearchParametersDto;
@@ -25,6 +25,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
 import java.util.UUID;
 
 @Slf4j
@@ -103,11 +104,10 @@ public class ExperimentEndpoint {
 
     // TODO: Endpoint to get Logs by *Date*, by *User* and by Experiment
     //  Current one: Logs related to experiment with uuid
-    @GetMapping("/{uuid}/audit_logs")
-    public ResponseEntity<AuditLogDto[]> getAuditLogs(@PathVariable UUID uuid) {
-
-        //TODO:
-        throw new UnsupportedOperationException();
+    @GetMapping("/{uuid}/history")
+    public ResponseEntity<List<ExperimentHistoryDto>> getAuditLogs(@PathVariable UUID uuid, @AuthenticationPrincipal Jwt jwt) {
+        List<ExperimentHistoryDto> history = experimentService.getExperimentHistory(uuid);
+        return ResponseEntity.ok(history);
     }
 
     // Javadoc: I decided that normal users get the archived Experiments where they are the creator or the scientist...
