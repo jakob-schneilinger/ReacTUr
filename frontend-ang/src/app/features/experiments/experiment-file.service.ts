@@ -17,7 +17,7 @@ class ExperimentFileService {
 
 
   /**
-   * Extracts metadata from a file and returns it as a object.
+   * Extracts metadata from a file and returns it as an object.
    * @param file the file to extract metadata from.
    */
   extractMetadataFromFile(file: File): Promise<any | null> {
@@ -46,10 +46,11 @@ class ExperimentFileService {
             } else if (line.startsWith('#Temperature:')) {
               const match = line.match(/([\d.]+)/);
               if (match) metadata.temperature = parseFloat(match[1]);
+            } else if (line.startsWith('#User: ')) {
+              const user = line.replace('#User: ', '').trim();
+              if (user.includes('SX User')) metadata.instrument = 'SX20';
             } else if (line.startsWith('#Cell type:')) {
-              metadata.instrument = line.replace('#Cell type:', '').trim();
-            } else if (line.startsWith('#HV') || line === 'Absorbance') {
-              if (line.includes('Absorbance')) metadata.modality = 'Absorbance';
+              metadata.modality = line.replace('#Cell type:', '').trim();
             } else if (line.startsWith('Wavelength,Wavelength:')) {
               const match = line.match(/Wavelength:\s*([\d.]+)/);
               if (match) {
