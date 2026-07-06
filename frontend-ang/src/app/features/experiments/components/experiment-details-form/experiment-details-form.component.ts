@@ -77,6 +77,7 @@ export class ExperimentDetailsFormComponent implements OnInit, OnDestroy, OnChan
     this.authService.getLoggedInUser().subscribe((value) => this.user = value);
     this.initForm();
     this.setupReactionAutoFill();
+    this.setupErrorValidation();
     this.loadOptions();
   }
 
@@ -166,7 +167,12 @@ export class ExperimentDetailsFormComponent implements OnInit, OnDestroy, OnChan
       concentrationA: ['', [Validators.required, Validators.min(0)]],
       concentrationB: ['', [Validators.required, Validators.min(0)]],
 
+      rateConstant: ['', [Validators.required, Validators.min(0)]],
+      error: ['', [Validators.required, Validators.min(0)]],
+      isErrorPercentage: [false, Validators.required],
+
       // Optional Metadata
+      pFO_rateConstant: ['', Validators.min(0)],
       instrument: ['', [this.inListValidator(this.knownInstruments)]],
       modality: ['', [this.inListValidator(this.knownModalities)]],
       wavelength: ['', Validators.min(0)],
@@ -232,6 +238,24 @@ export class ExperimentDetailsFormComponent implements OnInit, OnDestroy, OnChan
 
       return isValid ? null : { notInList: { value: control.value } };
     };
+  }
+
+  private setupErrorValidation(): void {
+    this.experimentForm
+      .get('isErrorPercentage')
+      ?.valueChanges.subscribe((isPercentage: boolean) => {
+        const errorControl = this.experimentForm.get('error');
+
+        if (!errorControl) return;
+
+        if (isPercentage) {
+          errorControl.setValidators([Validators.required, Validators.min(0), Validators.max(100)]);
+        } else {
+          errorControl.setValidators([Validators.required, Validators.min(0)]);
+        }
+
+        errorControl.updateValueAndValidity({ emitEvent: false });
+      });
   }
 
   get reactantsControls() {

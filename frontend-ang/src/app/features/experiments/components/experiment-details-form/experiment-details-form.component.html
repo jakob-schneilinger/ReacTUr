@@ -145,10 +145,69 @@
       </div>
     }
   </div>
+
+  <div class="input-group">
+    <label>{{ 'experiments.details.form.labels.rateConstant' | transloco }}</label>
+    <div class="search-field" [class.has-value]="experimentForm.get('rateConstant')?.value">
+      <input type="number" formControlName="rateConstant" [class.is-invalid]="isInvalid('rateConstant')" [placeholder]="'experiments.details.form.placeholders.value' | transloco" />
+      @if (experimentForm.get('rateConstant')?.value) {
+        <span class="icon bi bi-x text-black clear-btn" (click)="clearControl('rateConstant')"></span>
+      }
+    </div>
+    @if (isInvalid('rateConstant')) {
+      <div class="error-message">
+        @if (experimentForm.get('rateConstant')?.hasError('required')) { {{ 'experiments.details.form.errors.rateConstantRequired' | transloco }} }
+        @if (experimentForm.get('rateConstant')?.hasError('min')) { {{ 'experiments.details.form.errors.rateConstantNegative' | transloco }} }
+      </div>
+    }
+  </div>
+
+  <div class="input-group">
+    <label>{{ 'experiments.details.form.labels.error' | transloco }}</label>
+    <div class="search-field" [class.has-value]="experimentForm.get('error')?.value">
+      <input type="number" formControlName="error" [class.is-invalid]="isInvalid('error')" [placeholder]="'experiments.details.form.placeholders.value' | transloco" />
+      @if (experimentForm.get('isErrorPercentage')?.value) {
+        <span class="icon unit-label text-dark">%</span>
+      }
+      @if (experimentForm.get('error')?.value) {
+        <span class="icon bi bi-x text-black clear-btn" (click)="clearControl('error')"></span>
+      }
+    </div>
+    @if (isInvalid('error')) {
+      <div class="error-message">
+        @if (experimentForm.get('error')?.hasError('required')) { {{ 'experiments.details.form.errors.errorRequired' | transloco }} }
+        @if (experimentForm.get('error')?.hasError('min')) { {{ 'experiments.details.form.errors.errorNegative' | transloco }} }
+        @if (experimentForm.get('error')?.hasError('max')) { {{ 'experiments.details.form.errors.errorPercentageLimit' | transloco }} }
+      </div>
+    }
+  </div>
+
+  <div class="input-group checkbox-group">
+    <label class="checkbox-label">
+      <input type="checkbox" formControlName="isErrorPercentage" />
+      {{ 'experiments.details.form.labels.isErrorPercentage' | transloco }}
+    </label>
+  </div>
+
   <div class="divider-container">
     <div class="divider"></div>
     <span class="divider-label">{{ 'experiments.details.form.sections.optional' | transloco }}</span>
     <div class="divider"></div>
+  </div>
+
+  <div class="input-group">
+    <label>{{ 'experiments.details.form.labels.pfoRateConstant' | transloco }}</label>
+    <div class="search-field" [class.has-value]="experimentForm.get('pFO_rateConstant')?.value">
+      <input type="number" formControlName="pFO_rateConstant" [class.is-invalid]="isInvalid('pFO_rateConstant')" [placeholder]="'experiments.details.form.placeholders.value' | transloco" />
+      @if (experimentForm.get('pFO_rateConstant')?.value) {
+        <span class="icon bi bi-x text-black clear-btn" (click)="clearControl('pFO_rateConstant')"></span>
+      }
+    </div>
+    @if (isInvalid('pFO_rateConstant')) {
+      <div class="error-message">
+        @if (experimentForm.get('pFO_rateConstant')?.hasError('min')) { {{ 'experiments.details.form.errors.rateConstantNegative' | transloco }} }
+      </div>
+    }
   </div>
 
   <div class="input-group">

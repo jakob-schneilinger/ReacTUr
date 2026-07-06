@@ -311,7 +311,11 @@
           "instrument": "Instrument",
           "modality": "Modality",
           "wavelength": "Wavelength",
-          "comment": "Comment"
+          "comment": "Comment",
+          "rateConstant": "Rate Constant",
+          "error": "Error",
+          "isErrorPercentage": "Percentage Error",
+          "pfoRateConstant": "Pseudo First Order Rate Constant"
         },
         "placeholders": {
           "value": "Value",
@@ -330,9 +334,14 @@
           "scientistRequired": "Scientist name is required.",
           "temperatureRequired": "Temperature is required.",
           "solventRequired": "Solvent is required.",
+          "rateConstantRequired": "Rate Constant is required.",
+          "errorRequired": "Error is required.",
           "concentrationARequired": "Concentration A is required.",
           "concentrationBRequired": "Concentration B is required.",
           "concentrationNegative": "Concentration can not be negative.",
+          "rateConstantNegative": "Rate Constant can not be negative.",
+          "errorNegative": "Error can not be negative.",
+          "errorPercentageLimit": "Error Percentage can not be larger than 100%.",
           "invalidSolvent": "Please select a valid solvent from the list.",
           "invalidInstrument": "Please select a valid instrument from the list.",
           "invalidModality": "Please select a valid modality from the list.",
