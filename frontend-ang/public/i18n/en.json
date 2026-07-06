@@ -433,7 +433,18 @@
       "reactantAStruct": "Reactant A (Structures)",
       "reactantBName": "Reactant B (Name)",
       "reactantBSmiles": "Reactant B (SMILES)",
-      "reactantBStruct": "Reactant B (Structures)"
+      "reactantBStruct": "Reactant B (Structures)",
+      "reactantAType": "Reactant A (Type)",
+      "reactantBType": "Reactant B (Type)",
+      "instrument": "Instrument",
+      "modality": "Modality",
+      "wavelength": "Wavelength",
+      "expComment": "Experiment Comment",
+      "date": "Date",
+      "scientist": "Scientist",
+      "concentrationA": "Concentration A",
+      "concentrationB": "Concentration B",
+      "isErrorPercentage": "Is Error Percentage"
     },
     "preview": {
       "title": "Data Preview",
