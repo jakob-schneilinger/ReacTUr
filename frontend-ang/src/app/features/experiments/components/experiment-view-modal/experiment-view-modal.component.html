@@ -98,6 +98,12 @@
   }
 
   <ng-container footer>
+    @if (selectedExperiment !== undefined && selectedExperiment !== null ) {
+      <button type="button" class="btn btn-outline-primary" (click)="planExperiment(selectedExperiment)">
+        <i class="bi bi-graph-up me-1"></i> Plan Experiment
+      </button>
+    }
+
     @if (hasWritePermission) {
       <button type="button" class="btn primary" (click)="editExperiment(selectedExperiment?.uuid)">Edit Experiment</button>
     }

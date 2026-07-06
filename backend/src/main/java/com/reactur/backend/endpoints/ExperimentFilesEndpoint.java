@@ -27,21 +27,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class ExperimentFilesEndpoint {
 
-    // TODO: Pass and verify Security Context to SErvice
-
-    /*
-    @DeleteMapping("/{fileId}")
-    public ResponseEntity<Void> archiveFile(
-            @PathVariable UUID fileId,
-            Authentication authentication,
-            @AuthenticationPrincipal Jwt jwt) {
-
-        Role userRole = extractUserRole(authentication);
-        fileService.archiveFile(fileId, jwt.getSubject(), userRole);
-
-        return ResponseEntity.noContent().build();
-    }
-     */
+    // TODO: Add Security Context to Service
 
     private final FileService fileService;
 

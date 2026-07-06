@@ -1,5 +1,5 @@
 
-import { Component, EventEmitter, Output } from '@angular/core';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { TRANSLOCO_IMPORTS } from '../../../../core/global/transloco-imports';
@@ -15,7 +15,6 @@ export type ConcUnit = 'M' | 'mM' | 'µM';
 })
 export class PlanningSidebarComponent {
 
-  kValue: number = 75;
   concA: number = 10;
   concB: number = 20;
   concUnit: ConcUnit = 'µM';
@@ -23,6 +22,9 @@ export class PlanningSidebarComponent {
   durationHours: number = 1;
   durationMinutes: number = 0;
 
+  @Input() kValue: number = 75;
+  @Input() nameA: string = 'A';
+  @Input() nameB: string = 'B';
   @Output() simulate = new EventEmitter<{k: number, a0: number, b0: number, duration: number, unit: ConcUnit}>();
 
   onSimulateClick() {

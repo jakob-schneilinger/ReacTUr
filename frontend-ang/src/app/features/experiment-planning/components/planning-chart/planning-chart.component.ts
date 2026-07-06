@@ -16,6 +16,8 @@ import { ConcUnit } from '../planning-sidebar/planning-sidebar.component';
 export class PlanningChartComponent implements OnChanges {
   @Input() data: KineticsDataPoint[] = [];
   @Input() unit: ConcUnit = 'mM';
+  @Input() nameA: string = 'A';
+  @Input() nameB: string = 'B';
 
   chartOptions: EChartsOption = {};
 
@@ -29,11 +31,14 @@ export class PlanningChartComponent implements OnChanges {
     const scale = this.unit === 'M' ? 1 : this.unit === 'mM' ? 1e3 : 1e6;
     const u = this.unit;
 
+    const labelA = `Conc [${this.nameA}]`;
+    const labelB = `Conc [${this.nameB}]`;
+
     this.chartOptions = {
       tooltip: {
         trigger: 'axis'
       },
-      legend: { data: ['Conc [A]', 'Conc [B]', 'Product', 'Conversion %'] },
+      legend: { data: [labelA, labelB, 'Product', 'Conversion %'] },
       xAxis: {
         type: 'value',
         name: 'Time (min)',
@@ -56,13 +61,13 @@ export class PlanningChartComponent implements OnChanges {
       ],
       series: [
         {
-          name: 'Conc [A]', type: 'line',
+          name: labelA, type: 'line',
           data: this.data.map(d => [d.time / 60, d.a * scale]),
           showSymbol: false,
           tooltip: { valueFormatter: (val: any) => Number(val).toFixed(2) + ' ' + u }
         },
         {
-          name: 'Conc [B]', type: 'line',
+          name: labelB, type: 'line',
           data: this.data.map(d => [d.time / 60, d.b * scale]),
           showSymbol: false,
           tooltip: { valueFormatter: (val: any) => Number(val).toFixed(2) + ' ' + u }

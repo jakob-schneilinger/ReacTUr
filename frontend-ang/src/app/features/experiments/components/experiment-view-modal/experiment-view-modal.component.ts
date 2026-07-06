@@ -75,6 +75,19 @@ export class ExperimentViewModalComponent implements OnInit {
     );
   }
 
+  planExperiment(experiment: GetExperimentDto | undefined): void {
+    if (experiment?.measurementData.rateConstant) {
+      this.router.navigate(['/experiment-planning'], {
+        queryParams: {
+          k: experiment.measurementData.rateConstant,
+          nameA: experiment.reactantA?.shortName || 'A',
+          nameB: experiment.reactantB?.shortName || 'B'
+        }
+      });
+      this.close.emit();
+    }
+  }
+
   get concentrationText(): string {
     if (
       this.selectedExperiment?.metadata.concentrationA &&
