@@ -178,14 +178,24 @@ export class ExperimentService {
 
   private buildHttpParams(params: SearchParametersDto): HttpParams {
     let httpParams = new HttpParams();
-    if (params) {
-      Object.keys(params).forEach((key) => {
-        const value = (params as any)[key];
+    const appendParams = (obj: any, prefix: string = '') => {
+      if (!obj) return;
+      Object.keys(obj).forEach((key) => {
+        const value = obj[key];
+
         if (value !== null && value !== undefined && value !== '') {
-          httpParams = httpParams.set(key, value.toString());
+          const paramKey = prefix ? `${prefix}.${key}` : key;
+
+          if (typeof value === 'object' && !Array.isArray(value) && !(value instanceof Date)) {
+            appendParams(value, paramKey);
+          } else {
+            httpParams = httpParams.set(paramKey, value.toString());
+          }
         }
       });
-    }
+    };
+
+    appendParams(params);
     return httpParams;
   }
 }
