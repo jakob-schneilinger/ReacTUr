@@ -242,12 +242,11 @@ export class ReactantFormComponent implements OnInit, OnDestroy {
       formValue.chemicalType = this.chemicalTypes.find(
         (t) => t.name === formValue.chemicalType,
       )?.uuid;
-
       formValue.additionalShortNames = formValue.additionalShortNames.filter(
         (val: string) => val && val.trim() !== '',
       );
       formValue.references = formValue.references.filter((val: string) => val && val.trim() !== '');
-
+      formValue.inChiKey = this.rdkitService.generateInChiKey(formValue.smiles);
       this.save.emit({
         data: formValue,
         onSuccess: () => this.reactantForm.markAsPristine(),

@@ -163,4 +163,31 @@ export class RDKitService {
       if (qmol) qmol.delete();
     }
   }
+
+  generateInChiKey(smiles: string): string | null {
+    if (!this.rdkitModule || !smiles) return null;
+
+    let mol = null;
+
+    try {
+      mol = this.rdkitModule.get_mol(smiles);
+      if (!mol) {
+        console.warn('Invalid SMILES parsed by RDKit:', smiles);
+        return null;
+      }
+
+      const inchi = mol.get_inchi();
+      const inchiKey = this.rdkitModule.get_inchikey_for_inchi(inchi);
+
+      return inchiKey;
+
+    } catch (error) {
+      console.error('System error generating InChIKey for:', smiles, error);
+      return null;
+    } finally {
+      if (mol) {
+        mol.delete();
+      }
+    }
+  }
 }

@@ -263,8 +263,8 @@ export class ExperimentDetailsFormComponent implements OnInit, OnDestroy, OnChan
       concentrationB: ['', [Validators.required, Validators.min(0)]],
 
       rateConstant: ['', [Validators.required, Validators.min(0)]],
-      error: ['', [Validators.required, Validators.min(0)]],
-      isErrorPercentage: [false, Validators.required],
+      error: [5, [Validators.required, Validators.min(0)]],
+      isErrorPercentage: [true, Validators.required],
 
       // Optional Metadata
       pFO_rateConstant: ['', Validators.min(0)],
@@ -446,7 +446,7 @@ export class ExperimentDetailsFormComponent implements OnInit, OnDestroy, OnChan
           error: formValue.error,
           isErrorPercentage: formValue.isErrorPercentage,
         },
-        doi: formValue.doi || '',
+        doi: formValue.doi || undefined,
       };
 
       const request$: Observable<GetExperimentDto> =
