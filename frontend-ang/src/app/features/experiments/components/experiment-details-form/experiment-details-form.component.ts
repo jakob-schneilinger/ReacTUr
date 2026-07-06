@@ -5,26 +5,31 @@ import {
   ChangeDetectorRef,
   Component,
   Input,
+  Output,
+  EventEmitter,
   OnChanges,
   OnDestroy,
   OnInit,
   SimpleChanges,
 } from '@angular/core';
-import { FormBuilder, FormGroup, FormArray, Validators, ValidatorFn, AbstractControl, ValidationErrors } from '@angular/forms';
+import { FormBuilder, FormGroup, Validators, ValidatorFn, AbstractControl, ValidationErrors } from '@angular/forms';
 import { Router } from '@angular/router';
 import { NotificationService } from '../../../../core/layout/notification/notification.service';
 import { AuthService } from '../../../../core/auth/auth.service';
 import { GetUserDto } from '../../../../shared/dtos/user.dto';
 import { TRANSLOCO_IMPORTS } from '../../../../core/global/transloco-imports';
 import { TranslocoService } from '@jsverse/transloco';
-import { ExperimentService } from '../../experiment.service';
 import { GetExperimentDto, SaveExperimentDto } from '../../experiment.dto';
-import { Observable, Subject } from 'rxjs';
+import { Subject } from 'rxjs';
 import { OptionService } from '../../../../shared/services/option.service';
 import { ReactantSelectorComponent } from '../../../search/components/reactant-selector/reactant-selector.component';
 import { ReactantDto } from '../../../reactants/reactant.dto';
 import { ReactantService } from '../../../reactants/reactant.service';
-import { InstrumentDto, ModalityDto, SolventDto } from '../../../../shared/dtos/selection-option.dto';
+import {
+  InstrumentDto,
+  ModalityDto,
+  SolventDto,
+} from '../../../../shared/dtos/selection-option.dto';
 import { UserService } from '../../../../shared/services/user.service';
 import { OptionSelectorComponent } from '../../../../shared/option-selector/option-selector.component';
 
@@ -46,8 +51,11 @@ export type FormState = 'create' | 'edit';
 })
 export class ExperimentDetailsFormComponent implements OnInit, OnDestroy, OnChanges {
   private destroy$ = new Subject<void>();
+
   @Input() formState: FormState = 'create';
   @Input() experiment?: GetExperimentDto;
+
+  @Output() saveExperiment = new EventEmitter<SaveExperimentDto>();
 
   availableReactants: ReactantDto[] = [];
   isReactantsLoaded: boolean = false;
@@ -88,7 +96,6 @@ export class ExperimentDetailsFormComponent implements OnInit, OnDestroy, OnChan
     private optionService: OptionService,
     private userService: UserService,
     private reactantService: ReactantService,
-    private experimentService: ExperimentService,
     private cdr: ChangeDetectorRef,
     private transloco: TranslocoService,
   ) {}
@@ -461,7 +468,6 @@ export class ExperimentDetailsFormComponent implements OnInit, OnDestroy, OnChan
   }
 
   onSubmit(): void {
-    // TODO: send to backend and wait for success
     if (this.experimentForm.valid) {
       const formValue = this.experimentForm.getRawValue();
 
@@ -476,7 +482,7 @@ export class ExperimentDetailsFormComponent implements OnInit, OnDestroy, OnChan
       )?.uuid;
       formValue.modality = this.knownModalities.find((m) => m.name === formValue.modality)?.uuid;
 
-      const saveExperiment: SaveExperimentDto = {
+      const savePayload: SaveExperimentDto = {
         reactantA: formValue.reactantA,
         reactantB: formValue.reactantB,
         metadata: {
@@ -500,27 +506,7 @@ export class ExperimentDetailsFormComponent implements OnInit, OnDestroy, OnChan
         doi: formValue.doi || undefined,
       };
 
-      const request$: Observable<GetExperimentDto> =
-        this.formState === 'create'
-          ? this.experimentService.createExperiment(saveExperiment)
-          : this.experimentService.updateExperiment(this.experiment!.uuid, saveExperiment);
-
-      request$.subscribe({
-        next: (value) => {
-          this.experimentForm.markAsPristine();
-          this.notification.success(
-            this.transloco.translate('experiments.details.notifications.savedTitle'),
-            this.transloco.translate('experiments.details.notifications.savedMessage'),
-          );
-          this.router.navigate(['/experiments', value.uuid]);
-        },
-        error: (err) => {
-          this.notification.error(
-            this.transloco.translate('experiments.details.notifications.savedErrorTitle'),
-            this.transloco.translate('experiments.details.notifications.savedErrorMessage'),
-          );
-        },
-      });
+      this.saveExperiment.emit(savePayload);
     } else {
       this.experimentForm.markAllAsTouched();
     }

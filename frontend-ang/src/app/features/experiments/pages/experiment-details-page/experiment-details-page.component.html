@@ -16,7 +16,8 @@
         <app-experiment-details-form
           class="experiment-details-form"
           [formState]="formState"
-          [experiment]="experiment">
+          [experiment]="experiment"
+          (saveExperiment)="onSaveExperiment($event)">
         </app-experiment-details-form>
       } @else {
         <div class="loading-state">
@@ -27,6 +28,9 @@
 
     <!-- Rechte Spalte -->
     <div rightContent>
+      @if (filesDirty) {
+        <span class="p-3">Save experiment to submit changed files.</span>
+      }
       <app-file-upload
         [allowedExtensions]="['txt', 'csv', 'dsx', 'prism', 'pzfx']"
         [maxFileSizeMB]="20"

@@ -7,17 +7,14 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { AuthService } from '../../../../core/auth/auth.service';
 import { NotificationService } from '../../../../core/layout/notification/notification.service';
 import { ExperimentService } from '../../experiment.service';
-import { GetExperimentDto } from '../../experiment.dto';
+import { GetExperimentDto, SaveExperimentDto } from '../../experiment.dto';
 import { GetUserDto } from '../../../../shared/dtos/user.dto';
 import { TranslocoService } from '@jsverse/transloco';
 import ExperimentFileService from '../../experiment-file.service';
-import {
-  ExtractedMetadataConfirmModalComponent
-} from '../../components/extracted-metadata-confirm-modal/extracted-metadata-confirm-modal.component';
+import { ExtractedMetadataConfirmModalComponent } from '../../components/extracted-metadata-confirm-modal/extracted-metadata-confirm-modal.component';
 import { ExperimentHistoryDto } from '../../experiment-history.dto';
-import {
-  ExperimentHistoryModalComponent
-} from '../../components/experiment-history-modal/experiment-history-modal.component';
+import { ExperimentHistoryModalComponent } from '../../components/experiment-history-modal/experiment-history-modal.component';
+import { firstValueFrom } from 'rxjs';
 
 export type FormState = 'create' | 'edit';
 
@@ -53,8 +50,9 @@ export class ExperimentDetailsPageComponent implements OnInit {
   isLoadingHistory = false;
 
   pendingFiles: File[] = [];
+  filesDirty: boolean = false;
 
-  private uploadedFileFingerprints = new Set<string>();
+  private uploadedFilesMap = new Map<string, string>();
   private processedMetadataFiles = new Set<string>();
 
   constructor(
@@ -73,13 +71,9 @@ export class ExperimentDetailsPageComponent implements OnInit {
   }
 
   get experimentTitle() {
-    if (this.state === 'create') {
-      return this.transloco.translate('experiments.details.createNew');
-    } else if (this.state === 'edit') {
-      return this.transloco.translate('experiments.details.editExisting');
-    } else {
-      return this.transloco.translate('experiments.details.viewExisting');
-    }
+    if (this.state === 'create') return this.transloco.translate('experiments.details.createNew');
+    if (this.state === 'edit') return this.transloco.translate('experiments.details.editExisting');
+    return this.transloco.translate('experiments.details.viewExisting');
   }
 
   ngOnInit(): void {
@@ -127,6 +121,50 @@ export class ExperimentDetailsPageComponent implements OnInit {
     }
   }
 
+  onSaveExperiment(savePayload: SaveExperimentDto) {
+    const request$ =
+      this.state === 'create'
+        ? this.experimentService.createExperiment(savePayload)
+        : this.experimentService.updateExperiment(this.experiment!.uuid, savePayload);
+
+    request$.subscribe({
+      next: (savedExperiment: GetExperimentDto) => {
+        this.notification.success(
+          this.transloco.translate('experiments.details.notifications.savedTitle'),
+          this.transloco.translate('experiments.details.notifications.savedMessage'),
+        );
+
+        if (this.state === 'create' && this.pendingFiles.length > 0) {
+          for (const file of this.pendingFiles) {
+            this.experimentFileService.uploadFile(savedExperiment.uuid, file).subscribe({
+              next: (response) => {
+                console.log(`File uploaded successfully: ${file.name}`);
+              },
+              error: (error) => {
+                this.notification.error(
+                  'File Upload Error',
+                  `Experiment saved, but failed to upload file: ${file.name}`,
+                );
+              },
+            });
+          }
+        }
+
+        if (this.formComponent) {
+          this.formComponent.experimentForm.markAsPristine();
+        }
+
+        this.router.navigate(['/experiments', savedExperiment.uuid]);
+      },
+      error: (err) => {
+        this.notification.error(
+          this.transloco.translate('experiments.details.notifications.savedErrorTitle'),
+          this.transloco.translate('experiments.details.notifications.savedErrorMessage'),
+        );
+      },
+    });
+  }
+
   openHistoryModal(): void {
     if (this.state === 'create' || !this.experiment?.uuid) return;
 
@@ -150,46 +188,56 @@ export class ExperimentDetailsPageComponent implements OnInit {
   }
 
   async onFilesUploaded(files: File[]): Promise<void> {
+
     if (this.state === 'create') {
+      this.filesDirty = true;
       this.pendingFiles = files;
     } else {
-      const newFiles = files.filter((file) => {
-        const fingerprint = this.getFileFingerprint(file);
-        return !this.uploadedFileFingerprints.has(fingerprint);
-      });
+      this.filesDirty = false;
+      const currentFingerprints = new Set(files.map((f) => this.getFileFingerprint(f)));
 
+      await this.handleDeletedFiles(currentFingerprints);
+
+      const newFiles = files.filter(
+        (file) => !this.uploadedFilesMap.has(this.getFileFingerprint(file)),
+      );
       if (newFiles.length > 0) {
         await this.uploadDirectly(newFiles);
       }
-
-      this.syncUploadedSet(files);
     }
 
     await this.handleExtract(files);
   }
 
-  private async uploadDirectly(newFiles: File[]): Promise<void> {
-    if (this.experiment) {
-      for (const file of newFiles) {
-        this.experimentFileService.uploadFile(this.experiment.uuid, file).subscribe({
-          next: (response) => {
-            const fingerprint = this.getFileFingerprint(file);
-            this.uploadedFileFingerprints.add(fingerprint);
-          },
-          error: (error) => {
-            console.error(`Failed to upload ${file.name}:`, error);
-          },
-        });
+  private async handleDeletedFiles(currentFingerprints: Set<string>): Promise<void> {
+    if (!this.experiment) return;
+
+    for (const [fingerprint, fileName] of this.uploadedFilesMap.entries()) {
+      if (!currentFingerprints.has(fingerprint)) {
+        try {
+          await firstValueFrom(
+            this.experimentFileService.archiveFile(this.experiment.attachments.find((f) => f.fileName === fileName)!.uuid,),
+          );
+          this.uploadedFilesMap.delete(fingerprint);
+        } catch (error) {
+          console.error(`Failed to delete file ${fileName}:`, error);
+          this.notification.error('Delete Error', `Could not delete file: ${fileName}`);
+        }
       }
     }
   }
 
-  private syncUploadedSet(currentFiles: File[]): void {
-    const currentFingerprints = new Set(currentFiles.map((f) => this.getFileFingerprint(f)));
+  private async uploadDirectly(newFiles: File[]): Promise<void> {
+    if (!this.experiment) return;
 
-    for (const uploadedFingerprint of this.uploadedFileFingerprints) {
-      if (!currentFingerprints.has(uploadedFingerprint)) {
-        this.uploadedFileFingerprints.delete(uploadedFingerprint);
+    for (const file of newFiles) {
+      try {
+        await firstValueFrom(this.experimentFileService.uploadFile(this.experiment.uuid, file));
+
+        this.uploadedFilesMap.set(this.getFileFingerprint(file), file.name);
+      } catch (error) {
+        console.error(`Failed to upload ${file.name}:`, error);
+        this.notification.error('Upload Error', `Failed to upload: ${file.name}`);
       }
     }
   }
