@@ -133,11 +133,14 @@ export class ExperimentDetailsFormComponent implements OnInit, OnDestroy, OnChan
   private loadUsers() {
     this.userService.getAllUsers().subscribe({
       next: (users) => {
-        this.knownUsers = users;
-        this.knownUserNames = users.map((o) => o.firstName + ' ' + o.lastName);
+        this.knownUsers = users.filter((u) => u.role !== 'UNAUTHORIZED' && !u.deactivatedAt);
+        this.knownUserNames = this.knownUsers.map((o) => o.firstName + ' ' + o.lastName);
         this.filteredUserNames = [...this.knownUserNames];
 
-        this.userOptions = users.map((u) => ({ id: u.id, name: `${u.firstName} ${u.lastName}` }));
+        this.userOptions = this.knownUsers.map((u) => ({
+          id: u.id,
+          name: `${u.firstName} ${u.lastName}`,
+        }));
 
         const scientistControl = this.experimentForm.get('scientist');
         scientistControl?.setValidators([
@@ -160,8 +163,8 @@ export class ExperimentDetailsFormComponent implements OnInit, OnDestroy, OnChan
     // Fetch Solvents
     this.optionService.getSelectionOptions('solvent').subscribe({
       next: (opts) => {
-        this.knownSolvents = opts;
-        this.knownSolventNames = opts.map((o) => o.name);
+        this.knownSolvents = opts.filter((o) => !o.archivedAt);
+        this.knownSolventNames = this.knownSolvents.map((o) => o.name);
         this.filteredSolventNames = [...this.knownSolventNames];
         const solventControl = this.experimentForm.get('solvent');
         solventControl?.setValidators([
@@ -177,8 +180,8 @@ export class ExperimentDetailsFormComponent implements OnInit, OnDestroy, OnChan
     // Fetch Instruments
     this.optionService.getSelectionOptions('instrument').subscribe({
       next: (opts) => {
-        this.knownInstruments = opts;
-        this.knownInstrumentNames = opts.map((o) => o.name);
+        this.knownInstruments = opts.filter((o) => !o.archivedAt);
+        this.knownInstrumentNames = this.knownInstruments.map((o) => o.name);
         this.filteredInstrumentNames = [...this.knownInstrumentNames];
         const instrumentControl = this.experimentForm.get('instrument');
         instrumentControl?.setValidators([this.inListValidator(this.knownInstrumentNames)]);
@@ -191,8 +194,8 @@ export class ExperimentDetailsFormComponent implements OnInit, OnDestroy, OnChan
     // Fetch Modalities
     this.optionService.getSelectionOptions('modality').subscribe({
       next: (opts) => {
-        this.knownModalities = opts;
-        this.knownModalityNames = opts.map((o) => o.name);
+        this.knownModalities = opts.filter((o) => !o.archivedAt);
+        this.knownModalityNames = this.knownModalities.map((o) => o.name);
         this.filteredModalityNames = [...this.knownModalityNames];
         const modalityControl = this.experimentForm.get('modality');
         modalityControl?.setValidators([this.inListValidator(this.knownModalityNames)]);
