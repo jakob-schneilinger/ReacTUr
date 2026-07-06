@@ -21,6 +21,9 @@ import { ExperimentService } from '../../experiment.service';
 import { GetExperimentDto, SaveExperimentDto } from '../../experiment.dto';
 import { Observable, Subject } from 'rxjs';
 import { OptionService } from '../../../../shared/services/option.service';
+import { ReactantSelectorComponent } from '../../../search/components/reactant-selector/reactant-selector.component';
+import { ReactantDto } from '../../../reactants/reactant.dto';
+import { ReactantService } from '../../../reactants/reactant.service';
 
 export type FormState = 'create' | 'edit';
 
@@ -29,15 +32,24 @@ export type FormState = 'create' | 'edit';
   templateUrl: './experiment-details-form.component.html',
   styleUrls: ['./experiment-details-form.component.scss'],
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, AppConfirmModalComponent, TRANSLOCO_IMPORTS],
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    AppConfirmModalComponent,
+    TRANSLOCO_IMPORTS,
+    ReactantSelectorComponent,
+  ],
 })
 export class ExperimentDetailsFormComponent implements OnInit, OnDestroy, OnChanges {
   private destroy$ = new Subject<void>();
   @Input() formState: FormState = 'create';
   @Input() experiment?: GetExperimentDto;
 
-  isArchiveExperimentModalOpen = false;
-  isCancelExperimentModalOpen = false;
+  availableReactants: ReactantDto[] = [];
+  initValA: string[] = [];
+  initValB: string[] = [];
+  triggerClearA: number = 0;
+  triggerClearB: number = 0;
 
   experimentForm!: FormGroup;
 
@@ -51,12 +63,16 @@ export class ExperimentDetailsFormComponent implements OnInit, OnDestroy, OnChan
 
   user: GetUserDto | null = null;
 
+  isArchiveExperimentModalOpen = false;
+  isCancelExperimentModalOpen = false;
+
   constructor(
     private fb: FormBuilder,
     private router: Router,
     private notification: NotificationService,
     private authService: AuthService,
     private optionService: OptionService,
+    private reactantService: ReactantService,
     private experimentService: ExperimentService,
     private cdr: ChangeDetectorRef,
     private transloco: TranslocoService,
@@ -74,11 +90,12 @@ export class ExperimentDetailsFormComponent implements OnInit, OnDestroy, OnChan
   }
 
   ngOnInit(): void {
-    this.authService.getLoggedInUser().subscribe((value) => this.user = value);
+    this.authService.getLoggedInUser().subscribe((value) => (this.user = value));
     this.initForm();
     this.setupReactionAutoFill();
     this.setupErrorValidation();
     this.loadOptions();
+    this.loadReactants();
   }
 
   private loadOptions(): void {
@@ -136,6 +153,21 @@ export class ExperimentDetailsFormComponent implements OnInit, OnDestroy, OnChan
     );
   }
 
+  private loadReactants(): void {
+    this.reactantService.getAllReactants().subscribe({
+      next: (value) => {
+        this.availableReactants = value;
+        this.cdr.markForCheck();
+      },
+      error: (err) => {
+        this.notification.error(
+          'Reactant Error',
+          `Unable to fetch reactants. Please reload the page! Error: ${err.message || err.error || err} `,
+        );
+      },
+    });
+  }
+
   get fullName(): string {
     return `${this.user?.firstName} ${this.user?.lastName}`;
   }
@@ -149,15 +181,15 @@ export class ExperimentDetailsFormComponent implements OnInit, OnDestroy, OnChan
       return date.split('T')[0];
     }
     return null;
-  };
+  }
 
   private initForm(): void {
     const isEditMode = this.formState !== 'create';
 
     this.experimentForm = this.fb.group({
       // Reactants
-      reactantA: [{ value: '', disabled: isEditMode }, Validators.required],
-      reactantB: [{ value: '', disabled: isEditMode }, Validators.required],
+      reactantA: ['', Validators.required],
+      reactantB: ['', Validators.required],
 
       // Required Metadata
       date: [this.currentDate, Validators.required],
@@ -176,19 +208,19 @@ export class ExperimentDetailsFormComponent implements OnInit, OnDestroy, OnChan
       instrument: ['', [this.inListValidator(this.knownInstruments)]],
       modality: ['', [this.inListValidator(this.knownModalities)]],
       wavelength: ['', Validators.min(0)],
+      doi: [''],
       comment: [''],
     });
 
-    //TODO: if edit mode init form with existing data
-    if (this.experiment) {
+    if (this.experiment && isEditMode) {
       this.patchFormWithExperiment(this.experiment);
     }
   }
 
   private patchFormWithExperiment(exp: GetExperimentDto): void {
     this.experimentForm.patchValue({
-      reactantA: exp.reactantA.shortName || '',
-      reactantB: exp.reactantB.shortName || '',
+      reactantA: exp.reactantA.uuid || exp.reactantA.shortName || '',
+      reactantB: exp.reactantB.uuid || exp.reactantB.shortName || '',
       date: this.formatDate(exp.metadata?.date) || this.currentDate,
       scientist:
         `${exp.metadata?.scientist?.firstName} ${exp.metadata?.scientist?.lastName}` ||
@@ -200,8 +232,16 @@ export class ExperimentDetailsFormComponent implements OnInit, OnDestroy, OnChan
       instrument: exp.metadata?.instrument?.name,
       modality: exp.metadata?.modality?.name,
       wavelength: exp.metadata?.wavelength,
+      doi: exp.doi,
       comment: exp.metadata?.comment,
     });
+
+    if (exp.reactantA) {
+      this.initValA = [exp.reactantA.uuid || exp.reactantA.shortName];
+    }
+    if (exp.reactantB) {
+      this.initValB = [exp.reactantB.uuid || exp.reactantB.shortName];
+    }
   }
 
   public patchExtractedMetadata(metadata: any): void {
@@ -226,7 +266,7 @@ export class ExperimentDetailsFormComponent implements OnInit, OnDestroy, OnChan
 
     this.notification.success(
       'Metadata Applied',
-      'Form fields have been populated from the uploaded file.'
+      'Form fields have been populated from the uploaded file.',
     );
   }
 
@@ -258,8 +298,16 @@ export class ExperimentDetailsFormComponent implements OnInit, OnDestroy, OnChan
       });
   }
 
-  get reactantsControls() {
-    return (this.experimentForm.get('reactants') as FormArray).controls;
+  onReactantChange(type: 'A' | 'B', uuids: string[]): void {
+    const val = uuids.length > 0 ? uuids[0] : '';
+    const controlName = type === 'A' ? 'reactantA' : 'reactantB';
+    const control = this.experimentForm.get(controlName);
+
+    if (control) {
+      control.setValue(val);
+      control.markAsTouched();
+      control.markAsDirty();
+    }
   }
 
   private setupReactionAutoFill(): void {
@@ -277,15 +325,15 @@ export class ExperimentDetailsFormComponent implements OnInit, OnDestroy, OnChan
       control.markAsTouched();
       control.markAsDirty();
     }
+    if (controlName === 'reactantA') {
+      this.triggerClearA++;
+    } else if (controlName === 'reactantB') {
+      this.triggerClearB++;
+    }
   }
 
   isInvalid(controlName: string): boolean {
     const control = this.experimentForm.get(controlName);
-    return !!(control && control.invalid && control.touched);
-  }
-
-  isReactantInvalid(index: number): boolean {
-    const control = this.reactantsControls[index];
     return !!(control && control.invalid && control.touched);
   }
 
@@ -295,13 +343,33 @@ export class ExperimentDetailsFormComponent implements OnInit, OnDestroy, OnChan
       const formValue = this.experimentForm.getRawValue();
 
       const saveExperiment: SaveExperimentDto = {
-        ...formValue,
+        reactantA: formValue.reactantA,
+        reactantB: formValue.reactantB,
+        metadata: {
+          date: formValue.date,
+          scientist: formValue.scientist,
+          temperature: formValue.temperature,
+          solvent: formValue.solvent,
+          concentrationA: formValue.concentrationA,
+          concentrationB: formValue.concentrationB,
+          instrument: formValue.instrument || undefined,
+          modality: formValue.modality || undefined,
+          wavelength: formValue.wavelength || undefined,
+          comment: formValue.comment || undefined,
+        },
+        measurementData: {
+          pFO_rateConstant: formValue.pFO_rateConstant || undefined,
+          rateConstant: formValue.rateConstant,
+          error: formValue.error,
+          isErrorPercentage: formValue.isErrorPercentage,
+        },
+        doi: formValue.doi || '',
       };
 
       const request$: Observable<GetExperimentDto> =
         this.formState === 'create'
           ? this.experimentService.createExperiment(saveExperiment)
-          : this.experimentService.patchExperiment(this.experiment!.uuid, saveExperiment);
+          : this.experimentService.updateExperiment(this.experiment!.uuid, saveExperiment);
 
       request$.subscribe({
         next: (value) => {
@@ -322,7 +390,6 @@ export class ExperimentDetailsFormComponent implements OnInit, OnDestroy, OnChan
       this.experimentForm.markAllAsTouched();
     }
   }
-
 
   // ####################
   // ## MODAL HANDLING ##

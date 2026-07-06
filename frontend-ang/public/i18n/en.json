@@ -315,7 +315,8 @@
           "rateConstant": "Rate Constant",
           "error": "Error",
           "isErrorPercentage": "Percentage Error",
-          "pfoRateConstant": "Pseudo First Order Rate Constant"
+          "pfoRateConstant": "Pseudo First Order Rate Constant",
+          "doi": "Digital Object Identifier (DOI)"
         },
         "placeholders": {
           "value": "Value",

@@ -14,6 +14,7 @@ import { ReactantDto } from '../../../reactants/reactant.dto';
 export class ReactantSelectorComponent implements OnInit {
   @Input() label: string = 'Reactant';
   @Input() availableReactants: ReactantDto[] = [];
+  @Input() reactantLimit: number = 0;
 
   @Input() set initialValue(vals: string[]) {
     if (vals && vals.length > 0) this.initReactants(vals);
@@ -31,6 +32,10 @@ export class ReactantSelectorComponent implements OnInit {
 
   isDrawModalOpen = false;
   currentSmilesForModal = '';
+
+  get isLimitReached(): boolean {
+    return this.reactantLimit > 0 && this.selectedReactants.length >= this.reactantLimit;
+  }
 
   ngOnInit() {}
 
@@ -63,6 +68,9 @@ export class ReactantSelectorComponent implements OnInit {
   }
 
   selectReactant(reactant: ReactantDto) {
+    if (this.isLimitReached) {
+      return;
+    }
     if (!this.selectedReactants.find((r) => r.uuid === reactant.uuid)) {
       this.selectedReactants.push(reactant);
     }

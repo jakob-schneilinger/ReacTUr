@@ -25,48 +25,50 @@
     </div>
   }
 
-  <div class="position-relative">
-    <div class="custom-search-wrapper d-flex align-items-center bg-white shadow-sm border rounded p-1">
-      <input
-        type="text"
-        class="form-control border-0 shadow-none bg-transparent"
-        [(ngModel)]="searchTerm"
-        (ngModelChange)="onSearchInput()"
-        placeholder="Search by name, SMILES, or type..." />
+  @if (!isLimitReached) {
+    <div class="position-relative">
+      <div class="custom-search-wrapper d-flex align-items-center bg-white shadow-sm border rounded p-1">
+        <input
+          type="text"
+          class="form-control border-0 shadow-none bg-transparent"
+          [(ngModel)]="searchTerm"
+          (ngModelChange)="onSearchInput()"
+          placeholder="Search by name, SMILES, or type..." />
 
-      <button
-        class="icon-btn text-secondary border-0 bg-transparent"
-        type="button"
-        (click)="openDraw()"
-        title="Draw Molecule">
-        <i class="bi bi-pencil-square"></i>
-      </button>
-
-      @if (searchTerm) {
         <button
-          class="icon-btn text-danger me-1 border-0 bg-transparent"
+          class="icon-btn text-secondary border-0 bg-transparent"
           type="button"
-          (click)="clearSearch()"
-          title="Clear Search">
-          <i class="bi bi-x-lg"></i>
+          (click)="openDraw()"
+          title="Draw Molecule">
+          <i class="bi bi-pencil-square"></i>
         </button>
-      }
-    </div>
 
-    @if (suggestions.length > 0) {
-      <div class="list-group position-absolute w-100 mt-1 custom-dropdown-menu shadow z-3">
-        @for (item of suggestions; track item.shortName) {
-          <button type="button" class="list-group-item list-group-item-action custom-dropdown-item border-0" (click)="selectReactant(item)">
-            <div class="d-flex w-100 justify-content-between align-items-center mb-1">
-              <span class="reactant-name fw-semibold">{{ item.shortName }}</span>
-              <span class="badge bg-secondary reactant-type">{{ item.chemicalType?.name }}</span>
-            </div>
-            <span class="reactant-smiles text-break small text-muted">{{ item.smiles }}</span>
+        @if (searchTerm) {
+          <button
+            class="icon-btn text-danger me-1 border-0 bg-transparent"
+            type="button"
+            (click)="clearSearch()"
+            title="Clear Search">
+            <i class="bi bi-x-lg"></i>
           </button>
         }
       </div>
-    }
-  </div>
+
+      @if (suggestions.length > 0) {
+        <div class="list-group position-absolute w-100 mt-1 custom-dropdown-menu shadow z-3">
+          @for (item of suggestions; track item.shortName) {
+            <button type="button" class="list-group-item list-group-item-action custom-dropdown-item border-0" (click)="selectReactant(item)">
+              <div class="d-flex w-100 justify-content-between align-items-center mb-1">
+                <span class="reactant-name fw-semibold">{{ item.shortName }}</span>
+                <span class="badge bg-secondary reactant-type">{{ item.chemicalType?.name }}</span>
+              </div>
+              <span class="reactant-smiles text-break small text-muted">{{ item.smiles }}</span>
+            </button>
+          }
+        </div>
+      }
+    </div>
+  }
 </div>
 
 @if (isDrawModalOpen) {

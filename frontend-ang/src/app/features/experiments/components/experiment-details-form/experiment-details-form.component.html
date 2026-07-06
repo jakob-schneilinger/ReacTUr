@@ -1,21 +1,23 @@
 <form class="search-container" [formGroup]="experimentForm" (ngSubmit)="onSubmit()">
 
-  @if (formState === 'create') {
-    <div class="divider-container">
-      <div class="divider"></div>
-      <span class="divider-label">{{ 'experiments.details.form.sections.required' | transloco }}</span>
-      <div class="divider"></div>
-    </div>
-  }
+  <div class="divider-container">
+    <div class="divider"></div>
+    <span class="divider-label">{{ 'experiments.details.form.sections.required' | transloco }}</span>
+    <div class="divider"></div>
+  </div>
 
   <div class="input-group">
     <label>{{ 'experiments.details.form.labels.reactantA' | transloco }}</label>
-    <div class="search-field">
-      <input type="text" formControlName="reactantA" [class.is-invalid]="isInvalid('reactantA')" [placeholder]="'experiments.details.form.placeholders.value' | transloco" />
-      @if (experimentForm.get('reactantA')?.value && formState === 'create') {
-        <span class="icon bi bi-x text-black clear-btn" (click)="clearControl('reactantA')"></span>
-      }
-    </div>
+
+    <app-reactant-selector
+      [label]="''"
+      [availableReactants]="availableReactants"
+      [reactantLimit]="1"
+      [initialValue]="initValA"
+      [clearSignal]="triggerClearA"
+      (selectionChanged)="onReactantChange('A', $event)">
+    </app-reactant-selector>
+
     @if (isInvalid('reactantA')) {
       <div class="error-message">{{ 'experiments.details.form.errors.reactantARequired' | transloco }}</div>
     }
@@ -23,24 +25,20 @@
 
   <div class="input-group">
     <label>{{ 'experiments.details.form.labels.reactantB' | transloco }}</label>
-    <div class="search-field">
-      <input type="text" formControlName="reactantB" [class.is-invalid]="isInvalid('reactantB')" [placeholder]="'experiments.details.form.placeholders.value' | transloco" />
-      @if (experimentForm.get('reactantB')?.value && formState === 'create') {
-        <span class="icon bi bi-x text-black clear-btn" (click)="clearControl('reactantB')"></span>
-      }
-    </div>
-    @if (isInvalid("reactantB")) {
+
+    <app-reactant-selector
+      [label]="''"
+      [availableReactants]="availableReactants"
+      [reactantLimit]="1"
+      [initialValue]="initValB"
+      [clearSignal]="triggerClearB"
+      (selectionChanged)="onReactantChange('B', $event)">
+    </app-reactant-selector>
+
+    @if (isInvalid('reactantB')) {
       <div class="error-message">{{ 'experiments.details.form.errors.reactantBRequired' | transloco }}</div>
     }
   </div>
-
-  @if (formState === 'edit') {
-    <div class="divider-container">
-      <div class="divider"></div>
-      <span class="divider-label">{{ 'experiments.details.form.sections.required' | transloco }}</span>
-      <div class="divider"></div>
-    </div>
-  }
 
   <div class="input-group">
     <label>{{ 'experiments.details.form.labels.date' | transloco }}</label>
@@ -277,6 +275,16 @@
   </div>
 
   <div class="input-group">
+    <label>{{ 'experiments.details.form.labels.doi' | transloco }}</label>
+    <div class="search-field" [class.has-value]="experimentForm.get('doi')?.value">
+      <input formControlName="doi" [placeholder]="'experiments.details.form.placeholders.value' | transloco" />
+      @if (experimentForm.get('doi')?.value) {
+        <span class="icon bi bi-x text-black clear-btn" (click)="clearControl('doi')"></span>
+      }
+    </div>
+  </div>
+
+  <div class="input-group">
     <label>{{ 'experiments.details.form.labels.comment' | transloco }}</label>
     <div class="search-field align-items-start">
       <textarea formControlName="comment" [placeholder]="'experiments.details.form.placeholders.comment' | transloco" rows="3"></textarea>
@@ -289,7 +297,9 @@
   <div class="action-buttons mt-4">
     <button type="submit" class="form-button primary">{{ 'experiments.details.form.buttons.submit' | transloco }}</button>
     <button type="button" class="form-button" (click)="onCancel()">{{ 'experiments.details.form.buttons.cancel' | transloco }}</button>
-    <button type="button" class="form-button error" (click)="onArchive()">{{ 'experiments.details.form.buttons.archive' | transloco }}</button>
+    @if (formState === 'edit') {
+      <button type="button" class="form-button error" (click)="onArchive()">{{ 'experiments.details.form.buttons.archive' | transloco }}</button>
+    }
   </div>
 
 </form>

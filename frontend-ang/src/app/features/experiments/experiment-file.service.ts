@@ -1,6 +1,10 @@
 import { Injectable } from '@angular/core';
 import { Globals } from '../../core/global/globals';
 import { HttpClient } from '@angular/common/http';
+import { SearchParametersDto } from '../../shared/dtos/search.dto';
+import { Observable } from 'rxjs';
+import { GetExperimentDto } from './experiment.dto';
+import { MOCK_EXPERIMENTS } from '../../mock/mock-experiments';
 
 @Injectable({
   providedIn: 'root',
@@ -14,6 +18,26 @@ class ExperimentFileService {
   ) {
     this.experimentFileBaseUri = this.globals.backendUri + '/file'; //TODO: Set correct path
   }
+
+  /*
+  uploadFile(experimentUuid: string, file: File): Observable<any> {
+    //TODO: remove when backend connected
+    return of({ status: 'Mock Upload Success' }).pipe(delay(1000));
+    const formData = new FormData();
+    formData.append('file', file);
+    return this.httpClient.post(`${this.fileBaseUri}/${experimentUuid}/`, formData);
+  }
+
+  download()
+
+  getFileDetails()
+
+  removeFile(experimentUuid: string, fileUuid: string): Observable<void> {
+    //TODO: remove when backend connected
+    return of(undefined).pipe(delay(500));
+    return this.httpClient.delete<void>(`${this.fileBaseUri}/${experimentUuid}/${fileUuid}`);
+  }
+  */
 
   /**
    * Extracts metadata from a file and returns it as an object.

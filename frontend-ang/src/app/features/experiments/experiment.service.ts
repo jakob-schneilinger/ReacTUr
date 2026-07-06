@@ -30,56 +30,61 @@ export class ExperimentService {
 
   createExperiment(experimentData: SaveExperimentDto): Observable<GetExperimentDto> {
     //TODO: remove when backend connected
-    return of(MOCK_EXPERIMENTS[0]).pipe(delay(500));
+    //return of(MOCK_EXPERIMENTS[0]).pipe(delay(500));
     return this.httpClient.post<GetExperimentDto>(this.experimentBaseUri, experimentData);
   }
 
-  patchExperiment(uuid: string, experimentData: SaveExperimentDto): Observable<GetExperimentDto> {
+  updateExperiment(uuid: string, experimentData: SaveExperimentDto): Observable<GetExperimentDto> {
     //TODO: remove when backend connected
     const mockExp = MOCK_EXPERIMENTS.find((e) => e.uuid === uuid) || MOCK_EXPERIMENTS[0];
-    return of(mockExp).pipe(delay(500));
-    return this.httpClient.patch<GetExperimentDto>(
+    // return of(mockExp).pipe(delay(500));
+    return this.httpClient.put<GetExperimentDto>(
       `${this.experimentBaseUri}/${uuid}`,
       experimentData,
     );
   }
 
+
+  // if archived just for creator, scientist or admin visible
   getExperiment(uuid: string): Observable<GetExperimentDto> {
     //TODO: remove when backend connected
     const mockExp = MOCK_EXPERIMENTS.find((e) => e.uuid === uuid) || MOCK_EXPERIMENTS[0];
-    return of(mockExp).pipe(delay(500));
+    // return of(mockExp).pipe(delay(500));
     return this.httpClient.get<GetExperimentDto>(`${this.experimentBaseUri}/${uuid}`);
   }
 
   searchExperiments(searchParams: SearchParametersDto): Observable<GetExperimentDto[]> {
     //TODO: remove when backend connected
-    return this.mockSearchExperiment(searchParams);
+    //return this.mockSearchExperiment(searchParams);
     const params = this.buildHttpParams(searchParams);
     return this.httpClient.get<GetExperimentDto[]>(this.experimentBaseUri, { params });
   }
 
   getAuditLogs(uuid: string): Observable<AuditLogDto[]> {
     //TODO: remove when backend connected
-    return of([] as AuditLogDto[]).pipe(delay(500)); // Mocking empty logs
+    //return of([] as AuditLogDto[]).pipe(delay(500)); // Mocking empty logs
     return this.httpClient.get<AuditLogDto[]>(`${this.experimentBaseUri}/${uuid}/audit_logs`);
   }
 
+  // normal user gets own archived experiments, admin gets all
   getArchivedExperiments(): Observable<GetExperimentDto[]> {
     //TODO: remove when backend connected
-    return of(MOCK_EXPERIMENTS.slice(0, 2)).pipe(delay(500)); // Mocking a couple archived
+    //return of(MOCK_EXPERIMENTS.slice(0, 2)).pipe(delay(500)); // Mocking a couple archived
     return this.httpClient.get<GetExperimentDto[]>(`${this.experimentBaseUri}/archived`);
   }
 
+  // only admin, creator or scientist can restore
   archiveExperiment(uuid: string): Observable<void> {
     //TODO: remove when backend connected
-    return of(undefined).pipe(delay(500));
+    //return of(undefined).pipe(delay(500));
     return this.httpClient.delete<void>(`${this.experimentBaseUri}/${uuid}`);
   }
 
+  // only admin, creator or scientist can restore
   restoreExperiment(uuid: string): Observable<GetExperimentDto> {
     //TODO: remove when backend connected
     const mockExp = MOCK_EXPERIMENTS.find((e) => e.uuid === uuid) || MOCK_EXPERIMENTS[0];
-    return of(mockExp).pipe(delay(500));
+    //return of(mockExp).pipe(delay(500));
     return this.httpClient.put<GetExperimentDto>(`${this.experimentBaseUri}/${uuid}/restore`, {});
   }
 
@@ -100,22 +105,6 @@ export class ExperimentService {
     return this.httpClient.get<ExperimentDataDto[]>(`${this.experimentBaseUri}/bulk-data`, {
       params,
     });
-  }
-
-  // --- FILE ENDPOINTS ---
-
-  uploadFile(experimentUuid: string, file: File): Observable<any> {
-    //TODO: remove when backend connected
-    return of({ status: 'Mock Upload Success' }).pipe(delay(1000));
-    const formData = new FormData();
-    formData.append('file', file);
-    return this.httpClient.post(`${this.fileBaseUri}/${experimentUuid}/`, formData);
-  }
-
-  removeFile(experimentUuid: string, fileUuid: string): Observable<void> {
-    //TODO: remove when backend connected
-    return of(undefined).pipe(delay(500));
-    return this.httpClient.delete<void>(`${this.fileBaseUri}/${experimentUuid}/${fileUuid}`);
   }
 
   // --- UTILITIES & MOCK IMPLEMENTATIONS ---

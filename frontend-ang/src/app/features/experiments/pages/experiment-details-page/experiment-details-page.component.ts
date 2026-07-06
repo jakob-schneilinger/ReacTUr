@@ -93,10 +93,28 @@ export class ExperimentDetailsPageComponent implements OnInit {
         this.router.navigate(['/search'], { skipLocationChange: true });
         return;
       }
+
+
+      this.experimentService.getExperiment(experimentUuid).subscribe({
+        next: (value: GetExperimentDto) => {
+          this.experiment = value;
+          this.cdr.markForCheck();
+        },
+        error: (err: any) => {
+          this.notification.error(
+            this.transloco.translate('experiments.details.notifications.errorTitle'),
+            this.transloco.translate('experiments.details.notifications.loadExpError', {
+              error: err.error || err.message || err,
+            }),
+          );
+          this.router.navigate(['/search'], { skipLocationChange: true });
+          return;
+        },
+      });
+
+      /*
       if (this.role != 'ADMIN') {
-        console.log('Test1');
         if (this.user?.email) {
-          console.log('Test2');
           // TODO: check role and permissions, switch to 'view' if not enough permission
           this.authService.hasExperimentPermission(experimentUuid, this.user?.id).subscribe({
             next: (hasPermission) =>
@@ -116,20 +134,7 @@ export class ExperimentDetailsPageComponent implements OnInit {
           });
         }
       }
-      this.experimentService.getExperiment(experimentUuid).subscribe({
-        next: (value: GetExperimentDto) => {
-          this.experiment = value;
-          this.cdr.markForCheck();
-        },
-        error: (err: any) => {
-          this.notification.error(
-            this.transloco.translate('experiments.details.notifications.errorTitle'),
-            this.transloco.translate('experiments.details.notifications.loadExpError', {
-              error: err.error || err.message || err,
-            }),
-          );
-        },
-      });
+      */
       //TODO: load experiment data from backend
     } else {
       this.state = 'create';
