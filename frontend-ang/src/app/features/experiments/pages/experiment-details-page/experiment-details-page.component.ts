@@ -277,7 +277,13 @@ export class ExperimentDetailsPageComponent implements OnInit {
         this.uploadedFilesMap.set(this.getFileFingerprint(file), fileId);
       } catch (error: any) {
         console.error(`Failed to upload ${file.name}:`, error);
-        this.notification.error('Upload Error', `Failed to upload: ${file.name}`);
+
+        this.notification.error(
+          this.transloco.translate('experiments.details.notifications.uploadErrorTitle'),
+          this.transloco.translate('experiments.details.notifications.uploadErrorMessage', {
+            fileName: file.name,
+          }),
+        );
       }
     }
   }

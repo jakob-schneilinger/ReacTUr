@@ -3,6 +3,7 @@ import { CanActivate, ActivatedRouteSnapshot, Router } from '@angular/router';
 import { AuthService } from './auth.service';
 import { NotificationService } from '../layout/notification/notification.service';
 import { Observable, tap } from 'rxjs';
+import { TranslocoService } from '@jsverse/transloco';
 
 @Injectable({
   providedIn: 'root',
@@ -12,6 +13,7 @@ export class RoleGuard implements CanActivate {
     private authService: AuthService,
     private router: Router,
     private notification: NotificationService,
+    private transloco: TranslocoService
   ) {}
 
   canActivate(route: ActivatedRouteSnapshot): Observable<boolean> {
@@ -21,8 +23,8 @@ export class RoleGuard implements CanActivate {
       tap((hasAccess: boolean) => {
         if (!hasAccess) {
           this.notification.error(
-            'Access Denied',
-            "You don't have the required permissions to access this page.",
+            this.transloco.translate('service.notifications.accessErrorTitle'),
+            this.transloco.translate('service.notifications.accessErrorMessage'),
           );
 
           this.authService.hasRole(['UNAUTHORIZED']).subscribe({

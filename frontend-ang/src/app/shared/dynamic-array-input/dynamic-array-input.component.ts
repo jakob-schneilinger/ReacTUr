@@ -2,6 +2,7 @@ import { Component, Input, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormArray, FormBuilder, Validators, FormControl } from '@angular/forms';
 import { NotificationService } from '../../core/layout/notification/notification.service';
+import { TranslocoService } from '@jsverse/transloco';
 
 @Component({
   selector: 'app-dynamic-array-input',
@@ -23,6 +24,7 @@ export class DynamicArrayInputComponent {
     private fb: FormBuilder,
     private notification: NotificationService,
     private cdr: ChangeDetectorRef,
+    private transloco: TranslocoService
   ) {}
 
   get controls() {
@@ -33,8 +35,8 @@ export class DynamicArrayInputComponent {
     const lastControl = this.formArray.at(this.formArray.length - 1);
     if (lastControl && !lastControl.value) {
       this.notification.error(
-        'Field is empty',
-        'Please fill out the last field before adding a new one.',
+        this.transloco.translate('reactants.details.notifications.fieldEmptyErrorTitle'),
+        this.transloco.translate('reactants.details.notifications.fieldEmptyErrorMessage'),
       );
       return;
     }

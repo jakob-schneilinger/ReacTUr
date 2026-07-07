@@ -14,28 +14,24 @@
     "myExperiments": "test",
     "language": "test"
   },
-
   "selectionOptions": {
     "type": "test",
     "modality": "test",
     "instrument": "test",
     "solvent": "test"
   },
-
   "userRoles": {
     "user": "test",
     "supervisor": "test",
     "unauthorized": "test",
     "admin": "test"
   },
-
   "login": {
     "title": "test",
     "login": "test",
     "loginInstruction": "test",
     "loginButton": "test"
   },
-
   "planning": {
     "title": "test",
     "subtitle": "test",
@@ -50,7 +46,6 @@
     "reactionEnd": "test",
     "emptyChart": "test"
   },
-
   "admin": {
     "user": {
       "title": "test",
@@ -109,7 +104,6 @@
       }
     }
   },
-
   "shared": {
     "file": "test",
     "upload": {
@@ -300,6 +294,16 @@
       "drawMolecule": "test",
       "clearSearch": "test",
       "removeReactant": "test"
+    },
+    "notifications": {
+      "errorTitle": "test",
+      "experimentDetailsErrorMessage": "test",
+      "restoreErrorMessage": "test",
+      "archiveErrorMessage": "test",
+      "restoreTitle": "test",
+      "restoreMessage": "test",
+      "archiveTitle": "test",
+      "archiveMessage": "test"
     }
   },
   "reactants": {
@@ -447,7 +451,9 @@
         "generateErrorMessage": "test",
         "structureSelectTitle": "test",
         "structureSelectErrorTitle": "test",
-        "structureSelectErrorMessage": "test"
+        "structureSelectErrorMessage": "test",
+        "fieldEmptyErrorTitle": "test",
+        "fieldEmptyErrorMessage": "test"
       },
       "structure": {
         "failedGenerate": "test",
@@ -497,44 +503,43 @@
       "buttons": {
         "edit": "test",
         "close": "test"
-      },
-      "notifications": {
-        "missing3dFileTitle": "test",
-        "missing3dFileMessage": "test"
       }
     },
-    "history": {
-      "title": "test",
-      "noHistory": "test"
-    },
-    "extractedMetadata": {
-      "title": "test",
-      "description": "test",
-      "table": {
-        "keep": "test",
-        "property": "test",
-        "value": "test"
-      },
-      "labels": {
-        "date": "test",
-        "temperature": "test",
-        "instrument": "test",
-        "modality": "test",
-        "wavelength": "test",
-        "reactantA": "test",
-        "concentrationA": "test",
-        "reactantB": "test",
-        "concentrationB": "test",
-        "comment": "test"
-      },
-      "buttons": {
-        "useSelected": "test",
-        "appliedTitle": "test",
-        "appliedMessage": "test"
-      }
+    "notifications": {
+      "missing3dFileTitle": "test",
+      "missing3dFileMessage": "test"
     }
   },
-
+  "history": {
+    "title": "test",
+    "noHistory": "test"
+  },
+  "extractedMetadata": {
+    "title": "test",
+    "description": "test",
+    "table": {
+      "keep": "test",
+      "property": "test",
+      "value": "test"
+    },
+    "labels": {
+      "date": "test",
+      "temperature": "test",
+      "instrument": "test",
+      "modality": "test",
+      "wavelength": "test",
+      "reactantA": "test",
+      "concentrationA": "test",
+      "reactantB": "test",
+      "concentrationB": "test",
+      "comment": "test"
+    },
+    "buttons": {
+      "useSelected": "test",
+      "appliedTitle": "test",
+      "appliedMessage": "test"
+    }
+  },
   "experiments": {
     "view": {
       "title": "test",
@@ -659,7 +664,11 @@
         "reactantLoadError": "test",
         "historyLoadError": "test",
         "deleteFileErrorTitle": "test",
-        "deleteFileErrorMessage": "test"
+        "deleteFileErrorMessage": "test",
+        "metaDataTitle": "test",
+        "metaDataMessage": "test",
+        "uploadErrorTitle": "test",
+        "uploadErrorMessage": "test"
       }
     },
     "my": {
@@ -731,6 +740,14 @@
     "buttons": {
       "cancel": "test",
       "download": "test"
+    }
+  },
+  "service": {
+    "notifications": {
+      "auth": {
+        "accessErrorTitle": "test",
+        "accessErrorMessage": "test"
+      }
     }
   }
 }

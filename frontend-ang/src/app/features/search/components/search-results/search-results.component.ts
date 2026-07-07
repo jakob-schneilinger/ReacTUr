@@ -136,7 +136,10 @@ export class SearchResultsComponent {
       this.selectedExperimentForView = experimentToView;
       this.isViewModalOpen = true;
     } else {
-      this.notification.error('Error', 'Experiment details could not be found.');
+      this.notification.error(
+        this.transloco.translate('search.notifications.errorTitle'),
+        this.transloco.translate('search.notifications.experimentDetailsErrorMessage'),
+      );
     }
   }
 
@@ -172,7 +175,10 @@ export class SearchResultsComponent {
     if (!this.restoreExperimentUuid) return;
     this.experimentService.restoreExperiment(this.restoreExperimentUuid).subscribe({
       next: (value) => {
-        this.notification.success('Experiment restored', 'Experiment restored successfully');
+        this.notification.success(
+          this.transloco.translate('search.notifications.restoreTitle'),
+          this.transloco.translate('search.notifications.restoreMessage'),
+        );
         this.experiments = this.experiments.filter(
           (exp) => exp.uuid !== this.restoreExperimentUuid,
         );
@@ -180,7 +186,10 @@ export class SearchResultsComponent {
         this.listChanged.emit();
       },
       error: (err) => {
-        this.notification.error('Error', 'Could not restore experiment');
+        this.notification.error(
+          this.transloco.translate('search.notifications.errorTitle'),
+          this.transloco.translate('search.notifications.restoreErrorMessage'),
+        );
         this.cancelRestore();
         this.cdr.markForCheck();
       },
@@ -202,12 +211,18 @@ export class SearchResultsComponent {
     if (!this.archiveExperimentUuid) return;
     this.experimentService.archiveExperiment(this.archiveExperimentUuid).subscribe({
       next: () => {
-        this.notification.success('Experiment archived', 'Experiment archived successfully');
+        this.notification.success(
+          this.transloco.translate('search.notifications.archiveTitle'),
+          this.transloco.translate('search.notifications.archiveMessage'),
+        );
         this.cancelArchive();
         this.listChanged.emit();
       },
       error: () => {
-        this.notification.error('Error', 'Could not archive experiment');
+        this.notification.error(
+          this.transloco.translate('search.notifications.errorTitle'),
+          this.transloco.translate('search.notifications.archiveErrorMessage'),
+        );
         this.cancelArchive();
         this.cdr.markForCheck();
       },

@@ -410,8 +410,8 @@ export class ExperimentDetailsFormComponent implements OnInit, OnDestroy, OnChan
     this.experimentForm.updateValueAndValidity();
 
     this.notification.success(
-      'Metadata Applied',
-      'Form fields have been populated from the uploaded file.',
+      this.transloco.translate('experiments.details.notifications.metaDataTitle'),
+      this.transloco.translate('experiments.details.notifications.metaDataMessage')
     );
   }
 

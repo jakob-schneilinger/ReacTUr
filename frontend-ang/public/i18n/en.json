@@ -14,28 +14,24 @@
     "myExperiments": "My Experiments",
     "language": "Language"
   },
-
   "selectionOptions": {
     "type": "Type",
     "modality": "Modality",
     "instrument": "Instrument",
     "solvent": "Solvent"
   },
-
   "userRoles": {
     "user": "USER",
     "supervisor": "SUPERVISOR",
     "unauthorized": "UNAUTHORIZED",
     "admin": "ADMIN"
   },
-
   "login": {
     "title": "ReacTUr",
     "login": "Login",
     "loginInstruction": "Please log in with your TU account to continue.",
     "loginButton": "Login with TU SSO"
   },
-
   "planning": {
     "title": "Experiment Planning (Kinetics)",
     "subtitle": "Simulate 2nd order reactions based on different starting concentrations.",
@@ -50,7 +46,6 @@
     "reactionEnd": "99% Conversion (Reaction End)",
     "emptyChart": "Enter parameters and click 'Simulate Kinetics' to view the reaction profile."
   },
-
   "admin": {
     "user": {
       "title": "User Management",
@@ -109,7 +104,6 @@
       }
     }
   },
-
   "shared": {
     "file": "File",
     "upload": {
@@ -300,6 +294,16 @@
       "drawMolecule": "Draw Molecule",
       "clearSearch": "Clear Search",
       "removeReactant": "Remove Reactant"
+    },
+    "notifications": {
+      "errorTitle": "Error",
+      "experimentDetailsErrorMessage": "Experiment details could not be found.",
+      "restoreErrorMessage": "Could not restore experiment.",
+      "archiveErrorMessage": "Could not archive experiment.",
+      "restoreTitle": "Experiment restored",
+      "restoreMessage": "Experiment restored successfully.",
+      "archiveTitle": "Experiment archived",
+      "archiveMessage": "Experiment archived successfully."
     }
   },
   "reactants": {
@@ -447,7 +451,9 @@
         "generateErrorMessage": "Error: {{error}}",
         "structureSelectTitle": "Selection Successful",
         "structureSelectErrorTitle": "Structure Selection Failed",
-        "structureSelectErrorMessage": "Failed to select structure! Error: {{error}}"
+        "structureSelectErrorMessage": "Failed to select structure! Error: {{error}}",
+        "fieldEmptyErrorTitle": "Field is empty",
+        "fieldEmptyErrorMessage": "Please fill out the last field before adding a new one."
       },
       "structure": {
         "failedGenerate": "Failed to generate structure.",
@@ -534,7 +540,6 @@
       }
     }
   },
-
   "experiments": {
     "view": {
       "title": "Details",
@@ -659,7 +664,11 @@
         "reactantLoadError": "Unable to fetch reactants. Please reload the page! Error: {{error}}",
         "historyLoadError": "Could not load experiment history.",
         "deleteFileErrorTitle": "Delete Error",
-        "deleteFileErrorMessage": "Could not delete file."
+        "deleteFileErrorMessage": "Could not delete file.",
+        "metaDataTitle": "Metadata Applied",
+        "metaDataMessage": "Form fields have been populated from the uploaded file.",
+        "uploadErrorTitle": "Upload Error",
+        "uploadErrorMessage": "Failed to upload: {{fileName}}"
       }
     },
     "my": {
@@ -731,6 +740,14 @@
     "buttons": {
       "cancel": "Cancel",
       "download": "Download {{format}}"
+    }
+  },
+  "service": {
+    "notifications": {
+      "auth": {
+        "accessErrorTitle": "Access Denied",
+        "accessErrorMessage": "You don't have the required permissions to access this page."
+      }
     }
   }
 }
