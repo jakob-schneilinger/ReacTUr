@@ -27,10 +27,9 @@ class ExperimentFileService {
     );
   }
 
-  //TODO: get return type from backend
   downloadFile(fileId: string): Observable<Blob> {
     return this.httpClient.get(`${this.fileBaseUri}/${fileId}`, {
-      responseType: 'blob' // Tell Angular to expect binary data, not JSON
+      responseType: 'blob'
     });
   }
 

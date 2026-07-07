@@ -143,7 +143,7 @@ export class PasteTableComponent {
 
     this.fileGenerated.emit(file);
 
-    //TODO: add if data should be removed from table
+    //add if data should be removed from table
     //this.clearTable();
   }
 

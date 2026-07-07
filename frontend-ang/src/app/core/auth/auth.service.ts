@@ -124,9 +124,4 @@ export class AuthService {
       })
     );
   }
-
-  // TODO: think about function, placement, parameters.
-  public hasExperimentPermission(experimentUuid: string, userUuid: string): Observable<boolean> {
-    return of(false);
-  }
 }

@@ -14,7 +14,7 @@ export class FileService {
     private globals: Globals,
   ) {
     this.reactantFileBaseUri = this.globals.backendUri + '/structure/file';
-    this.experimentFileBaseUri = this.globals.backendUri + '/file'; //TODO: Set correct path
+    this.experimentFileBaseUri = this.globals.backendUri + '/file';
   }
 
 }

@@ -1,4 +1,3 @@
-//TODO: overthink interface
 import { ChemicalTypeDto } from '../../shared/dtos/selection-option.dto';
 import { StructureFlag } from './structure-flag.enum';
 
@@ -8,7 +7,7 @@ import { StructureFlag } from './structure-flag.enum';
 export interface ReactantDto {
   uuid: string;
   smiles: string;
-  chemicalType?: ChemicalTypeDto; // TODO: should be mandatory in the future
+  chemicalType: ChemicalTypeDto;
   shortName: string;
   chemicalName?: string;
   flag?: StructureFlag;
@@ -32,7 +31,7 @@ export interface ReactantDetailDto extends ReactantDto {
  */
 export interface SaveReactantDto {
   smiles: string;
-  chemicalType: string; //uuid TODO: think about renaming (e.g. to chemicalTypeUuid) also with all other uuid strings
+  chemicalType: string; //uuid
   shortName: string;
   additionalShortNames?: string[];
   chemicalName?: string;

@@ -303,8 +303,7 @@ export class ReactantOverviewPageComponent implements OnInit {
     }
   }
 
-  openDraw() {
-    //TODO: add RDKit check if current Search is SMILES
+  openDraw() {x
     this.currentSmilesForModal = this.searchTerm;
     this.isDrawModalOpen = true;
   }

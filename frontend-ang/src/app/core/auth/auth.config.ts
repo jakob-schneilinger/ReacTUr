@@ -13,7 +13,6 @@ export const authConfig: AuthConfig = {
   responseType: 'code',
 
   // The data we want to get form keycloak (openid for login, profile for names, offline_access for JWT token)
-  //TODO: Do we need email?
   scope: 'openid profile email offline_access',
 
   //TODO: Set to false in Production
