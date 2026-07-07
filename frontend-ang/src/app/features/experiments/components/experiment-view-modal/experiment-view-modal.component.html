@@ -120,14 +120,14 @@
 
   <ng-container footer>
     @if (selectedExperiment !== undefined && selectedExperiment !== null ) {
-      <button type="button" class="btn btn-outline-primary" (click)="planExperiment(selectedExperiment)">
+      <button type="button" class="" (click)="planExperiment(selectedExperiment)">
         <i class="bi bi-graph-up me-1"></i> Plan Experiment
       </button>
-    }
 
-    @if (hasWritePermission) {
-      <button type="button" class="btn primary" (click)="editExperiment(selectedExperiment?.uuid)">Edit Experiment</button>
+      @if (hasWritePermission && !selectedExperiment.archivedAt) {
+        <button type="button" class="primary" (click)="editExperiment(selectedExperiment.uuid)">Edit Experiment</button>
+      }
+      <button type="button" class="" (click)="close.emit()">Close</button>
     }
-    <button type="button" class="btn" (click)="close.emit()">Close</button>
   </ng-container>
 </app-modal>

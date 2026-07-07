@@ -32,22 +32,28 @@
 
       <div class="experiments-layout">
 
-        <app-experiment-results class="experiment-column"
-                                state="has-results"
-                                [disableExport]="true"
-                                [showPages]="false"
-                                [experiments]="leftHalf"
-                                [totalElements]="leftHalf.length"
-                                [pageSize]="leftHalf.length || 1">
+        <app-experiment-results
+          class="experiment-column"
+          state="has-results"
+          [disableExport]="true"
+          [showPages]="false"
+          [allowArchive]="viewMode === 'active'"
+          [experiments]="leftHalf"
+          [totalElements]="leftHalf.length"
+          [pageSize]="leftHalf.length || 1"
+          (listChanged)="onListChanged()">
         </app-experiment-results>
 
-        <app-experiment-results class="experiment-column"
-                                state="has-results"
-                                [disableExport]="true"
-                                [showPages]="false"
-                                [experiments]="rightHalf"
-                                [totalElements]="rightHalf.length"
-                                [pageSize]="rightHalf.length || 1">
+        <app-experiment-results
+          class="experiment-column"
+          state="has-results"
+          [disableExport]="true"
+          [showPages]="false"
+          [allowArchive]="viewMode === 'active'"
+          [experiments]="rightHalf"
+          [totalElements]="rightHalf.length"
+          [pageSize]="rightHalf.length || 1"
+          (listChanged)="onListChanged()">
         </app-experiment-results>
 
       </div>

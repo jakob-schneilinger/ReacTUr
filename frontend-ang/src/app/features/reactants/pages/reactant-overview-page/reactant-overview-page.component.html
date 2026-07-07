@@ -75,7 +75,7 @@
   [title]="'reactants.modals.restore.title' | transloco"
   [message]="'reactants.modals.restore.message' | transloco: { name: pendingRestoreReactant?.shortName }"
   [confirmLabel]="'reactants.modals.restore.confirm' | transloco"
-  confirmButtonClass="primary"
+  confirmButtonClass="restore"
   (confirm)="executeRestore()"
   (cancel)="cancelRestore()">
 </app-confirm-modal>

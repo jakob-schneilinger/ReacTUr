@@ -18,6 +18,7 @@
       type="button"
       [class.primary]="confirmButtonClass === 'primary'"
       [class.error-warning]="confirmButtonClass === 'danger'"
+      [class.restore]="confirmButtonClass === 'restore'"
       (click)="onConfirm()">
       {{ confirmLabel }}
     </button>

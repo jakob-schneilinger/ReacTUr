@@ -133,8 +133,8 @@
     "modals": {
       "archive": {
         "title": "Archive Reactant",
-        "message": "Are you sure you want to permanently archive the reactant <strong>{{name}}</strong>?",
-        "confirm": "Permanently Archive"
+        "message": "Are you sure you want to archive the reactant <strong>{{name}}</strong>?",
+        "confirm": "Archive"
       },
       "restore": {
         "title": "Restore Reactant",
@@ -215,8 +215,8 @@
         },
         "archive": {
           "title": "Archive Reactant",
-          "message": "Are you sure you want to permanently archive the reactant {{name}}?",
-          "confirm": "Permanently Archive"
+          "message": "Are you sure you want to archive the reactant {{name}}?",
+          "confirm": "Archive"
         },
         "cancel": {
           "title": "Unsaved Changes",
@@ -374,8 +374,8 @@
       "modals": {
         "archive": {
           "title": "Archive Experiment",
-          "message": "Are you sure you want to permanently archive this experiment? This action cannot be undone.",
-          "confirm": "Permanently Archive"
+          "message": "Are you sure you want to archive this experiment? This action cannot be undone.",
+          "confirm": "Archive"
         },
         "cancel": {
           "title": "Unsaved Changes",
@@ -386,8 +386,9 @@
       },
       "notifications": {
         "errorTitle": "Error",
-        "loadError": "Failed to load experiment data",
+        "loadError": "Failed to load experiment",
         "loadExpError": "Failed to load experiment data! Error: {{error}}",
+        "loadArchivedError": "Failed to load experiment data! Can not load archived experiment.",
         "permissionErrorTitle": "Permission Error",
         "permissionErrorMessage": "Permission Error for this Experiment! Error: {{error}}",
         "optionLoadErrorTitle": "Option Loading Error",

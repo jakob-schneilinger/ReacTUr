@@ -57,6 +57,10 @@ export class MyExperimentsPageComponent implements OnInit {
     });
   }
 
+  onListChanged(): void {
+    this.loadExperiments();
+  }
+
   private splitExperiments(): void {
     const halfIndex = Math.ceil(this.experiments.length / 2);
     this.leftHalf = this.experiments.slice(0, halfIndex);

@@ -108,9 +108,18 @@
               </button>
             }
 
+            @if (allowArchive && !exp.archivedAt) {
+              <button type="button"
+                      class="btn-custom error"
+                      (click)="archiveExperiment(exp.uuid)">
+                <i class="bi bi-archive"></i>
+                Archive
+              </button>
+            }
+
             @if (!!exp.archivedAt) {
               <button type="button"
-                      class="btn-custom"
+                      class="btn-custom restore"
                       (click)="restoreExperiment(exp.uuid)">
                 <i class="bi bi-arrow-counterclockwise"></i>
                 Restore
@@ -175,8 +184,20 @@
     [title]="'Restore Experiment'"
     [message]="'Are you sure you want to restore this experiment'"
     [confirmLabel]="'Restore'"
-    confirmButtonClass="primary"
+    confirmButtonClass="restore"
     (confirm)="executeRestore()"
     (cancel)="cancelRestore()">
+  </app-confirm-modal>
+}
+
+@if (isArchiveExperimentModalOpen) {
+  <app-confirm-modal
+    [isOpen]="true"
+    [title]="'Archive Experiment'"
+    [message]="'Are you sure you want to archive this experiment?'"
+    [confirmLabel]="'Archive'"
+    confirmButtonClass="danger"
+    (confirm)="executeArchive()"
+    (cancel)="cancelArchive()">
   </app-confirm-modal>
 }

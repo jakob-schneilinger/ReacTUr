@@ -103,13 +103,21 @@ export class ExperimentDetailsPageComponent implements OnInit {
 
       this.experimentService.getExperiment(experimentUuid).subscribe({
         next: (value: GetExperimentDto) => {
+          if (!!value.archivedAt) {
+            this.notification.error(
+              this.transloco.translate('experiments.details.notifications.loadError'),
+              this.transloco.translate('experiments.details.notifications.loadArchivedError'),
+            );
+            this.router.navigate(['/search']);
+            return;
+          }
           this.experiment = value;
           this.loadFakeFiles();
           this.cdr.markForCheck();
         },
         error: (err: any) => {
           this.notification.error(
-            this.transloco.translate('experiments.details.notifications.errorTitle'),
+            this.transloco.translate('experiments.details.notifications.loadError'),
             this.transloco.translate('experiments.details.notifications.loadExpError', {
               error: err.error || err.message || err,
             }),

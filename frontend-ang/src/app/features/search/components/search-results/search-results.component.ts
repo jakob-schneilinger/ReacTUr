@@ -29,6 +29,7 @@ export type SearchState = 'initial' | 'no-results' | 'has-results';
 })
 export class SearchResultsComponent {
   @Input() disableExport: boolean = false;
+  @Input() allowArchive: boolean = false;
   @Input() showPages: boolean = true;
   @Input() state: SearchState = 'initial';
   @Input() experiments: GetExperimentDto[] = [];
@@ -36,6 +37,7 @@ export class SearchResultsComponent {
   @Input() totalElements: number = 0;
   @Input() pageSize: number = 25;
 
+  @Output() listChanged = new EventEmitter<void>();
   @Output() pageChange = new EventEmitter<number>();
   @Output() getExport = new EventEmitter<GetExperimentDto[]>();
   @Output() getExportAll = new EventEmitter<void>();
@@ -45,14 +47,17 @@ export class SearchResultsComponent {
   selectedExperiments = new Map<string, GetExperimentDto>();
   expandedCardIds = new Set<string>();
 
+  user: GetUserDto | null = null;
+
   isViewModalOpen: boolean = false;
   selectedExperimentForView: GetExperimentDto | undefined;
   hasWritePermission: boolean = false;
 
-  user: GetUserDto | null = null;
-
-  restoreExperimentUuid: string = "";
+  restoreExperimentUuid: string = '';
   isRestoreExperimentModalOpen: boolean = false;
+
+  archiveExperimentUuid: string = '';
+  isArchiveExperimentModalOpen: boolean = false;
 
   constructor(
     private notification: NotificationService,
@@ -118,11 +123,15 @@ export class SearchResultsComponent {
     this.authService.getLoggedInUser().subscribe((value) => (this.user = value));
 
     if (!this.user) return;
-    this.hasWritePermission = !!this.authService.hasExperimentPermission(uuid, this.user.id);
+    const userId = this.user.id;
 
     const experimentToView = this.experiments.find((exp) => exp.uuid === uuid);
 
     if (experimentToView) {
+      this.hasWritePermission =
+        this.user.role == 'ADMIN' ||
+        experimentToView.createdBy.id === userId ||
+        experimentToView.metadata.scientist.id === userId;
       this.selectedExperimentForView = experimentToView;
       this.isViewModalOpen = true;
     } else {
@@ -148,7 +157,7 @@ export class SearchResultsComponent {
 
   cancelRestore() {
     this.isRestoreExperimentModalOpen = false;
-    this.restoreExperimentUuid = "";
+    this.restoreExperimentUuid = '';
   }
 
   restoreExperiment(uuid: string): void {
@@ -167,11 +176,38 @@ export class SearchResultsComponent {
           (exp) => exp.uuid !== this.restoreExperimentUuid,
         );
         this.cancelRestore();
-        this.cdr.markForCheck();
+        this.listChanged.emit();
       },
       error: (err) => {
         this.notification.error('Error', 'Could not restore experiment');
         this.cancelRestore();
+        this.cdr.markForCheck();
+      },
+    });
+  }
+
+  cancelArchive() {
+    this.isArchiveExperimentModalOpen = false;
+    this.archiveExperimentUuid = '';
+  }
+
+  archiveExperiment(uuid: string): void {
+    if (!uuid) return;
+    this.archiveExperimentUuid = uuid;
+    this.isArchiveExperimentModalOpen = true;
+  }
+
+  executeArchive() {
+    if (!this.archiveExperimentUuid) return;
+    this.experimentService.archiveExperiment(this.archiveExperimentUuid).subscribe({
+      next: () => {
+        this.notification.success('Experiment archived', 'Experiment archived successfully');
+        this.cancelArchive();
+        this.listChanged.emit();
+      },
+      error: () => {
+        this.notification.error('Error', 'Could not archive experiment');
+        this.cancelArchive();
         this.cdr.markForCheck();
       },
     });

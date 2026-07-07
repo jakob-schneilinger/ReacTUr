@@ -26,7 +26,7 @@
 <app-confirm-modal
   [isOpen]="isDeleteFileModalOpen"
   title="Remove File"
-  [message]="'Are you sure you want to permanently remove <strong>' + pendingFileName + '</strong> from the upload list?'"
+  [message]="'Are you sure you want to <strong>permanently</strong> remove <strong>' + pendingFileName + '</strong> from the upload list?'"
   confirmLabel="Permanently Remove"
   confirmButtonClass="danger"
   (confirm)="executeDelete()"

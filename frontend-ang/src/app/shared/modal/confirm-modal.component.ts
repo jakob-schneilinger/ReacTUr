@@ -7,14 +7,14 @@ import { AppModalComponent } from './app-modal.component';
   standalone: true,
   imports: [CommonModule, AppModalComponent],
   templateUrl: './confirm-modal.component.html',
-  styleUrls: ['./confirm-modal.component.scss']
+  styleUrls: ['./confirm-modal.component.scss'],
 })
 export class AppConfirmModalComponent {
   @Input() title: string = 'Confirm';
   @Input() message: string = 'Are you sure you want to proceed?';
   @Input() confirmLabel: string = 'Confirm';
   @Input() cancelLabel: string = 'Cancel';
-  @Input() confirmButtonClass: 'primary' | 'danger' = 'primary';
+  @Input() confirmButtonClass: 'primary' | 'danger' | 'restore' = 'primary';
   @Input() isOpen: boolean = false;
   @Input() icon: string = 'bi-exclamation-triangle-fill';
 

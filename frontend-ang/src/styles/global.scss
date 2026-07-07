@@ -88,6 +88,15 @@ button {
     }
   }
 
+  &.restore {
+    color: white;
+    background-color: $accent_light;
+
+    &:hover {
+      background-color: $accent;
+    }
+  }
+
   &.error-warning {
     color: white;
     background-color: $error;
@@ -130,4 +139,8 @@ span.error {
 
 .hidden {
   display: none;
+}
+
+.text-restore {
+  color: $accent;
 }

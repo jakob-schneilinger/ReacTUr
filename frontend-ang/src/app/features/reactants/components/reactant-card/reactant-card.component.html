@@ -64,7 +64,7 @@
           <i class="bi bi-trash"></i>
         </button>
       } @else {
-        <button class="primary compact" *appHasRole="['ADMIN']" (click)="restore.emit(reactant)" [title]="'reactants.actions.restoreReactant' | transloco">
+        <button class="restore compact" *appHasRole="['ADMIN']" (click)="restore.emit(reactant)" [title]="'reactants.actions.restoreReactant' | transloco">
           <i class="bi bi-arrow-counterclockwise"></i>
         </button>
       }
