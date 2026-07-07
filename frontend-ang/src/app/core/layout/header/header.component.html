@@ -47,7 +47,7 @@
     <div ngbDropdown placement="bottom-end" class="d-inline-block">
       <div id="profile" ngbDropdownToggle [title]="'header.userProfile' | transloco" class="bi bi-person"></div>
 
-      <div ngbDropdownMenu>
+      <div ngbDropdownMenu class="dropdown-menu-right">
         @if (isLoggedIn) {
           <button ngbDropdownItem disabled>{{'header.greetings' | transloco}}, {{ user?.firstName }}</button>
           <div class="dropdown-divider"></div>
