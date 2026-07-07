@@ -35,7 +35,7 @@
                 </div>
                 <div class="form-check form-switch mb-2">
                   <input class="form-check-input" type="checkbox" id="f_type" [(ngModel)]="exportFields.reactants.type" (change)="onFieldChange()">
-                  <label class="form-check-label" for="f_type">Chemical Type</label>
+                  <label class="form-check-label" for="f_type">{{ 'exportModal.fields.chemicalType' | transloco }}</label>
                 </div>
                 <div class="form-check form-switch mb-2">
                   <input class="form-check-input" type="checkbox" id="f_smiles" [(ngModel)]="exportFields.reactants.smiles" (change)="onFieldChange()">

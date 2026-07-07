@@ -2,12 +2,14 @@ import { ChangeDetectorRef, Component, EventEmitter, Output } from '@angular/cor
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
+import { TRANSLOCO_IMPORTS } from '../../../core/global/transloco-imports';
+
 @Component({
   selector: 'app-paste-table',
   templateUrl: './paste-table.component.html',
   styleUrls: ['./paste-table.component.scss'],
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, TRANSLOCO_IMPORTS],
 })
 export class PasteTableComponent {
   @Output() fileGenerated = new EventEmitter<File>();

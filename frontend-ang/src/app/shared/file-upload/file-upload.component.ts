@@ -14,9 +14,9 @@ import {
   SimpleChanges,
 } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { AuthService } from '../../core/auth/auth.service';
 import { NotificationService } from '../../core/layout/notification/notification.service';
-import { ExperimentService } from '../../features/experiments/experiment.service';
+import { TRANSLOCO_IMPORTS } from '../../core/global/transloco-imports';
+import { TranslocoService } from '@jsverse/transloco';
 
 @Component({
   selector: 'app-file-upload',
@@ -30,6 +30,7 @@ import { ExperimentService } from '../../features/experiments/experiment.service
     PasteTableComponent,
     UploadedFileComponent,
     AppConfirmModalComponent,
+    TRANSLOCO_IMPORTS,
   ],
 })
 export class FileUploadComponent implements OnInit, OnChanges {
@@ -45,6 +46,7 @@ export class FileUploadComponent implements OnInit, OnChanges {
   constructor(
     private route: ActivatedRoute,
     private notification: NotificationService,
+    private transloco: TranslocoService,
   ) {}
 
   files: File[] = [];
@@ -65,8 +67,8 @@ export class FileUploadComponent implements OnInit, OnChanges {
       const maxSizeBytes = this.maxFileSizeMB * 1024 * 1024;
       if (file.size > maxSizeBytes) {
         this.notification.error(
-          'Upload Error',
-          `Pasted data exceeds the maximum allowed file size of ${this.maxFileSizeMB}MB.`,
+          this.transloco.translate('shared.upload.dragDrop.errors.uploadError'),
+          this.transloco.translate('shared.upload.pastedDataExceedsSize', { size: this.maxFileSizeMB }),
         );
         return;
       }
@@ -80,8 +82,8 @@ export class FileUploadComponent implements OnInit, OnChanges {
 
     if (this.maxFiles > 0 && this.files.length + filesArray.length > this.maxFiles) {
       this.notification.error(
-        'Upload Error',
-        `Maximum number of files reached. Only ${this.maxFiles} file(s) are allowed.`,
+        this.transloco.translate('shared.upload.dragDrop.errors.uploadError'),
+        this.transloco.translate('shared.upload.maxFilesReached', { count: this.maxFiles }),
       );
       return;
     }
@@ -90,9 +92,15 @@ export class FileUploadComponent implements OnInit, OnChanges {
     this.filesChanged.emit(this.files);
 
     if (filesArray.length === 1) {
-      this.notification.success('File Added', `"${filesArray[0].name}" has been added.`);
+      this.notification.success(
+        this.transloco.translate('shared.upload.fileAdded'),
+        this.transloco.translate('shared.upload.fileAddedMessage', { fileName: filesArray[0].name }),
+      );
     } else {
-      this.notification.success('Success', `${filesArray.length} files added.`);
+      this.notification.success(
+        this.transloco.translate('shared.upload.filesAdded'),
+        this.transloco.translate('shared.upload.filesAddedMessage', { count: filesArray.length }),
+      );
     }
   }
 
@@ -118,8 +126,8 @@ export class FileUploadComponent implements OnInit, OnChanges {
       this.filesChanged.emit(this.files);
 
       this.notification.success(
-        'File Removed',
-        `The file "${tempName}" was successfully removed from the list.`,
+        this.transloco.translate('shared.upload.fileRemoved'),
+        this.transloco.translate('shared.upload.fileRemovedMessage', { fileName: tempName }),
       );
     }
     this.cancelDelete();

@@ -6,14 +6,14 @@
         @if (isFakeFile) { <i class="bi bi-cloud-check me-2 ms-1"></i> }
         <h6 class="mb-0 text-truncate" style="min-height: 22px">{{ file.name }}</h6>
       </div>
-      <small class="text-muted text-uppercase d-block">{{ getExtension(file.name) }}</small>
+      <small class="text-muted text-uppercase d-block">{{ getExtension(file.name) | transloco }}</small>
     </div>
     <div class="d-flex flex-row align-items-center gap-2 flex-shrink-0">
-      <div class="icon download-icon" (click)="onDownload()" title="Download">
+      <div class="icon download-icon" (click)="onDownload()" [title]="'shared.actions.download' | transloco">
         <i class="bi bi-download"></i>
       </div>
       @if (removePossible) {
-        <div class="icon remove-icon" (click)="onRemove()" title="Remove">
+        <div class="icon remove-icon" (click)="onRemove()" [title]="'shared.actions.remove' | transloco">
           <i class="bi bi-trash"></i>
         </div>
       }

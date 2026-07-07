@@ -8,14 +8,14 @@ import { AuthService } from '../../../../core/auth/auth.service';
 import { HasRoleDirective } from '../../../../shared/directives/has-role.directive';
 import { GetUserDto } from '../../../../shared/dtos/user.dto';
 import { ExperimentService } from '../../../experiments/experiment.service';
-import { ReactantDto } from '../../../reactants/reactant.dto';
-import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
+import { TranslocoService } from '@jsverse/transloco';
 import { AppConfirmModalComponent } from '../../../../shared/modal/confirm-modal.component';
+import { TRANSLOCO_IMPORTS } from '../../../../core/global/transloco-imports';
 
 export type SearchState = 'initial' | 'no-results' | 'has-results';
 
 @Component({
-  selector: 'app-experiment-results',
+  selector: 'app-search-results',
   templateUrl: './search-results.component.html',
   styleUrls: ['./search-results.component.scss'],
   standalone: true,
@@ -25,6 +25,7 @@ export type SearchState = 'initial' | 'no-results' | 'has-results';
     ExperimentViewModalComponent,
     HasRoleDirective,
     AppConfirmModalComponent,
+    TRANSLOCO_IMPORTS,
   ],
 })
 export class SearchResultsComponent {

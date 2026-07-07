@@ -208,7 +208,10 @@ export class ExperimentDetailsPageComponent implements OnInit {
       },
       error: (err: any) => {
         console.log(err);
-        this.notification.error('Error', 'Could not load experiment history');
+        this.notification.error(
+          this.transloco.translate('experiments.details.notifications.errorTitle'),
+          this.transloco.translate('experiments.details.notifications.historyLoadError'),
+        );
         this.isLoadingHistory = false;
         this.cdr.markForCheck();
       },
@@ -246,7 +249,10 @@ export class ExperimentDetailsPageComponent implements OnInit {
           this.uploadedFilesMap.delete(fingerprint);
         } catch (error: any) {
           console.error(`Failed to delete file ${fileIdentifier}:`, error);
-          this.notification.error('Delete Error', `Could not delete file.`);
+          this.notification.error(
+            this.transloco.translate('experiments.details.notifications.deleteFileErrorTitle'),
+            this.transloco.translate('experiments.details.notifications.deleteFileErrorMessage'),
+          );
         }
       }
     }
@@ -315,6 +321,10 @@ export class ExperimentDetailsPageComponent implements OnInit {
   confirmMetadataUse(selectedMetadata: Record<string, any>): void {
     if (selectedMetadata && this.formComponent) {
       this.formComponent.patchExtractedMetadata(selectedMetadata);
+      this.notification.success(
+        this.transloco.translate('reactants.extractedMetadata.buttons.appliedTitle'),
+        this.transloco.translate('reactants.extractedMetadata.buttons.appliedMessage'),
+      );
     }
 
     this.isConfirmMetadataModalOpen = false;

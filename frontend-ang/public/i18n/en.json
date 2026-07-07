@@ -11,7 +11,8 @@
     "logout": "Logout",
     "experimentPlanning": "Planning",
     "login": "Login",
-    "myExperiments": "My Experiments"
+    "myExperiments": "My Experiments",
+    "language": "Language"
   },
 
   "selectionOptions": {
@@ -109,7 +110,197 @@
     }
   },
 
+  "shared": {
+    "file": "File",
+    "upload": {
+      "title": "Upload Files",
+      "removeFile": "Remove File",
+      "removeConfirmMessage": "Are you sure you want to <strong>permanently</strong> remove <strong>{{fileName}}</strong> from the upload list?",
+      "removeConfirmLabel": "Permanently Remove",
+      "pastedDataExceedsSize": "Pasted data exceeds the maximum allowed file size of {{size}}MB.",
+      "maxFilesReached": "Maximum number of files reached. Only {{count}} {{count, plural, =1 {file} other {files}}} are allowed.",
+      "fileAdded": "File Added",
+      "fileAddedMessage": "\"{{fileName}}\" has been added.",
+      "filesAdded": "Success",
+      "filesAddedMessage": "{{count}} files added.",
+      "fileRemoved": "File Removed",
+      "fileRemovedMessage": "The file \"{{fileName}}\" was successfully removed from the list.",
+      "dragDrop": {
+        "title": "Drag and Drop",
+        "or": "or",
+        "browse": "Browse",
+        "allFiles": "All files",
+        "and": "and",
+        "supports": "Supports: {{extensions}}",
+        "maxSize": "Max: {{size}}MB",
+        "maxFilesSingle": ", {{count}} file",
+        "maxFilesPlural": ", {{count}} files",
+        "maxFilesOnlySingle": "Max: {{count}} file",
+        "maxFilesOnlyPlural": "Max: {{count}} files",
+        "errors": {
+          "typeNotAllowed": "File type .{{extension}} is not allowed. Only {{allowed}} are supported.",
+          "sizeExceeded": "File \"{{fileName}}\" exceeds the maximum size of {{size}}MB.",
+          "uploadError": "Upload Error"
+        }
+      },
+      "paste": {
+        "title": "Paste Data Table",
+        "clear": "Clear",
+        "saveCsv": "Save as CSV",
+        "loading": "Processing data, please wait...",
+        "instruction": "Click here and press <strong>Ctrl+V</strong> (or Cmd+V) to paste data from Excel/Prism/Sheets.",
+        "previewAlert": "Showing preview of the first <strong>{{previewCount}}</strong> rows. All <strong>{{totalCount}}</strong> rows are saved and ready for export."
+      }
+    },
+    "actions": {
+      "download": "Download",
+      "remove": "Remove",
+      "close": "Close",
+      "cancel": "Cancel",
+      "confirm": "Confirm",
+      "save": "Save",
+      "edit": "Edit",
+      "view": "View",
+      "add": "Add",
+      "next": "Next",
+      "previous": "Previous",
+      "history": "History"
+    },
+    "modals": {
+      "confirm": {
+        "title": "Confirm",
+        "message": "Are you sure you want to proceed?",
+        "confirm": "Confirm",
+        "cancel": "Cancel"
+      }
+    }
+  },
+  "search": {
+    "initial": "Input reactants to search for reactions.",
+    "noResults": "No experiments found for these reactants.",
+    "countOnPage": "{{count}} results on page ({{total}} total)",
+    "pagination": {
+      "showing": "Showing {{start}} to {{end}} of {{total}} entries",
+      "perPage": "per page"
+    },
+    "actions": {
+      "selectAll": "Select Page",
+      "deselectAll": "Deselect Page",
+      "exportSelected": "Export Selected ({{count}})",
+      "exportAll": "Export All ({{total}})",
+      "viewDetails": "View details",
+      "remove": "Remove",
+      "add": "Add",
+      "hideDetails": "Hide details",
+      "showDetails": "Show details",
+      "archive": "Archive",
+      "restore": "Restore"
+    },
+    "metadata": {
+      "rateConstant": "Rate Constant",
+      "date": "Date",
+      "solvent": "Solvent",
+      "temp": "Temp",
+      "conc": "Conc.",
+      "pfoRateConstant": "pFO Rate Constant",
+      "instrument": "Instrument",
+      "modality": "Modality",
+      "wavelength": "Wavelength",
+      "notes": "Notes"
+    },
+    "modals": {
+      "archive": {
+        "title": "Archive Experiment",
+        "message": "Are you sure you want to archive this experiment?",
+        "confirm": "Archive"
+      },
+      "restore": {
+        "title": "Restore Experiment",
+        "message": "Are you sure you want to restore this experiment?",
+        "confirm": "Restore"
+      },
+      "draw": {
+        "title": "Draw Structure",
+        "apply": "Apply Structure"
+      }
+    },
+    "standard": {
+      "reactant1": "Reactant 1",
+      "reactant2": "Reactant 2",
+      "switchToExact": "Switch to Exact Match",
+      "searchBySubstructure": "Search by Substructure",
+      "reactantError": "Reactant Error",
+      "reactantFetchFailed": "Unable to fetch reactants. Please reload the page!"
+    },
+    "advanced": {
+      "title": "Advanced Search",
+      "rateConstantRange": "Rate Constant Range",
+      "pfoRateConstantRange": "Pseudo First Order Rate Constant Range",
+      "dateRange": "Date Range",
+      "scientist": "Scientist",
+      "temperature": "Temperature",
+      "solvent": "Solvent",
+      "concentrationA": "Concentration A",
+      "concentrationB": "Concentration B",
+      "instrument": "Instrument",
+      "modality": "Modality",
+      "wavelengthRange": "Wavelength Range",
+      "comment": "Comment",
+      "clearFields": "Clear Fields",
+      "labels": {
+        "from": "From",
+        "to": "To",
+        "min": "Min",
+        "max": "Max",
+        "reactantA": "Reactant A",
+        "reactantB": "Reactant B"
+      },
+      "placeholders": {
+        "scientist": "Name",
+        "solvent": "e.g. Water",
+        "reactant": "Search for reactant...",
+        "instrument": "Instrument Name",
+        "modality": "Modality Type",
+        "comment": "Comment"
+      },
+      "warnings": {
+        "invalidRange": "Minimum value cannot be greater than maximum value.",
+        "invalidDateRange": "Start date cannot be after end date.",
+        "fetchUsersError": "Error Fetching Users"
+      }
+    },
+    "substructure": {
+      "group": "Group ( )",
+      "operator": "Operator",
+      "format": "Format",
+      "not": "NOT",
+      "removeGroup": "Remove Group",
+      "addRule": "Add Rule",
+      "addGroup": "Add Group ( )",
+      "searchButton": "Search Substructures",
+      "resultsLabel": "Search Results",
+      "placeholder": "Draw or paste sequence...",
+      "removeReactant": "Remove Reactant",
+      "drawSubstructure": "Draw Substructure",
+      "warnings": {
+        "maxDepth": "Maximum group depth reached.",
+        "rdkitNotLoaded": "RDKit is not loaded yet."
+      }
+    },
+    "selector": {
+      "placeholder": "Search by name, SMILES, or type...",
+      "drawMolecule": "Draw Molecule",
+      "clearSearch": "Clear Search",
+      "removeReactant": "Remove Reactant"
+    }
+  },
   "reactants": {
+    "status": {
+      "pending": "3D structure is being generated...",
+      "ready": "3D structure is awaiting approval",
+      "failed": "Generation failed",
+      "missing": "No 3D structure available"
+    },
     "title": "Reactants",
     "searchPlaceholder": "Search by name, SMILES, or type...",
     "actions": {
@@ -303,14 +494,65 @@
         "missing3dFileTitle": "Missing 3D File",
         "missing3dFileMessage": "3D File(s) of Reactant not found!"
       }
+    },
+    "history": {
+      "title": "Experiment History",
+      "noHistory": "No history available for this experiment."
+    },
+    "extractedMetadata": {
+      "title": "Metadata Detected",
+      "description": "We found the following details in your uploaded file <strong>{{fileName}}</strong>. Select the data you would like to autofill.",
+      "table": {
+        "keep": "Keep",
+        "property": "Property",
+        "value": "Value"
+      },
+      "labels": {
+        "date": "Date",
+        "temperature": "Temperature (°C)",
+        "instrument": "Instrument",
+        "modality": "Cell Type",
+        "wavelength": "Wavelength (nm)",
+        "reactantA": "Reactant A",
+        "concentrationA": "Concentration A (mM)",
+        "reactantB": "Reactant B",
+        "concentrationB": "Concentration B (mM)",
+        "comment": "Remarks"
+      },
+      "buttons": {
+        "useSelected": "Use Selected Metadata",
+        "appliedTitle": "Metadata Applied",
+        "appliedMessage": "Form fields have been populated from the uploaded file."
+      }
     }
   },
 
   "experiments": {
+    "view": {
+      "title": "Details",
+      "experimentMetadata": "Experiment Metadata",
+      "measurementData": "Measurement Data",
+      "noMeasurementData": "No measurement data available.",
+      "noReactants": "No reactants associated with this experiment.",
+      "noFiles": "No files attached.",
+      "planExperiment": "Plan Experiment",
+      "labels": {
+        "concentrations": "Concentrations",
+        "instrument": "Instrument",
+        "modality": "Modality",
+        "wavelength": "Wavelength",
+        "comment": "Comment",
+        "rateConstant": "Rate Constant",
+        "error": "Error",
+        "pfoRateConstant": "pFO Rate Constant"
+      }
+    },
     "details": {
       "createNew": "Create new Experiment",
       "editExisting": "Edit Experiment",
       "viewExisting": "View Experiment",
+      "loading": "Loading experiment details...",
+      "filesDirtyHint": "Save experiment to submit changed files.",
       "form": {
         "sections": {
           "required": "Required",
@@ -367,7 +609,8 @@
           "invalidModality": "Please select a valid modality from the list.",
           "wavelengthInvalid": "Wavelength invalid.",
           "wavelengthNegative": "Wavelength can not be negative.",
-          "commentLength": "Comment can not be longer than 1000 characters."
+          "commentLength": "Comment can not be longer than 1000 characters.",
+          "formInvalid": "Please fix the errors in the form before submitting."
         },
         "dateTitle": "Show date selection"
       },
@@ -396,11 +639,18 @@
         "savedTitle": "Experiment Saved",
         "savedMessage": "Experiment was saved successfully!",
         "savedErrorTitle": "Save Failed",
-        "savedErrorMessage": "Saving of Experiment failed! Error: {{}}",
+        "savedErrorMessage": "Saving of Experiment failed! Error: {{error}}",
         "archivedTitle": "Experiment Archived",
         "archivedMessage": "Experiment was archived successfully!",
         "archiveFailedTitle": "Archive Failed",
-        "archiveFailedMessage": "Archiving of Experiment failed! Error: {{error}}"
+        "archiveFailedMessage": "Archiving of Experiment failed! Error: {{error}}",
+        "userErrorTitle": "User Error",
+        "userLoadError": "Unable to fetch users. Please reload the page! Error: {{error}}",
+        "reactantErrorTitle": "Reactant Error",
+        "reactantLoadError": "Unable to fetch reactants. Please reload the page! Error: {{error}}",
+        "historyLoadError": "Could not load experiment history.",
+        "deleteFileErrorTitle": "Delete Error",
+        "deleteFileErrorMessage": "Could not delete file."
       }
     },
     "my": {
@@ -411,8 +661,9 @@
       "noActive": "You currently have no active experiments.",
       "noArchived": "No archived experiments available.",
       "notifications": {
-        "errorTitle": "Error Loading",
-        "loadError": "Your experiments could not be loaded."
+        "errorTitle": "Error",
+        "loadError": "Could not load experiments.",
+        "userLoadError": "Could not load user data."
       }
     }
   },
@@ -433,6 +684,7 @@
     "fields": {
       "names": "Names",
       "smiles": "SMILES",
+      "chemicalType": "Chemical Type",
       "structures": "3D Structures",
       "rateConstant": "Rate Constant",
       "pfo": "pFO Rate Constant",

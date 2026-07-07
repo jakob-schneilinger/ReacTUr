@@ -1,6 +1,6 @@
 <app-modal
   [isOpen]="isOpen"
-  title="Experiment History"
+  [title]="'reactants.history.title' | transloco"
   size="lg"
   [scrollable]="true"
   (close)="onClose()">
@@ -8,7 +8,7 @@
   <div body class="timeline-container">
     @if (!history || history.length === 0) {
       <div class="text-center text-muted p-4">
-        No history available for this experiment.
+        {{ 'reactants.history.noHistory' | transloco }}
       </div>
     } @else {
       <div class="timeline">
@@ -67,6 +67,6 @@
   </div>
 
   <ng-container footer>
-    <button type="button" class="btn btn-secondary px-4" (click)="onClose()">Close</button>
+    <button type="button" class="btn btn-secondary px-4" (click)="onClose()">{{ 'shared.actions.close' | transloco }}</button>
   </ng-container>
 </app-modal>

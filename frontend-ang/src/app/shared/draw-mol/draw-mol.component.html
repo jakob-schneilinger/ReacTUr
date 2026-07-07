@@ -1,6 +1,6 @@
 <app-modal
   [isOpen]="true"
-  title="Draw Structure"
+  [title]="'search.modals.draw.title' | transloco"
   size="lg"
   (close)="onClose()">
 
@@ -24,9 +24,9 @@
   </div>
 
   <ng-container footer>
-    <button type="button" class="text-white px-4" (click)="onClose()">Cancel</button>
+    <button type="button" class="text-white px-4" (click)="onClose()">{{ 'shared.actions.cancel' | transloco }}</button>
     <button type="button" class="primary px-4" (click)="onSave()">
-      <i class="bi bi-check2 me-2"></i> Apply Structure
+      <i class="bi bi-check2 me-2"></i> {{ 'search.modals.draw.apply' | transloco }}
     </button>
   </ng-container>
 </app-modal>

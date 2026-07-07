@@ -4,12 +4,14 @@ import { DrawMolComponent } from '../../../../shared/draw-mol/draw-mol.component
 import { Component, Input, Output, EventEmitter, OnInit } from '@angular/core';
 import { ReactantDto } from '../../../reactants/reactant.dto';
 
+import { TRANSLOCO_IMPORTS } from '../../../../core/global/transloco-imports';
+
 @Component({
   selector: 'app-reactant-selector',
   templateUrl: './reactant-selector.component.html',
   styleUrls: ['./reactant-selector.component.scss'],
   standalone: true,
-  imports: [CommonModule, FormsModule, DrawMolComponent],
+  imports: [CommonModule, FormsModule, DrawMolComponent, TRANSLOCO_IMPORTS],
 })
 export class ReactantSelectorComponent implements OnInit {
   @Input() label: string = 'Reactant';

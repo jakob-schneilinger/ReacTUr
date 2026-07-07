@@ -1,31 +1,31 @@
-<div class="substructure-query-builder d-flex flex-column gap-2">
+<div class="substructure-query-builder d-flex flex-column gap-2" *transloco="let t; read: 'search.substructure'">
 
   <ng-template #groupTemplate let-group="group" let-isRoot="isRoot" let-depth="depth">
     <div class="p-3 rounded" [ngClass]="isRoot ? 'bg-white' : 'bg-light border ms-4 mt-2'">
 
       <div class="d-flex align-items-center gap-2 mb-3 pb-2 border-bottom">
         @if (!isRoot) {
-          <span class="badge bg-secondary">Group ( )</span>
+          <span class="badge bg-secondary">{{ t('group') }}</span>
         }
 
-        <select class="form-select form-select-sm fw-bold text-primary" style="width: auto;" [(ngModel)]="group.operator">
+        <select class="form-select form-select-sm fw-bold text-primary" style="width: auto;" [(ngModel)]="group.operator" [title]="t('operator')">
           <option value="AND">AND</option>
           <option value="OR">OR</option>
         </select>
 
-        <select class="form-select form-select-sm border-secondary text-secondary fw-semibold" style="width: auto;" [(ngModel)]="group.format">
+        <select class="form-select form-select-sm border-secondary text-secondary fw-semibold" style="width: auto;" [(ngModel)]="group.format" [title]="t('format')">
           <option value="SMARTS">SMARTS</option>
           <option value="SMILES">SMILES</option>
         </select>
 
         <div class="form-check form-switch ms-2 mb-0 d-flex align-items-center gap-2">
           <input class="form-check-input mt-0" type="checkbox" role="switch" [(ngModel)]="group.isNot" [id]="'notSwitch' + group.id">
-          <label class="form-check-label fw-bold text-secondary" [for]="'notSwitch' + group.id">NOT</label>
+          <label class="form-check-label fw-bold text-secondary" [for]="'notSwitch' + group.id">{{ t('not') }}</label>
         </div>
 
         @if (!isRoot) {
-          <button class="btn btn-sm btn-link text-danger ms-auto p-0" (click)="removeNode(group.id)" title="Remove Group">
-            <i class="bi bi-trash"></i>Group
+          <button class="btn btn-sm btn-link text-danger ms-auto p-0" (click)="removeNode(group.id)" [title]="t('removeGroup')">
+            <i class="bi bi-trash"></i> {{ t('group') }}
           </button>
         }
       </div>
@@ -42,17 +42,17 @@
                 <div class="input-group-text bg-white border-end-0">
                   <div class="form-check mb-0">
                     <input class="form-check-input" type="checkbox" [(ngModel)]="child.isNot" [id]="'ruleNot' + child.id">
-                    <label class="form-check-label fw-bold text-secondary ms-1" [for]="'ruleNot' + child.id">NOT</label>
+                    <label class="form-check-label fw-bold text-secondary ms-1" [for]="'ruleNot' + child.id">{{ t('not') }}</label>
                   </div>
                 </div>
 
                 <input
                   type="text"
                   class="form-control border-start-0 font-monospace"
-                  placeholder="Draw or paste sequence..."
+                  [placeholder]="t('placeholder')"
                   [(ngModel)]="child.query">
 
-                <button class="btn btn-outline-secondary bg-white substructure-btn" type="button" (click)="openDraw(child)" title="Draw Substructure">
+                <button class="btn btn-outline-secondary bg-white substructure-btn" type="button" (click)="openDraw(child)" [title]="t('drawSubstructure')">
                   <i class="bi bi-pencil-square"></i>
                 </button>
               </div>
@@ -68,11 +68,11 @@
 
         <div class="mt-2 d-flex gap-2">
           <button class="btn btn-sm btn-outline-primary" (click)="addRule(group)">
-            <i class="bi bi-plus-lg"></i> Add Rule
+            <i class="bi bi-plus-lg"></i> {{ t('addRule') }}
           </button>
           @if (depth < maxDepth) {
             <button class="btn btn-sm btn-outline-secondary" (click)="addGroup(group, depth)">
-              <i class="bi bi-folder-plus"></i> Add Group ( )
+              <i class="bi bi-folder-plus"></i> {{ t('addGroup') }}
             </button>
           }
         </div>
@@ -84,14 +84,14 @@
 
   <div class="d-flex justify-content-end mt-3 pt-3 border-top">
     <button class="btn btn-primary" (click)="onSearchSubmit()">
-      <i class="bi bi-search me-1"></i> Search Substructures
+      <i class="bi bi-search me-1"></i> {{ t('searchButton') }}
     </button>
   </div>
 
   @if (matchedReactantsList.length > 0) {
     <div class="matched-reactants-container mt-4 pt-3 border-top">
       <div class="d-flex align-items-start justify-content-between">
-        <label class="form-label text-muted fw-bold mb-3">Search Results</label>
+        <label class="form-label text-muted fw-bold mb-3">{{ t('resultsLabel') }}</label>
         <button class="btn btn-link text-danger p-0 ms-1 remove-condition-btn"
                 (click)="clearMatchedReactants()">
           <i class="bi bi-trash"></i>
@@ -110,7 +110,7 @@
                 </div>
               </div>
 
-              <button type="button" class="btn-close ms-2" aria-label="Close" (click)="removeMatchedReactant(reactant)" title="Remove Reactant"></button>
+              <button type="button" class="btn-close ms-2" aria-label="Close" (click)="removeMatchedReactant(reactant)" [title]="t('removeReactant')"></button>
 
             </div>
           </div>

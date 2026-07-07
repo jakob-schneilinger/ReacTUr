@@ -13,13 +13,15 @@ import { SearchParametersDto, MeasurementSearchDto } from '../../search.dto';
 import { UserService } from '../../../../shared/services/user.service';
 import { NotificationService } from '../../../../core/layout/notification/notification.service';
 import { GetUserDto } from '../../../../shared/dtos/user.dto';
+import { TranslocoService } from '@jsverse/transloco';
+import { TRANSLOCO_IMPORTS } from '../../../../core/global/transloco-imports';
 
 @Component({
   selector: 'app-advanced-search',
   templateUrl: './advanced-search.component.html',
   styleUrls: ['./advanced-search.component.scss'],
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, TRANSLOCO_IMPORTS],
 })
 export class AdvancedSearchComponent implements OnChanges, OnInit {
   @Output() searchChanged = new EventEmitter<SearchParametersDto>();
@@ -43,13 +45,17 @@ export class AdvancedSearchComponent implements OnChanges, OnInit {
   constructor(
     private userService: UserService,
     private notification: NotificationService,
+    private transloco: TranslocoService,
   ) {}
 
   ngOnInit() {
     this.userService.getAllUsers().subscribe({
       next: (users) => (this.allUsers = users),
       error: (err) =>
-        this.notification.error('Error Fetching Users', err.message || err.error || err),
+        this.notification.error(
+          this.transloco.translate('search.advanced.warnings.fetchUsersError'),
+          err.message || err.error || err,
+        ),
     });
   }
 

@@ -57,15 +57,33 @@
             <i class="bi bi-journal-text ms-2"></i>
           </button>
           <div class="dropdown-divider"></div>
-
-          <button ngbDropdownItem (click)="logout()" class="text-danger logout-button d-flex align-items-center justify-content-between">
-            {{ 'header.logout' | transloco }}
-            <i id="logout_icon" [title]="'header.logout' | transloco" class="bi bi-box-arrow-right ms-2"></i>
-          </button>
         } @else {
           <button ngbDropdownItem routerLink="/login" class="d-flex align-items-center justify-content-between">
             {{ 'header.login' | transloco }}
             <i id="login_icon" [title]="'header.login' | transloco" class="bi bi-box-arrow-right ms-2"></i>
+          </button>
+          <div class="dropdown-divider"></div>
+        }
+
+        <h6 class="dropdown-header text-muted">{{ 'header.language' | transloco }}</h6>
+        @for (lang of availableLanguages; track getLangId(lang)) {
+          <button ngbDropdownItem
+                  (click)="setActiveLanguage(getLangId(lang))"
+                  [class.active]="getLangId(lang) === activeLanguage"
+                  class="d-flex align-items-center justify-content-between ps-4">
+
+            {{ getLangLabel(lang) | uppercase }}
+
+            @if (getLangId(lang) === activeLanguage) {
+              <i class="bi bi-check ms-2"></i>
+            }
+          </button>
+        }
+        @if (isLoggedIn) {
+          <div class="dropdown-divider"></div>
+          <button ngbDropdownItem (click)="logout()" class="text-danger logout-button d-flex align-items-center justify-content-between">
+            {{ 'header.logout' | transloco }}
+            <i id="logout_icon" [title]="'header.logout' | transloco" class="bi bi-box-arrow-right ms-2"></i>
           </button>
         }
       </div>

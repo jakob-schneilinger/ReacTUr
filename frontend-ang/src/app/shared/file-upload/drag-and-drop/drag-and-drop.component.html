@@ -1,4 +1,4 @@
-<div class="dropzone p-2 mb-4 rounded text-center" app-drag-and-drop-directive (fileDropped)="onFileDropped($event)">
+<div class="dropzone p-2 mb-4 rounded text-center" app-drag-and-drop-directive (fileDropped)="onFileDropped($event)" *transloco="let t; read: 'shared.upload.dragDrop'">
   <input
     type="file"
     #fileDropRef
@@ -11,20 +11,21 @@
 
   <div class="drag-and-drop-text-icon">
     <i class="bi bi-file-earmark-text fs-1"></i>
-    <h5>Drag and Drop <br> or
-      <a href="javascript:void(0)" class="text-primary text-decoration-none" (click)="fileDropRef.click()">Browse</a>
+    <h5>{{ t('title') }} <br> {{ t('or') }}
+      <a href="javascript:void(0)" class="text-primary text-decoration-none" (click)="fileDropRef.click()">{{ t('browse') }}</a>
     </h5>
   </div>
   <p class="text-muted small mb-0">
-    Supports: {{acceptedExtensionsText}}
+    {{ t('supports', { extensions: acceptedExtensionsText }) }}
     @if (maxFileSizeMB) {
-      <span> (Max: {{maxFileSizeMB}}MB</span>
+      <span>(</span>
+      <span>{{ t('maxSize', { size: maxFileSizeMB }) }}</span>
       @if (maxFiles > 0) {
-        <span>, {{maxFiles}} {{maxFiles === 1 ? 'file' : 'files'}}</span>
+        <span>{{ t(maxFiles === 1 ? 'maxFilesSingle' : 'maxFilesPlural', { count: maxFiles }) }}</span>
       }
       <span>)</span>
     } @else if (maxFiles > 0) {
-      <span> (Max: {{maxFiles}} {{maxFiles === 1 ? 'file' : 'files'}})</span>
+      <span>{{ t(maxFiles === 1 ? 'maxFilesSingle' : 'maxFilesPlural', { count: maxFiles }) }}</span>
     }
   </p>
 </div>

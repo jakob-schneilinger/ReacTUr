@@ -1,14 +1,16 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { NotificationService } from '../../../core/layout/notification/notification.service';
+import { TRANSLOCO_IMPORTS } from '../../../core/global/transloco-imports';
 import { DragAndDropDirective } from '../../directives/drag-and-drop.directive';
+import { TranslocoService } from '@jsverse/transloco';
 
 @Component({
   selector: 'app-drag-and-drop',
   templateUrl: './drag-and-drop.component.html',
   styleUrls: ['./drag-and-drop.component.scss'],
   standalone: true,
-  imports: [CommonModule, DragAndDropDirective],
+  imports: [CommonModule, DragAndDropDirective, TRANSLOCO_IMPORTS],
 })
 export class DragAndDropComponent {
   @Output() filesSelected = new EventEmitter<File[]>();
@@ -16,7 +18,10 @@ export class DragAndDropComponent {
   @Input() maxFileSizeMB?: number;
   @Input() maxFiles: number = 0;
 
-  constructor(private notification: NotificationService) {}
+  constructor(
+    private notification: NotificationService,
+    private transloco: TranslocoService,
+  ) {}
 
   onFileDropped(files: FileList | File[]) {
     this.processFiles(files);
@@ -40,9 +45,15 @@ export class DragAndDropComponent {
 
       if (!extension || !this.allowedExtensions.includes(extension)) {
         const dottedExtensions = this.allowedExtensions.map((ext) => `.${ext}`);
-        const formatter = new Intl.ListFormat('en', { style: 'long', type: 'conjunction' });
+        const formatter = new Intl.ListFormat(this.transloco.getActiveLang(), {
+          style: 'long',
+          type: 'conjunction',
+        });
         this.onFileError(
-          `File type .${extension} is not allowed. Only ${formatter.format(dottedExtensions)} are supported.`,
+          this.transloco.translate('shared.upload.dragDrop.errors.typeNotAllowed', {
+            extension,
+            allowed: formatter.format(dottedExtensions),
+          }),
         );
         continue;
       }
@@ -51,7 +62,10 @@ export class DragAndDropComponent {
         const maxSizeBytes = this.maxFileSizeMB * 1024 * 1024;
         if (file.size > maxSizeBytes) {
           this.onFileError(
-            `File "${file.name}" exceeds the maximum size of ${this.maxFileSizeMB}MB.`,
+            this.transloco.translate('shared.upload.dragDrop.errors.sizeExceeded', {
+              fileName: file.name,
+              size: this.maxFileSizeMB,
+            }),
           );
           continue;
         }
@@ -66,7 +80,10 @@ export class DragAndDropComponent {
   }
 
   onFileError(errorMessage: string) {
-    this.notification.error('Upload Error', errorMessage);
+    this.notification.error(
+      this.transloco.translate('shared.upload.dragDrop.errors.uploadError'),
+      errorMessage,
+    );
   }
 
   get acceptedExtensionsString(): string {
@@ -74,11 +91,13 @@ export class DragAndDropComponent {
   }
 
   get acceptedExtensionsText(): string {
-    if (this.allowedExtensions.length === 0) return 'All files';
+    if (this.allowedExtensions.length === 0)
+      return this.transloco.translate('shared.upload.dragDrop.allFiles');
     return this.allowedExtensions
       .map((ext, index): string => {
         if (this.allowedExtensions.length <= 1) return `${ext.toUpperCase()}`;
-        if (this.allowedExtensions.length - 1 == index) return `and ${ext.toUpperCase()}`;
+        if (this.allowedExtensions.length - 1 == index)
+          return `${this.transloco.translate('shared.upload.dragDrop.and')} ${ext.toUpperCase()}`;
         return `${ext.toUpperCase()}`;
       })
       .join(', ');

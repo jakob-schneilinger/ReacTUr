@@ -2,11 +2,11 @@
 
   @if (state === 'initial') {
     <div class="message-box">
-      <p>Input reactants to search for reactions.</p>
+      <p>{{ 'search.initial' | transloco }}</p>
     </div>
   } @else if (state === 'no-results') {
     <div class="message-box">
-      <p>No experiments found for these reactants.</p>
+      <p>{{ 'search.noResults' | transloco }}</p>
     </div>
   } @else if (state === 'has-results') {
     <!-- Action Bar -->
@@ -15,12 +15,12 @@
         <div class="results-action-bar-filler"></div>
         <div class="results-action-bar" *appHasRole="['SUPERVISOR', 'ADMIN']">
           <div class="left-actions">
-            <span class="results-count">{{ experiments.length }} results on page ({{ totalElements }} total)</span>
+            <span class="results-count">{{ 'search.countOnPage' | transloco: { count: experiments.length, total: totalElements } }}</span>
 
             <!-- Select All Checkbox -->
             <div class="select-all-wrapper" (click)="toggleSelectAll()">
               <i class="bi" [ngClass]="allSelected ? 'bi-check-square-fill text-success' : 'bi-square'"></i>
-              <span>{{ allSelected ? 'Deselect Page' : 'Select Page' }}</span>
+              <span>{{ allSelected ? ('search.actions.deselectAll' | transloco) : ('search.actions.selectAll' | transloco) }}</span>
             </div>
           </div>
 
@@ -28,12 +28,12 @@
             <button class="btn-export"
                     [disabled]="selectedExperiments.size === 0"
                     (click)="onExportClicked()">
-              Export Selected ({{ selectedExperiments.size }})
+              {{ 'search.actions.exportSelected' | transloco: { count: selectedExperiments.size } }}
             </button>
 
             <button class="btn-export outline"
                     (click)="onExportAllClicked()">
-              Export All ({{ totalElements }})
+              {{ 'search.actions.exportAll' | transloco: { total: totalElements } }}
             </button>
           </div>
         </div>
@@ -55,37 +55,37 @@
           <!-- Metadata Grid -->
           <div class="metadata-groups" style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem 1rem; margin-bottom: 0.5rem;">
             <div class="detail-item">
-              Rate Constant:
+              {{ 'search.metadata.rateConstant' | transloco }}:
               <strong>{{ exp.measurementData.rateConstant }} ± {{ exp.measurementData.error }}{{ exp.measurementData.isErrorPercentage ? '%' : '' }}</strong>
             </div>
-            <div class="detail-item">Date: <strong>{{ exp.metadata.date | date:'shortDate' }}</strong></div>
-            <div class="detail-item">Solvent: <strong>{{ exp.metadata.solvent.name }}</strong></div>
-            <div class="detail-item">Temp: <strong>{{ exp.metadata.temperature }} °C</strong></div>
-            <div class="detail-item">Conc. {{ exp.reactantA.shortName}}: <strong>{{ exp.metadata.concentrationA }} mM</strong></div>
-            <div class="detail-item">Conc. {{ exp.reactantB.shortName}}: <strong>{{ exp.metadata.concentrationB }} mM</strong></div>
+            <div class="detail-item">{{ 'search.metadata.date' | transloco }}: <strong>{{ exp.metadata.date | date:'shortDate' }}</strong></div>
+            <div class="detail-item">{{ 'search.metadata.solvent' | transloco }}: <strong>{{ exp.metadata.solvent.name }}</strong></div>
+            <div class="detail-item">{{ 'search.metadata.temp' | transloco }}: <strong>{{ exp.metadata.temperature }} °C</strong></div>
+            <div class="detail-item">{{ 'search.metadata.conc' | transloco }} {{ exp.reactantA.shortName}}: <strong>{{ exp.metadata.concentrationA }} mM</strong></div>
+            <div class="detail-item">{{ 'search.metadata.conc' | transloco }} {{ exp.reactantB.shortName}}: <strong>{{ exp.metadata.concentrationB }} mM</strong></div>
           </div>
 
           @if (exp.measurementData.pFO_rateConstant != null || exp.metadata.instrument || exp.metadata.modality || exp.metadata.wavelength) {
             <div class="toggle-details-wrapper" style="text-align: center;">
               <button class="plain show-details-btn" (click)="toggleCardDetails(exp.uuid, $event)">
-                {{ isCardExpanded(exp.uuid) ? 'Hide details' : 'Show details' }}
+                {{ isCardExpanded(exp.uuid) ? ('search.actions.hideDetails' | transloco) : ('search.actions.showDetails' | transloco) }}
                 <i class="bi" [ngClass]="isCardExpanded(exp.uuid) ? 'bi-chevron-up' : 'bi-chevron-down'"></i>
               </button>
             </div>
 
             @if (isCardExpanded(exp.uuid)) {
               <div class="metadata-groups" style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem 1rem; padding-top: 0.25rem; border-top: 1px dashed #eee; margin-bottom: 0.5rem;">
-                <div class="detail-item" *ngIf="exp.measurementData.pFO_rateConstant != null">pFO Rate Constant: <strong>{{ exp.measurementData.pFO_rateConstant }}</strong></div>
-                <div class="detail-item" *ngIf="exp.metadata.instrument">Instrument: <strong>{{ exp.metadata.instrument.name }}</strong></div>
-                <div class="detail-item" *ngIf="exp.metadata.modality">Modality: <strong>{{ exp.metadata.modality.name }}</strong></div>
-                <div class="detail-item" *ngIf="exp.metadata.wavelength != null">Wavelength: <strong>{{ exp.metadata.wavelength }} nm</strong></div>
+                <div class="detail-item" *ngIf="exp.measurementData.pFO_rateConstant != null">{{ 'search.metadata.pfoRateConstant' | transloco }}: <strong>{{ exp.measurementData.pFO_rateConstant }}</strong></div>
+                <div class="detail-item" *ngIf="exp.metadata.instrument">{{ 'search.metadata.instrument' | transloco }}: <strong>{{ exp.metadata.instrument.name }}</strong></div>
+                <div class="detail-item" *ngIf="exp.metadata.modality">{{ 'search.metadata.modality' | transloco }}: <strong>{{ exp.metadata.modality.name }}</strong></div>
+                <div class="detail-item" *ngIf="exp.metadata.wavelength != null">{{ 'search.metadata.wavelength' | transloco }}: <strong>{{ exp.metadata.wavelength }} nm</strong></div>
               </div>
 
 
 
               @if (exp.metadata.comment) {
                 <div class="comment-section" style="margin-top: 0.5rem; background-color: #f8f9fa; padding: 0.5rem; border-radius: 4px;">
-                  <strong>Notes:</strong> {{ exp.metadata.comment }}
+                  <strong>{{ 'search.metadata.notes' | transloco }}:</strong> {{ exp.metadata.comment }}
                 </div>
               }
 
@@ -94,7 +94,7 @@
 
           <div class="card-footer" style="margin-top: 0.25rem;">
             <button class="btn-custom btn-view" (click)="viewDetails(exp.uuid)">
-              View details
+              {{ 'search.actions.viewDetails' | transloco }}
             </button>
 
             @if (!disableExport) {
@@ -104,7 +104,7 @@
                       (click)="toggleSelection(exp)"
                       *appHasRole="['SUPERVISOR', 'ADMIN']">
                 <i class="bi" [ngClass]="isSelected(exp.uuid) ? 'bi-dash-lg' : 'bi-plus-lg'"></i>
-                {{ isSelected(exp.uuid) ? 'Remove' : 'Add' }}
+                {{ isSelected(exp.uuid) ? ('search.actions.remove' | transloco) : ('search.actions.add' | transloco) }}
               </button>
             }
 
@@ -113,7 +113,7 @@
                       class="btn-custom error"
                       (click)="archiveExperiment(exp.uuid)">
                 <i class="bi bi-archive"></i>
-                Archive
+                {{ 'search.actions.archive' | transloco }}
               </button>
             }
 
@@ -122,7 +122,7 @@
                       class="btn-custom restore"
                       (click)="restoreExperiment(exp.uuid)">
                 <i class="bi bi-arrow-counterclockwise"></i>
-                Restore
+                {{ 'search.actions.restore' | transloco }}
               </button>
             }
 
@@ -134,8 +134,11 @@
       <div class="pagination-container d-flex justify-content-between align-items-center mt-4">
         <div class="d-flex align-items-center gap-3">
           <span class="text-muted small">
-            Showing {{ (currentPage * pageSize) + 1 }} to
-            {{ (currentPage * pageSize) + experiments.length }} of {{ totalElements }} entries
+            {{ 'search.pagination.showing' | transloco: {
+              start: (currentPage * pageSize) + 1,
+              end: (currentPage * pageSize) + experiments.length,
+              total: totalElements
+            } }}
           </span>
 
           <div class="d-flex align-items-center gap-1">
@@ -146,7 +149,7 @@
               <option [value]="25">25</option>
               <option [value]="50">50</option>
             </select>
-            <span class="text-muted small">per page</span>
+            <span class="text-muted small">{{ 'search.pagination.perPage' | transloco }}</span>
           </div>
         </div>
 
@@ -154,13 +157,13 @@
           <button class="primary-plain"
                   [disabled]="currentPage === 0"
                   (click)="pageChange.emit(currentPage - 1)">
-            <i class="bi bi-chevron-left"></i> Previous
+            <i class="bi bi-chevron-left"></i> {{ 'shared.actions.previous' | transloco }}
           </button>
 
           <button class="primary-plain"
                   [disabled]="!hasNextPage"
                   (click)="pageChange.emit(currentPage + 1)">
-            Next <i class="bi bi-chevron-right"></i>
+            {{ 'shared.actions.next' | transloco }} <i class="bi bi-chevron-right"></i>
           </button>
         </div>
       </div>
@@ -181,9 +184,9 @@
 @if (isRestoreExperimentModalOpen) {
   <app-confirm-modal
     [isOpen]="true"
-    [title]="'Restore Experiment'"
-    [message]="'Are you sure you want to restore this experiment'"
-    [confirmLabel]="'Restore'"
+    [title]="'search.modals.restore.title' | transloco"
+    [message]="'search.modals.restore.message' | transloco"
+    [confirmLabel]="'search.modals.restore.confirm' | transloco"
     confirmButtonClass="restore"
     (confirm)="executeRestore()"
     (cancel)="cancelRestore()">
@@ -193,9 +196,9 @@
 @if (isArchiveExperimentModalOpen) {
   <app-confirm-modal
     [isOpen]="true"
-    [title]="'Archive Experiment'"
-    [message]="'Are you sure you want to archive this experiment?'"
-    [confirmLabel]="'Archive'"
+    [title]="'search.modals.archive.title' | transloco"
+    [message]="'search.modals.archive.message' | transloco"
+    [confirmLabel]="'search.modals.archive.confirm' | transloco"
     confirmButtonClass="danger"
     (confirm)="executeArchive()"
     (cancel)="cancelArchive()">

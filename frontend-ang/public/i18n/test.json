@@ -9,20 +9,55 @@
     "userProfile": "test",
     "greetings": "test",
     "logout": "test",
-    "login": "test"
+    "experimentPlanning": "test",
+    "login": "test",
+    "myExperiments": "test",
+    "language": "test"
   },
+
+  "selectionOptions": {
+    "type": "test",
+    "modality": "test",
+    "instrument": "test",
+    "solvent": "test"
+  },
+
+  "userRoles": {
+    "user": "test",
+    "supervisor": "test",
+    "unauthorized": "test",
+    "admin": "test"
+  },
+
   "login": {
     "title": "test",
     "login": "test",
     "loginInstruction": "test",
     "loginButton": "test"
   },
+
+  "planning": {
+    "title": "test",
+    "subtitle": "test",
+    "reactionParams": "test",
+    "rateConstant": "test",
+    "rateConstantHelp": "test",
+    "concA": "test",
+    "concB": "test",
+    "duration": "test",
+    "simulateBtn": "test",
+    "halfLife": "test",
+    "reactionEnd": "test",
+    "emptyChart": "test"
+  },
+
   "admin": {
     "user": {
       "title": "test",
       "searchPlaceholder": "test",
       "pendingTitle": "test",
       "activeTitle": "test",
+      "unauthorizedTitle": "test",
       "deactivatedTitle": "test",
       "table": {
         "headerName": "test",
@@ -58,6 +93,13 @@
       },
       "addPlaceholder": "test",
       "addButton": "test",
+      "modals": {
+        "add": {
+          "title": "test",
+          "message": "test",
+          "confirm": "test"
+        }
+      },
       "notifications": {
         "loadError": "test",
         "statusUpdated": "test",
@@ -67,18 +109,196 @@
       }
     }
   },
-  "selectionOptions": {
-    "type": "test",
-    "modality": "test",
-    "instrument": "test",
-    "solvent": "test"
+
+  "shared": {
+    "file": "test",
+    "upload": {
+      "title": "test",
+      "removeFile": "test",
+      "removeConfirmMessage": "test",
+      "removeConfirmLabel": "test",
+      "pastedDataExceedsSize": "test",
+      "maxFilesReached": "test",
+      "fileAdded": "test",
+      "fileAddedMessage": "test",
+      "filesAdded": "test",
+      "filesAddedMessage": "test",
+      "fileRemoved": "test",
+      "fileRemovedMessage": "test",
+      "dragDrop": {
+        "title": "test",
+        "or": "test",
+        "browse": "test",
+        "allFiles": "test",
+        "and": "test",
+        "supports": "test",
+        "maxSize": "test",
+        "maxFiles": "test",
+        "maxFilesOnly": "test",
+        "errors": {
+          "typeNotAllowed": "test",
+          "sizeExceeded": "test",
+          "uploadError": "test"
+        }
+      },
+      "paste": {
+        "title": "test",
+        "clear": "test",
+        "saveCsv": "test",
+        "loading": "test",
+        "instruction": "test",
+        "previewAlert": "test"
+      }
+    },
+    "actions": {
+      "download": "test",
+      "remove": "test",
+      "close": "test",
+      "cancel": "test",
+      "confirm": "test",
+      "save": "test",
+      "edit": "test",
+      "view": "test",
+      "add": "test",
+      "next": "test",
+      "previous": "test",
+      "history": "test"
+    },
+    "modals": {
+      "confirm": {
+        "title": "test",
+        "message": "test",
+        "confirm": "test",
+        "cancel": "test"
+      }
+    }
   },
-  "userRoles": {
-    "user": "test",
-    "supervisor": "test",
-    "admin": "test"
+  "search": {
+    "initial": "test",
+    "noResults": "test",
+    "countOnPage": "test",
+    "pagination": {
+      "showing": "test",
+      "perPage": "test"
+    },
+    "actions": {
+      "selectAll": "test",
+      "deselectAll": "test",
+      "exportSelected": "test",
+      "exportAll": "test",
+      "viewDetails": "test",
+      "remove": "test",
+      "add": "test",
+      "hideDetails": "test",
+      "showDetails": "test",
+      "archive": "test",
+      "restore": "test"
+    },
+    "metadata": {
+      "rateConstant": "test",
+      "date": "test",
+      "solvent": "test",
+      "temp": "test",
+      "conc": "test",
+      "pfoRateConstant": "test",
+      "instrument": "test",
+      "modality": "test",
+      "wavelength": "test",
+      "notes": "test"
+    },
+    "modals": {
+      "archive": {
+        "title": "test",
+        "message": "test",
+        "confirm": "test"
+      },
+      "restore": {
+        "title": "test",
+        "message": "test",
+        "confirm": "test"
+      },
+      "draw": {
+        "title": "test",
+        "apply": "test"
+      }
+    },
+    "standard": {
+      "reactant1": "test",
+      "reactant2": "test",
+      "switchToExact": "test",
+      "searchBySubstructure": "test",
+      "reactantError": "test",
+      "reactantFetchFailed": "test"
+    },
+    "advanced": {
+      "title": "test",
+      "rateConstantRange": "test",
+      "pfoRateConstantRange": "test",
+      "dateRange": "test",
+      "scientist": "test",
+      "temperature": "test",
+      "solvent": "test",
+      "concentrationA": "test",
+      "concentrationB": "test",
+      "instrument": "test",
+      "modality": "test",
+      "wavelengthRange": "test",
+      "comment": "test",
+      "clearFields": "test",
+      "labels": {
+        "from": "test",
+        "to": "test",
+        "min": "test",
+        "max": "test",
+        "reactantA": "test",
+        "reactantB": "test"
+      },
+      "placeholders": {
+        "scientist": "test",
+        "solvent": "test",
+        "reactant": "test",
+        "instrument": "test",
+        "modality": "test",
+        "comment": "test"
+      },
+      "warnings": {
+        "invalidRange": "test",
+        "invalidDateRange": "test",
+        "fetchUsersError": "test"
+      }
+    },
+    "substructure": {
+      "group": "test",
+      "operator": "test",
+      "format": "test",
+      "not": "test",
+      "removeGroup": "test",
+      "addRule": "test",
+      "addGroup": "test",
+      "searchButton": "test",
+      "resultsLabel": "test",
+      "placeholder": "test",
+      "removeReactant": "test",
+      "drawSubstructure": "test",
+      "warnings": {
+        "maxDepth": "test",
+        "rdkitNotLoaded": "test"
+      }
+    },
+    "selector": {
+      "placeholder": "test",
+      "drawMolecule": "test",
+      "clearSearch": "test",
+      "removeReactant": "test"
+    }
   },
   "reactants": {
+    "status": {
+      "pending": "test",
+      "ready": "test",
+      "failed": "test",
+      "missing": "test"
+    },
     "title": "test",
     "searchPlaceholder": "test",
     "actions": {
@@ -101,6 +321,11 @@
     },
     "modals": {
       "archive": {
+        "title": "test",
+        "message": "test",
+        "confirm": "test"
+      },
+      "restore": {
         "title": "test",
         "message": "test",
         "confirm": "test"
@@ -155,10 +380,28 @@
           "smilesRequired": "test",
           "smilesSyntax": "test",
           "smilesSanitization": "test",
-          "invalidType": "test"
+          "invalidType": "test",
+          "fieldRequired": "test"
         }
       },
       "modals": {
+        "structureSelect": {
+          "title": "test",
+          "description": "test",
+          "buttons": {
+            "select": "test",
+            "rejectAll": "test",
+            "cancel": "test"
+          }
+        },
+        "structureConfirm": {
+          "title": "test",
+          "description": "test",
+          "buttons": {
+            "confirm": "test",
+            "cancel": "test"
+          }
+        },
         "archive": {
           "title": "test",
           "message": "test",
@@ -176,12 +419,34 @@
         "loadError": "test",
         "typeLoadErrorTitle": "test",
         "typeLoadErrorMessage": "test",
+        "pageRefreshTitle": "test",
         "savedTitle": "test",
         "savedMessage": "test",
+        "saveErrorTitle": "test",
+        "saveErrorMessage": "test",
         "archivedTitle": "test",
         "archivedMessage": "test",
         "archiveFailedTitle": "test",
-        "archiveFailedMessage": "test"
+        "archiveFailedMessage": "test",
+        "uploadTitle": "test",
+        "uploadMessage": "test",
+        "uploadErrorTitle": "test",
+        "uploadErrorMessage": "test",
+        "generateTitle": "test",
+        "generateErrorTitle": "test",
+        "generateErrorMessage": "test",
+        "structureSelectTitle": "test",
+        "structureSelectErrorTitle": "test",
+        "structureSelectErrorMessage": "test"
+      },
+      "structure": {
+        "failedGenerate": "test",
+        "tryAgainButton": "test",
+        "generating": "test",
+        "refreshButton": "test",
+        "generateComplete": "test",
+        "selectStructureButton": "test",
+        "generateStructureButton": "test"
       }
     },
     "structure": {
@@ -214,6 +479,10 @@
         "comment": "test",
         "references": "test"
       },
+      "structure": {
+        "generate": "test",
+        "generateFailed": "test"
+      },
       "emptyFiles": "test",
       "buttons": {
         "edit": "test",
@@ -223,13 +492,65 @@
         "missing3dFileTitle": "test",
         "missing3dFileMessage": "test"
       }
+    },
+    "history": {
+      "title": "test",
+      "noHistory": "test"
+    },
+    "extractedMetadata": {
+      "title": "test",
+      "description": "test",
+      "table": {
+        "keep": "test",
+        "property": "test",
+        "value": "test"
+      },
+      "labels": {
+        "date": "test",
+        "temperature": "test",
+        "instrument": "test",
+        "modality": "test",
+        "wavelength": "test",
+        "reactantA": "test",
+        "concentrationA": "test",
+        "reactantB": "test",
+        "concentrationB": "test",
+        "comment": "test"
+      },
+      "buttons": {
+        "useSelected": "test",
+        "appliedTitle": "test",
+        "appliedMessage": "test"
+      }
     }
   },
+
   "experiments": {
+    "view": {
+      "title": "test",
+      "experimentMetadata": "test",
+      "measurementData": "test",
+      "noMeasurementData": "test",
+      "noReactants": "test",
+      "noFiles": "test",
+      "planExperiment": "test",
+      "labels": {
+        "concentrations": "test",
+        "instrument": "test",
+        "modality": "test",
+        "wavelength": "test",
+        "comment": "test",
+        "rateConstant": "test",
+        "error": "test",
+        "pfoRateConstant": "test"
+      }
+    },
     "details": {
       "createNew": "test",
       "editExisting": "test",
       "viewExisting": "test",
+      "loading": "test",
+      "filesDirtyHint": "test",
       "form": {
         "sections": {
           "required": "test",
@@ -247,7 +568,13 @@
           "instrument": "test",
           "modality": "test",
           "wavelength": "test",
-          "comment": "test"
+          "comment": "test",
+          "rateConstant": "test",
+          "error": "test",
+          "isErrorPercentage": "test",
+          "pfoRateConstant": "test",
+          "doi": "test",
+          "createdBy": "test"
         },
         "placeholders": {
           "value": "test",
@@ -262,18 +589,26 @@
         "errors": {
           "reactantARequired": "test",
           "reactantBRequired": "test",
+          "reactantNotUnique": "test",
           "dateRequired": "test",
           "scientistRequired": "test",
           "temperatureRequired": "test",
           "solventRequired": "test",
+          "rateConstantRequired": "test",
+          "errorRequired": "test",
           "concentrationARequired": "test",
           "concentrationBRequired": "test",
           "concentrationNegative": "test",
+          "rateConstantNegative": "test",
+          "errorNegative": "test",
+          "errorPercentageLimit": "test",
           "invalidSolvent": "test",
           "invalidInstrument": "test",
           "invalidModality": "test",
           "wavelengthInvalid": "test",
-          "wavelengthNegative": "test"
+          "wavelengthNegative": "test",
+          "commentLength": "test",
+          "formInvalid": "test"
         },
         "dateTitle": "test"
       },
@@ -294,6 +629,7 @@
         "errorTitle": "test",
         "loadError": "test",
         "loadExpError": "test",
+        "loadArchivedError": "test",
         "permissionErrorTitle": "test",
         "permissionErrorMessage": "test",
         "optionLoadErrorTitle": "test",
@@ -305,8 +641,85 @@
         "archivedTitle": "test",
         "archivedMessage": "test",
         "archiveFailedTitle": "test",
-        "archiveFailedMessage": "test"
+        "archiveFailedMessage": "test",
+        "userErrorTitle": "test",
+        "userLoadError": "test",
+        "reactantErrorTitle": "test",
+        "reactantLoadError": "test",
+        "historyLoadError": "test",
+        "deleteFileErrorTitle": "test",
+        "deleteFileErrorMessage": "test"
       }
+    },
+    "my": {
+      "title": "test",
+      "active": "test",
+      "archived": "test",
+      "loading": "test",
+      "noActive": "test",
+      "noArchived": "test",
+      "notifications": {
+        "errorTitle": "test",
+        "loadError": "test",
+        "userLoadError": "test"
+      }
+    }
+  },
+  "exportModal": {
+    "title": "test",
+    "format": "test",
+    "json": "test",
+    "csv": "test",
+    "includeJsonFields": "test",
+    "availableCsvFields": "test",
+    "dragDropInstruction": "test",
+    "dragDropPlaceholder": "test",
+    "categories": {
+      "reactantsStructures": "test",
+      "kineticsData": "test",
+      "coreMetadata": "test"
+    },
+    "fields": {
+      "names": "test",
+      "smiles": "test",
+      "chemicalType": "test",
+      "structures": "test",
+      "rateConstant": "test",
+      "pfo": "test",
+      "error": "test",
+      "doi": "test",
+      "temperature": "test",
+      "solvent": "test",
+      "uuid": "test",
+      "createdBy": "test",
+      "reactantAName": "test",
+      "reactantASmiles": "test",
+      "reactantAStruct": "test",
+      "reactantBName": "test",
+      "reactantBSmiles": "test",
+      "reactantBStruct": "test",
+      "reactantAType": "test",
+      "reactantBType": "test",
+      "instrument": "test",
+      "modality": "test",
+      "wavelength": "test",
+      "expComment": "test",
+      "date": "test",
+      "scientist": "test",
+      "concentrationA": "test",
+      "concentrationB": "test",
+      "isErrorPercentage": "test"
+    },
+    "preview": {
+      "title": "test",
+      "showingItems": "test",
+      "copying": "test",
+      "copied": "test",
+      "copyFullData": "test"
+    },
+    "buttons": {
+      "cancel": "test",
+      "download": "test"
     }
   }
 }

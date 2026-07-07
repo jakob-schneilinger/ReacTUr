@@ -1,11 +1,11 @@
-<div class="d-flex flex-column gap-4 mb-2">
+<div class="d-flex flex-column gap-4 mb-2" *transloco="let t; read: 'search.standard'">
 
   <div>
     <div class="d-flex justify-content-between align-items-end mb-1">
-      <label class="form-label text-muted fw-bold mb-0">Reactant 1</label>
+      <label class="form-label text-muted fw-bold mb-0">{{ t('reactant1') }}</label>
       <button class="btn-sm btn-link text-decoration-none text-muted p-0 substructure-btn" (click)="toggleMode(1)">
         <i class="bi" [ngClass]="showSub1 ? 'bi-arrow-return-left' : 'bi-diagram-3'"></i>
-        {{ showSub1 ? 'Switch to Exact Match' : 'Search by Substructure' }}
+        {{ showSub1 ? t('switchToExact') : t('searchBySubstructure') }}
       </button>
     </div>
 
@@ -29,10 +29,10 @@
 
   <div>
     <div class="d-flex justify-content-between align-items-end mb-1">
-      <label class="form-label text-muted fw-bold mb-0">Reactant 2</label>
+      <label class="form-label text-muted fw-bold mb-0">{{ t('reactant2') }}</label>
       <button class="btn-sm btn-link text-decoration-none text-muted p-0 substructure-btn" (click)="toggleMode(2)">
         <i class="bi" [ngClass]="showSub2 ? 'bi-arrow-return-left' : 'bi-diagram-3'"></i>
-        {{ showSub2 ? 'Switch to Exact Match' : 'Search by Substructure' }}
+        {{ showSub2 ? t('switchToExact') : t('searchBySubstructure') }}
       </button>
     </div>
 

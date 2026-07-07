@@ -1,10 +1,10 @@
 <app-modal
   [isOpen]="true"
-  [title]="'Metadata Detected'"
+  [title]="'reactants.extractedMetadata.title' | transloco"
   size="lg"
   (close)="onCancel()">
 
-  <p>We found the following details in your uploaded file <strong>{{ fileName }}</strong>. Select the data you would like to autofill.</p>
+  <p [innerHTML]="'reactants.extractedMetadata.description' | transloco: { fileName: fileName }"></p>
 
   <div class="modal-content">
 
@@ -13,9 +13,9 @@
         <table class="metadata-table">
           <thead>
           <tr>
-            <th class="checkbox-col">Keep</th>
-            <th>Property</th>
-            <th>Value</th>
+            <th class="checkbox-col">{{ 'reactants.extractedMetadata.table.keep' | transloco }}</th>
+            <th>{{ 'reactants.extractedMetadata.table.property' | transloco }}</th>
+            <th>{{ 'reactants.extractedMetadata.table.value' | transloco }}</th>
           </tr>
           </thead>
           <tbody>
@@ -27,7 +27,7 @@
                          (click)="$event.stopPropagation()"
                          (change)="toggleSelection(item)">
                 </td>
-                <td class="metadata-key">{{ metadataLabels[item.key] || item.key }}</td>
+                <td class="metadata-key">{{ getLabel(item.key) }}</td>
                 <td class="metadata-value">{{ item.value }}</td>
               </tr>
             }
@@ -38,7 +38,7 @@
   </div>
 
   <ng-container footer>
-    <button type="button" class="primary" (click)="onConfirm()">Use Selected Metadata</button>
-    <button type="button" class="" (click)="onCancel()">Cancel</button>
+    <button type="button" class="primary" (click)="onConfirm()">{{ 'reactants.extractedMetadata.buttons.useSelected' | transloco }}</button>
+    <button type="button" class="" (click)="onCancel()">{{ 'shared.actions.cancel' | transloco }}</button>
   </ng-container>
 </app-modal>

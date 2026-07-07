@@ -1,6 +1,8 @@
 import { Component, EventEmitter, Input, Output, OnChanges, SimpleChanges } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { AppModalComponent } from '../../../../shared/modal/app-modal.component';
+import { TRANSLOCO_IMPORTS } from '../../../../core/global/transloco-imports';
+import { TranslocoService } from '@jsverse/transloco';
 
 // Interface to track the state of each row
 interface MetadataItem {
@@ -14,7 +16,7 @@ interface MetadataItem {
   templateUrl: './extracted-metadata-confirm-modal.component.html',
   styleUrls: ['./extracted-metadata-confirm-modal.component.scss'],
   standalone: true,
-  imports: [CommonModule, AppModalComponent],
+  imports: [CommonModule, AppModalComponent, TRANSLOCO_IMPORTS],
 })
 export class ExtractedMetadataConfirmModalComponent implements OnChanges {
   @Input() metadata: Record<string, any> | null = null;
@@ -51,6 +53,12 @@ export class ExtractedMetadataConfirmModalComponent implements OnChanges {
     concentrationB: 'Concentration B (mM)',
     comment: 'Remarks',
   };
+
+  constructor(private transloco: TranslocoService) {}
+
+  getLabel(key: string): string {
+    return this.transloco.translate(`reactants.extractedMetadata.labels.${key}`);
+  }
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['metadata'] && this.metadata) {

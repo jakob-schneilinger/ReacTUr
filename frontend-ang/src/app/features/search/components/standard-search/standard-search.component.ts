@@ -8,12 +8,15 @@ import { ExperimentService } from '../../../experiments/experiment.service';
 import { NotificationService } from '../../../../core/layout/notification/notification.service';
 import { StructureFlag } from '../../../reactants/structure-flag.enum';
 
+import { TRANSLOCO_IMPORTS } from '../../../../core/global/transloco-imports';
+import { TranslocoService } from '@jsverse/transloco';
+
 @Component({
   selector: 'app-experiment-search',
   templateUrl: './standard-search.component.html',
   styleUrls: ['./standard-search.component.scss'],
   standalone: true,
-  imports: [CommonModule, ReactantSelectorComponent, SubstructureSearchComponent],
+  imports: [CommonModule, ReactantSelectorComponent, SubstructureSearchComponent, TRANSLOCO_IMPORTS],
 })
 export class StandardSearchComponent implements OnInit {
   @Output() searchChanged = new EventEmitter<{
@@ -61,7 +64,8 @@ export class StandardSearchComponent implements OnInit {
   constructor(
     private reactantService: ReactantService,
     private notification: NotificationService,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private transloco: TranslocoService,
   ) {}
 
   ngOnInit() {
@@ -72,8 +76,8 @@ export class StandardSearchComponent implements OnInit {
       },
       error: (err) => {
         this.notification.error(
-          'Reactant Error',
-          `Unable to fetch reactants. Please reload the page! Error: ${err.message || err.error || err} `,
+          this.transloco.translate('search.standard.reactantError'),
+          `${this.transloco.translate('search.standard.reactantFetchFailed')} Error: ${err.message || err.error || err} `,
         );
       },
     });

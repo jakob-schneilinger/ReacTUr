@@ -1,6 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { AppModalComponent } from '../../../../shared/modal/app-modal.component';
 import { UploadedFileComponent } from '../../../../shared/file-upload/uploaded-file/uploaded-file.component';
+import { TRANSLOCO_IMPORTS } from '../../../../core/global/transloco-imports';
 import {
   Component,
   Input,
@@ -21,7 +22,7 @@ import { ExperimentService } from '../../experiment.service';
   templateUrl: './experiment-view-modal.component.html',
   styleUrls: ['./experiment-view-modal.component.scss'],
   standalone: true,
-  imports: [CommonModule, AppModalComponent, UploadedFileComponent, RouterLink],
+  imports: [CommonModule, AppModalComponent, UploadedFileComponent, RouterLink, TRANSLOCO_IMPORTS],
 })
 export class ExperimentViewModalComponent implements OnInit, OnChanges {
   @Input() selectedExperiment: GetExperimentDto | undefined;

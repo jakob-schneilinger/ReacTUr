@@ -1,5 +1,5 @@
 
-<div class="container mt-4" style="max-width: 500px;">
+<div class="container mt-4" style="max-width: 500px;" *transloco="let t; read: 'shared.upload'">
 
   @if (showTable) {
     <app-paste-table (fileGenerated)="onPasteTableGenerated($event)"></app-paste-table>
@@ -25,9 +25,9 @@
 
 <app-confirm-modal
   [isOpen]="isDeleteFileModalOpen"
-  title="Remove File"
-  [message]="'Are you sure you want to <strong>permanently</strong> remove <strong>' + pendingFileName + '</strong> from the upload list?'"
-  confirmLabel="Permanently Remove"
+  [title]="'shared.upload.removeFile' | transloco"
+  [message]="'shared.upload.removeConfirmMessage' | transloco:{ fileName: pendingFileName }"
+  [confirmLabel]="'shared.upload.removeConfirmLabel' | transloco"
   confirmButtonClass="danger"
   (confirm)="executeDelete()"
   (cancel)="cancelDelete()">

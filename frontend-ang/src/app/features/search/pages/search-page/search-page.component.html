@@ -47,7 +47,7 @@
 
     <!-- Rechte Spalte -->
     <div rightContent>
-      <app-experiment-results
+      <app-search-results
         [state]="currentSearchState"
         [experiments]="foundExperiments"
         [currentPage]="currentPage"
@@ -58,7 +58,7 @@
         (searchScientist)="handleSearchScientist($event)"
         (pageChange)="handlePageChange($event)"
         (pageSizeChange)="handlePageSizeChange($event)">
-      </app-experiment-results>
+      </app-search-results>
     </div>
   </app-layout>
   @if (isExportModalOpen) {

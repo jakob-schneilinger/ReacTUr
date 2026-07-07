@@ -1,6 +1,6 @@
 <app-modal
   [isOpen]="true"
-  [title]="selectedExperiment?.uuid ? headerText : 'Details'"
+  [title]="selectedExperiment?.uuid ? headerText : ('experiments.view.title' | transloco)"
   size="xl"
   (close)="close.emit()">
 
@@ -9,74 +9,74 @@
       <div class="row">
 
         <div class="col-md-6 pe-4">
-          <h6 class="border-bottom pb-2 mb-3 text-primary">Experiment Metadata</h6>
+          <h6 class="border-bottom pb-2 mb-3 text-primary">{{ 'experiments.view.experimentMetadata' | transloco }}</h6>
 
           @if (selectedExperiment.metadata; as meta) {
             <dl class="row">
-              <dt class="col-sm-4">Date</dt>
+              <dt class="col-sm-4">{{ 'experiments.details.form.labels.date' | transloco }}</dt>
               <dd class="col-sm-8 text-break">{{ meta.date | date:'mediumDate' }}</dd>
 
-              <dt class="col-sm-4">Scientist</dt>
+              <dt class="col-sm-4">{{ 'experiments.details.form.labels.scientist' | transloco }}</dt>
               <dd class="col-sm-8 text-break">{{ meta.scientist.firstName }} {{ meta.scientist.lastName }}</dd>
 
-              <dt class="col-sm-4">Temperature</dt>
+              <dt class="col-sm-4">{{ 'experiments.details.form.labels.temperature' | transloco }}</dt>
               <dd class="col-sm-8 text-break">{{ meta.temperature }} &deg;C</dd>
 
-              <dt class="col-sm-4">Solvent</dt>
+              <dt class="col-sm-4">{{ 'experiments.details.form.labels.solvent' | transloco }}</dt>
               <dd class="col-sm-8 text-break">{{ meta.solvent.name }}</dd>
 
-              <dt class="col-sm-4">Concentrations</dt>
+              <dt class="col-sm-4">{{ 'experiments.view.labels.concentrations' | transloco }}</dt>
               <dd class="col-sm-8 text-break">{{ concentrationText }}</dd>
 
-              <dt class="col-sm-4">Instrument</dt>
+              <dt class="col-sm-4">{{ 'experiments.view.labels.instrument' | transloco }}</dt>
               <dd class="col-sm-8 text-break">{{ meta.instrument?.name || '-' }}</dd>
 
-              <dt class="col-sm-4">Modality</dt>
+              <dt class="col-sm-4">{{ 'experiments.view.labels.modality' | transloco }}</dt>
               <dd class="col-sm-8 text-break">{{ meta.modality?.name || '-' }}</dd>
 
-              <dt class="col-sm-4">Wavelength</dt>
+              <dt class="col-sm-4">{{ 'experiments.view.labels.wavelength' | transloco }}</dt>
               <dd class="col-sm-8 text-break">{{ meta.wavelength ? meta.wavelength + ' nm' : '-' }}</dd>
 
-              <dt class="col-sm-4">Comment</dt>
+              <dt class="col-sm-4">{{ 'experiments.view.labels.comment' | transloco }}</dt>
               <dd class="col-sm-8 text-break">{{ meta.comment || '-' }}</dd>
             </dl>
           }
 
-          <h6 class="border-bottom pb-2 mb-3 mt-4 text-primary">Measurement Data</h6>
+          <h6 class="border-bottom pb-2 mb-3 mt-4 text-primary">{{ 'experiments.view.measurementData' | transloco }}</h6>
 
           @if (selectedExperiment.measurementData; as mData) {
             <dl class="row">
-              <dt class="col-sm-4">Rate Constant</dt>
+              <dt class="col-sm-4">{{ 'experiments.view.labels.rateConstant' | transloco }}</dt>
               <dd class="col-sm-8 text-break">{{ mData.rateConstant }}</dd>
 
-              <dt class="col-sm-4">Error</dt>
+              <dt class="col-sm-4">{{ 'experiments.view.labels.error' | transloco }}</dt>
               <dd class="col-sm-8 text-break">
                 &plusmn; {{ mData.error }}{{ mData.isErrorPercentage ? '%' : '' }}
               </dd>
 
-              <dt class="col-sm-4">pFO Rate Constant</dt>
+              <dt class="col-sm-4">{{ 'experiments.view.labels.pfoRateConstant' | transloco }}</dt>
               <dd class="col-sm-8 text-break">
                 {{ mData.pFO_rateConstant ?? '-' }}
               </dd>
             </dl>
           } @else {
-            <div class="text-muted small mb-4">No measurement data available.</div>
+            <div class="text-muted small mb-4">{{ 'experiments.view.noMeasurementData' | transloco }}</div>
           }
         </div>
 
         <div class="col-md-6 border-start ps-4" style="min-height: 600px">
 
-          <h6 class="border-bottom pb-2 mb-3 mt-4 text-primary">Reactants</h6>
+          <h6 class="border-bottom pb-2 mb-3 mt-4 text-primary">{{ 'reactants.title' | transloco }}</h6>
 
           @if (!selectedExperiment.reactantA && !selectedExperiment.reactantB) {
-            <div class="text-muted small">No reactants associated with this experiment.</div>
+            <div class="text-muted small">{{ 'experiments.view.noReactants' | transloco }}</div>
           } @else {
             <div class="list-group">
               <div class="reactant list-group-item d-flex flex-row justify-content-between align-items-center mb-2 border rounded" [routerLink]="['/reactants', selectedExperiment.reactantA.uuid]">
                 <div class="d-flex flex-column justify-content-between">
                   <h6 class="mb-1 text-primary">{{ selectedExperiment.reactantA.shortName }}</h6>
                   <p class="mb-1 small text-truncate" title="{{ selectedExperiment.reactantA.smiles }}">
-                    <strong>SMILES:</strong> {{ selectedExperiment.reactantA.smiles }}
+                    <strong>{{ 'reactants.viewModal.labels.smiles' | transloco }}:</strong> {{ selectedExperiment.reactantA.smiles }}
                   </p>
                   @if (!!selectedExperiment.reactantA.chemicalName) {
                     <small class="text-muted">{{ selectedExperiment.reactantA.chemicalName }}</small>
@@ -88,7 +88,7 @@
                 <div class="d-flex flex-column justify-content-between">
                   <h6 class="mb-1 text-primary">{{ selectedExperiment.reactantB.shortName }}</h6>
                   <p class="mb-1 small text-truncate" title="{{ selectedExperiment.reactantB.smiles }}">
-                    <strong>SMILES:</strong> {{ selectedExperiment.reactantB.smiles }}
+                    <strong>{{ 'reactants.viewModal.labels.smiles' | transloco }}:</strong> {{ selectedExperiment.reactantB.smiles }}
                   </p>
                   @if (!!selectedExperiment.reactantB.chemicalName) {
                     <small class="text-muted">{{ selectedExperiment.reactantB.chemicalName }}</small>
@@ -99,7 +99,7 @@
             </div>
           }
 
-          <h6 class="border-bottom pb-2 mb-3 text-primary">Files</h6>
+          <h6 class="border-bottom pb-2 mb-3 text-primary">{{ 'admin.option.title' | transloco }}</h6>
 
           @if (modalFiles.length > 0) {
             @for (file of modalFiles; track $index) {
@@ -109,7 +109,7 @@
               </app-uploaded-file>
             }
           } @else {
-            <div class="text-muted small mb-4">No files attached.</div>
+            <div class="text-muted small mb-4">{{ 'experiments.view.noFiles' | transloco }}</div>
           }
 
         </div>
@@ -121,13 +121,13 @@
   <ng-container footer>
     @if (selectedExperiment !== undefined && selectedExperiment !== null ) {
       <button type="button" class="" (click)="planExperiment(selectedExperiment)">
-        <i class="bi bi-graph-up me-1"></i> Plan Experiment
+        <i class="bi bi-graph-up me-1"></i> {{ 'experiments.view.planExperiment' | transloco }}
       </button>
 
       @if (hasWritePermission && !selectedExperiment.archivedAt) {
-        <button type="button" class="primary" (click)="editExperiment(selectedExperiment.uuid)">Edit Experiment</button>
+        <button type="button" class="primary" (click)="editExperiment(selectedExperiment.uuid)">{{ 'experiments.details.editExisting' | transloco }}</button>
       }
-      <button type="button" class="" (click)="close.emit()">Close</button>
+      <button type="button" class="" (click)="close.emit()">{{ 'shared.actions.close' | transloco }}</button>
     }
   </ng-container>
 </app-modal>

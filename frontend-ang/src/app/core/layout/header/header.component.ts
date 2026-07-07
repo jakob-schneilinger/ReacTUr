@@ -6,6 +6,7 @@ import { GetUserDto } from '../../../shared/dtos/user.dto';
 import { HasRoleDirective } from '../../../shared/directives/has-role.directive';
 import { NgbDropdown, NgbDropdownItem, NgbDropdownMenu, NgbDropdownToggle } from '@ng-bootstrap/ng-bootstrap';
 import { TRANSLOCO_IMPORTS } from '../../global/transloco-imports';
+import { AvailableLangs, LangDefinition, TranslocoService } from '@jsverse/transloco';
 
 @Component({
   selector: 'app-header',
@@ -28,6 +29,7 @@ export class HeaderComponent implements OnInit {
   constructor(
     public router: Router,
     public authService: AuthService,
+    private transloco: TranslocoService,
     private cdr: ChangeDetectorRef,
   ) {}
 
@@ -40,6 +42,26 @@ export class HeaderComponent implements OnInit {
         this.cdr.markForCheck();
       });
     });
+  }
+
+  getLangId(lang: any): string {
+    return typeof lang === 'string' ? lang : lang.id;
+  }
+
+  getLangLabel(lang: any): string {
+    return typeof lang === 'string' ? lang : lang.label;
+  }
+
+  get activeLanguage(): string {
+    return this.transloco.getActiveLang();
+  }
+
+  setActiveLanguage(lang: string) {
+    this.transloco.setActiveLang(lang);
+  }
+
+  get availableLanguages(): AvailableLangs {
+    return this.transloco.getAvailableLangs();
   }
 
   get isLoggedIn(): boolean {

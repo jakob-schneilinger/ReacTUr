@@ -8,19 +8,19 @@
           @switch (reactant.flag) {
             @case ('PENDING') {
               <i class="bi bi-hourglass-split status-pending fs-5"
-                 title="3D structure is being generated..."></i>
+                 [title]="'reactants.status.pending' | transloco"></i>
             }
             @case ('READY') {
               <i class="bi bi-check-circle-fill status-ready fs-5"
-                 title="3D structure is awaiting approval"></i>
+                 [title]="'reactants.status.ready' | transloco"></i>
             }
             @case ('FAILED') {
               <i class="bi bi-x-circle-fill status-failed fs-5"
-                 title="Generation failed"></i>
+                 [title]="'reactants.status.failed' | transloco"></i>
             }
             @default {
               <i class="bi bi-question-circle-fill status-missing fs-5"
-                 title="No 3D structure available"></i>
+                 [title]="'reactants.status.missing' | transloco"></i>
             }
           }
         </span>

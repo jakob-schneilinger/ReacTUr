@@ -1,18 +1,18 @@
 <app-modal
   [isOpen]="isOpen"
-  [title]="title"
+  [title]="title | transloco"
   (close)="onCancel()">
 
   <div body class="d-flex align-items-center">
     @if (icon) {
       <i class="bi {{ icon }} me-3 fs-3 text-{{ confirmButtonClass }}"></i>
     }
-    <p class="mb-0" [innerHTML]="message"></p>
+    <p class="mb-0" [innerHTML]="message | transloco"></p>
   </div>
 
   <ng-container footer>
     <button type="button" (click)="onCancel()">
-      {{ cancelLabel }}
+      {{ cancelLabel | transloco }}
     </button>
     <button
       type="button"
@@ -20,7 +20,7 @@
       [class.error-warning]="confirmButtonClass === 'danger'"
       [class.restore]="confirmButtonClass === 'restore'"
       (click)="onConfirm()">
-      {{ confirmLabel }}
+      {{ confirmLabel | transloco }}
     </button>
   </ng-container>
 </app-modal>

@@ -4,6 +4,8 @@ import { DrawMolComponent } from '../../../../shared/draw-mol/draw-mol.component
 import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { ReactantDto } from '../../../reactants/reactant.dto';
 import { RDKitService } from '../../../../shared/services/rdkit.service';
+import { TRANSLOCO_IMPORTS } from '../../../../core/global/transloco-imports';
+import { TranslocoService } from '@jsverse/transloco';
 
 export type LogicalOperator = 'AND' | 'OR';
 
@@ -28,7 +30,7 @@ export interface SearchRule {
   templateUrl: './substructure-search.component.html',
   styleUrls: ['./substructure-search.component.scss'],
   standalone: true,
-  imports: [CommonModule, FormsModule, DrawMolComponent],
+  imports: [CommonModule, FormsModule, DrawMolComponent, TRANSLOCO_IMPORTS],
 })
 export class SubstructureSearchComponent {
   @Input() availableReactants: ReactantDto[] = [];
@@ -51,7 +53,10 @@ export class SubstructureSearchComponent {
 
   maxDepth = 3;
 
-  constructor(private rdkitService: RDKitService) {
+  constructor(
+    private rdkitService: RDKitService,
+    private transloco: TranslocoService,
+  ) {
     this.addRule(this.rootGroup);
   }
 
@@ -66,7 +71,7 @@ export class SubstructureSearchComponent {
 
   addGroup(parentGroup: SearchGroup, currentDepth: number) {
     if (currentDepth >= this.maxDepth) {
-      console.warn('Maximum group depth reached.');
+      console.warn(this.transloco.translate('search.substructure.warnings.maxDepth'));
       return;
     }
     parentGroup.children.push({
@@ -124,7 +129,7 @@ export class SubstructureSearchComponent {
 
   evaluateRulesTree() {
     if (!this.rdkitService.isLoaded) {
-      console.warn('RDKit is not loaded yet.');
+      console.warn(this.transloco.translate('search.substructure.warnings.rdkitNotLoaded'));
       return;
     }
 

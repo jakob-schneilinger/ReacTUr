@@ -181,8 +181,10 @@ export class ExperimentDetailsFormComponent implements OnInit, OnDestroy, OnChan
       },
       error: (err) => {
         this.notification.error(
-          'User Error',
-          `Unable to fetch users. Please reload the page! Error: ${err.message || err.error || err} `,
+          this.transloco.translate('experiments.details.notifications.userErrorTitle'),
+          this.transloco.translate('experiments.details.notifications.userLoadError', {
+            error: err.message || err.error || err,
+          }),
         );
       },
     });
@@ -289,8 +291,10 @@ export class ExperimentDetailsFormComponent implements OnInit, OnDestroy, OnChan
       error: (err) => {
         this.isReactantsLoaded = true;
         this.notification.error(
-          'Reactant Error',
-          `Unable to fetch reactants. Please reload the page! Error: ${err.message || err.error || err} `,
+          this.transloco.translate('experiments.details.notifications.reactantErrorTitle'),
+          this.transloco.translate('experiments.details.notifications.reactantLoadError', {
+            error: err.message || err.error || err,
+          }),
         );
       },
     });
@@ -530,6 +534,10 @@ export class ExperimentDetailsFormComponent implements OnInit, OnDestroy, OnChan
       this.saveExperiment.emit(savePayload);
     } else {
       this.experimentForm.markAllAsTouched();
+      this.notification.error(
+        this.transloco.translate('experiments.details.notifications.savedErrorTitle'),
+        this.transloco.translate('experiments.details.form.errors.formInvalid'),
+      );
     }
   }
 
@@ -559,15 +567,23 @@ export class ExperimentDetailsFormComponent implements OnInit, OnDestroy, OnChan
     this.isArchiveExperimentModalOpen = false;
     if (!this.experiment) return;
     this.experimentService.archiveExperiment(this.experiment.uuid).subscribe({
-      next: value => {
-        this.notification.success('Experiment Archived', 'Experiment was archived successfully!');
+      next: (value) => {
+        this.notification.success(
+          this.transloco.translate('experiments.details.notifications.archivedTitle'),
+          this.transloco.translate('experiments.details.notifications.archivedMessage'),
+        );
         this.experimentForm.reset();
         this.router.navigate(['/search']);
       },
-      error: err => {
-        this.notification.error('Experiment Archive Error', 'Unable to archive experiment!');
-      }
-    })
+      error: (err) => {
+        this.notification.error(
+          this.transloco.translate('experiments.details.notifications.archiveFailedTitle'),
+          this.transloco.translate('experiments.details.notifications.archiveFailedMessage', {
+            error: err.error || err.message || err,
+          }),
+        );
+      },
+    });
   }
 
   closeModals(): void {

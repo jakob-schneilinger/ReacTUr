@@ -13,6 +13,7 @@ import {
 } from '@angular/core';
 import { AppModalComponent } from '../modal/app-modal.component';
 import { RDKitService } from '../services/rdkit.service';
+import { TRANSLOCO_IMPORTS } from '../../core/global/transloco-imports';
 
 declare var ChemDoodle: any;
 
@@ -21,7 +22,7 @@ declare var ChemDoodle: any;
   templateUrl: './draw-mol.component.html',
   styleUrls: ['./draw-mol.component.scss'],
   standalone: true,
-  imports: [CommonModule, FormsModule, AppModalComponent],
+  imports: [CommonModule, FormsModule, AppModalComponent, TRANSLOCO_IMPORTS],
 })
 export class DrawMolComponent implements OnInit, AfterViewInit {
   @Input() initialSmiles: string = '';

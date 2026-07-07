@@ -2,12 +2,14 @@ import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import ExperimentFileService from '../../../features/experiments/experiment-file.service';
 
+import { TRANSLOCO_IMPORTS } from '../../../core/global/transloco-imports';
+
 @Component({
   selector: 'app-uploaded-file',
   templateUrl: './uploaded-file.component.html',
   styleUrls: ['./uploaded-file.component.scss'],
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, TRANSLOCO_IMPORTS],
 })
 export class UploadedFileComponent {
   @Input() file!: File;
@@ -23,7 +25,7 @@ export class UploadedFileComponent {
   }
 
   getExtension(filename: string): string {
-    return filename.split('.').pop() || 'File';
+    return filename.split('.').pop() || 'shared.file';
   }
 
   onRemove() {

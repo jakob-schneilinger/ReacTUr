@@ -51,7 +51,10 @@ export class MyExperimentsPageComponent implements OnInit {
       },
       error: (err) => {
         this.isLoading = false;
-        this.notification.error('Error', 'Could not load user data');
+        this.notification.error(
+          this.transloco.translate('experiments.details.notifications.errorTitle'),
+          this.transloco.translate('experiments.my.notifications.userLoadError'),
+        );
         this.cdr.markForCheck();
       },
     });

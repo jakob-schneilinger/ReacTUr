@@ -32,7 +32,7 @@
 
       <div class="experiments-layout">
 
-        <app-experiment-results
+        <app-search-results
           class="experiment-column"
           state="has-results"
           [disableExport]="true"
@@ -42,9 +42,9 @@
           [totalElements]="leftHalf.length"
           [pageSize]="leftHalf.length || 1"
           (listChanged)="onListChanged()">
-        </app-experiment-results>
+        </app-search-results>
 
-        <app-experiment-results
+        <app-search-results
           class="experiment-column"
           state="has-results"
           [disableExport]="true"
@@ -54,7 +54,7 @@
           [totalElements]="rightHalf.length"
           [pageSize]="rightHalf.length || 1"
           (listChanged)="onListChanged()">
-        </app-experiment-results>
+        </app-search-results>
 
       </div>
 

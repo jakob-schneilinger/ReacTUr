@@ -1,4 +1,4 @@
-<div class="reactant-selector-container">
+<div class="reactant-selector-container" *transloco="let t; read: 'search.selector'">
   @if (label) {
     <label class="form-label text-muted fw-bold mb-2">{{ label }}</label>
   }
@@ -17,7 +17,7 @@
               </div>
             </div>
 
-            <button type="button" class="btn-close ms-2" aria-label="Close" (click)="removeReactant(reactant)" title="Remove Reactant"></button>
+            <button type="button" class="btn-close ms-2" aria-label="Close" (click)="removeReactant(reactant)" [title]="t('removeReactant')"></button>
 
           </div>
         </div>
@@ -33,13 +33,13 @@
           class="form-control border-0 shadow-none bg-transparent"
           [(ngModel)]="searchTerm"
           (ngModelChange)="onSearchInput()"
-          placeholder="Search by name, SMILES, or type..." />
+          [placeholder]="t('placeholder')" />
 
         <button
           class="icon-btn text-secondary border-0 bg-transparent"
           type="button"
           (click)="openDraw()"
-          title="Draw Molecule">
+          [title]="t('drawMolecule')">
           <i class="bi bi-pencil-square"></i>
         </button>
 
@@ -48,7 +48,7 @@
             class="icon-btn text-danger me-1 border-0 bg-transparent"
             type="button"
             (click)="clearSearch()"
-            title="Clear Search">
+            [title]="t('clearSearch')">
             <i class="bi bi-x-lg"></i>
           </button>
         }

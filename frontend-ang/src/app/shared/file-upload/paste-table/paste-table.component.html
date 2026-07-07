@@ -1,19 +1,19 @@
-<div class="paste-container">
+<div class="paste-container" *transloco="let t; read: 'shared.upload.paste'">
 
   <div class="toolbar">
-    <h3>Paste Data Table</h3>
+    <h3>{{ t('title') }}</h3>
     <div class="actions">
       <button
         class="btn-clear"
         (click)="clearTable()"
         [disabled]="tableData.length === 0 || isLoading">
-        Clear
+        {{ t('clear') }}
       </button>
       <button
         class="btn-save"
         (click)="saveAsCsv()"
         [disabled]="tableData.length === 0 || isLoading">
-        Save as CSV
+        {{ t('saveCsv') }}
       </button>
     </div>
   </div>
@@ -30,22 +30,21 @@
         <div class="spinner-border text-primary" role="status">
           <span class="visually-hidden">Loading...</span>
         </div>
-        <p class="mb-0">Processing data, please wait...</p>
+        <p class="mb-0">{{ t('loading') }}</p>
       </div>
     }
 
     @if (tableData.length === 0 && !isLoading) {
       <div class="table-placeholder">
-        <p>Click here and press <strong>Ctrl+V</strong> (or Cmd+V) to paste data from Excel/Prism/Sheets.</p>
+        <p [innerHTML]="t('instruction')"></p>
       </div>
     }
 
     @if (tableData.length > 0 && !isLoading) {
       <div class="table-wrapper">
         @if (tableData.length > previewData.length) {
-          <div class="alert alert-info py-1 px-2 mb-2 small text-center">
-            Showing preview of the first <strong>{{ previewData.length }}</strong> rows.
-            All <strong>{{ tableData.length }}</strong> rows are saved and ready for export.
+          <div class="alert alert-info py-1 px-2 mb-2 small text-center"
+               [innerHTML]="t('previewAlert', { previewCount: previewData.length, totalCount: tableData.length })">
           </div>
         }
         <table>
