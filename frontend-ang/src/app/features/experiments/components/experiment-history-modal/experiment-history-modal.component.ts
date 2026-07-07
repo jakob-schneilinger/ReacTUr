@@ -21,7 +21,7 @@ export class ExperimentHistoryModalComponent {
     'reactantA', 'reactantB', 'date', 'scientist', 'temperature', 'solvent',
     'concentrationA', 'concentrationB', 'rateConstant', 'errorValue',
     'isErrorPercentage', 'pfoRateConstant', 'instrument', 'modality',
-    'wavelength', 'doi', 'comment', 'createdBy'
+    'wavelength', 'dois', 'comment', 'createdBy'
   ];
 
   private readonly TRANSLATION_MAPPING: Record<string, string> = {

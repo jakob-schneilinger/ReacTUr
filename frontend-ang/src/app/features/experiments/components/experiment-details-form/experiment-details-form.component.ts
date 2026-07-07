@@ -1,6 +1,7 @@
 import { CommonModule } from '@angular/common';
 import {
   AbstractControl,
+  FormArray,
   FormBuilder,
   FormControl,
   FormGroup,
@@ -42,6 +43,7 @@ import { UserService } from '../../../../shared/services/user.service';
 import { OptionSelectorComponent } from '../../../../shared/option-selector/option-selector.component';
 import { StructureFlag } from '../../../reactants/structure-flag.enum';
 import { ExperimentService } from '../../experiment.service';
+import { DynamicArrayInputComponent } from '../../../../shared/dynamic-array-input/dynamic-array-input.component';
 
 export type FormState = 'create' | 'edit';
 
@@ -57,6 +59,7 @@ export type FormState = 'create' | 'edit';
     TRANSLOCO_IMPORTS,
     ReactantSelectorComponent,
     OptionSelectorComponent,
+    DynamicArrayInputComponent,
   ],
 })
 export class ExperimentDetailsFormComponent implements OnInit, OnDestroy, OnChanges {
@@ -125,6 +128,10 @@ export class ExperimentDetailsFormComponent implements OnInit, OnDestroy, OnChan
 
   get modalityControl(): FormControl {
     return this.experimentForm.get('modality') as FormControl;
+  }
+
+  get dois(): FormArray {
+    return this.experimentForm.get('dois') as FormArray;
   }
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -320,8 +327,8 @@ export class ExperimentDetailsFormComponent implements OnInit, OnDestroy, OnChan
 
     this.experimentForm = this.fb.group({
       // Reactants
-      reactantA: ['', [Validators.required, this.reactantUniqueValidator("A")]],
-      reactantB: ['', [Validators.required, this.reactantUniqueValidator("B")]],
+      reactantA: ['', [Validators.required, this.reactantUniqueValidator('A')]],
+      reactantB: ['', [Validators.required, this.reactantUniqueValidator('B')]],
 
       // Required Metadata
       date: [this.currentDate, Validators.required],
@@ -340,7 +347,7 @@ export class ExperimentDetailsFormComponent implements OnInit, OnDestroy, OnChan
       instrument: ['', [this.inListValidator(this.knownInstrumentNames)]],
       modality: ['', [this.inListValidator(this.knownModalityNames)]],
       wavelength: ['', Validators.min(0)],
-      doi: [''],
+      dois: this.fb.array([this.fb.control('')]),
       comment: ['', Validators.maxLength(1000)],
     });
 
@@ -364,7 +371,6 @@ export class ExperimentDetailsFormComponent implements OnInit, OnDestroy, OnChan
       instrument: exp.metadata?.instrument?.name,
       modality: exp.metadata?.modality?.name,
       wavelength: exp.metadata?.wavelength,
-      doi: exp.doi,
       comment: exp.metadata?.comment,
       rateConstant: exp.measurementData?.rateConstant,
       pFO_rateConstant: exp.measurementData?.pFO_rateConstant,
@@ -372,11 +378,22 @@ export class ExperimentDetailsFormComponent implements OnInit, OnDestroy, OnChan
       isErrorPercentage: exp.measurementData?.isErrorPercentage,
     });
 
+    this.syncDois(exp.dois);
+
     if (exp.reactantA) {
       this.initValA = [exp.reactantA.uuid || exp.reactantA.shortName];
     }
     if (exp.reactantB) {
       this.initValB = [exp.reactantB.uuid || exp.reactantB.shortName];
+    }
+  }
+
+  private syncDois(dois?: string[]): void {
+    this.dois.clear();
+    if (dois && dois.length > 0) {
+      dois.forEach((doi) => this.dois.push(this.fb.control(doi)));
+    } else {
+      this.dois.push(this.fb.control(''));
     }
   }
 
@@ -506,6 +523,7 @@ export class ExperimentDetailsFormComponent implements OnInit, OnDestroy, OnChan
         (i) => i.name === formValue.instrument,
       )?.uuid;
       formValue.modality = this.knownModalities.find((m) => m.name === formValue.modality)?.uuid;
+      formValue.dois = formValue.dois.filter((val: string) => val && val.trim() !== '');
 
       const savePayload: SaveExperimentDto = {
         reactantA: formValue.reactantA,
@@ -528,7 +546,7 @@ export class ExperimentDetailsFormComponent implements OnInit, OnDestroy, OnChan
           error: formValue.error,
           isErrorPercentage: formValue.isErrorPercentage,
         },
-        doi: formValue.doi || undefined,
+        dois: formValue.dois,
       };
 
       this.saveExperiment.emit(savePayload);

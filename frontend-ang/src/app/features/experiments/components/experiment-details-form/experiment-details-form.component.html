@@ -229,15 +229,11 @@
     </div>
   </div>
 
-  <div class="input-group">
-    <label>{{ 'experiments.details.form.labels.doi' | transloco }}</label>
-    <div class="search-field" [class.has-value]="experimentForm.get('doi')?.value">
-      <input formControlName="doi" [placeholder]="'experiments.details.form.placeholders.value' | transloco" />
-      @if (experimentForm.get('doi')?.value) {
-        <span class="icon bi bi-x text-black clear-btn" (click)="clearControl('doi')"></span>
-      }
-    </div>
-  </div>
+  <app-dynamic-array-input
+    [formArray]="dois"
+    [label]="'experiments.details.form.labels.doi' | transloco"
+    [placeholder]="'experiments.details.form.placeholders.value' | transloco">
+  </app-dynamic-array-input>
 
   <div class="input-group">
     <label>{{ 'experiments.details.form.labels.comment' | transloco }}</label>

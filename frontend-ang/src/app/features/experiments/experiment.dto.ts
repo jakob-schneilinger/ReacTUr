@@ -23,7 +23,7 @@ export interface MeasurementDto {
 
 // new
 export interface GetExperimentDto extends DetailsDto {
-  doi: string;
+  dois: string[];
   reactantA: ReactantDto;
   reactantB: ReactantDto;
   metadata: GetMetadataDto;
@@ -37,7 +37,7 @@ export interface SaveExperimentDto {
   reactantB: string; //uuid
   metadata: SaveMetadataDto;
   measurementData: MeasurementDataDto;
-  doi: string;
+  dois: string[];
 }
 
 export interface ExperimentAttachmentDto {

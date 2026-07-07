@@ -17,7 +17,7 @@ import { MOCK_REACTANTS } from './mock-reactants';
 export const MOCK_EXPERIMENTS: GetExperimentDto[] = [
   {
     uuid: '5d955cec-c2c1-4551-8070-07c5717505c8',
-    doi: '10.1000/xyz123',
+    dois: ['10.1000/xyz123'],
     archivedAt: null,
     reactantA: MOCK_REACTANTS[0],
     reactantB: MOCK_REACTANTS[1],
@@ -48,7 +48,7 @@ export const MOCK_EXPERIMENTS: GetExperimentDto[] = [
   },
   {
     uuid: '0ca74037-956d-4dda-9f28-34153859e21c',
-    doi: '10.1000/xyz124',
+    dois: [ '10.1000/xyz124' ],
     archivedAt: null,
     reactantA: MOCK_REACTANTS[1],
     reactantB: MOCK_REACTANTS[2],
@@ -79,7 +79,7 @@ export const MOCK_EXPERIMENTS: GetExperimentDto[] = [
   },
   {
     uuid: '64c4d973-6416-4a24-8496-96d6d6005a5c',
-    doi: '10.1000/xyz125',
+    dois: [ '10.1000/xyz125' ],
     archivedAt: null,
     reactantA: MOCK_REACTANTS[3],
     reactantB: MOCK_REACTANTS[4],
@@ -110,7 +110,7 @@ export const MOCK_EXPERIMENTS: GetExperimentDto[] = [
   },
   {
     uuid: 'e34cfcef-539e-4d71-abd3-be06c70a7f2c',
-    doi: '10.1000/xyz126',
+    dois: [ '10.1000/xyz126' ],
     archivedAt: null,
     reactantA: MOCK_REACTANTS[4],
     reactantB: MOCK_REACTANTS[5],
@@ -140,7 +140,7 @@ export const MOCK_EXPERIMENTS: GetExperimentDto[] = [
   },
   {
     uuid: 'e2f35ba3-1ae7-4c58-9b2a-419237eb8f9e',
-    doi: '10.1000/xyz127',
+    dois: [ '10.1000/xyz127' ],
     archivedAt: null,
     reactantA: MOCK_REACTANTS[5],
     reactantB: MOCK_REACTANTS[6],
@@ -170,7 +170,7 @@ export const MOCK_EXPERIMENTS: GetExperimentDto[] = [
   },
   {
     uuid: '5e1ffe0c-a4cd-4b15-909d-1b65521a7227',
-    doi: '10.1000/xyz128',
+    dois: [ '10.1000/xyz128' ],
     archivedAt: null,
     reactantA: MOCK_REACTANTS[6],
     reactantB: MOCK_REACTANTS[7],
@@ -200,7 +200,7 @@ export const MOCK_EXPERIMENTS: GetExperimentDto[] = [
   },
   {
     uuid: '5ea69c1a-3c56-4340-ae02-6a0e832dde11',
-    doi: '10.1000/xyz129',
+    dois: [ '10.1000/xyz129' ],
     archivedAt: null,
     reactantA: MOCK_REACTANTS[7],
     reactantB: MOCK_REACTANTS[8],
@@ -230,7 +230,7 @@ export const MOCK_EXPERIMENTS: GetExperimentDto[] = [
   },
   {
     uuid: '71f44860-e583-443f-95a6-e07f7cac3f4a',
-    doi: '10.1000/xyz130',
+    dois: [ '10.1000/xyz130' ],
     archivedAt: null,
     reactantA: MOCK_REACTANTS[8],
     reactantB: MOCK_REACTANTS[9],
@@ -261,7 +261,7 @@ export const MOCK_EXPERIMENTS: GetExperimentDto[] = [
   },
   {
     uuid: 'e645f909-3d52-4be1-add2-a612af285b38',
-    doi: '10.1000/xyz131',
+    dois: [ '10.1000/xyz131' ],
     archivedAt: null,
     reactantA: MOCK_REACTANTS[9],
     reactantB: MOCK_REACTANTS[0],
@@ -292,7 +292,7 @@ export const MOCK_EXPERIMENTS: GetExperimentDto[] = [
   },
   {
     uuid: 'a594e746-9426-4cee-947e-e3057bd64d58',
-    doi: '10.1000/xyz132',
+    dois: [ '10.1000/xyz132' ],
     archivedAt: null,
     reactantA: MOCK_REACTANTS[1],
     reactantB: MOCK_REACTANTS[0],

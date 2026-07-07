@@ -61,6 +61,12 @@ public class Experiment {
     // ToDo: Is the doi nullable, can it be added later and is not forced to
     //  be since the beginning, or should we add not-null and always from the
     //  beginning its here? Update DTOs and FrontEnd accordingly
+    //  ---
+    //  should be nullable and can be added later, nullable because scientist still want to log
+    //  experiment while they are working on them, not after publication.
+    //  Also unique = true can be dangerous -> a single paper (which has a single doi) can have multiple
+    //  experiments -> so multiple experiments can have the same doi
+    //  Also change doi to dois -> List<String> dois
     @Column(name = "doi", unique = true)
     private String doi;
 

@@ -37,6 +37,17 @@
               <dt class="col-sm-4">{{ 'experiments.view.labels.wavelength' | transloco }}</dt>
               <dd class="col-sm-8 text-break">{{ meta.wavelength ? meta.wavelength + ' nm' : '-' }}</dd>
 
+              <dt class="col-sm-4">{{ 'experiments.details.form.labels.doi' | transloco }}</dt>
+              <dd class="col-sm-8 text-break">
+                @if (selectedExperiment.dois && selectedExperiment.dois.length > 0) {
+                  @for (doi of selectedExperiment.dois; track $index) {
+                    <div>{{ doi }}</div>
+                  }
+                } @else {
+                  -
+                }
+              </dd>
+
               <dt class="col-sm-4">{{ 'experiments.view.labels.comment' | transloco }}</dt>
               <dd class="col-sm-8 text-break">{{ meta.comment || '-' }}</dd>
             </dl>

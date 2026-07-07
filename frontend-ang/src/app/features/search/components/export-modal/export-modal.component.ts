@@ -35,7 +35,7 @@ export class ExportModalComponent implements OnInit {
   reactantDetailsMap: Map<string, ReactantDetailDto> = new Map();
 
   exportFields = {
-    core: { doi: true, attachments: false },
+    core: { dois: true, attachments: false },
     reactants: { names: true, smiles: true, structures: true, type: true },
     kinetics: { rateConstant: true, pFO_rateConstant: false, error: true, isErrorPercentage: false },
     metadata: {
@@ -203,7 +203,7 @@ export class ExportModalComponent implements OnInit {
     const filteredItems = itemsToProcess.map(exp => {
       const filteredExp: any = { uuid: exp.uuid };
 
-      if (this.exportFields.core.doi && exp.doi) filteredExp.doi = exp.doi;
+      if (this.exportFields.core.dois && exp.dois) filteredExp.dois = exp.dois;
       if (this.exportFields.core.attachments && exp.attachments) filteredExp.attachments = exp.attachments;
 
       const reactantsObj: any = {};
@@ -306,7 +306,7 @@ export class ExportModalComponent implements OnInit {
 
     switch (colId) {
       case 'uuid': return exp.uuid || '';
-      case 'doi': return exp.doi || '';
+      case 'doi': return exp.dois ? exp.dois.join('; ') : '';
 
       case 'reactantA_name': return exp.reactantA?.shortName || '';
       case 'reactantA_smiles': return exp.reactantA?.smiles || '';
