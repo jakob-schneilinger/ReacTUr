@@ -141,7 +141,7 @@ export class ReactantOverviewPageComponent implements OnInit {
           reactant.shortName.toLowerCase().includes(term) ||
           reactant.smiles.toLowerCase().includes(term) ||
           (reactant.chemicalName && reactant.chemicalName.toLowerCase().includes(term)) ||
-          reactant.chemicalType?.name.toLowerCase().includes(term),
+          reactant.chemicalType.name.toLowerCase().includes(term),
       );
     }
 
@@ -162,13 +162,6 @@ export class ReactantOverviewPageComponent implements OnInit {
         sensitivity: 'base',
       });
     });
-
-    console.log("", this.filteredReactants.map(r =>  r.flag));
-
-    console.log(
-      '',
-      this.activeReactants.map((r) => r.flag),
-    );
   }
 
   goToCreate(): void {
@@ -303,7 +296,7 @@ export class ReactantOverviewPageComponent implements OnInit {
     }
   }
 
-  openDraw() {x
+  openDraw() {
     this.currentSmilesForModal = this.searchTerm;
     this.isDrawModalOpen = true;
   }

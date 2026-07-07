@@ -107,7 +107,6 @@ export class SearchPageComponent implements OnInit {
 
     this.searchService.searchExperiments(this.metadata, this.currentPage, this.pageSize).subscribe({
       next: (pageResults) => {
-        console.log('Search Resuluts Page: ', pageResults);
         if (pageResults.content.length === 0) {
           this.currentSearchState = 'no-results';
           this.foundExperiments = [];
@@ -146,7 +145,6 @@ export class SearchPageComponent implements OnInit {
 
   handleSearchScientist(scientist: GetUserDto) {
     this.isAdvancedSearchOpen = true;
-    console.log('Test1', scientist);
     this.searchScientist = scientist;
   }
 

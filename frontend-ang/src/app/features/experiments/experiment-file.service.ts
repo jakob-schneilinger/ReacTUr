@@ -20,7 +20,6 @@ class ExperimentFileService {
   uploadFile(experimentUuid: string, file: File): Observable<ExperimentAttachmentDto> {
     const formData = new FormData();
     formData.append('file', file);
-    console.log(formData);
     return this.httpClient.post<ExperimentAttachmentDto>(
       `${this.fileBaseUri}/${experimentUuid}`,
       formData,

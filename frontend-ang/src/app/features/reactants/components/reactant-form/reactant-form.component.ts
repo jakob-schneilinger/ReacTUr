@@ -145,10 +145,10 @@ export class ReactantFormComponent implements OnInit, OnDestroy {
     if (this.reactantForm && changes['reactant'] && this.reactant) {
       const currentType = this.reactantForm.get('chemicalType')?.value;
 
-      if (currentType !== this.reactant.chemicalType?.name) {
+      if (currentType !== this.reactant.chemicalType.name) {
         this.reactantForm.patchValue({
           ...this.reactant,
-          chemicalType: this.reactant.chemicalType?.name,
+          chemicalType: this.reactant.chemicalType.name,
         });
       }
     }
@@ -166,7 +166,7 @@ export class ReactantFormComponent implements OnInit, OnDestroy {
         [Validators.required, this.smilesValidator()],
       ],
       chemicalType: [
-        this.reactant?.chemicalType?.name || '',
+        this.reactant?.chemicalType.name || '',
         [Validators.required, this.inListValidator()],
       ],
 

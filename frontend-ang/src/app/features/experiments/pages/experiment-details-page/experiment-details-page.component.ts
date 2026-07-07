@@ -149,7 +149,6 @@ export class ExperimentDetailsPageComponent implements OnInit {
       this.uploadedFilesMap.set(this.getFileFingerprint(fakeFile), attachment.uuid);
     }
 
-    console.log('Fake Files:', files);
     this.fakeFiles = files;
     this.onFilesUploaded(this.fakeFiles)
   }

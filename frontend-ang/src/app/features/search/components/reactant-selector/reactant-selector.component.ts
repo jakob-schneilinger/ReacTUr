@@ -73,7 +73,7 @@ export class ReactantSelectorComponent implements OnInit {
         (r) =>
           !this.selectedReactants.some((selected) => selected.uuid === r.uuid) &&
           (r.shortName.toLowerCase().includes(lowerTerm) ||
-            r.chemicalType?.name.toLowerCase().includes(lowerTerm) ||
+            r.chemicalType.name.toLowerCase().includes(lowerTerm) ||
             r.chemicalName?.toLowerCase().includes(lowerTerm) ||
             r.smiles.includes(this.searchTerm)),
       );
