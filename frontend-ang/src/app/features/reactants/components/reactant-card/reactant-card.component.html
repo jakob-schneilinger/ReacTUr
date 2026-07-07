@@ -4,14 +4,25 @@
     <div class="d-flex align-items-center gap-2 pe-3 short-name" [class.archivedShortName]="isArchived">
 
       @if (hasWritePermission && reactant.flag !== 'ACTIVE') {
-        <span class="status-icon"
-              [title]="reactant.flag === 'PENDING' ? '3D structure is being generated...' :
-                       reactant.flag === 'READY' ? '3D structure is awaiting approval' :
-                       reactant.flag === 'FAILED' ? 'Generation failed' : 'No 3D structure available'">
-          @if (reactant.flag === 'PENDING') { <i class="bi bi-hourglass-split text-warning fs-5"></i> }
-          @else if (reactant.flag === 'READY') { <i class="bi bi-exclamation-circle-fill text-warning fs-5"></i>}
-          @else if (reactant.flag === 'FAILED') { <i class="bi bi-x-circle-fill text-danger fs-5"></i> }
-          @else { <i class="bi bi-question-circle-fill text-warning fs-5"></i> }
+        <span class="status-icon">
+          @switch (reactant.flag) {
+            @case ('PENDING') {
+              <i class="bi bi-hourglass-split status-pending fs-5"
+                 title="3D structure is being generated..."></i>
+            }
+            @case ('READY') {
+              <i class="bi bi-check-circle-fill status-ready fs-5"
+                 title="3D structure is awaiting approval"></i>
+            }
+            @case ('FAILED') {
+              <i class="bi bi-x-circle-fill status-failed fs-5"
+                 title="Generation failed"></i>
+            }
+            @default {
+              <i class="bi bi-question-circle-fill status-missing fs-5"
+                 title="No 3D structure available"></i>
+            }
+          }
         </span>
       }
 

@@ -98,3 +98,19 @@ button.compact {
     padding: 0.2rem;
   }
 }
+
+.status-pending {
+  color: $primary;
+}
+
+.status-ready {
+  color: $accent;
+}
+
+.status-failed {
+  color: $error;
+}
+
+.status-missing {
+  color: $light_gray;
+}

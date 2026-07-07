@@ -127,32 +127,47 @@ export class ReactantOverviewPageComponent implements OnInit {
   onSearch(): void {
     const term = this.searchTerm.toLowerCase().trim();
 
-    const priorityFlags: StructureFlag[] = [
-      StructureFlag.PENDING,
-      StructureFlag.FAILED,
-      StructureFlag.READY,
-    ];
+    const flagRank: Partial<Record<StructureFlag, number>> = {
+      [StructureFlag.READY]: 1,
+      [StructureFlag.PENDING]: 2,
+      [StructureFlag.FAILED]: 4,
+    };
 
-    this.filteredReactants = this.activeReactants.sort((a, b) => {
-      const aHasPriority = a.flag ? priorityFlags.includes(a.flag) : false;
-      const bHasPriority = b.flag ? priorityFlags.includes(b.flag) : false;
+    let searchResults = this.activeReactants;
 
-      if (aHasPriority && !bHasPriority) return -1;
-      if (!aHasPriority && bHasPriority) return 1;
-
-      return a.shortName.localeCompare(b.shortName);
-    });
-
-    if (!term) {
-      return;
+    if (term) {
+      searchResults = searchResults.filter(
+        (reactant) =>
+          reactant.shortName.toLowerCase().includes(term) ||
+          reactant.smiles.toLowerCase().includes(term) ||
+          (reactant.chemicalName && reactant.chemicalName.toLowerCase().includes(term)) ||
+          reactant.chemicalType?.name.toLowerCase().includes(term),
+      );
     }
 
-    this.filteredReactants = this.filteredReactants.filter(
-      (reactant) =>
-        reactant.shortName.toLowerCase().includes(term) ||
-        reactant.smiles.toLowerCase().includes(term) ||
-        (reactant.chemicalName && reactant.chemicalName.toLowerCase().includes(term)) ||
-        reactant.chemicalType?.name.toLowerCase().includes(term), //TODO: chemicalType will mandatory in future
+    this.filteredReactants = [...searchResults].sort((a, b) => {
+      const getRank = (flag: StructureFlag | null | undefined): number => {
+        if (!flag) return 3;
+        return flagRank[flag] || 5;
+      };
+
+      const rankA = getRank(a.flag);
+      const rankB = getRank(b.flag);
+
+      if (rankA !== rankB) {
+        return rankA - rankB;
+      }
+
+      return a.shortName.localeCompare(b.shortName, undefined, {
+        sensitivity: 'base',
+      });
+    });
+
+    console.log("", this.filteredReactants.map(r =>  r.flag));
+
+    console.log(
+      '',
+      this.activeReactants.map((r) => r.flag),
     );
   }
 
