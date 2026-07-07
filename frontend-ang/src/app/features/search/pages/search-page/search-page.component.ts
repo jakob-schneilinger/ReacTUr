@@ -12,6 +12,7 @@ import { SearchParametersDto } from '../../search.dto';
 import { RDKitService } from '../../../../shared/services/rdkit.service';
 import { GetUserDto } from '../../../../shared/dtos/user.dto';
 import { SearchService } from '../../search.service';
+import { TRANSLOCO_IMPORTS } from '../../../../core/global/transloco-imports';
 
 @Component({
   selector: 'app-search-site',
@@ -26,6 +27,7 @@ import { SearchService } from '../../search.service';
     AdvancedSearchComponent,
     SearchResultsComponent,
     ExportModalComponent,
+    TRANSLOCO_IMPORTS
   ],
 })
 export class SearchPageComponent implements OnInit {
@@ -144,7 +146,7 @@ export class SearchPageComponent implements OnInit {
 
   handleSearchScientist(scientist: GetUserDto) {
     this.isAdvancedSearchOpen = true;
-    console.log('Test1', scientist); //TODO: do real request
+    console.log('Test1', scientist);
     this.searchScientist = scientist;
   }
 

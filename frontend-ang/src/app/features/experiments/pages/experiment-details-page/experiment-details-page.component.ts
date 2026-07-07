@@ -15,6 +15,7 @@ import { ExtractedMetadataConfirmModalComponent } from '../../components/extract
 import { ExperimentHistoryDto } from '../../experiment-history.dto';
 import { ExperimentHistoryModalComponent } from '../../components/experiment-history-modal/experiment-history-modal.component';
 import { firstValueFrom, Observable } from 'rxjs';
+import { TRANSLOCO_IMPORTS } from '../../../../core/global/transloco-imports';
 
 export type FormState = 'create' | 'edit';
 
@@ -30,6 +31,7 @@ export type FormState = 'create' | 'edit';
     FileUploadComponent,
     ExtractedMetadataConfirmModalComponent,
     ExperimentHistoryModalComponent,
+    TRANSLOCO_IMPORTS
   ],
 })
 export class ExperimentDetailsPageComponent implements OnInit {
@@ -178,6 +180,8 @@ export class ExperimentDetailsPageComponent implements OnInit {
               },
             });
           }
+        } else {
+          this.router.navigate(['/experiments', savedExperiment.uuid]);
         }
 
         if (this.formComponent) {

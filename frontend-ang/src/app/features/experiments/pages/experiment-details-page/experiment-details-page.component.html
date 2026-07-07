@@ -8,7 +8,7 @@
 
       @if (experiment) {
         <button (click)="openHistoryModal()">
-          <i class="bi bi-clock-history"></i> Show History
+          <i class="bi bi-clock-history"></i> {{ 'experiments.details.showHistory' | transloco }}
         </button>
       }
 
@@ -21,7 +21,7 @@
         </app-experiment-details-form>
       } @else {
         <div class="loading-state">
-          <p>Loading experiment details...</p>
+          <p>{{ 'experiments.details.loading' | transloco }}</p>
         </div>
       }
     </div>
@@ -29,7 +29,7 @@
     <!-- Rechte Spalte -->
     <div rightContent>
       @if (filesDirty) {
-        <span class="p-3">Save experiment to submit changed files.</span>
+        <span class="p-3">{{ 'experiments.details.filesDirtyHint' | transloco }}</span>
       }
       <app-file-upload
         [existingFiles]="fakeFiles"

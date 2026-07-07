@@ -133,8 +133,10 @@
         "and": "test",
         "supports": "test",
         "maxSize": "test",
-        "maxFiles": "test",
-        "maxFilesOnly": "test",
+        "maxFilesSingle": "test",
+        "maxFilesPlural": "test",
+        "maxFilesOnlySingle": "test",
+        "maxFilesOnlyPlural": "test",
         "errors": {
           "typeNotAllowed": "test",
           "sizeExceeded": "test",
@@ -174,9 +176,13 @@
     }
   },
   "search": {
+    "title": "test",
+    "advancedSearch": "test",
     "initial": "test",
     "noResults": "test",
     "countOnPage": "test",
+    "btnSearch": "test",
+    "btnCreate": "test",
     "pagination": {
       "showing": "test",
       "perPage": "test"
@@ -271,7 +277,11 @@
       "group": "test",
       "operator": "test",
       "format": "test",
+      "or": "test",
+      "and": "test",
       "not": "test",
+      "smarts": "test",
+      "smiles": "test",
       "removeGroup": "test",
       "addRule": "test",
       "addGroup": "test",
@@ -551,6 +561,7 @@
       "viewExisting": "test",
       "loading": "test",
       "filesDirtyHint": "test",
+      "showHistory": "test",
       "form": {
         "sections": {
           "required": "test",

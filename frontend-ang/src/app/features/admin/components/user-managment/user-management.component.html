@@ -85,7 +85,6 @@
         <thead class="table-light">
         <tr>
           <th>{{'admin.user.table.headerName' | transloco}}</th>
-          <th>{{'admin.user.table.headerEmail' | transloco}}</th>
           <th>{{'admin.user.table.headerRole' | transloco}}</th>
           <th class="text-end">{{'admin.user.table.headerAction' | transloco}}</th>
         </tr>
@@ -94,7 +93,6 @@
           @for (user of userList; track user.id) {
             <tr>
               <td class="text-break">{{ user.firstName }} {{ user.lastName }}</td>
-              <td class="text-break">{{ user.email }}</td>
               <td>
                 @if (type === 'active' || type === 'pending') {
                   <select class="form-select form-select-sm w-auto" [value]="user.role || ''" (change)="updateUserRole(user, $event)">

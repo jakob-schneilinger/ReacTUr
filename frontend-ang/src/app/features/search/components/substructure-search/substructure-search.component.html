@@ -9,13 +9,13 @@
         }
 
         <select class="form-select form-select-sm fw-bold text-primary" style="width: auto;" [(ngModel)]="group.operator" [title]="t('operator')">
-          <option value="AND">AND</option>
-          <option value="OR">OR</option>
+          <option value="AND">{{ t('and') }}</option>
+          <option value="OR">{{ t('or') }}</option>
         </select>
 
         <select class="form-select form-select-sm border-secondary text-secondary fw-semibold" style="width: auto;" [(ngModel)]="group.format" [title]="t('format')">
-          <option value="SMARTS">SMARTS</option>
-          <option value="SMILES">SMILES</option>
+          <option value="SMARTS">{{ t('smarts') }}</option>
+          <option value="SMILES">{{ t('smiles') }}</option>
         </select>
 
         <div class="form-check form-switch ms-2 mb-0 d-flex align-items-center gap-2">

@@ -45,10 +45,7 @@ export class DragAndDropComponent {
 
       if (!extension || !this.allowedExtensions.includes(extension)) {
         const dottedExtensions = this.allowedExtensions.map((ext) => `.${ext}`);
-        const formatter = new Intl.ListFormat(this.transloco.getActiveLang(), {
-          style: 'long',
-          type: 'conjunction',
-        });
+        const formatter = new Intl.ListFormat('en', { style: 'long', type: 'conjunction' });
         this.onFileError(
           this.transloco.translate('shared.upload.dragDrop.errors.typeNotAllowed', {
             extension,

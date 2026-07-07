@@ -4,7 +4,7 @@
 
     <!-- Linke Spalte -->
     <div leftContent>
-      <h2>Search</h2>
+      <h2>{{ 'search.title' | transloco }}</h2>
       <app-experiment-search
         [triggerClear]="clearSignal"
         [reactantA]="reactantA"
@@ -16,7 +16,7 @@
 
       <div class="collapse-toggle-container">
         <div class="collapse-toggle" (click)="toggleAdvancedSearch()">
-          <span>Advanced Search</span>
+          <span>{{ 'search.advancedSearch' | transloco }}</span>
           <i class="bi" [ngClass]="isAdvancedSearchOpen ? 'bi-chevron-up' : 'bi-chevron-down'"></i>
         </div>
       </div>
@@ -31,7 +31,7 @@
 
       <div class="d-flex flex-row btn-group gap-2">
         <button class="primary" (click)="handleSearchButton()">
-          Search for Experiments
+          {{ 'search.btnSearch' | transloco }}
         </button>
 
         <button class=""
@@ -40,7 +40,7 @@
             reactantA: reactantA.length ? reactantA : null,
             reactantB: reactantB.length ? reactantB : null
           }">
-          Create new Experiment
+          {{ 'search.btnCreate' | transloco }}
         </button>
       </div>
     </div>
