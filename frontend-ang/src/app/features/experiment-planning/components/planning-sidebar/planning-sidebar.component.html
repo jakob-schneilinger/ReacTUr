@@ -48,13 +48,13 @@
     <div class="mb-4">
       <label class="form-label fw-bold">{{ 'planning.duration' | transloco }}</label>
       <div class="row g-2">
-        <div class="col-6">
+        <div class="col-12 col-custom">
           <div class="input-group">
             <input type="number" min="0" class="form-control" [(ngModel)]="durationHours" (blur)="checkEmptyDuration()">
             <span class="input-group-text">h</span>
           </div>
         </div>
-        <div class="col-6">
+        <div class="col-12 col-custom">
           <div class="input-group">
             <input type="number" min="0" max="59" class="form-control" [(ngModel)]="durationMinutes" (blur)="checkEmptyDuration()">
             <span class="input-group-text">min</span>

@@ -257,3 +257,20 @@
 .container-fluid {
   padding: 60px 24px;
 }
+
+
+.col-custom-1150-3 {
+  padding-bottom: 1rem;
+
+  @media (min-width: 1150px) {
+    flex: 0 0 auto;
+    width: 25%;
+  }
+}
+
+.col-custom-1150-9 {
+  @media (min-width: 1150px) {
+    flex: 0 0 auto;
+    width: 75%;
+  }
+}
