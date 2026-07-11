@@ -40,9 +40,13 @@ public class Experiment {
 
     If yes: We might need to change this to a @ManyToMany list of reactants rather than two hardcoded columns.
 
+    ---- > Dennis: Only and Exactly Two Reactants. Always
+
     The DOI timing: Is the DOI (Digital Object Identifier) known the moment the experiment is created, or is it usually added weeks later after a paper is published?
 
     Currently: The column is implicitly nullable (which is good), but we should ensure the frontend knows it shouldn't force the user to type a DOI to hit "Save".
+
+    -------> It must be possible to add it in the future. But there might even be multiple DOIs...
      */
 
 
@@ -61,6 +65,7 @@ public class Experiment {
     // ToDo: Is the doi nullable, can it be added later and is not forced to
     //  be since the beginning, or should we add not-null and always from the
     //  beginning its here? Update DTOs and FrontEnd accordingly
+    //   Update: Accept multiples
     //  ---
     //  should be nullable and can be added later, nullable because scientist still want to log
     //  experiment while they are working on them, not after publication.
