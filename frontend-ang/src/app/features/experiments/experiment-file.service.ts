@@ -73,7 +73,7 @@ class ExperimentFileService {
               metadata.date = line.replace('#Date:', '').trim();
             } else if (line.startsWith('#Temperature:')) {
               // expect "C"
-              const match = line.match(/([\d.]+)\s*C/i);
+              const match = line.replace(',', '.').match(/([\d.]+)\s*C/i);
               if (match) metadata.temperature = parseFloat(match[1]);
             } else if (line.startsWith('#User: ')) {
               const user = line.replace('#User: ', '').trim();
@@ -82,7 +82,7 @@ class ExperimentFileService {
               metadata.modality = line.replace('#Cell type:', '').trim();
             } else if (line.startsWith('Wavelength,Wavelength:')) {
               // expect 'nm'
-              const match = line.match(/Wavelength:\s*([\d.]+)\s*nm/i);
+              const match = line.replace(',', '.').match(/Wavelength:\s*([\d.]+)\s*nm/i);
               if (match) {
                 const wavelength = parseFloat(match[1]);
                 if (wavelength == 280) {
@@ -99,7 +99,7 @@ class ExperimentFileService {
               remarks.push(line);
 
               // Extract reactant name and concentration (mM)
-              const reactantMatch = line.match(/^([^:]+):.*?([\d.]+)\s*(mM|nM)/i);
+              const reactantMatch = line.replace(',', '.').match(/^([^:]+):.*?([\d.]+)\s*(mM|nM)/i);
 
               if (reactantMatch) {
                 const reactantName = reactantMatch[1].trim();
@@ -114,7 +114,7 @@ class ExperimentFileService {
                 }
               } else {
                 // expect "mM"
-                const concMatch = line.match(/([\d.]+)\s*(mM)/i);
+                const concMatch = line.replace(',', '.').match(/([\d.]+)\s*(mM)/i);
                 if (concMatch) {
                   const val = parseFloat(concMatch[1]);
                   if (metadata.concentrationA === undefined) {
