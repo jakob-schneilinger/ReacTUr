@@ -117,6 +117,14 @@
   </div>
 
   <div class="input-group">
+    <label>{{ 'experiments.details.form.labels.halfConcentrationReactantA' | transloco }}</label>
+    <div class="search-field disabled" [class.has-value]="experimentForm.get('halfConcentrationA')?.value !== ''">
+      <input type="number" formControlName="halfConcentrationA" />
+      <span class="icon unit-label text-dark">mM</span>
+    </div>
+  </div>
+
+  <div class="input-group">
     <label>{{ 'experiments.details.form.labels.concentrationReactantB' | transloco }}</label>
     <div class="search-field" [class.has-value]="experimentForm.get('concentrationB')?.value">
       <input type="number" formControlName="concentrationB" [class.is-invalid]="isInvalid('concentrationB')" [placeholder]="'experiments.details.form.placeholders.value' | transloco" />
@@ -131,6 +139,14 @@
         @if (experimentForm.get('concentrationB')?.hasError('min')) { {{ 'experiments.details.form.errors.concentrationNegative' | transloco }} }
       </div>
     }
+  </div>
+
+  <div class="input-group">
+    <label>{{ 'experiments.details.form.labels.halfConcentrationReactantB' | transloco }}</label>
+    <div class="search-field disabled" [class.has-value]="experimentForm.get('halfConcentrationB')?.value !== ''">
+      <input type="number" formControlName="halfConcentrationB" />
+      <span class="icon unit-label text-dark">mM</span>
+    </div>
   </div>
 
   <div class="input-group">
