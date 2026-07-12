@@ -107,18 +107,17 @@ button {
 
   &.plain {
     color: $light_gray;
-    background-color: white;
+    background-color: $background;
 
     &:hover {
       color: $light_gray_hover;
-      background-color: $background;
-
+      background-color: $white_gray;
     }
   }
 
   &.primary-plain {
     color: $primary;
-    background-color: white;
+    background-color: $background;
 
     &:disabled {
       color: $light_gray;
@@ -126,7 +125,7 @@ button {
 
     &:hover:not([disabled]) {
       color: $primary_hover;
-      background-color: $background;
+      background-color: $white_gray;
     }
   }
 }

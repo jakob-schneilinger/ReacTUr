@@ -1,4 +1,5 @@
 @use "styles/variables" as *;
+@use "styles/global" as *;
 
 .custom-search-wrapper {
   border: 1px solid #cbd5e1;
@@ -27,22 +28,11 @@
 
   .icon-btn {
     border: none;
-    border-radius: 0.5rem;
-    border-bottom-left-radius: 0.5rem !important;
-    border-top-left-radius: 0.5rem !important;
-    background: transparent;
+    border-radius: 0.5rem !important;
     padding: 0.4rem 0.6rem;
     display: flex;
     align-items: center;
     justify-content: center;
-
-    &:hover {
-      background-color: $background;
-    }
-
-    &:focus {
-      box-shadow: none;
-    }
   }
 }
 
