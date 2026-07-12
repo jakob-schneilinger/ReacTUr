@@ -200,6 +200,7 @@
       "solvent": "Solvent",
       "temp": "Temp",
       "conc": "Conc.",
+      "error": "Error",
       "pfoRateConstant": "pFO Rate Constant",
       "instrument": "Instrument",
       "modality": "Modality",
