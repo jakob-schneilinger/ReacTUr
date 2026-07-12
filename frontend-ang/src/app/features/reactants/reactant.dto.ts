@@ -9,6 +9,7 @@ export interface ReactantDto {
   smiles: string;
   chemicalType: ChemicalTypeDto;
   shortName: string;
+  additionalShortNames?: string[];
   chemicalName?: string;
   flag?: StructureFlag;
 }

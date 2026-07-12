@@ -139,6 +139,7 @@ export class ReactantOverviewPageComponent implements OnInit {
       searchResults = searchResults.filter(
         (reactant) =>
           reactant.shortName.toLowerCase().includes(term) ||
+          reactant.additionalShortNames?.some((name) => name.toLowerCase().includes(term)) ||
           reactant.smiles.toLowerCase().includes(term) ||
           (reactant.chemicalName && reactant.chemicalName.toLowerCase().includes(term)) ||
           reactant.chemicalType.name.toLowerCase().includes(term),
