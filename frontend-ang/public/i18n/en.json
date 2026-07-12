@@ -671,7 +671,9 @@
         "metaDataTitle": "Metadata Applied",
         "metaDataMessage": "Form fields have been populated from the uploaded file.",
         "uploadErrorTitle": "Upload Error",
-        "uploadErrorMessage": "Failed to upload: {{fileName}}"
+        "uploadErrorMessage": "Failed to upload: {{fileName}}",
+        "commaWarningTitle": "Commas not allowed",
+        "commaWarningMessage": "Please use points instead of commas in numeric input fields."
       }
     },
     "my": {

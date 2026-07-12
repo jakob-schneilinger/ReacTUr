@@ -77,7 +77,7 @@
   <div class="input-group">
     <label>{{ 'experiments.details.form.labels.temperature' | transloco }}</label>
     <div class="search-field" [class.has-value]="experimentForm.get('temperature')?.value">
-      <input type="number" formControlName="temperature" [class.is-invalid]="isInvalid('temperature')" [placeholder]="'experiments.details.form.placeholders.value' | transloco" />
+      <input type="number" formControlName="temperature" (keydown)="preventComma($event)" [class.is-invalid]="isInvalid('temperature')" [placeholder]="'experiments.details.form.placeholders.value' | transloco" />
       <span class="icon unit-label text-dark">°C</span>
       @if (experimentForm.get('temperature')?.value) {
         <span class="icon bi bi-x text-black clear-btn" (click)="clearControl('temperature')"></span>
@@ -102,7 +102,7 @@
   <div class="input-group">
     <label>{{ 'experiments.details.form.labels.concentrationReactantA' | transloco }}</label>
     <div class="search-field" [class.has-value]="experimentForm.get('concentrationA')?.value">
-      <input type="number" formControlName="concentrationA" [class.is-invalid]="isInvalid('concentrationA')" [placeholder]="'experiments.details.form.placeholders.value' | transloco" />
+      <input type="number" formControlName="concentrationA" (keydown)="preventComma($event)" [class.is-invalid]="isInvalid('concentrationA')" [placeholder]="'experiments.details.form.placeholders.value' | transloco" />
       <span class="icon unit-label text-dark">mM</span>
       @if (experimentForm.get('concentrationA')?.value) {
         <span class="icon bi bi-x text-black clear-btn" (click)="clearControl('concentrationA')"></span>
@@ -119,7 +119,7 @@
   <div class="input-group">
     <label>{{ 'experiments.details.form.labels.halfConcentrationReactantA' | transloco }}</label>
     <div class="search-field disabled" [class.has-value]="experimentForm.get('halfConcentrationA')?.value !== ''">
-      <input type="number" formControlName="halfConcentrationA" />
+      <input type="text" formControlName="halfConcentrationA" />
       <span class="icon unit-label text-dark">mM</span>
     </div>
   </div>
@@ -127,7 +127,7 @@
   <div class="input-group">
     <label>{{ 'experiments.details.form.labels.concentrationReactantB' | transloco }}</label>
     <div class="search-field" [class.has-value]="experimentForm.get('concentrationB')?.value">
-      <input type="number" formControlName="concentrationB" [class.is-invalid]="isInvalid('concentrationB')" [placeholder]="'experiments.details.form.placeholders.value' | transloco" />
+      <input type="number" formControlName="concentrationB" (keydown)="preventComma($event)" [class.is-invalid]="isInvalid('concentrationB')" [placeholder]="'experiments.details.form.placeholders.value' | transloco" />
       <span class="icon unit-label text-dark">mM</span>
       @if (experimentForm.get('concentrationB')?.value) {
         <span class="icon bi bi-x text-black clear-btn" (click)="clearControl('concentrationB')"></span>
@@ -144,7 +144,7 @@
   <div class="input-group">
     <label>{{ 'experiments.details.form.labels.halfConcentrationReactantB' | transloco }}</label>
     <div class="search-field disabled" [class.has-value]="experimentForm.get('halfConcentrationB')?.value !== ''">
-      <input type="number" formControlName="halfConcentrationB" />
+      <input type="text" formControlName="halfConcentrationB" />
       <span class="icon unit-label text-dark">mM</span>
     </div>
   </div>
@@ -152,7 +152,7 @@
   <div class="input-group">
     <label>{{ 'experiments.details.form.labels.rateConstant' | transloco }}</label>
     <div class="search-field" [class.has-value]="experimentForm.get('rateConstant')?.value">
-      <input type="number" formControlName="rateConstant" [class.is-invalid]="isInvalid('rateConstant')" [placeholder]="'experiments.details.form.placeholders.value' | transloco" />
+      <input type="number" formControlName="rateConstant" (keydown)="preventComma($event)" [class.is-invalid]="isInvalid('rateConstant')" [placeholder]="'experiments.details.form.placeholders.value' | transloco" />
       @if (experimentForm.get('rateConstant')?.value) {
         <span class="icon bi bi-x text-black clear-btn" (click)="clearControl('rateConstant')"></span>
       }
@@ -168,7 +168,7 @@
   <div class="input-group">
     <label>{{ 'experiments.details.form.labels.error' | transloco }}</label>
     <div class="search-field" [class.has-value]="experimentForm.get('error')?.value">
-      <input type="number" formControlName="error" [class.is-invalid]="isInvalid('error')" [placeholder]="'experiments.details.form.placeholders.value' | transloco" />
+      <input type="number" formControlName="error" (keydown)="preventComma($event)" [class.is-invalid]="isInvalid('error')" [placeholder]="'experiments.details.form.placeholders.value' | transloco" />
       @if (experimentForm.get('isErrorPercentage')?.value) {
         <span class="icon unit-label text-dark">%</span>
       }
@@ -201,7 +201,7 @@
   <div class="input-group">
     <label>{{ 'experiments.details.form.labels.pfoRateConstant' | transloco }}</label>
     <div class="search-field" [class.has-value]="experimentForm.get('pFO_rateConstant')?.value">
-      <input type="number" formControlName="pFO_rateConstant" [class.is-invalid]="isInvalid('pFO_rateConstant')" [placeholder]="'experiments.details.form.placeholders.value' | transloco" />
+      <input type="number" formControlName="pFO_rateConstant" (keydown)="preventComma($event)" [class.is-invalid]="isInvalid('pFO_rateConstant')" [placeholder]="'experiments.details.form.placeholders.value' | transloco" />
       @if (experimentForm.get('pFO_rateConstant')?.value) {
         <span class="icon bi bi-x text-black clear-btn" (click)="clearControl('pFO_rateConstant')"></span>
       }
@@ -234,7 +234,7 @@
   <div class="input-group">
     <label>{{ 'experiments.details.form.labels.wavelength' | transloco }}</label>
     <div class="search-field" [class.has-value]="experimentForm.get('wavelength')?.value">
-      <input type="number" formControlName="wavelength" [class.is-invalid]="isInvalid('wavelength')" [placeholder]="'experiments.details.form.placeholders.value' | transloco" />
+      <input type="number" formControlName="wavelength" (keydown)="preventComma($event)" [class.is-invalid]="isInvalid('wavelength')" [placeholder]="'experiments.details.form.placeholders.value' | transloco" />
       <span class="icon unit-label text-dark">nm</span>
       @if (experimentForm.get('wavelength')?.value) {
         <span class="icon bi bi-x text-black clear-btn" (click)="clearControl('wavelength')"></span>

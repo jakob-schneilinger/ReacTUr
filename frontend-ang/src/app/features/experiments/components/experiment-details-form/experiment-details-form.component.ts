@@ -361,20 +361,27 @@ export class ExperimentDetailsFormComponent implements OnInit, OnDestroy, OnChan
 
   private setupHalfConcentrationAutoFill(): void {
     this.experimentForm.get('concentrationA')?.valueChanges.subscribe((val) => {
-      console.log('concentrationA', val);
-      const halfValue = val ? val / 2 : '';
+      const cleanVal = this.normalizeNumber(val);
+
+      const isNumber = cleanVal !== '' && cleanVal !== null && !isNaN(cleanVal);
+      const halfValue = isNumber ? String(cleanVal / 2) : '';
+
       this.experimentForm.get('halfConcentrationA')?.setValue(halfValue, { emitEvent: false });
     });
 
     this.experimentForm.get('concentrationB')?.valueChanges.subscribe((val) => {
-      const halfValue = val ? val / 2 : '';
+      const cleanVal = this.normalizeNumber(val);
+
+      const isNumber = cleanVal !== '' && cleanVal !== null && !isNaN(cleanVal);
+      const halfValue = isNumber ? String(cleanVal / 2) : '';
+
       this.experimentForm.get('halfConcentrationB')?.setValue(halfValue, { emitEvent: false });
     });
   }
 
   private patchFormWithExperiment(exp: GetExperimentDto): void {
-    const concA = exp.metadata?.concentrationA;
-    const concB = exp.metadata?.concentrationB;
+    const concA = this.normalizeNumber(exp.metadata?.concentrationA);
+    const concB = this.normalizeNumber(exp.metadata?.concentrationB);
 
     this.experimentForm.patchValue({
       reactantA: exp.reactantA.uuid || exp.reactantA.shortName || '',
@@ -383,21 +390,21 @@ export class ExperimentDetailsFormComponent implements OnInit, OnDestroy, OnChan
       scientist:
         `${exp.metadata?.scientist?.firstName} ${exp.metadata?.scientist?.lastName}` ||
         this.fullName,
-      temperature: exp.metadata?.temperature,
+      temperature: this.normalizeNumber(exp.metadata?.temperature),
       solvent: exp.metadata?.solvent?.name,
 
       concentrationA: concA,
-      halfConcentrationA: concA ? concA / 2 : '',
+      halfConcentrationA: concA ? String(concA / 2) : '',
       concentrationB: concB,
-      halfConcentrationB: concB ? concB / 2 : '',
+      halfConcentrationB: concB ? String(concB / 2) : '',
 
       instrument: exp.metadata?.instrument?.name,
       modality: exp.metadata?.modality?.name,
-      wavelength: exp.metadata?.wavelength,
+      wavelength: this.normalizeNumber(exp.metadata?.wavelength),
       comment: exp.metadata?.comment,
-      rateConstant: exp.measurementData?.rateConstant,
-      pFO_rateConstant: exp.measurementData?.pFO_rateConstant,
-      error: exp.measurementData?.error,
+      rateConstant: this.normalizeNumber(exp.measurementData?.rateConstant),
+      pFO_rateConstant: this.normalizeNumber(exp.measurementData?.pFO_rateConstant),
+      error: this.normalizeNumber(exp.measurementData?.error),
       isErrorPercentage: exp.measurementData?.isErrorPercentage,
     });
 
@@ -408,6 +415,25 @@ export class ExperimentDetailsFormComponent implements OnInit, OnDestroy, OnChan
     }
     if (exp.reactantB) {
       this.initValB = [exp.reactantB.uuid || exp.reactantB.shortName];
+    }
+  }
+
+  private normalizeNumber(val: any): any {
+    if (typeof val === 'string' && val.includes(',')) {
+      const parsed = parseFloat(val.replace(/,/g, '.'));
+      return isNaN(parsed) ? val : parsed;
+    }
+    return val;
+  }
+
+  preventComma(event: KeyboardEvent): void {
+    if (event.key === ',') {
+      event.preventDefault();
+
+      this.notification.error(
+        this.transloco.translate('experiments.details.notifications.commaWarningTitle'),
+        this.transloco.translate('experiments.details.notifications.commaWarningMessage'),
+      )
     }
   }
 
