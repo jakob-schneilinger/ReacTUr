@@ -29,7 +29,7 @@
                 <h6 class="mb-0 fw-bold" [ngClass]="'text-' + commit.commitType.toLowerCase()">
                   {{ commit.commitType }}
                 </h6>
-                <small class="text-muted">{{ commit.commitDate | date:'medium' }}</small>
+                <small class="text-muted">{{ commit.commitDate | date:'d. MMMM yyyy, HH:mm' }}</small>
               </div>
 
               <div class="text-muted small mb-3 pb-2 border-bottom">

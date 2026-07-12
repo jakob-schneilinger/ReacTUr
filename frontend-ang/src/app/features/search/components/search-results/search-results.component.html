@@ -58,7 +58,7 @@
               {{ 'search.metadata.rateConstant' | transloco }}:
               <strong>{{ exp.measurementData.rateConstant }}</strong>
             </div>
-            <div class="detail-item">{{ 'search.metadata.date' | transloco }}: <strong>{{ exp.metadata.date | date:'shortDate' }}</strong></div>
+            <div class="detail-item">{{ 'search.metadata.date' | transloco }}: <strong>{{ exp.metadata.date | date:'d. MMMM yyyy' }}</strong></div>
             <div class="detail-item">{{ 'search.metadata.solvent' | transloco }}: <strong>{{ exp.metadata.solvent.name }}</strong></div>
             <div class="detail-item">{{ 'search.metadata.temp' | transloco }}: <strong>{{ exp.metadata.temperature }} °C</strong></div>
             <div class="detail-item">{{ 'search.metadata.conc' | transloco }} {{ exp.reactantA.shortName}}: <strong>{{ exp.metadata.concentrationA }} mM</strong></div>
