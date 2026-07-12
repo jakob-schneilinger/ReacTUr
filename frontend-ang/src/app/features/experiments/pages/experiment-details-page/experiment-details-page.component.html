@@ -6,12 +6,6 @@
     <div leftContent>
       <h2>{{experimentTitle}}</h2>
 
-      @if (experiment) {
-        <button (click)="openHistoryModal()">
-          <i class="bi bi-clock-history"></i> {{ 'experiments.details.showHistory' | transloco }}
-        </button>
-      }
-
       @if (formState === 'create' || experiment) {
         <app-experiment-details-form
           class="experiment-details-form"
@@ -23,6 +17,12 @@
         <div class="loading-state">
           <p>{{ 'experiments.details.loading' | transloco }}</p>
         </div>
+      }
+
+      @if (experiment) {
+        <button (click)="openHistoryModal()" class="history-btn">
+          <i class="bi bi-clock-history"></i> {{ 'experiments.details.showHistory' | transloco }}
+        </button>
       }
     </div>
 
