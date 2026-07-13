@@ -56,9 +56,9 @@
           <div class="metadata-groups" style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem 1rem; margin-bottom: 0.5rem;">
             <div class="detail-item">
               {{ 'search.metadata.rateConstant' | transloco }}:
-              <strong>{{ exp.measurementData.rateConstant }} ± {{ exp.measurementData.error }}{{ exp.measurementData.isErrorPercentage ? '%' : '' }}</strong>
+              <strong>{{ exp.measurementData.rateConstant }}</strong>
             </div>
-            <div class="detail-item">{{ 'search.metadata.date' | transloco }}: <strong>{{ exp.metadata.date | date:'shortDate' }}</strong></div>
+            <div class="detail-item">{{ 'search.metadata.date' | transloco }}: <strong>{{ exp.metadata.date | date:'d. MMMM yyyy' }}</strong></div>
             <div class="detail-item">{{ 'search.metadata.solvent' | transloco }}: <strong>{{ exp.metadata.solvent.name }}</strong></div>
             <div class="detail-item">{{ 'search.metadata.temp' | transloco }}: <strong>{{ exp.metadata.temperature }} °C</strong></div>
             <div class="detail-item">{{ 'search.metadata.conc' | transloco }} {{ exp.reactantA.shortName}}: <strong>{{ exp.metadata.concentrationA }} mM</strong></div>
@@ -75,6 +75,7 @@
 
             @if (isCardExpanded(exp.uuid)) {
               <div class="metadata-groups" style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem 1rem; padding-top: 0.25rem; border-top: 1px dashed #eee; margin-bottom: 0.5rem;">
+                <div class="detail-item" *ngIf="exp.measurementData.error">{{ 'search.metadata.error' | transloco }}: <strong>{{ exp.measurementData.error }}{{ exp.measurementData.isErrorPercentage ? '%' : '' }}</strong></div>
                 <div class="detail-item" *ngIf="exp.measurementData.pFO_rateConstant != null">{{ 'search.metadata.pfoRateConstant' | transloco }}: <strong>{{ exp.measurementData.pFO_rateConstant }}</strong></div>
                 <div class="detail-item" *ngIf="exp.metadata.instrument">{{ 'search.metadata.instrument' | transloco }}: <strong>{{ exp.metadata.instrument.name }}</strong></div>
                 <div class="detail-item" *ngIf="exp.metadata.modality">{{ 'search.metadata.modality' | transloco }}: <strong>{{ exp.metadata.modality.name }}</strong></div>

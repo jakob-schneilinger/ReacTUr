@@ -149,6 +149,7 @@ export class ExperimentDetailsFormComponent implements OnInit, OnDestroy, OnChan
     this.authService.getLoggedInUser().subscribe((value) => (this.user = value));
     this.initForm();
     this.setupReactionAutoFill();
+    this.setupHalfConcentrationAutoFill();
     this.setupErrorValidation();
     this.loadUsers();
     this.loadOptions();
@@ -336,10 +337,12 @@ export class ExperimentDetailsFormComponent implements OnInit, OnDestroy, OnChan
       temperature: ['', Validators.required],
       solvent: ['', [Validators.required, this.inListValidator(this.knownSolventNames)]],
       concentrationA: ['', [Validators.required, Validators.min(0)]],
+      halfConcentrationA: [{ value: '', disabled: true }],
       concentrationB: ['', [Validators.required, Validators.min(0)]],
+      halfConcentrationB: [{ value: '', disabled: true }],
 
       rateConstant: ['', [Validators.required, Validators.min(0)]],
-      error: [5, [Validators.required, Validators.min(0)]],
+      error: [6, [Validators.required, Validators.min(0)]],
       isErrorPercentage: [true, Validators.required],
 
       // Optional Metadata
@@ -356,7 +359,30 @@ export class ExperimentDetailsFormComponent implements OnInit, OnDestroy, OnChan
     }
   }
 
+  private setupHalfConcentrationAutoFill(): void {
+    this.experimentForm.get('concentrationA')?.valueChanges.subscribe((val) => {
+      const cleanVal = this.normalizeNumber(val);
+
+      const isNumber = cleanVal !== '' && cleanVal !== null && !isNaN(cleanVal);
+      const halfValue = isNumber ? String(cleanVal / 2) : '';
+
+      this.experimentForm.get('halfConcentrationA')?.setValue(halfValue, { emitEvent: false });
+    });
+
+    this.experimentForm.get('concentrationB')?.valueChanges.subscribe((val) => {
+      const cleanVal = this.normalizeNumber(val);
+
+      const isNumber = cleanVal !== '' && cleanVal !== null && !isNaN(cleanVal);
+      const halfValue = isNumber ? String(cleanVal / 2) : '';
+
+      this.experimentForm.get('halfConcentrationB')?.setValue(halfValue, { emitEvent: false });
+    });
+  }
+
   private patchFormWithExperiment(exp: GetExperimentDto): void {
+    const concA = this.normalizeNumber(exp.metadata?.concentrationA);
+    const concB = this.normalizeNumber(exp.metadata?.concentrationB);
+
     this.experimentForm.patchValue({
       reactantA: exp.reactantA.uuid || exp.reactantA.shortName || '',
       reactantB: exp.reactantB.uuid || exp.reactantB.shortName || '',
@@ -364,17 +390,21 @@ export class ExperimentDetailsFormComponent implements OnInit, OnDestroy, OnChan
       scientist:
         `${exp.metadata?.scientist?.firstName} ${exp.metadata?.scientist?.lastName}` ||
         this.fullName,
-      temperature: exp.metadata?.temperature,
+      temperature: this.normalizeNumber(exp.metadata?.temperature),
       solvent: exp.metadata?.solvent?.name,
-      concentrationA: exp.metadata?.concentrationA,
-      concentrationB: exp.metadata?.concentrationB,
+
+      concentrationA: concA,
+      halfConcentrationA: concA ? String(concA / 2) : '',
+      concentrationB: concB,
+      halfConcentrationB: concB ? String(concB / 2) : '',
+
       instrument: exp.metadata?.instrument?.name,
       modality: exp.metadata?.modality?.name,
-      wavelength: exp.metadata?.wavelength,
+      wavelength: this.normalizeNumber(exp.metadata?.wavelength),
       comment: exp.metadata?.comment,
-      rateConstant: exp.measurementData?.rateConstant,
-      pFO_rateConstant: exp.measurementData?.pFO_rateConstant,
-      error: exp.measurementData?.error,
+      rateConstant: this.normalizeNumber(exp.measurementData?.rateConstant),
+      pFO_rateConstant: this.normalizeNumber(exp.measurementData?.pFO_rateConstant),
+      error: this.normalizeNumber(exp.measurementData?.error),
       isErrorPercentage: exp.measurementData?.isErrorPercentage,
     });
 
@@ -385,6 +415,25 @@ export class ExperimentDetailsFormComponent implements OnInit, OnDestroy, OnChan
     }
     if (exp.reactantB) {
       this.initValB = [exp.reactantB.uuid || exp.reactantB.shortName];
+    }
+  }
+
+  private normalizeNumber(val: any): any {
+    if (typeof val === 'string' && val.includes(',')) {
+      const parsed = parseFloat(val.replace(/,/g, '.'));
+      return isNaN(parsed) ? val : parsed;
+    }
+    return val;
+  }
+
+  preventComma(event: KeyboardEvent): void {
+    if (event.key === ',') {
+      event.preventDefault();
+
+      this.notification.error(
+        this.transloco.translate('experiments.details.notifications.commaWarningTitle'),
+        this.transloco.translate('experiments.details.notifications.commaWarningMessage'),
+      )
     }
   }
 
@@ -428,18 +477,20 @@ export class ExperimentDetailsFormComponent implements OnInit, OnDestroy, OnChan
 
     this.notification.success(
       this.transloco.translate('experiments.details.notifications.metaDataTitle'),
-      this.transloco.translate('experiments.details.notifications.metaDataMessage')
+      this.transloco.translate('experiments.details.notifications.metaDataMessage'),
     );
   }
 
   private reactantUniqueValidator(identifier: string): ValidatorFn {
     return (control: AbstractControl): ValidationErrors | null => {
       const value = control.value;
-      const otherReactantValue = identifier === "A" ? this.experimentForm?.get('reactantB')?.value : this.experimentForm?.get('reactantA')?.value;
+      const otherReactantValue =
+        identifier === 'A'
+          ? this.experimentForm?.get('reactantB')?.value
+          : this.experimentForm?.get('reactantA')?.value;
       const isUnique = value !== otherReactantValue;
       return isUnique ? null : { notUnique: { value: control.value } };
     };
-
   }
 
   private inListValidator(validOptions: string[]): ValidatorFn {

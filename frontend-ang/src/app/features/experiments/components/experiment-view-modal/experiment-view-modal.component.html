@@ -14,7 +14,7 @@
           @if (selectedExperiment.metadata; as meta) {
             <dl class="row">
               <dt class="col-sm-4">{{ 'experiments.details.form.labels.date' | transloco }}</dt>
-              <dd class="col-sm-8 text-break">{{ meta.date | date:'mediumDate' }}</dd>
+              <dd class="col-sm-8 text-break">{{ meta.date | date:'d. MMMM yyyy' }}</dd>
 
               <dt class="col-sm-4">{{ 'experiments.details.form.labels.scientist' | transloco }}</dt>
               <dd class="col-sm-8 text-break">{{ meta.scientist.firstName }} {{ meta.scientist.lastName }}</dd>

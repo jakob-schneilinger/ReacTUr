@@ -22,20 +22,12 @@
 
   .icon-btn {
     border: none;
-    background: transparent;
     padding: 0.4rem 0.6rem;
     display: flex;
     align-items: center;
     justify-content: center;
     border-radius: 0.375rem;
 
-    &:hover {
-      background-color: $background;
-    }
-
-    &:focus {
-      box-shadow: none;
-    }
   }
 }
 

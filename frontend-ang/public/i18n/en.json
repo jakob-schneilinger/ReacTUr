@@ -2,7 +2,7 @@
   "header": {
     "title": "ReacTUr",
     "logoAlt": "ReacTUr Logo",
-    "search": "Search",
+    "search": "Experiment Search",
     "createExperiment": "Create Experiment",
     "reactants": "Reactants",
     "admin": "Admin",
@@ -200,6 +200,7 @@
       "solvent": "Solvent",
       "temp": "Temp",
       "conc": "Conc.",
+      "error": "Error",
       "pfoRateConstant": "pFO Rate Constant",
       "instrument": "Instrument",
       "modality": "Modality",
@@ -579,8 +580,10 @@
           "scientist": "Scientist",
           "temperature": "Temperature",
           "solvent": "Solvent",
-          "concentrationReactantA": "Concentration Reactant A",
-          "concentrationReactantB": "Concentration Reactant B",
+          "concentrationReactantA": "Concentration Reactant A (in syringe)",
+          "concentrationReactantB": "Concentration Reactant B (in syringe)",
+          "halfConcentrationReactantA": "Concentration Reactant A (real)",
+          "halfConcentrationReactantB": "Concentration Reactant B (real)",
           "instrument": "Instrument",
           "modality": "Modality",
           "wavelength": "Wavelength",
@@ -668,7 +671,9 @@
         "metaDataTitle": "Metadata Applied",
         "metaDataMessage": "Form fields have been populated from the uploaded file.",
         "uploadErrorTitle": "Upload Error",
-        "uploadErrorMessage": "Failed to upload: {{fileName}}"
+        "uploadErrorMessage": "Failed to upload: {{fileName}}",
+        "commaWarningTitle": "Commas not allowed",
+        "commaWarningMessage": "Please use points instead of commas in numeric input fields."
       }
     },
     "my": {
