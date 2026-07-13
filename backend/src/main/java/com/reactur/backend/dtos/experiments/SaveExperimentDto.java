@@ -3,6 +3,8 @@ package com.reactur.backend.dtos.experiments;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 
+import java.util.Collections;
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -12,7 +14,7 @@ import java.util.UUID;
  * @param reactantB       The UUID or identifier of the second reactant.
  * @param metadata        The experimental setup and conditions to save.
  * @param measurementData The kinetics results to save.
- * @param doi             The Digital Object Identifier (optional).
+ * @param dois            The Digital Object Identifiers (optional).
  */
 public record SaveExperimentDto(
 
@@ -30,8 +32,14 @@ public record SaveExperimentDto(
   @NotNull(message = "Measurement data is required")
   MeasurementDataDto measurementData,
 
-  // TODO (Syntactic - DTO): If DOIs follow a strict format,
+  // TODO (Syntactic - DTO): Ask if DOIs follow a strict format,
   //  add a @Pattern(regexp = "^10\\.\\d{4,9}/[-._;()/:A-Z0-9]+$") here.
-  String doi
+  List<String> dois
 ) {
+  // Guarantees that dois is never null, but rather an empty list
+  public SaveExperimentDto {
+    if (dois == null) {
+      dois = Collections.emptyList();
+    }
+  }
 }

@@ -3,7 +3,9 @@ package com.reactur.backend.entities.experiment;
 import com.reactur.backend.entities.Reactant;
 import com.reactur.backend.entities.User;
 import jakarta.persistence.CascadeType;
+import jakarta.persistence.CollectionTable;
 import jakarta.persistence.Column;
+import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
@@ -34,22 +36,6 @@ import java.util.UUID;
 @Builder
 public class Experiment {
 
-    // TODO: Questions for Dennis
-    /*
-    The "Two Reactant" Rule: Right now, the database strictly mandates exactly two reactants (reactantA and reactantB). What happens if a scientist performs a decomposition reaction (only 1 reactant)? Or a multi-component synthesis (3 or 4 reactants)?
-
-    If yes: We might need to change this to a @ManyToMany list of reactants rather than two hardcoded columns.
-
-    ---- > Dennis: Only and Exactly Two Reactants. Always
-
-    The DOI timing: Is the DOI (Digital Object Identifier) known the moment the experiment is created, or is it usually added weeks later after a paper is published?
-
-    Currently: The column is implicitly nullable (which is good), but we should ensure the frontend knows it shouldn't force the user to type a DOI to hit "Save".
-
-    -------> It must be possible to add it in the future. But there might even be multiple DOIs...
-     */
-
-
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
@@ -62,18 +48,13 @@ public class Experiment {
     @JoinColumn(name = "reactant_b_id", nullable = false)
     private Reactant reactantB;
 
-    // ToDo: Is the doi nullable, can it be added later and is not forced to
-    //  be since the beginning, or should we add not-null and always from the
-    //  beginning its here? Update DTOs and FrontEnd accordingly
-    //   Update: Accept multiples
-    //  ---
-    //  should be nullable and can be added later, nullable because scientist still want to log
-    //  experiment while they are working on them, not after publication.
-    //  Also unique = true can be dangerous -> a single paper (which has a single doi) can have multiple
-    //  experiments -> so multiple experiments can have the same doi
-    //  Also change doi to dois -> List<String> dois
-    @Column(name = "doi", unique = true)
-    private String doi;
+    // Multiple experiments could correspond to the same paper, so multiple experiments can have the same DOI
+    // the same way, an experiment can appear in multiple papers and have multiple DOIs
+    @ElementCollection(fetch = FetchType.EAGER)
+    @CollectionTable(name = "experiment_dois", joinColumns = @JoinColumn(name = "experiment_id"))
+    @Column(name = "doi")
+    @Builder.Default
+    private List<String> dois = new ArrayList<>();
 
     @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JoinColumn(name = "metadata_id", referencedColumnName = "id")

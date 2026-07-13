@@ -39,7 +39,6 @@ public record SearchParametersDto(
   LocalDate dateMin,
   LocalDate dateMax,
 
-  // Changed from List<UUID> to List<String> to match Keycloak IDs
   List<String> scientist,
 
   @Min(value = -273, message = "Temperature cannot be below absolute zero")

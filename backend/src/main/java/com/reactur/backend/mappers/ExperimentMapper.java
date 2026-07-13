@@ -15,6 +15,7 @@ import java.util.List;
     UserMapper.class,
     MetadataMapper.class,
     MeasurementDataMapper.class
+    /* TODO: ExperimentAttachmentMapper ? */
   }
 )
 public interface ExperimentMapper {
@@ -22,7 +23,13 @@ public interface ExperimentMapper {
   // Main Experiment Mapping
   @Mapping(target = "uuid", source = "experiment.id")
   @Mapping(target = "measurementData", source = "experiment.result")
+  @Mapping(target = "dois", source = "experiment.dois")
   @Mapping(target = "attachments", source = "attachments")
   GetExperimentDto experimentToGetExperimentDto(Experiment experiment, List<ExperimentAttachmentDto> attachments);
+
+  @Mapping(target = "uuid", source = "id")
+  @Mapping(target = "measurementData", source = "result")
+  @Mapping(target = "attachments", source = "files") // Maps the internal List<ExperimentAttachment> files
+  GetExperimentDto experimentToGetExperimentDto(Experiment experiment);
 
 }

@@ -12,7 +12,7 @@ import java.util.UUID;
  * DTO for retrieving the comprehensive details of an experiment.
  *
  * @param uuid            The unique identifier of the experiment.
- * @param doi             The Digital Object Identifier associated with the experiment.
+ * @param dois            The Digital Object Identifier(s) associated with the experiment.
  * @param reactantA       The first reactant involved in the reaction.
  * @param reactantB       The second reactant involved in the reaction.
  * @param metadata        The metadata associated with the experiment.
@@ -23,7 +23,7 @@ import java.util.UUID;
  */
 public record GetExperimentDto(
         UUID uuid,
-        String doi,
+        List<String> dois,
         ReactantDto reactantA,
         ReactantDto reactantB,
         GetMetadataDto metadata,
@@ -32,4 +32,9 @@ public record GetExperimentDto(
         List<ExperimentAttachmentDto> attachments,
         Instant archivedAt
 ) implements DetailsDto {
+  public GetExperimentDto {
+    if (dois == null) {
+      dois = java.util.Collections.emptyList();
+    }
+  }
 }

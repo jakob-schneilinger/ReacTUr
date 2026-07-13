@@ -52,7 +52,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.test.util.ReflectionTestUtils;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -127,11 +126,12 @@ class ExperimentServiceTest {
     UUID modalityId = randomUUID();
 
     SaveMetadataDto validMetadata = new SaveMetadataDto(
-            java.time.LocalDate.now().minusDays(1), scientistId, 25.0, solventId, 1.5, 2.0, instrumentId, modalityId, 450.0, "Test"
+      java.time.LocalDate.now().minusDays(1), scientistId, 25.0, solventId, 1.5, 2.0, instrumentId, modalityId, 450.0, "Test"
     );
     MeasurementDataDto validMeasurement = new MeasurementDataDto(1.2, 5.5, 0.1, false);
+
     SaveExperimentDto validRequestDto = new SaveExperimentDto(
-            reactantAId, reactantBId, validMetadata, validMeasurement, "10.1000/rxn123"
+      reactantAId, reactantBId, validMetadata, validMeasurement, List.of("10.1000/rxn123")
     );
 
     User mockCreator = new User(); mockCreator.setId(userId);
@@ -173,9 +173,9 @@ class ExperimentServiceTest {
     Experiment capturedEntity = experimentCaptor.getValue();
 
     assertNotNull(capturedEntity, "The captured entity should not be null");
-    assertEquals("10.1000/rxn123", capturedEntity.getDoi());
+    assertEquals(List.of("10.1000/rxn123"), capturedEntity.getDois());
     assertNotNull(result, "The returned DTO should not be null");
-    assertEquals("10.1000/rxn123", result.doi());
+    assertEquals(List.of("10.1000/rxn123"), result.dois());
   }
 
   @Test
@@ -241,7 +241,7 @@ class ExperimentServiceTest {
 
     Experiment mockExperiment = new Experiment();
     mockExperiment.setId(experimentId);
-    mockExperiment.setDoi("10.1000/rxn999");
+    mockExperiment.setDois(List.of("10.1000/rxn999"));
 
     when(experimentRepository.findById(experimentId)).thenReturn(Optional.of(mockExperiment));
 
@@ -249,7 +249,7 @@ class ExperimentServiceTest {
 
     assertNotNull(result, "The returned DTO should not be null");
     assertEquals(experimentId, result.uuid());
-    assertEquals("10.1000/rxn999", result.doi());
+    assertEquals(List.of("10.1000/rxn999"), result.dois());
   }
 
   @Test
@@ -460,7 +460,7 @@ class ExperimentServiceTest {
     String creatorId = "creator-123";
 
     Experiment existingExperiment = createMockEntityForSecurity(experimentId, creatorId, "scientist-456", null);
-    existingExperiment.setDoi("10.1000/old-doi");
+    existingExperiment.setDois(List.of("10.1000/old-doi"));
     existingExperiment.getMetadata().setTemperature(20.0);
 
     SaveExperimentDto updateDto = createDummyExperimentDto();
@@ -498,14 +498,13 @@ class ExperimentServiceTest {
     Mockito.verify(experimentRepository).save(experimentCaptor.capture());
     Experiment savedExperiment = experimentCaptor.getValue();
 
-    // Assert MUTABLE fields were updated correctly
-    assertEquals(updateDto.doi(), savedExperiment.getDoi(), "DOI should be updated");
+    assertEquals(updateDto.dois(), savedExperiment.getDois(), "DOI should be updated");
     assertEquals(updateDto.metadata().temperature(), savedExperiment.getMetadata().getTemperature(), "Temperature should be updated");
     assertEquals(updateDto.metadata().scientist(), savedExperiment.getMetadata().getScientist().getId(), "Scientist should be updated");
     assertEquals(creatorId, savedExperiment.getCreatedBy().getId(), "Creator should NEVER change during an update");
 
     assertNotNull(result);
-    assertEquals(updateDto.doi(), result.doi());
+    assertEquals(updateDto.dois(), result.dois());
   }
 
   @Test
@@ -621,7 +620,7 @@ class ExperimentServiceTest {
       "Test"
     );
     return new SaveExperimentDto(
-      randomUUID(), randomUUID(), metadata, new MeasurementDataDto(1.2, 5.5, 0.1, false), "10.1000/rxn123"
+      randomUUID(), randomUUID(), metadata, new MeasurementDataDto(1.2, 5.5, 0.1, false), List.of("10.1000/rxn123")
     );
   }
 

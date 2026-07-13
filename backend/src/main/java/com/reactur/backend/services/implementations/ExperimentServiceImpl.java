@@ -31,7 +31,6 @@ import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.Predicate;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.javers.core.Javers;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -60,12 +59,11 @@ public class ExperimentServiceImpl implements ExperimentService {
   private final ExperimentMapper experimentMapper;
   private final ReactantStructureRepository structureRepository;
   private final FileService fileService;
-  private final Javers javers;
 
   @Override
   @Transactional
   public GetExperimentDto createExperiment(SaveExperimentDto experimentDto, String requestingUserId, Role requestingUserRole) {
-    log.trace("Attempting to create new experiment with DOI: {} for user ID: {}", experimentDto.doi(), requestingUserId);
+    log.trace("Attempting to create new experiment with DOI: {} for user ID: {}", experimentDto.dois(), requestingUserId);
 
     // First, semantic Validation
 
@@ -140,7 +138,7 @@ public class ExperimentServiceImpl implements ExperimentService {
       .build();
 
     Experiment experimentToSave = Experiment.builder()
-      .doi(experimentDto.doi())
+      .dois(experimentDto.dois())
       .reactantA(reactantA)
       .reactantB(reactantB)
       .metadata(metadata)
@@ -148,7 +146,7 @@ public class ExperimentServiceImpl implements ExperimentService {
       .createdBy(creator)
       .build();
 
-    // ... aand saving the entities + the loggers
+    // ...saving the entities + the loggers
 
     Experiment savedExperiment = experimentRepository.save(experimentToSave);
 
@@ -330,7 +328,7 @@ public class ExperimentServiceImpl implements ExperimentService {
 
     // 5. Apply Updates (Full Replacement via PUT)
     // Note: We intentionally DO NOT update `createdBy` or `archivedAt` to enforce immutability.
-    existingExperiment.setDoi(experimentDto.doi());
+    existingExperiment.setDois(experimentDto.dois());
     existingExperiment.setReactantA(reactantA);
     existingExperiment.setReactantB(reactantB);
 

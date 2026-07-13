@@ -59,6 +59,9 @@ public class ReactantEndpoint {
         return ResponseEntity.ok(detail);
     }
 
+    // TODO-Future: For future versions, consider adding a BackEnd Reactant substructure search
+    //  as Reactants Amount grows in time, to avoid FrontEnd / Browser overload
+
     @GetMapping
     public ResponseEntity<List<ReactantDto>> getAllReactants() {
         List<ReactantDto> reactants = reactantService.getAllReactants();

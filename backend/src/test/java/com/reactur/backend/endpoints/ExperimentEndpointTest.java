@@ -89,11 +89,11 @@ class ExperimentEndpointTest {
     );
 
     SaveExperimentDto validRequestDto = new SaveExperimentDto(
-      reactantA, reactantB, validMetadata, validMeasurement, "10.1000/rxn123"
+      reactantA, reactantB, validMetadata, validMeasurement, List.of("10.1000/rxn123")
     );
 
     GetExperimentDto expectedResponseDto = new GetExperimentDto(
-      newExperimentId, "10.1000/rxn123", null, null, null, null, null, null, null
+      newExperimentId, List.of("10.1000/rxn123"), null, null, null, null, null, null, null
     );
 
     // ## Mocking of the service layer to accept the DTO and return the expected answer
@@ -117,7 +117,7 @@ class ExperimentEndpointTest {
       .andExpect(status().isCreated())
 
       .andExpect(jsonPath("$.uuid").value(newExperimentId.toString()))
-      .andExpect(jsonPath("$.doi").value("10.1000/rxn123"));
+      .andExpect(jsonPath("$.dois[0]").value("10.1000/rxn123"));
 
     // ## Extra check: Making sure that the service got the right DTO, that nothing got accidentally changed
     ArgumentCaptor<SaveExperimentDto> dtoCaptor = ArgumentCaptor.forClass(SaveExperimentDto.class);
@@ -132,7 +132,7 @@ class ExperimentEndpointTest {
     Assertions.assertNotNull(capturedDto, "The captured DTO should not be null");
     Assertions.assertEquals(reactantA, capturedDto.reactantA());
     Assertions.assertEquals(reactantB, capturedDto.reactantB());
-    Assertions.assertEquals("10.1000/rxn123", capturedDto.doi());
+    Assertions.assertEquals(List.of("10.1000/rxn123"), capturedDto.dois());
     Assertions.assertEquals(25.0, capturedDto.metadata().temperature());
   }
 
@@ -160,7 +160,7 @@ class ExperimentEndpointTest {
       UUID.randomUUID(),
       validMetadata,
       validMeasurement,
-      "10.1000/rxn123"
+      List.of("10.1000/rxn123")
     );
 
     mockMvc.perform(post("/api/experiment")
@@ -177,7 +177,7 @@ class ExperimentEndpointTest {
   @Test
   void getExperiment_whenFoundAndAuthorized_returns200Ok() throws Exception {
     UUID experimentId = UUID.randomUUID();
-    GetExperimentDto activeExperiment = new GetExperimentDto(experimentId, "10.1000/rxn123", null, null, null, null, null, null, null);
+    GetExperimentDto activeExperiment = new GetExperimentDto(experimentId, List.of("10.1000/rxn123"), null, null, null, null, null, null, null);
 
     Mockito.when(experimentService.getExperiment(Mockito.eq(experimentId), Mockito.anyString(), any(Role.class)))
       .thenReturn(activeExperiment);
@@ -185,7 +185,7 @@ class ExperimentEndpointTest {
     mockMvc.perform(get("/api/experiment/" + experimentId)
         .with(jwt().jwt(builder -> builder.subject("random-user-id"))))
       .andExpect(status().isOk())
-      .andExpect(jsonPath("$.doi").value("10.1000/rxn123"));
+      .andExpect(jsonPath("$.dois[0]").value("10.1000/rxn123"));
   }
 
   @Test
@@ -243,7 +243,7 @@ class ExperimentEndpointTest {
   @Test
   void restoreExperiment_whenAuthorized_returns200Ok() throws Exception {
     UUID experimentId = UUID.randomUUID();
-    GetExperimentDto restoredExperiment = new GetExperimentDto(experimentId, "10.1000/rxn123", null, null, null, null, null, null, null);
+    GetExperimentDto restoredExperiment = new GetExperimentDto(experimentId, List.of("10.1000/rxn123"), null, null, null, null, null, null, null);
 
     Mockito.when(experimentService.restoreExperiment(Mockito.eq(experimentId), Mockito.anyString(), any(Role.class)))
       .thenReturn(restoredExperiment);
@@ -252,7 +252,7 @@ class ExperimentEndpointTest {
         .with(csrf())
         .with(jwt().jwt(builder -> builder.subject("scientist-456"))))
       .andExpect(status().isOk())
-      .andExpect(jsonPath("$.doi").value("10.1000/rxn123"));
+      .andExpect(jsonPath("$.dois[0]").value("10.1000/rxn123"));
 
     Mockito.verify(experimentService).restoreExperiment(experimentId, "scientist-456", Role.USER);
   }
@@ -273,8 +273,8 @@ class ExperimentEndpointTest {
   @Test
   void getArchivedExperiments_whenAuthorizedAsUser_returns200OkWithData() throws Exception {
     String userId = "standard-user-123";
-    GetExperimentDto experiment1 = new GetExperimentDto(UUID.randomUUID(), "10.1000/rxn001", null, null, null, null, null, null, null);
-    GetExperimentDto experiment2 = new GetExperimentDto(UUID.randomUUID(), "10.1000/rxn002", null, null, null, null, null, null, null);
+    GetExperimentDto experiment1 = new GetExperimentDto(UUID.randomUUID(), List.of("10.1000/rxn001"), null, null, null, null, null, null, null);
+    GetExperimentDto experiment2 = new GetExperimentDto(UUID.randomUUID(), List.of("10.1000/rxn002"), null, null, null, null, null, null, null);
     GetExperimentDto[] mockedResponse = { experiment1, experiment2 };
 
     Mockito.when(experimentService.getArchivedExperiments(Mockito.eq(userId), Mockito.eq(Role.USER)))
@@ -284,8 +284,8 @@ class ExperimentEndpointTest {
         .with(jwt().jwt(builder -> builder.subject(userId))))
       .andExpect(status().isOk())
       .andExpect(jsonPath("$.length()").value(2))
-      .andExpect(jsonPath("$[0].doi").value("10.1000/rxn001"))
-      .andExpect(jsonPath("$[1].doi").value("10.1000/rxn002"));
+      .andExpect(jsonPath("$[0].dois[0]").value("10.1000/rxn001"))
+      .andExpect(jsonPath("$[1].dois[0]").value("10.1000/rxn002"));
 
     Mockito.verify(experimentService).getArchivedExperiments(userId, Role.USER);
   }
@@ -294,7 +294,7 @@ class ExperimentEndpointTest {
   void getArchivedExperiments_whenAuthorizedAsAdmin_returns200OkWithData() throws Exception {
     String adminId = "admin-user-999";
     GetExperimentDto[] mockedResponse = {
-      new GetExperimentDto(UUID.randomUUID(), "10.1000/rxn999", null, null, null, null, null, null, null)
+      new GetExperimentDto(UUID.randomUUID(), List.of("10.1000/rxn999"), null, null, null, null, null, null, null)
     };
 
     Mockito.when(experimentService.getArchivedExperiments(Mockito.eq(adminId), Mockito.eq(Role.ADMIN)))
@@ -304,7 +304,7 @@ class ExperimentEndpointTest {
         .with(jwt().jwt(builder -> builder.subject(adminId)).authorities(new org.springframework.security.core.authority.SimpleGrantedAuthority("ROLE_ADMIN"))))
       .andExpect(status().isOk())
       .andExpect(jsonPath("$.length()").value(1))
-      .andExpect(jsonPath("$[0].doi").value("10.1000/rxn999"));
+      .andExpect(jsonPath("$[0].dois[0]").value("10.1000/rxn999"));
 
     Mockito.verify(experimentService).getArchivedExperiments(adminId, Role.ADMIN);
   }
@@ -347,11 +347,11 @@ class ExperimentEndpointTest {
       1.2, 5.5, 0.1, false
     );
     SaveExperimentDto validRequestDto = new SaveExperimentDto(
-      reactantA, reactantB, validMetadata, validMeasurement, "10.1000/rxn-updated"
+      reactantA, reactantB, validMetadata, validMeasurement, List.of("10.1000/rxn-updated")
     );
 
     GetExperimentDto expectedResponseDto = new GetExperimentDto(
-      experimentId, "10.1000/rxn-updated", null, null, null, null, null, null, null
+      experimentId, List.of("10.1000/rxn-updated"), null, null, null, null, null, null, null
     );
 
     Mockito.when(experimentService.updateExperiment(
@@ -368,7 +368,7 @@ class ExperimentEndpointTest {
         .content(objectMapper.writeValueAsString(validRequestDto)))
       .andExpect(status().isOk())
       .andExpect(jsonPath("$.uuid").value(experimentId.toString()))
-      .andExpect(jsonPath("$.doi").value("10.1000/rxn-updated"));
+      .andExpect(jsonPath("$.dois[0]").value("10.1000/rxn-updated"));
 
     Mockito.verify(experimentService).updateExperiment(
       Mockito.eq(experimentId),
@@ -401,8 +401,8 @@ class ExperimentEndpointTest {
   @Test
   void searchExperiments_whenValidFiltersAndPagination_returns200OkWithPage() throws Exception {
     // Setup expected data
-    GetExperimentDto experiment1 = new GetExperimentDto(UUID.randomUUID(), "10.1000/rxn1", null, null, null, null, null, null, null);
-    GetExperimentDto experiment2 = new GetExperimentDto(UUID.randomUUID(), "10.1000/rxn2", null, null, null, null, null, null, null);
+    GetExperimentDto experiment1 = new GetExperimentDto(UUID.randomUUID(), List.of("10.1000/rxn1"), null, null, null, null, null, null, null);
+    GetExperimentDto experiment2 = new GetExperimentDto(UUID.randomUUID(), List.of("10.1000/rxn2"), null, null, null, null, null, null, null);
 
     // mock Spring Page containing our data
     Page<GetExperimentDto> mockPage =
@@ -431,7 +431,7 @@ class ExperimentEndpointTest {
       .andExpect(status().isOk())
       // Verify Spring Page JSON structure
       .andExpect(jsonPath("$.content.length()").value(2))
-      .andExpect(jsonPath("$.content[0].doi").value("10.1000/rxn1"))
+      .andExpect(jsonPath("$.content[0].dois[0]").value("10.1000/rxn1"))
       .andExpect(jsonPath("$.totalElements").value(2))
       .andExpect(jsonPath("$.pageable.pageSize").value(20));
 
@@ -473,7 +473,7 @@ class ExperimentEndpointTest {
       LocalDate.now(), "scientist-id", 25.0, UUID.randomUUID(), 1.0, 1.0, null, null, null, null
     );
     MeasurementDataDto measurement = new MeasurementDataDto(null, 1.0, 0.1, false);
-    return new SaveExperimentDto(UUID.randomUUID(), UUID.randomUUID(), metadata, measurement, "10.1000/rxn");
+    return new SaveExperimentDto(UUID.randomUUID(), UUID.randomUUID(), metadata, measurement, List.of("10.1000/rxn"));
   }
 
 }

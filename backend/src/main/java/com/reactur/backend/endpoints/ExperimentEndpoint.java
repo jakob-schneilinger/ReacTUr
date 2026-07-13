@@ -33,10 +33,9 @@ import java.util.UUID;
  * REST controller for managing experimental data within the ReacTUr chemical reaction knowledge base.
  * <p>
  * This endpoint provides the external API boundaries for creating, retrieving, updating, and dynamically
- * querying chemical synthesis experiments. It enforces strict data governance and security rules, ensuring
- * that active experiments remain globally searchable to prevent duplicated lab work, while restricting
- * the modification and viewing of archived records to authorized personnel (The creator who included the
- * experiment in the database, the designated scientist, or system administrators).
+ * querying chemical synthesis experiments. It ensures that active experiments remain globally searchable to prevent
+ * duplicated lab work, while restricting the modification and viewing of archived records to authorized personnel
+ * (The creator who included the experiment in the database, the designated scientist, or system administrators).
  * </p>
  *
  * @see com.reactur.backend.services.ExperimentService
@@ -171,10 +170,10 @@ public class ExperimentEndpoint {
         return ResponseEntity.ok(searchResults);
     }
 
-    // TODO: Endpoint to get Logs by *Date*, by *User* and by Experiment
-    //  Current one: Logs related to experiment with uuid
+    // TODO-Future: Endpoint to get Logs by *Date* and by *User*, besides by *Experiment*
     @GetMapping("/{uuid}/history")
     public ResponseEntity<List<ExperimentHistoryDto>> getAuditLogs(@PathVariable UUID uuid, @AuthenticationPrincipal Jwt jwt) {
+        // TODO: Secure service
         List<ExperimentHistoryDto> history = experimentHistoryService.getExperimentHistory(uuid);
         return ResponseEntity.ok(history);
     }
@@ -262,6 +261,7 @@ public class ExperimentEndpoint {
         return ResponseEntity.ok(restoredExperiment);
     }
 
+    // TODO: Update to also have Supervisor
     // Extracts the highest privileged application role from the Spring Security authentication context.
     // returns the determined Role. It defaults to USER if not explicitly an ADMIN.
     private Role extractUserRole(Authentication authentication) {
