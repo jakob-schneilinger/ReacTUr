@@ -5,6 +5,7 @@ import com.reactur.backend.dtos.folders.SaveFolderDto;
 import com.reactur.backend.entities.User;
 import com.reactur.backend.entities.experiment.Experiment;
 import com.reactur.backend.entities.experiment.ExperimentFolder;
+import com.reactur.backend.entities.experiment.Metadata;
 import com.reactur.backend.mappers.FolderMapper;
 import com.reactur.backend.repositories.ExperimentFolderRepository;
 import com.reactur.backend.repositories.ExperimentRepository;
@@ -23,6 +24,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.access.AccessDeniedException;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -52,8 +54,12 @@ class ExperimentFolderServiceTest {
   private ExperimentFolderServiceImpl folderService;
 
   private User creatorUser;
+
   private User scientistUser;
+  private String scientistUserId;
+
   private Experiment sharedExperiment;
+  private UUID sharedExperimentId;
 
   @BeforeEach
   void setUp() {
@@ -61,10 +67,14 @@ class ExperimentFolderServiceTest {
     creatorUser.setId("creator-123");
 
     scientistUser = new User();
-    scientistUser.setId("scientist-456");
+    scientistUserId = "scientist-456";
+    scientistUser.setId(scientistUserId);
 
+    sharedExperimentId = UUID.randomUUID();
     sharedExperiment = Experiment.builder()
-      .id(UUID.randomUUID())
+      .id(sharedExperimentId)
+      .createdBy(creatorUser)
+      .metadata(Metadata.builder().scientist(scientistUser).build())
       .build();
   }
 
@@ -92,6 +102,50 @@ class ExperimentFolderServiceTest {
     assertFalse(oldFolder.getExperiments().contains(sharedExperiment), "Experiment should be removed from the old folder");
     Mockito.verify(folderRepository).save(oldFolder);
     Mockito.verify(folderRepository).save(newFolder);
+  }
+
+  @Test
+  void addExperimentToFolder_whenExperimentNotOwned_throwsAccessDeniedException() {
+    UUID folderId = UUID.randomUUID();
+
+    User snooperUser = new User();
+    String snooperUserId = "snooper-123";
+    snooperUser.setId(snooperUserId);
+
+    List<Experiment> folderExperiments = new ArrayList<>();
+    ExperimentFolder folder = new ExperimentFolder(folderId, "Folder", snooperUser, folderExperiments);
+
+    when(folderRepository.findById(folderId)).thenReturn(Optional.of(folder));
+    when(experimentRepository.findById(sharedExperiment.getId())).thenReturn(Optional.of(sharedExperiment));
+
+    assertThrows(
+      AccessDeniedException.class,
+      () -> folderService.addExperimentToFolder(folderId, sharedExperimentId, snooperUserId)
+    );
+
+    Mockito.verify(folderRepository, Mockito.never()).save(any(ExperimentFolder.class));
+  }
+
+  @Test
+  void addExperimentToFolder_whenFolderNotOwned_throwsAccessDeniedException() {
+    UUID folderId = UUID.randomUUID();
+
+    User snooperUser = new User();
+    String snooperUserId = "snooper-123";
+    snooperUser.setId(snooperUserId);
+
+    List<Experiment> folderExperiments = new ArrayList<>();
+    folderExperiments.add(sharedExperiment);
+    ExperimentFolder folder = new ExperimentFolder(folderId, "Folder", scientistUser, folderExperiments);
+
+    when(folderRepository.findById(folderId)).thenReturn(Optional.of(folder));
+
+    assertThrows(
+      AccessDeniedException.class,
+      () -> folderService.addExperimentToFolder(folderId, sharedExperimentId, snooperUserId)
+    );
+
+    Mockito.verify(folderRepository, Mockito.never()).save(any(ExperimentFolder.class));
   }
 
   // Creator and Scientist can have the same exp in different folders
@@ -122,9 +176,6 @@ class ExperimentFolderServiceTest {
     Mockito.verify(folderRepository, Mockito.never()).save(creatorFolder);
   }
 
-  // ===================================================================================
-  // STANDARD CRUD VALIDATIONS
-  // ===================================================================================
   @Test
   void createFolder_whenValidInput_returnsGetFolderDto() {
     SaveFolderDto inputDto = new SaveFolderDto("My Synthesis");
@@ -164,7 +215,7 @@ class ExperimentFolderServiceTest {
 
     // Scientist tries to add an experiment to Creator's folder
     assertThrows(AccessDeniedException.class, () ->
-      folderService.addExperimentToFolder(folderId, sharedExperiment.getId(), scientistUser.getId())
+      folderService.addExperimentToFolder(folderId, sharedExperimentId, scientistUserId)
     );
 
     Mockito.verify(folderRepository, Mockito.never()).save(any());

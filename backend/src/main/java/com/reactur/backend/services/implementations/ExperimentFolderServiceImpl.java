@@ -64,6 +64,17 @@ public class ExperimentFolderServiceImpl implements ExperimentFolderService {
 
     ExperimentFolder folder = getFolderAndValidateOwnership(folderId, requestingUserId);
 
+    Experiment experiment = experimentRepository.findById(experimentId)
+      .orElseThrow(() -> new ResourceNotFoundException("Experiment not found."));
+
+    boolean isOwner = experiment.getCreatedBy().getId().equals(requestingUserId);
+    boolean isScientist = experiment.getMetadata().getScientist().getId().equals(requestingUserId);
+
+    if (!isOwner && !isScientist) {
+      log.warn("User {} tried to add non-owned experiment {} to folder", requestingUserId, experimentId);
+      throw new AccessDeniedException("User not authorized to add a not-owned experiment to a folder");
+    }
+
     // One Folder Per User: Find all user's folders and remove this experiment
     List<ExperimentFolder> allUserFolders = folderRepository.findAllByOwner_Id(requestingUserId);
     for (ExperimentFolder oldFolder : allUserFolders) {
@@ -82,9 +93,6 @@ public class ExperimentFolderServiceImpl implements ExperimentFolderService {
       .anyMatch(exp -> exp.getId().equals(experimentId));
 
     if (!alreadyExists) {
-      Experiment experiment = experimentRepository.findById(experimentId)
-        .orElseThrow(() -> new ResourceNotFoundException("Experiment not found."));
-
       folder.getExperiments().add(experiment);
       folderRepository.save(folder);
     }
@@ -98,6 +106,13 @@ public class ExperimentFolderServiceImpl implements ExperimentFolderService {
     log.trace("Removing experiment {} from folder {}", experimentId, folderId);
 
     ExperimentFolder folder = getFolderAndValidateOwnership(folderId, requestingUserId);
+
+    // I omit to check if the experiment is owned by the Person: If it's in its personal folder, is it to be
+    // assumed that:
+    // A) The ownership check was already performed to add it to the folder
+    // B) In any case, folders are a personal thing. If for some modifications of any kind the person lost
+    //    access to the experiment, it doesn't change anything that the personal folder of that user still
+    //    contains the experiment
 
     folder.getExperiments().removeIf(exp -> exp.getId().equals(experimentId));
     folderRepository.save(folder);
