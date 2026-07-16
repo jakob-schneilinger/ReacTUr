@@ -34,6 +34,9 @@ public class ReactantEndpoint {
 
     private final ReactantService reactantService;
 
+    // TODO-CLAUDE (next thread - Reactant/Structure permissions): change to
+    // @PreAuthorize("hasAnyRole('ADMIN','SUPERVISOR')"). Per team decision, SUPERVISOR may create
+    // new reactants, but not update/archive them (see updateReactant/archiveReactant below).
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ReactantDetailDto> createReactant(@Valid @RequestBody CreateReactantDto saveReactant, @AuthenticationPrincipal Jwt jwt) {
@@ -68,6 +71,9 @@ public class ReactantEndpoint {
         return ResponseEntity.ok(reactants);
     }
 
+    // TODO-CLAUDE (next thread): change to @PreAuthorize("hasAnyRole('ADMIN','SUPERVISOR')").
+    // Per team decision, SUPERVISOR should be able to view archived reactants (experiments may
+    // still reference them, even though SUPERVISOR cannot archive/restore reactants itself).
     @GetMapping("/archived")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<List<ReactantDto>> getArchivedReactants() {
@@ -83,6 +89,10 @@ public class ReactantEndpoint {
         return ResponseEntity.noContent().build();
     }
 
+    // TODO-CLAUDE (next thread): OPEN QUESTION - not explicitly decided yet. The team confirmed
+    // SUPERVISOR may create reactants but not "modify or archive" them; it's unclear whether
+    // restoring an archived reactant counts as archive-management (stays ADMIN-only) or as
+    // "adding back" (like create). Confirm with the team before changing this from hasRole('ADMIN').
     @PutMapping("/{uuid}/restore")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ReactantDto> restoreReactant(@PathVariable UUID uuid, @AuthenticationPrincipal Jwt jwt) {

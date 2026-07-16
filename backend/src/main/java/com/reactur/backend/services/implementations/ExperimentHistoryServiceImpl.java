@@ -49,6 +49,9 @@ public class ExperimentHistoryServiceImpl implements ExperimentHistoryService {
             "id", "metadata", "result", "archivedAt"
     );
 
+    // TODO-CLAUDE (next thread): add requestingUserId/requestingUserRole parameters and call
+    // experimentAuthorization.assertCanView(experiment, requestingUserId, requestingUserRole) right
+    // after the fetch below, mirroring ExperimentServiceImpl/FileServiceImpl. See interface javadoc.
     @Override
     public List<ExperimentHistoryDto> getExperimentHistory(UUID experimentUuid) {
         log.trace("Fetching history for experiment ID: {}", experimentUuid);
