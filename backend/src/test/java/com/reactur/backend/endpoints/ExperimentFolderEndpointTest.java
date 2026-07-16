@@ -12,6 +12,7 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
@@ -50,6 +51,11 @@ class ExperimentFolderEndpointTest {
 
   private final String userId = "mock-keycloak-id-123";
 
+  // Grants the minimum authority needed to pass SecurityConfig's global "approved user" gate.
+  private static org.springframework.test.web.servlet.request.RequestPostProcessor asUser(String subject) {
+    return jwt().jwt(builder -> builder.subject(subject)).authorities(new SimpleGrantedAuthority("ROLE_USER"));
+  }
+
   @Test
   void createFolder_whenValidInput_returns201Created() throws Exception {
     SaveFolderDto requestDto = new SaveFolderDto("My Synthesis");
@@ -61,7 +67,7 @@ class ExperimentFolderEndpointTest {
 
     mockMvc.perform(post("/api/folders")
         .with(csrf())
-        .with(jwt().jwt(builder -> builder.subject(userId)))
+        .with(asUser(userId))
         .contentType(MediaType.APPLICATION_JSON)
         .content(objectMapper.writeValueAsString(requestDto)))
       .andExpect(status().isCreated())
@@ -76,7 +82,7 @@ class ExperimentFolderEndpointTest {
 
     mockMvc.perform(post("/api/folders")
         .with(csrf())
-        .with(jwt().jwt(builder -> builder.subject(userId)))
+        .with(asUser(userId))
         .contentType(MediaType.APPLICATION_JSON)
         .content(objectMapper.writeValueAsString(invalidRequestDto)))
       .andExpect(status().isBadRequest());
@@ -93,7 +99,7 @@ class ExperimentFolderEndpointTest {
       .thenReturn(List.of(responseDto));
 
     mockMvc.perform(get("/api/folders")
-        .with(jwt().jwt(builder -> builder.subject(userId))))
+        .with(asUser(userId)))
       .andExpect(status().isOk())
       .andExpect(jsonPath("$.length()").value(1))
       .andExpect(jsonPath("$[0].name").value("My Synthesis"))
@@ -111,7 +117,7 @@ class ExperimentFolderEndpointTest {
 
     mockMvc.perform(post("/api/folders/" + folderId + "/experiments/" + experimentId)
         .with(csrf())
-        .with(jwt().jwt(builder -> builder.subject(userId))))
+        .with(asUser(userId)))
       .andExpect(status().isOk())
       .andExpect(jsonPath("$.experimentIds[0]").value(experimentId.toString()));
   }
@@ -129,7 +135,7 @@ class ExperimentFolderEndpointTest {
 
     mockMvc.perform(delete("/api/folders/" + folderId + "/experiments/" + experimentId)
         .with(csrf())
-        .with(jwt().jwt(builder -> builder.subject(userId))))
+        .with(asUser(userId)))
       .andExpect(status().isOk())
       .andExpect(jsonPath("$.experimentIds.length()").value(0));
   }
@@ -140,7 +146,7 @@ class ExperimentFolderEndpointTest {
 
     mockMvc.perform(delete("/api/folders/" + folderId)
         .with(csrf())
-        .with(jwt().jwt(builder -> builder.subject(userId))))
+        .with(asUser(userId)))
       .andExpect(status().isNoContent());
 
     Mockito.verify(folderService).deleteFolder(folderId, userId);
