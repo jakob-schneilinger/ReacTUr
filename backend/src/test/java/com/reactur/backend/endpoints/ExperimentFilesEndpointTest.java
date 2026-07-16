@@ -1,14 +1,15 @@
 package com.reactur.backend.endpoints;
 
 import com.reactur.backend.dtos.experiments.ExperimentAttachmentDetailsDto;
+import com.reactur.backend.enums.Role;
 import com.reactur.backend.exeptions.GlobalExceptionHandler;
 import com.reactur.backend.exeptions.ResourceNotFoundException;
 import com.reactur.backend.repositories.UserRepository;
+import com.reactur.backend.security.RoleExtractor;
+import com.reactur.backend.security.SecurityConfig;
 import com.reactur.backend.services.FileService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.security.autoconfigure.SecurityAutoConfiguration;
-import org.springframework.boot.security.oauth2.server.resource.autoconfigure.servlet.OAuth2ResourceServerAutoConfiguration;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.core.io.ByteArrayResource;
@@ -16,23 +17,22 @@ import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.UUID;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@WebMvcTest(
-        controllers = ExperimentFilesEndpoint.class,
-        excludeAutoConfiguration = {
-                SecurityAutoConfiguration.class,
-                OAuth2ResourceServerAutoConfiguration.class
-        }
-)
-@Import(GlobalExceptionHandler.class)
+@WebMvcTest(ExperimentFilesEndpoint.class)
+@Import({SecurityConfig.class, GlobalExceptionHandler.class, RoleExtractor.class})
 class ExperimentFilesEndpointTest {
 
     @Autowired
@@ -44,6 +44,14 @@ class ExperimentFilesEndpointTest {
     @MockitoBean
     private UserRepository userRepository;
 
+    @MockitoBean
+    private JwtDecoder jwtDecoder;
+
+    private static org.springframework.test.web.servlet.request.RequestPostProcessor approvedUser(String subject) {
+        return jwt().jwt(builder -> builder.subject(subject))
+                .authorities(new SimpleGrantedAuthority("ROLE_USER"));
+    }
+
     @Test
     void uploadFile_ShouldReturn201_WhenUploadIsSuccessful() throws Exception {
         UUID experimentId = UUID.randomUUID();
@@ -54,9 +62,10 @@ class ExperimentFilesEndpointTest {
                 UUID.randomUUID(), "test.pdf", MediaType.APPLICATION_PDF_VALUE, 1024L, "checksum123", "/api/file/123"
         );
 
-        when(fileService.storeFile(eq(experimentId), any())).thenReturn(mockResponse);
+        when(fileService.storeFile(eq(experimentId), any(), any(), any(Role.class))).thenReturn(mockResponse);
 
-        mockMvc.perform(multipart("/api/file/" + experimentId).file(file))
+        mockMvc.perform(multipart("/api/file/" + experimentId).file(file)
+                        .with(approvedUser("uploader-user-id")))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.fileName").value("test.pdf"));
     }
@@ -70,10 +79,11 @@ class ExperimentFilesEndpointTest {
         );
         Resource mockResource = new ByteArrayResource("CSV Data".getBytes());
 
-        when(fileService.getAttachmentDetail(fileId)).thenReturn(mockDetails);
-        when(fileService.loadFileAsResource(fileId)).thenReturn(mockResource);
+        when(fileService.getAttachmentDetail(eq(fileId), any(), any(Role.class))).thenReturn(mockDetails);
+        when(fileService.loadFileAsResource(eq(fileId), any(), any(Role.class))).thenReturn(mockResource);
 
-        mockMvc.perform(get("/api/file/" + fileId))
+        mockMvc.perform(get("/api/file/" + fileId)
+                        .with(approvedUser("viewer-user-id")))
                 .andExpect(status().isOk())
                 .andExpect(header().string(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"data.csv\""))
                 .andExpect(content().contentTypeCompatibleWith("text/csv"))
@@ -87,9 +97,10 @@ class ExperimentFilesEndpointTest {
                 fileId, "image.png", MediaType.IMAGE_PNG_VALUE, 2048L, "checksum", "/api/file/" + fileId
         );
 
-        when(fileService.getAttachmentDetail(fileId)).thenReturn(mockResponse);
+        when(fileService.getAttachmentDetail(eq(fileId), any(), any(Role.class))).thenReturn(mockResponse);
 
-        mockMvc.perform(get("/api/file/" + fileId + "/details"))
+        mockMvc.perform(get("/api/file/" + fileId + "/details")
+                        .with(approvedUser("viewer-user-id")))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.fileName").value("image.png"));
     }
@@ -97,10 +108,11 @@ class ExperimentFilesEndpointTest {
     @Test
     void getFileDetails_ShouldReturn404_WhenFileNotFound() throws Exception {
         UUID fileId = UUID.randomUUID();
-        when(fileService.getAttachmentDetail(fileId))
+        when(fileService.getAttachmentDetail(eq(fileId), any(), any(Role.class)))
                 .thenThrow(new ResourceNotFoundException("File not found"));
 
-        mockMvc.perform(get("/api/file/" + fileId + "/details"))
+        mockMvc.perform(get("/api/file/" + fileId + "/details")
+                        .with(approvedUser("viewer-user-id")))
                 .andExpect(status().isNotFound());
     }
 
@@ -108,9 +120,10 @@ class ExperimentFilesEndpointTest {
     void archiveFile_ShouldReturn204_WhenSuccessful() throws Exception {
         UUID fileId = UUID.randomUUID();
 
-        doNothing().when(fileService).archiveFile(fileId);
+        doNothing().when(fileService).archiveFile(eq(fileId), any(), any(Role.class));
 
-        mockMvc.perform(delete("/api/file/" + fileId))
+        mockMvc.perform(delete("/api/file/" + fileId)
+                        .with(approvedUser("deleter-user-id")))
                 .andExpect(status().isNoContent());
     }
 }

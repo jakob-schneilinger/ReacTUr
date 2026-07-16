@@ -1,8 +1,11 @@
 package com.reactur.backend.services.implementations;
 
+import com.reactur.backend.enums.Role;
 import com.reactur.backend.exeptions.FileStorageException;
+import com.reactur.backend.exeptions.ResourceConflictException;
 import com.reactur.backend.exeptions.ResourceNotFoundException;
 import com.reactur.backend.services.FileService;
+import com.reactur.backend.services.authorization.ExperimentAuthorization;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
 import com.reactur.backend.dtos.experiments.ExperimentAttachmentDetailsDto;
@@ -35,6 +38,7 @@ public class FileServiceImpl implements FileService {
 
     private final ExperimentAttachmentRepository attachmentRepository;
     private final ExperimentRepository experimentRepository;
+    private final ExperimentAuthorization experimentAuthorization;
 
     private final S3Client s3Client;
 
@@ -43,7 +47,7 @@ public class FileServiceImpl implements FileService {
 
     @Override
     @Transactional
-    public ExperimentAttachmentDetailsDto storeFile(UUID experimentId, MultipartFile file) {
+    public ExperimentAttachmentDetailsDto storeFile(UUID experimentId, MultipartFile file, String requestingUserId, Role requestingUserRole) {
         if (file == null || file.isEmpty()) {
             log.warn("Upload failed: Attempted to upload an empty file for experiment ID: {}", experimentId);
             throw new IllegalArgumentException("Cannot upload an empty file.");
@@ -51,6 +55,12 @@ public class FileServiceImpl implements FileService {
 
         Experiment experiment = experimentRepository.findById(experimentId)
                 .orElseThrow(() -> new ResourceNotFoundException("Experiment with ID " + experimentId + " not found"));
+
+        experimentAuthorization.assertCanModify(experiment, requestingUserId, requestingUserRole);
+
+        if (experiment.getArchivedAt() != null) {
+            throw new ResourceConflictException("Cannot upload a file to an archived experiment. Please restore it first.");
+        }
 
         String checksum = calculateSha256(file);
         String storageReferenceId = UUID.randomUUID() + "-" + file.getOriginalFilename();
@@ -84,10 +94,13 @@ public class FileServiceImpl implements FileService {
     }
 
     @Override
-    public Resource loadFileAsResource(UUID fileId) {
+    @Transactional(readOnly = true)
+    public Resource loadFileAsResource(UUID fileId, String requestingUserId, Role requestingUserRole) {
         log.info("Starting download for file ID: {}", fileId);
         ExperimentAttachment attachment = attachmentRepository.findById(fileId)
                 .orElseThrow(() -> new ResourceNotFoundException("File ID " + fileId + " not found"));
+
+        experimentAuthorization.assertCanView(attachment.getExperiment(), requestingUserId, requestingUserRole);
 
         GetObjectRequest getRequest = GetObjectRequest.builder()
                 .bucket(bucketName)
@@ -98,9 +111,12 @@ public class FileServiceImpl implements FileService {
     }
 
     @Override
-    public ExperimentAttachmentDetailsDto getAttachmentDetail(UUID fileId) {
+    @Transactional(readOnly = true)
+    public ExperimentAttachmentDetailsDto getAttachmentDetail(UUID fileId, String requestingUserId, Role requestingUserRole) {
         ExperimentAttachment attachment = attachmentRepository.findById(fileId)
                 .orElseThrow(() -> new ResourceNotFoundException("File ID " + fileId + " not found"));
+
+        experimentAuthorization.assertCanView(attachment.getExperiment(), requestingUserId, requestingUserRole);
 
         return mapToDetailsDto(attachment);
     }
@@ -123,11 +139,17 @@ public class FileServiceImpl implements FileService {
 
     @Override
     @Transactional
-    public void archiveFile(UUID fileId) {
+    public void archiveFile(UUID fileId, String requestingUserId, Role requestingUserRole) {
         log.info("Attempting to archive file ID: {}", fileId);
 
         ExperimentAttachment attachment = attachmentRepository.findById(fileId)
                 .orElseThrow(() -> new ResourceNotFoundException("File ID " + fileId + " not found"));
+
+        experimentAuthorization.assertCanModify(attachment.getExperiment(), requestingUserId, requestingUserRole);
+
+        if (attachment.getExperiment().getArchivedAt() != null) {
+            throw new ResourceConflictException("Cannot delete a file from an archived experiment. Please restore it first.");
+        }
 
         if (attachment.getArchivedAt() != null) {
             log.info("File ID {} is already archived.", fileId);

@@ -4,9 +4,11 @@ import com.reactur.backend.dtos.experiments.ExperimentAttachmentDetailsDto;
 import com.reactur.backend.dtos.experiments.ExperimentAttachmentDto;
 import com.reactur.backend.entities.experiment.Experiment;
 import com.reactur.backend.entities.experiment.ExperimentAttachment;
+import com.reactur.backend.enums.Role;
 import com.reactur.backend.exeptions.ResourceNotFoundException;
 import com.reactur.backend.repositories.ExperimentAttachmentRepository;
 import com.reactur.backend.repositories.ExperimentRepository;
+import com.reactur.backend.services.authorization.ExperimentAuthorization;
 import com.reactur.backend.services.implementations.FileServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -40,7 +42,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-public class FileServiceTests {
+class FileServiceTests {
 
     @Mock
     private ExperimentAttachmentRepository attachmentRepository;
@@ -51,10 +53,19 @@ public class FileServiceTests {
     @Mock
     private S3Client s3Client;
 
+    @Mock
+    private ExperimentAuthorization experimentAuthorization;
+
     @InjectMocks
     private FileServiceImpl fileService;
 
     private final String BUCKET_NAME = "test-bucket";
+
+    // Note: experimentAuthorization is a plain Mockito @Mock, so assertCanView/assertCanModify don't throw
+    // anything by default. These tests focus on storage behavior, not authorization,
+    // which are covered separately by ExperimentAuthorization's own tests.
+    private static final String REQUESTING_USER_ID = "requesting-user-id";
+    private static final Role REQUESTING_USER_ROLE = Role.ADMIN;
 
     @BeforeEach
     void setUp() {
@@ -81,7 +92,7 @@ public class FileServiceTests {
             return savedAttachment;
         });
 
-        ExperimentAttachmentDetailsDto result = fileService.storeFile(experimentId, file);
+        ExperimentAttachmentDetailsDto result = fileService.storeFile(experimentId, file, REQUESTING_USER_ID, REQUESTING_USER_ROLE);
 
         assertNotNull(result);
         assertEquals("test.pdf", result.fileName());
@@ -97,7 +108,7 @@ public class FileServiceTests {
         when(experimentRepository.findById(experimentId)).thenReturn(Optional.empty());
 
         assertThrows(ResourceNotFoundException.class,
-                () -> fileService.storeFile(experimentId, file));
+                () -> fileService.storeFile(experimentId, file, REQUESTING_USER_ID, REQUESTING_USER_ROLE));
 
         verify(s3Client, never()).putObject(any(PutObjectRequest.class), any(RequestBody.class));
     }
@@ -110,7 +121,7 @@ public class FileServiceTests {
 
         IllegalArgumentException exception = assertThrows(
                 IllegalArgumentException.class,
-                () -> fileService.storeFile(experimentId, emptyFile)
+                () -> fileService.storeFile(experimentId, emptyFile, REQUESTING_USER_ID, REQUESTING_USER_ROLE)
         );
 
         assertEquals("Cannot upload an empty file.", exception.getMessage());
@@ -125,13 +136,14 @@ public class FileServiceTests {
         UUID fileId = UUID.randomUUID();
         ExperimentAttachment attachment = new ExperimentAttachment();
         attachment.setStorageReferenceId("s3-key-123");
+        attachment.setExperiment(new Experiment());
 
         when(attachmentRepository.findById(fileId)).thenReturn(Optional.of(attachment));
 
         ResponseInputStream<GetObjectResponse> mockStream = mock(ResponseInputStream.class);
         when(s3Client.getObject(any(GetObjectRequest.class))).thenReturn(mockStream);
 
-        Resource result = fileService.loadFileAsResource(fileId);
+        Resource result = fileService.loadFileAsResource(fileId, REQUESTING_USER_ID, REQUESTING_USER_ROLE);
 
         assertNotNull(result);
         verify(s3Client, times(1)).getObject(any(GetObjectRequest.class));
@@ -144,10 +156,11 @@ public class FileServiceTests {
         attachment.setId(fileId);
         attachment.setFileName("data.csv");
         attachment.setFileSizeBytes(1024L);
+        attachment.setExperiment(new Experiment());
 
         when(attachmentRepository.findById(fileId)).thenReturn(Optional.of(attachment));
 
-        ExperimentAttachmentDetailsDto result = fileService.getAttachmentDetail(fileId);
+        ExperimentAttachmentDetailsDto result = fileService.getAttachmentDetail(fileId, REQUESTING_USER_ID, REQUESTING_USER_ROLE);
 
         assertEquals("data.csv", result.fileName());
         assertEquals(1024L, result.fileSizeBytes());
@@ -158,7 +171,7 @@ public class FileServiceTests {
         UUID fileId = UUID.randomUUID();
         when(attachmentRepository.findById(fileId)).thenReturn(Optional.empty());
 
-        assertThrows(ResourceNotFoundException.class, () -> fileService.getAttachmentDetail(fileId));
+        assertThrows(ResourceNotFoundException.class, () -> fileService.getAttachmentDetail(fileId, REQUESTING_USER_ID, REQUESTING_USER_ROLE));
     }
 
     @Test
@@ -192,7 +205,7 @@ public class FileServiceTests {
         UUID fileId = UUID.randomUUID();
         when(attachmentRepository.findById(fileId)).thenReturn(Optional.empty());
 
-        assertThrows(ResourceNotFoundException.class, () -> fileService.archiveFile(fileId));
+        assertThrows(ResourceNotFoundException.class, () -> fileService.archiveFile(fileId, REQUESTING_USER_ID, REQUESTING_USER_ROLE));
         verify(attachmentRepository, never()).save(any());
     }
 
@@ -201,10 +214,11 @@ public class FileServiceTests {
         UUID fileId = UUID.randomUUID();
         ExperimentAttachment attachment = new ExperimentAttachment();
         attachment.setArchivedAt(null);
+        attachment.setExperiment(new Experiment());
 
         when(attachmentRepository.findById(fileId)).thenReturn(Optional.of(attachment));
 
-        fileService.archiveFile(fileId);
+        fileService.archiveFile(fileId, REQUESTING_USER_ID, REQUESTING_USER_ROLE);
 
         verify(attachmentRepository, times(1)).save(attachment);
     }
