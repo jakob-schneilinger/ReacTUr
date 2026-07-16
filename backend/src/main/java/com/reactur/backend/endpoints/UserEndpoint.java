@@ -25,7 +25,11 @@ public class UserEndpoint {
 
     private final UserService userService;
 
+    // TODO-CLAUDE (next thread): confirm whether SUPERVISOR should also be able to list all users -
+    // they're not allowed to add/modify users, but read-only visibility of the directory wasn't
+    // explicitly decided. Defaulting to ADMIN-only for now since it exposes every user's email/name.
     @GetMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<List<GetUserDto>> getAllUsers() {
         return ResponseEntity.ok(userService.getAllUsers());
     }
@@ -40,7 +44,12 @@ public class UserEndpoint {
         return ResponseEntity.ok().build();
     }
 
+    // Anyone can check their OWN role (this is how the frontend detects "pending approval",
+    // AuthService.getLoggedInUser) so it must keep working even for UNAUTHORIZED users, which is
+    // why this path is also exempted from the role-based gate in SecurityConfig). Checking someone
+    // ELSE's role requires ADMIN.
     @GetMapping("/{id}/role")
+    @PreAuthorize("#id == authentication.name or hasRole('ADMIN')")
     public ResponseEntity<RoleDto> getRole(@PathVariable String id) {
         return ResponseEntity.ok(userService.getRole(id));
     }

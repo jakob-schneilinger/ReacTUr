@@ -7,6 +7,7 @@ import com.reactur.backend.dtos.experiments.SaveMetadataDto;
 import com.reactur.backend.dtos.experiments.SearchParametersDto;
 import com.reactur.backend.enums.Role;
 import com.reactur.backend.exeptions.ResourceNotFoundException;
+import com.reactur.backend.security.RoleExtractor;
 import com.reactur.backend.security.SecurityConfig;
 import com.reactur.backend.services.ExperimentHistoryService;
 import com.reactur.backend.services.ExperimentService;
@@ -25,9 +26,11 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.request.RequestPostProcessor;
 import tools.jackson.databind.ObjectMapper;
 
 import java.time.LocalDate;
@@ -42,7 +45,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(ExperimentEndpoint.class)
-@Import(SecurityConfig.class)
+@Import({SecurityConfig.class, RoleExtractor.class})
 @EnableConfigurationProperties(org.springframework.boot.h2console.autoconfigure.H2ConsoleProperties.class)
 class ExperimentEndpointTest {
   @Autowired
@@ -62,6 +65,12 @@ class ExperimentEndpointTest {
 
   @MockitoBean
   private ExperimentHistoryService experimentHistoryService;
+
+  // Grants the minimum authority needed to pass SecurityConfig's global "approved user" gate,
+  // matching the RoleExtractor -> Role.USER mapping exercised by most of these tests.
+  private static RequestPostProcessor asUser(String subject) {
+    return jwt().jwt(builder -> builder.subject(subject)).authorities(new SimpleGrantedAuthority("ROLE_USER"));
+  }
 
   @Test
   void createExperiment_whenInputIsValid_returns201Created() throws Exception {
@@ -110,7 +119,8 @@ class ExperimentEndpointTest {
           .subject("mock-keycloak-id-123")
           .claim("email", "chemist@tuwien.ac.at")
           .claim("given_name", "Marie")
-          .claim("family_name", "Curie")))
+          .claim("family_name", "Curie"))
+          .authorities(new SimpleGrantedAuthority("ROLE_USER")))
         .contentType(MediaType.APPLICATION_JSON)
         .content(objectMapper.writeValueAsString(validRequestDto)))
 
@@ -165,7 +175,7 @@ class ExperimentEndpointTest {
 
     mockMvc.perform(post("/api/experiment")
         .with(csrf())
-        .with(jwt().jwt(builder -> builder.subject("mock-keycloak-id-123")))
+        .with(asUser("mock-keycloak-id-123"))
         .contentType(MediaType.APPLICATION_JSON)
         .content(objectMapper.writeValueAsString(invalidRequestDto)))
 
@@ -183,7 +193,7 @@ class ExperimentEndpointTest {
       .thenReturn(activeExperiment);
 
     mockMvc.perform(get("/api/experiment/" + experimentId)
-        .with(jwt().jwt(builder -> builder.subject("random-user-id"))))
+        .with(asUser("random-user-id")))
       .andExpect(status().isOk())
       .andExpect(jsonPath("$.dois[0]").value("10.1000/rxn123"));
   }
@@ -196,7 +206,7 @@ class ExperimentEndpointTest {
       .thenThrow(new AccessDeniedException("Forbidden"));
 
     mockMvc.perform(get("/api/experiment/" + experimentId)
-        .with(jwt().jwt(builder -> builder.subject("snooping-user-id"))))
+        .with(asUser("snooping-user-id")))
       .andExpect(status().isForbidden());
   }
 
@@ -208,7 +218,7 @@ class ExperimentEndpointTest {
       .thenThrow(new ResourceNotFoundException("Not found"));
 
     mockMvc.perform(get("/api/experiment/" + experimentId)
-        .with(jwt().jwt(builder -> builder.subject("any-user-id"))))
+        .with(asUser("any-user-id")))
       .andExpect(status().isNotFound());
   }
 
@@ -220,7 +230,7 @@ class ExperimentEndpointTest {
     // The service method is void, so we just perform the request
     mockMvc.perform(delete("/api/experiment/" + experimentId)
         .with(csrf())
-        .with(jwt().jwt(builder -> builder.subject("creator-123"))))
+        .with(asUser("creator-123")))
       .andExpect(status().isNoContent());
 
     Mockito.verify(experimentService).archiveExperiment(experimentId, "creator-123", Role.USER);
@@ -236,7 +246,7 @@ class ExperimentEndpointTest {
 
     mockMvc.perform(delete("/api/experiment/" + experimentId)
         .with(csrf())
-        .with(jwt().jwt(builder -> builder.subject("snooper-000"))))
+        .with(asUser("snooper-000")))
       .andExpect(status().isForbidden());
   }
 
@@ -250,7 +260,7 @@ class ExperimentEndpointTest {
 
     mockMvc.perform(put("/api/experiment/" + experimentId + "/restore")
         .with(csrf())
-        .with(jwt().jwt(builder -> builder.subject("scientist-456"))))
+        .with(asUser("scientist-456")))
       .andExpect(status().isOk())
       .andExpect(jsonPath("$.dois[0]").value("10.1000/rxn123"));
 
@@ -266,7 +276,7 @@ class ExperimentEndpointTest {
 
     mockMvc.perform(put("/api/experiment/" + experimentId + "/restore")
         .with(csrf())
-        .with(jwt().jwt(builder -> builder.subject("snooper-000"))))
+        .with(asUser("snooper-000")))
       .andExpect(status().isForbidden());
   }
 
@@ -281,7 +291,7 @@ class ExperimentEndpointTest {
       .thenReturn(mockedResponse);
 
     mockMvc.perform(get("/api/experiment/archived")
-        .with(jwt().jwt(builder -> builder.subject(userId))))
+        .with(asUser(userId)))
       .andExpect(status().isOk())
       .andExpect(jsonPath("$.length()").value(2))
       .andExpect(jsonPath("$[0].dois[0]").value("10.1000/rxn001"))
@@ -301,7 +311,7 @@ class ExperimentEndpointTest {
       .thenReturn(mockedResponse);
 
     mockMvc.perform(get("/api/experiment/archived")
-        .with(jwt().jwt(builder -> builder.subject(adminId)).authorities(new org.springframework.security.core.authority.SimpleGrantedAuthority("ROLE_ADMIN"))))
+        .with(jwt().jwt(builder -> builder.subject(adminId)).authorities(new SimpleGrantedAuthority("ROLE_ADMIN"))))
       .andExpect(status().isOk())
       .andExpect(jsonPath("$.length()").value(1))
       .andExpect(jsonPath("$[0].dois[0]").value("10.1000/rxn999"));
@@ -318,7 +328,7 @@ class ExperimentEndpointTest {
       .thenReturn(mockedResponse);
 
     mockMvc.perform(get("/api/experiment/archived")
-        .with(jwt().jwt(builder -> builder.subject(userId))))
+        .with(asUser(userId)))
       .andExpect(status().isOk())
       .andExpect(jsonPath("$.length()").value(0));
 
@@ -363,7 +373,7 @@ class ExperimentEndpointTest {
 
     mockMvc.perform(put("/api/experiment/" + experimentId)
         .with(csrf())
-        .with(jwt().jwt(builder -> builder.subject("mock-keycloak-id-123")))
+        .with(asUser("mock-keycloak-id-123"))
         .contentType(MediaType.APPLICATION_JSON)
         .content(objectMapper.writeValueAsString(validRequestDto)))
       .andExpect(status().isOk())
@@ -392,7 +402,7 @@ class ExperimentEndpointTest {
 
     mockMvc.perform(put("/api/experiment/" + experimentId)
         .with(csrf())
-        .with(jwt().jwt(builder -> builder.subject("snooper-123")))
+        .with(asUser("snooper-123"))
         .contentType(MediaType.APPLICATION_JSON)
         .content(objectMapper.writeValueAsString(validRequestDto)))
       .andExpect(status().isForbidden());
@@ -427,7 +437,7 @@ class ExperimentEndpointTest {
         .param("measurementSearch.rateConstantMin", "5.0") // Testing nested object mapping
         .param("page", "0")
         .param("size", "20")
-        .with(jwt().jwt(builder -> builder.subject("mock-keycloak-id-123"))))
+        .with(asUser("mock-keycloak-id-123")))
       .andExpect(status().isOk())
       // Verify Spring Page JSON structure
       .andExpect(jsonPath("$.content.length()").value(2))
@@ -462,7 +472,7 @@ class ExperimentEndpointTest {
     // Simulating the user sending a negative concentration (which fails our @PositiveOrZero validation)
     mockMvc.perform(get("/api/experiment")
         .param("concentrationA_Min", "-5.0")
-        .with(jwt().jwt(builder -> builder.subject("mock-keycloak-id-123"))))
+        .with(asUser("mock-keycloak-id-123")))
       .andExpect(status().isBadRequest());
 
     Mockito.verify(experimentService, Mockito.never()).searchExperiments(any(), any(), any(), any());

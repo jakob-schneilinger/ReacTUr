@@ -2,6 +2,7 @@ package com.reactur.backend.security;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
+import org.springframework.http.HttpMethod;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -31,7 +32,17 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .headers(headers -> headers.frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin))
                 .authorizeHttpRequests(auth -> auth
-                        .anyRequest().authenticated()
+                        // TODO: Remove these Claude clarifying comments, or keep them simplified
+                        //  as documentation
+                        // Self-lookup must stay available to ANY authenticated principal (including
+                        // not-yet-approved UNAUTHORIZED users) - this is how the frontend determines a
+                        // user's own role, including detecting "pending approval" (see the Angular
+                        // AuthService.getLoggedInUser(), which calls this to build the current user).
+                        .requestMatchers(HttpMethod.GET, "/api/users/*/role").authenticated()
+                        // Everyone else must have been approved: UNAUTHORIZED users (freshly synced,
+                        // pending approval) are blocked from reading or writing anything else until a
+                        // Supervisor/Admin assigns them a real role.
+                        .anyRequest().hasAnyRole("USER", "ADMIN", "SUPERVISOR")
                 )
                 .oauth2ResourceServer(oauth2 -> oauth2.jwt(jwt ->
                         jwt.jwtAuthenticationConverter(customJwtAuthenticationConverter)

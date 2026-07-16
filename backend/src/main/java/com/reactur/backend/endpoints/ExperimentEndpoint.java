@@ -5,6 +5,7 @@ import com.reactur.backend.dtos.experiments.GetExperimentDto;
 import com.reactur.backend.dtos.experiments.SaveExperimentDto;
 import com.reactur.backend.dtos.experiments.SearchParametersDto;
 import com.reactur.backend.enums.Role;
+import com.reactur.backend.security.RoleExtractor;
 import com.reactur.backend.services.ExperimentHistoryService;
 import com.reactur.backend.services.ExperimentService;
 import jakarta.validation.Valid;
@@ -47,6 +48,7 @@ import java.util.UUID;
 public class ExperimentEndpoint {
     private final ExperimentService experimentService;
     private final ExperimentHistoryService experimentHistoryService;
+    private final RoleExtractor roleExtractor;
 
 
     /**
@@ -173,7 +175,12 @@ public class ExperimentEndpoint {
     // TODO-Future: Endpoint to get Logs by *Date* and by *User*, besides by *Experiment*
     @GetMapping("/{uuid}/history")
     public ResponseEntity<List<ExperimentHistoryDto>> getAuditLogs(@PathVariable UUID uuid, @AuthenticationPrincipal Jwt jwt) {
-        // TODO: Secure service
+        // TODO-CLAUDE (next thread): getExperimentHistory currently performs NO authorization check -
+        // any authenticated user can view any experiment's history, including archived ones. Per team
+        // decision, this should inherit ExperimentAuthorization.canView(...) (active -> any approved user,
+        // archived -> creator/scientist/ADMIN/SUPERVISOR only). Needs requestingUserId/requestingUserRole
+        // threaded through here and into ExperimentHistoryService, same pattern as ExperimentService/FileService.
+        // Deliberately deferred pending your review of the Javers-based implementation.
         List<ExperimentHistoryDto> history = experimentHistoryService.getExperimentHistory(uuid);
         return ResponseEntity.ok(history);
     }
@@ -261,18 +268,9 @@ public class ExperimentEndpoint {
         return ResponseEntity.ok(restoredExperiment);
     }
 
-    // TODO: Update to also have Supervisor
-    // Extracts the highest privileged application role from the Spring Security authentication context.
-    // returns the determined Role. It defaults to USER if not explicitly an ADMIN.
+    // Delegates to the shared RoleExtractor so every endpoint that needs a requestingUserRole
+    // derives it identically
     private Role extractUserRole(Authentication authentication) {
-        if (authentication == null) {
-            return Role.USER;
-        }
-
-        boolean isAdmin = authentication.getAuthorities().stream()
-          .map(org.springframework.security.core.GrantedAuthority::getAuthority)
-          .anyMatch("ROLE_ADMIN"::equals);
-
-        return isAdmin ? Role.ADMIN : Role.USER;
+        return roleExtractor.extractRole(authentication);
     }
 }

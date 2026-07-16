@@ -38,7 +38,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.reactur.backend.enums.Role;
-import org.springframework.security.access.AccessDeniedException;
+import com.reactur.backend.services.authorization.ExperimentAuthorization;
 import java.time.Instant;
 
 import java.util.ArrayList;
@@ -59,6 +59,7 @@ public class ExperimentServiceImpl implements ExperimentService {
   private final ExperimentMapper experimentMapper;
   private final ReactantStructureRepository structureRepository;
   private final FileService fileService;
+  private final ExperimentAuthorization experimentAuthorization;
 
   @Override
   @Transactional
@@ -169,16 +170,7 @@ public class ExperimentServiceImpl implements ExperimentService {
         "Experiment with ID " + experimentId + " not found"
       ));
 
-    // Security Check for Archived Data
-    if (experiment.getArchivedAt() != null) {
-      boolean isCreator = experiment.getCreatedBy().getId().equals(requestingUserId);
-      boolean isScientist = experiment.getMetadata().getScientist().getId().equals(requestingUserId);
-
-      if (requestingUserRole != Role.ADMIN && !isCreator && !isScientist) {
-        log.warn("Security blocked access to archived experiment {} for user {}", experimentId, requestingUserId);
-        throw new AccessDeniedException("You do not have permission to view this archived experiment.");
-      }
-    }
+    experimentAuthorization.assertCanView(experiment, requestingUserId, requestingUserRole);
 
     return experimentMapper.experimentToGetExperimentDto(experiment, fileService.getAttachmentsOfExperiment(experiment.getId()));
   }
@@ -194,13 +186,7 @@ public class ExperimentServiceImpl implements ExperimentService {
       .orElseThrow(() -> new ResourceNotFoundException("Experiment with ID " + experimentId + " not found"));
 
     // 2. Authorize (Security)
-    boolean isCreator = experiment.getCreatedBy().getId().equals(requestingUserId);
-    boolean isScientist = experiment.getMetadata().getScientist().getId().equals(requestingUserId);
-
-    if (requestingUserRole != Role.ADMIN && !isCreator && !isScientist) {
-      log.warn("Security blocked archive attempt on experiment {} by user {}", experimentId, requestingUserId);
-      throw new AccessDeniedException("You do not have permission to archive this experiment.");
-    }
+    experimentAuthorization.assertCanModify(experiment, requestingUserId, requestingUserRole);
 
     // TODO: How should we do if the experiment was already archived? I just don't change anything but still
     //  return the 201 succeeded code.
@@ -223,13 +209,7 @@ public class ExperimentServiceImpl implements ExperimentService {
       .orElseThrow(() -> new ResourceNotFoundException("Experiment with ID " + experimentId + " not found"));
 
     // 2. Authorize
-    boolean isCreator = experiment.getCreatedBy().getId().equals(requestingUserId);
-    boolean isScientist = experiment.getMetadata().getScientist().getId().equals(requestingUserId);
-
-    if (requestingUserRole != Role.ADMIN && !isCreator && !isScientist) {
-      log.warn("Security blocked restore attempt on experiment {} by user {}", experimentId, requestingUserId);
-      throw new AccessDeniedException("You do not have permission to restore this experiment.");
-    }
+    experimentAuthorization.assertCanModify(experiment, requestingUserId, requestingUserRole);
 
     // 3. Act
     if (experiment.getArchivedAt() != null) {
@@ -246,8 +226,8 @@ public class ExperimentServiceImpl implements ExperimentService {
 
     List<Experiment> archivedExperiments;
 
-    if (requestingUserRole == Role.ADMIN) {
-      log.debug("Admin role detected. Fetching ALL archived experiments.");
+    if (experimentAuthorization.isPrivileged(requestingUserRole)) {
+      log.debug("Privileged role detected. Fetching ALL archived experiments.");
       archivedExperiments = experimentRepository.findByArchivedAtIsNotNull();
     } else {
       log.debug("Standard role detected. Fetching archived experiments specifically for user.");
@@ -283,13 +263,7 @@ public class ExperimentServiceImpl implements ExperimentService {
     }
 
     // 3. Authorize (Security)
-    boolean isCreator = existingExperiment.getCreatedBy().getId().equals(requestingUserId);
-    boolean isScientist = existingExperiment.getMetadata().getScientist().getId().equals(requestingUserId);
-
-    if (requestingUserRole != Role.ADMIN && !isCreator && !isScientist) {
-      log.warn("Security blocked update attempt on experiment {} by user {}", experimentId, requestingUserId);
-      throw new AccessDeniedException("You do not have permission to update this experiment.");
-    }
+    experimentAuthorization.assertCanModify(existingExperiment, requestingUserId, requestingUserRole);
 
     // 4. Semantic Validation (Lookups for new DTO data)
     User scientist = userRepository.findById(experimentDto.metadata().scientist())

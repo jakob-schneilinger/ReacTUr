@@ -22,6 +22,7 @@ import com.reactur.backend.mappers.MeasurementDataMapper;
 import com.reactur.backend.mappers.MetadataMapper;
 import com.reactur.backend.mappers.ReactantMapper;
 import com.reactur.backend.mappers.UserMapper;
+import com.reactur.backend.services.authorization.ExperimentAuthorization;
 import com.reactur.backend.mappers.options.InstrumentMapper;
 import com.reactur.backend.mappers.options.ModalityMapper;
 import com.reactur.backend.mappers.options.SolventMapper;
@@ -92,6 +93,8 @@ class ExperimentServiceTest {
   @Spy private SolventMapper solventMapper = Mappers.getMapper(SolventMapper.class);
   @Spy private InstrumentMapper instrumentMapper = Mappers.getMapper(InstrumentMapper.class);
   @Spy private ModalityMapper modalityMapper = Mappers.getMapper(ModalityMapper.class);
+
+  @Spy private ExperimentAuthorization experimentAuthorization = new ExperimentAuthorization();
 
   // Mockito will take the mocked Repositories
   // and inject them into this real Service instance.
