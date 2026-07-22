@@ -3,6 +3,7 @@ package com.reactur.backend.endpoints;
 import com.reactur.backend.dtos.reactants.CreateReactantDto;
 import com.reactur.backend.dtos.reactants.ReactantDetailDto;
 import com.reactur.backend.dtos.reactants.ReactantDto;
+import com.reactur.backend.dtos.reactants.UpdateReactantDto;
 import com.reactur.backend.enums.StructureFlag;
 import com.reactur.backend.exeptions.GlobalExceptionHandler;
 import com.reactur.backend.exeptions.ResourceNotFoundException;
@@ -69,6 +70,25 @@ class ReactantEndpointTest {
     }
 
     @Test
+    void createReactant_WhenSupervisor_ShouldReturn201() throws Exception {
+        UUID newId = UUID.randomUUID();
+        String userId = "keycloak-supervisor-id";
+        CreateReactantDto saveDto = new CreateReactantDto("C=C", UUID.randomUUID(), "Ethene", null, "Ethene", "74-85-1", "VGGSQFCHJZSIN-UHFFFAOYSA-N", null, null);
+
+        ReactantDetailDto mockResponse = new ReactantDetailDto(newId, "C=C", null, "Ethene", null, "Ethene", "74-85-1", "VGGSQFCHJZSIN-UHFFFAOYSA-N", null, null, null, List.of());
+
+        when(reactantService.createReactant(any(CreateReactantDto.class), eq(userId))).thenReturn(mockResponse);
+
+        mockMvc.perform(post("/api/reactant")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(saveDto))
+                        .with(jwt().jwt(jwt -> jwt.subject(userId)).authorities(new SimpleGrantedAuthority("ROLE_SUPERVISOR"))))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.uuid").value(newId.toString()))
+                .andExpect(jsonPath("$.shortName").value("Ethene"));
+    }
+
+    @Test
     void createReactant_WhenUser_ShouldReturn403() throws Exception {
         CreateReactantDto saveDto = new CreateReactantDto("C=C", UUID.randomUUID(), "Ethene", null, "Ethene", "74-85-1", "VGGSQFCHJZSIN-UHFFFAOYSA-N", null, null);
 
@@ -79,6 +99,52 @@ class ReactantEndpointTest {
                 .andExpect(status().isForbidden());
 
         verify(reactantService, never()).createReactant(any(), any());
+    }
+
+    @Test
+    void updateReactant_WhenAdmin_ShouldReturn200() throws Exception {
+        UUID id = UUID.randomUUID();
+        UpdateReactantDto saveDto = new UpdateReactantDto("C=C", UUID.randomUUID(), "Ethene", null, "Ethene", "74-85-1", "VGGSQFCHJZSIN-UHFFFAOYSA-N", null, null);
+        ReactantDetailDto mockResponse = new ReactantDetailDto(id, "C=C", null, "Ethene", null, "Ethene", "74-85-1", "VGGSQFCHJZSIN-UHFFFAOYSA-N", null, null, null, List.of());
+
+        when(reactantService.updateReactant(eq(id), any(UpdateReactantDto.class))).thenReturn(mockResponse);
+
+        mockMvc.perform(patch("/api/reactant/" + id)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(saveDto))
+                        .with(jwt().authorities(new SimpleGrantedAuthority("ROLE_ADMIN"))))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.shortName").value("Ethene"));
+    }
+
+    // Confirmed by the team: SUPERVISOR may create reactants but not update them - this stays
+    // ADMIN-only, pinning against a future "extend everything to SUPERVISOR" regression.
+    @Test
+    void updateReactant_WhenSupervisor_ShouldReturn403() throws Exception {
+        UUID id = UUID.randomUUID();
+        UpdateReactantDto saveDto = new UpdateReactantDto("C=C", UUID.randomUUID(), "Ethene", null, "Ethene", "74-85-1", "VGGSQFCHJZSIN-UHFFFAOYSA-N", null, null);
+
+        mockMvc.perform(patch("/api/reactant/" + id)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(saveDto))
+                        .with(jwt().authorities(new SimpleGrantedAuthority("ROLE_SUPERVISOR"))))
+                .andExpect(status().isForbidden());
+
+        verify(reactantService, never()).updateReactant(any(), any());
+    }
+
+    @Test
+    void updateReactant_WhenUser_ShouldReturn403() throws Exception {
+        UUID id = UUID.randomUUID();
+        UpdateReactantDto saveDto = new UpdateReactantDto("C=C", UUID.randomUUID(), "Ethene", null, "Ethene", "74-85-1", "VGGSQFCHJZSIN-UHFFFAOYSA-N", null, null);
+
+        mockMvc.perform(patch("/api/reactant/" + id)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(saveDto))
+                        .with(jwt().authorities(new SimpleGrantedAuthority("ROLE_USER"))))
+                .andExpect(status().isForbidden());
+
+        verify(reactantService, never()).updateReactant(any(), any());
     }
 
     @Test
@@ -117,6 +183,37 @@ class ReactantEndpointTest {
     }
 
     @Test
+    void getArchivedReactants_WhenAdmin_ShouldReturn200() throws Exception {
+        ReactantDto dto = new ReactantDto(UUID.randomUUID(), "C", null, "Methane", "Methane", StructureFlag.READY);
+        when(reactantService.getArchivedReactants()).thenReturn(List.of(dto));
+
+        mockMvc.perform(get("/api/reactant/archived")
+                        .with(jwt().authorities(new SimpleGrantedAuthority("ROLE_ADMIN"))))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].shortName").value("Methane"));
+    }
+
+    @Test
+    void getArchivedReactants_WhenSupervisor_ShouldReturn200() throws Exception {
+        ReactantDto dto = new ReactantDto(UUID.randomUUID(), "C", null, "Methane", "Methane", StructureFlag.READY);
+        when(reactantService.getArchivedReactants()).thenReturn(List.of(dto));
+
+        mockMvc.perform(get("/api/reactant/archived")
+                        .with(jwt().authorities(new SimpleGrantedAuthority("ROLE_SUPERVISOR"))))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].shortName").value("Methane"));
+    }
+
+    @Test
+    void getArchivedReactants_WhenUser_ShouldReturn403() throws Exception {
+        mockMvc.perform(get("/api/reactant/archived")
+                        .with(jwt().authorities(new SimpleGrantedAuthority("ROLE_USER"))))
+                .andExpect(status().isForbidden());
+
+        verify(reactantService, never()).getArchivedReactants();
+    }
+
+    @Test
     void archiveReactant_WhenAdmin_ShouldReturn204() throws Exception {
         UUID id = UUID.randomUUID();
 
@@ -136,5 +233,43 @@ class ReactantEndpointTest {
                 .andExpect(status().isForbidden());
 
         verify(reactantService, never()).archiveReactant(any());
+    }
+
+    @Test
+    void restoreReactant_WhenAdmin_ShouldReturn200() throws Exception {
+        UUID id = UUID.randomUUID();
+        ReactantDto mockResponse = new ReactantDto(id, "C=C", null, "Ethene", "Ethene", StructureFlag.READY);
+
+        when(reactantService.restoreReactant(id)).thenReturn(mockResponse);
+
+        mockMvc.perform(put("/api/reactant/" + id + "/restore")
+                        .with(jwt().authorities(new SimpleGrantedAuthority("ROLE_ADMIN"))))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.shortName").value("Ethene"));
+    }
+
+    // Confirmed by the team: restoring is archive-management, which stays ADMIN-only even though
+    // SUPERVISOR may create reactants - pins against a future "extend everything to SUPERVISOR"
+    // regression.
+    @Test
+    void restoreReactant_WhenSupervisor_ShouldReturn403() throws Exception {
+        UUID id = UUID.randomUUID();
+
+        mockMvc.perform(put("/api/reactant/" + id + "/restore")
+                        .with(jwt().authorities(new SimpleGrantedAuthority("ROLE_SUPERVISOR"))))
+                .andExpect(status().isForbidden());
+
+        verify(reactantService, never()).restoreReactant(any());
+    }
+
+    @Test
+    void restoreReactant_WhenUser_ShouldReturn403() throws Exception {
+        UUID id = UUID.randomUUID();
+
+        mockMvc.perform(put("/api/reactant/" + id + "/restore")
+                        .with(jwt().authorities(new SimpleGrantedAuthority("ROLE_USER"))))
+                .andExpect(status().isForbidden());
+
+        verify(reactantService, never()).restoreReactant(any());
     }
 }

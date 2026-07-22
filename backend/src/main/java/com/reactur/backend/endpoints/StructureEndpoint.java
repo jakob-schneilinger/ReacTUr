@@ -24,13 +24,8 @@ public class StructureEndpoint {
 
     private final StructureService structureService;
 
-    // TODO-CLAUDE (next thread - Reactant/Structure permissions): change to
-    // @PreAuthorize("hasAnyRole('ADMIN','SUPERVISOR')"). Per team decision, SUPERVISOR has the
-    // same structure-management rights as ADMIN (upload/generate/select), mirroring their ability
-    // to create reactants - otherwise a SUPERVISOR-created reactant could never get an ACTIVE
-    // structure and would be stuck waiting on an Admin.
     @PostMapping(path = "/{reactantId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN','SUPERVISOR')")
     public ResponseEntity<StructureDto> uploadStructure(
             @PathVariable UUID reactantId,
             @RequestParam("file") MultipartFile file) {
@@ -39,19 +34,16 @@ public class StructureEndpoint {
         return ResponseEntity.ok(structureDto);
     }
 
-    // TODO-CLAUDE (next thread): change to @PreAuthorize("hasAnyRole('ADMIN','SUPERVISOR')") - see note above uploadStructure.
     @PostMapping("/{reactantId}/generate")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN','SUPERVISOR')")
     public ResponseEntity<Void> generateStructureFromAPI(@PathVariable UUID reactantId) {
 
         structureService.generateStructureFromAPI(reactantId);
         return ResponseEntity.noContent().build();
     }
 
-    // TODO-CLAUDE (next thread): change to @PreAuthorize("hasAnyRole('ADMIN','SUPERVISOR')") - see
-    // note above uploadStructure. Confirmed explicitly: select should also be open to SUPERVISOR.
     @PostMapping("/{structureId}/select")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN','SUPERVISOR')")
     public ResponseEntity<StructureDto> selectStructure(@PathVariable UUID structureId) {
 
         StructureDto structureDto = structureService.selectStructure(structureId);

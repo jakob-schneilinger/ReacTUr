@@ -25,11 +25,8 @@ public class UserEndpoint {
 
     private final UserService userService;
 
-    // TODO-CLAUDE (next thread): confirm whether SUPERVISOR should also be able to list all users -
-    // they're not allowed to add/modify users, but read-only visibility of the directory wasn't
-    // explicitly decided. Defaulting to ADMIN-only for now since it exposes every user's email/name.
     @GetMapping
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN','SUPERVISOR')")
     public ResponseEntity<List<GetUserDto>> getAllUsers() {
         return ResponseEntity.ok(userService.getAllUsers());
     }

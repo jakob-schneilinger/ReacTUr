@@ -69,6 +69,9 @@ public class ExperimentFolderServiceImpl implements ExperimentFolderService {
     Experiment experiment = experimentRepository.findById(experimentId)
       .orElseThrow(() -> new ResourceNotFoundException("Experiment not found."));
 
+    // No privileged bypass here by design
+    // Folders are strictly personal. ADMIN/SUPERVISOR can only
+    // add experiments into their OWN FOLDER (they created or are the scientist)
     if (!experimentAuthorization.isCreatorOrScientist(experiment, requestingUserId)) {
       log.warn("User {} tried to add non-owned experiment {} to folder", requestingUserId, experimentId);
       throw new AccessDeniedException("User not authorized to add a not-owned experiment to a folder");

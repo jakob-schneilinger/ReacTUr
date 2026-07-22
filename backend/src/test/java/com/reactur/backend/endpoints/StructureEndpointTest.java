@@ -66,6 +66,31 @@ public class StructureEndpointTest {
     }
 
     @Test
+    void uploadStructure_whenSupervisor_returns200Ok() throws Exception {
+        UUID reactantId = UUID.randomUUID();
+        MockMultipartFile file = new MockMultipartFile(
+                "file",
+                "test.xyz",
+                MediaType.TEXT_PLAIN_VALUE,
+                "XYZ content".getBytes()
+        );
+
+        StructureDto mockDto = new StructureDto(UUID.randomUUID(), reactantId, "test.xyz", "XYZ content", StructureFlag.READY);
+        when(structureService.uploadStructure(eq(reactantId), any())).thenReturn(mockDto);
+
+        mockMvc.perform(multipart(HttpMethod.POST, "/api/structure/{reactantId}", reactantId)
+                        .file(file)
+                        .contentType(MediaType.MULTIPART_FORM_DATA)
+                        .with(jwt().authorities(new SimpleGrantedAuthority("ROLE_SUPERVISOR"))))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(mockDto.id().toString()))
+                .andExpect(jsonPath("$.name").value("test.xyz"))
+                .andExpect(jsonPath("$.flag").value("READY"));
+
+        verify(structureService, times(1)).uploadStructure(eq(reactantId), any());
+    }
+
+    @Test
     void uploadStructure_whenUser_returns403Forbidden() throws Exception {
         UUID reactantId = UUID.randomUUID();
         MockMultipartFile file = new MockMultipartFile("file", "test.xyz", MediaType.TEXT_PLAIN_VALUE, "XYZ".getBytes());
@@ -93,6 +118,19 @@ public class StructureEndpointTest {
     }
 
     @Test
+    void generateStructureFromAPI_whenSupervisor_returns204NoContent() throws Exception {
+        UUID reactantId = UUID.randomUUID();
+
+        doNothing().when(structureService).generateStructureFromAPI(reactantId);
+
+        mockMvc.perform(post("/api/structure/{reactantId}/generate", reactantId)
+                        .with(jwt().authorities(new SimpleGrantedAuthority("ROLE_SUPERVISOR"))))
+                .andExpect(status().isNoContent());
+
+        verify(structureService, times(1)).generateStructureFromAPI(reactantId);
+    }
+
+    @Test
     void generateStructureFromAPI_whenUser_returns403Forbidden() throws Exception {
         UUID reactantId = UUID.randomUUID();
 
@@ -112,6 +150,22 @@ public class StructureEndpointTest {
 
         mockMvc.perform(post("/api/structure/{structureId}/select", structureId)
                         .with(jwt().authorities(new SimpleGrantedAuthority("ROLE_ADMIN"))))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(structureId.toString()))
+                .andExpect(jsonPath("$.flag").value("ACTIVE"));
+
+        verify(structureService, times(1)).selectStructure(structureId);
+    }
+
+    @Test
+    void selectStructure_whenSupervisor_returns200Ok() throws Exception {
+        UUID structureId = UUID.randomUUID();
+        StructureDto mockDto = new StructureDto(structureId, UUID.randomUUID(), "active_struct", "XYZ content", StructureFlag.ACTIVE);
+
+        when(structureService.selectStructure(structureId)).thenReturn(mockDto);
+
+        mockMvc.perform(post("/api/structure/{structureId}/select", structureId)
+                        .with(jwt().authorities(new SimpleGrantedAuthority("ROLE_SUPERVISOR"))))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(structureId.toString()))
                 .andExpect(jsonPath("$.flag").value("ACTIVE"));
