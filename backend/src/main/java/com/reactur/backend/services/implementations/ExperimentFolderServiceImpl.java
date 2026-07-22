@@ -11,6 +11,7 @@ import com.reactur.backend.repositories.ExperimentFolderRepository;
 import com.reactur.backend.repositories.ExperimentRepository;
 import com.reactur.backend.repositories.UserRepository;
 import com.reactur.backend.services.ExperimentFolderService;
+import com.reactur.backend.services.authorization.ExperimentAuthorization;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.access.AccessDeniedException;
@@ -29,6 +30,7 @@ public class ExperimentFolderServiceImpl implements ExperimentFolderService {
   private final ExperimentRepository experimentRepository;
   private final UserRepository userRepository;
   private final FolderMapper folderMapper;
+  private final ExperimentAuthorization experimentAuthorization;
 
   @Override
   @Transactional
@@ -67,10 +69,7 @@ public class ExperimentFolderServiceImpl implements ExperimentFolderService {
     Experiment experiment = experimentRepository.findById(experimentId)
       .orElseThrow(() -> new ResourceNotFoundException("Experiment not found."));
 
-    boolean isOwner = experiment.getCreatedBy().getId().equals(requestingUserId);
-    boolean isScientist = experiment.getMetadata().getScientist().getId().equals(requestingUserId);
-
-    if (!isOwner && !isScientist) {
+    if (!experimentAuthorization.isCreatorOrScientist(experiment, requestingUserId)) {
       log.warn("User {} tried to add non-owned experiment {} to folder", requestingUserId, experimentId);
       throw new AccessDeniedException("User not authorized to add a not-owned experiment to a folder");
     }

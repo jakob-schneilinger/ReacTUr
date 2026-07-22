@@ -548,6 +548,27 @@ class ExperimentServiceTest {
   }
 
   @Test
+  void updateExperiment_whenArchivedAndUnauthorizedUser_throwsAccessDeniedException() {
+    UUID experimentId = randomUUID();
+    String snooperId = "snooper-000";
+
+    // Experiment is archived AND the requester is neither creator, scientist, nor privileged.
+    Experiment archivedExperiment = createMockEntityForSecurity(experimentId, "creator-123", "scientist-456", Instant.now());
+    SaveExperimentDto updateDto = createDummyExperimentDto();
+
+    when(experimentRepository.findById(experimentId)).thenReturn(Optional.of(archivedExperiment));
+
+    // Authorization must be checked before the archived-state check, so an unauthorized caller
+    // gets a 403 (AccessDeniedException) instead of a 409 (ResourceConflictException), without revealing
+    // the experiment's archived status to someone with no view/modify rights over it.
+    assertThrows(AccessDeniedException.class, () ->
+      experimentService.updateExperiment(experimentId, updateDto, snooperId, Role.USER)
+    );
+
+    Mockito.verify(experimentRepository, Mockito.never()).save(any());
+  }
+
+  @Test
   void updateExperiment_whenReactantNotFound_throwsUnprocessableEntityException() {
     UUID experimentId = randomUUID();
     String creatorId = "creator-123";

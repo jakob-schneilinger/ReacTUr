@@ -256,14 +256,15 @@ public class ExperimentServiceImpl implements ExperimentService {
     Experiment existingExperiment = experimentRepository.findById(experimentId)
       .orElseThrow(() -> new ResourceNotFoundException("Experiment with ID " + experimentId + " not found"));
 
-    // 2. Check Immutable State (Archived experiments are frozen)
+    // 2. Authorize (Security) - runs before state checks below, so that an unauthorized
+    // caller always gets a 403 rather than learning the experiment's archived state via a 409.
+    experimentAuthorization.assertCanModify(existingExperiment, requestingUserId, requestingUserRole);
+
+    // 3. Check Immutable State (Archived experiments are frozen)
     if (existingExperiment.getArchivedAt() != null) {
       log.warn("Attempted to update archived experiment {} by user {}", experimentId, requestingUserId);
       throw new ResourceConflictException("Cannot update an archived experiment. Please restore it first.");
     }
-
-    // 3. Authorize (Security)
-    experimentAuthorization.assertCanModify(existingExperiment, requestingUserId, requestingUserRole);
 
     // 4. Semantic Validation (Lookups for new DTO data)
     User scientist = userRepository.findById(experimentDto.metadata().scientist())

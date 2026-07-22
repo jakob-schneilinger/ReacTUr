@@ -10,6 +10,7 @@ import com.reactur.backend.mappers.FolderMapper;
 import com.reactur.backend.repositories.ExperimentFolderRepository;
 import com.reactur.backend.repositories.ExperimentRepository;
 import com.reactur.backend.repositories.UserRepository;
+import com.reactur.backend.services.authorization.ExperimentAuthorization;
 import com.reactur.backend.services.implementations.ExperimentFolderServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -49,6 +50,9 @@ class ExperimentFolderServiceTest {
 
   @Spy
   private FolderMapper folderMapper = Mappers.getMapper(FolderMapper.class);
+
+  @Spy
+  private ExperimentAuthorization experimentAuthorization = new ExperimentAuthorization();
 
   @InjectMocks
   private ExperimentFolderServiceImpl folderService;
