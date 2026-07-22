@@ -1,27 +1,30 @@
 package com.reactur.backend.services;
 
 import com.reactur.backend.dtos.experiments.ExperimentHistoryDto;
+import com.reactur.backend.enums.Role;
 import com.reactur.backend.exeptions.ResourceNotFoundException;
+import org.springframework.security.access.AccessDeniedException;
 
 import java.util.List;
 import java.util.UUID;
 
 public interface ExperimentHistoryService {
 
-    // TODO-CLAUDE (next thread): This method currently performs NO authorization check at all - any
-    // authenticated user can view any experiment's history, including archived ones. Per team decision,
-    // history should inherit ExperimentAuthorization.canView(...): active experiments -> any approved
-    // user; archived -> creator/scientist/ADMIN/SUPERVISOR only. Needs requestingUserId/requestingUserRole
-    // added here (and to ExperimentEndpoint#getAuditLogs), same pattern as ExperimentService/FileService.
-    // Deliberately deferred in this pass, pending your review of the Javers-based implementation.
     /**
      * Retrieves the chronological audit trail for a specific experiment, including changes
      * to its metadata and results. Internal reference IDs are automatically resolved to
      * human-readable names.
+     * <p>
+     * Active experiments are accessible to all approved roles. If the experiment is archived,
+     * the requesting user must be the creator, the designated scientist, or an admin.
+     * </p>
      *
-     * @param experimentUuid the unique identifier of the experiment
+     * @param experimentUuid     the unique identifier of the experiment
+     * @param requestingUserId   The internal ID of the authenticated user.
+     * @param requestingUserRole The role of the authenticated user.
      * @return a List of {@link ExperimentHistoryDto} representing the history of changes, sorted newest to oldest
      * @throws ResourceNotFoundException if no experiment is found for the given UUID
+     * @throws AccessDeniedException if attempting to access an unauthorized archived record.
      */
-    List<ExperimentHistoryDto> getExperimentHistory(UUID experimentUuid);
+    List<ExperimentHistoryDto> getExperimentHistory(UUID experimentUuid, String requestingUserId, Role requestingUserRole);
 }

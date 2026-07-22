@@ -172,16 +172,31 @@ public class ExperimentEndpoint {
         return ResponseEntity.ok(searchResults);
     }
 
+    /**
+     * Retrieves the chronological audit trail for a specific experiment.
+     * <p>
+     * Active experiments are globally visible to all authenticated users.
+     * However, if the requested experiment has been archived, access is restricted to
+     * the original creator, the designated scientist, or a system administrator.
+     * </p>
+     *
+     * @param uuid           The unique identifier of the experiment.
+     * @param authentication The security context containing the user's role authorities.
+     * @param jwt            The Keycloak token containing the requesting user's internal ID.
+     * @return A {@link ResponseEntity} containing the {@link ExperimentHistoryDto} history entries.
+     */
     // TODO-Future: Endpoint to get Logs by *Date* and by *User*, besides by *Experiment*
     @GetMapping("/{uuid}/history")
-    public ResponseEntity<List<ExperimentHistoryDto>> getAuditLogs(@PathVariable UUID uuid, @AuthenticationPrincipal Jwt jwt) {
-        // TODO-CLAUDE (next thread): getExperimentHistory currently performs NO authorization check -
-        // any authenticated user can view any experiment's history, including archived ones. Per team
-        // decision, this should inherit ExperimentAuthorization.canView(...) (active -> any approved user,
-        // archived -> creator/scientist/ADMIN/SUPERVISOR only). Needs requestingUserId/requestingUserRole
-        // threaded through here and into ExperimentHistoryService, same pattern as ExperimentService/FileService.
-        // Deliberately deferred pending your review of the Javers-based implementation.
-        List<ExperimentHistoryDto> history = experimentHistoryService.getExperimentHistory(uuid);
+    public ResponseEntity<List<ExperimentHistoryDto>> getAuditLogs(
+      @PathVariable UUID uuid,
+      Authentication authentication,
+      @AuthenticationPrincipal Jwt jwt
+    ) {
+        log.info("GET /api/experiment/{}/history called by User ID: {}", uuid, jwt.getSubject());
+
+        Role userRole = extractUserRole(authentication);
+        List<ExperimentHistoryDto> history = experimentHistoryService.getExperimentHistory(uuid, jwt.getSubject(), userRole);
+
         return ResponseEntity.ok(history);
     }
 

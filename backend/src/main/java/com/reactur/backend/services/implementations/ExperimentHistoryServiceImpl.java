@@ -10,7 +10,9 @@ import com.reactur.backend.repositories.UserRepository;
 import com.reactur.backend.repositories.options.InstrumentRepository;
 import com.reactur.backend.repositories.options.ModalityRepository;
 import com.reactur.backend.repositories.options.SolventRepository;
+import com.reactur.backend.enums.Role;
 import com.reactur.backend.services.ExperimentHistoryService;
+import com.reactur.backend.services.authorization.ExperimentAuthorization;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -44,20 +46,20 @@ public class ExperimentHistoryServiceImpl implements ExperimentHistoryService {
     private final SolventRepository solventRepository;
     private final ReactantRepository reactantRepository;
     private final UserRepository userRepository;
+    private final ExperimentAuthorization experimentAuthorization;
 
     private static final Set<String> IGNORED_PROPERTIES = Set.of(
             "id", "metadata", "result", "archivedAt"
     );
 
-    // TODO-CLAUDE (next thread): add requestingUserId/requestingUserRole parameters and call
-    // experimentAuthorization.assertCanView(experiment, requestingUserId, requestingUserRole) right
-    // after the fetch below, mirroring ExperimentServiceImpl/FileServiceImpl. See interface javadoc.
     @Override
-    public List<ExperimentHistoryDto> getExperimentHistory(UUID experimentUuid) {
+    public List<ExperimentHistoryDto> getExperimentHistory(UUID experimentUuid, String requestingUserId, Role requestingUserRole) {
         log.trace("Fetching history for experiment ID: {}", experimentUuid);
 
         Experiment experiment = experimentRepository.findById(experimentUuid)
                 .orElseThrow(() -> new ResourceNotFoundException("Experiment not found"));
+
+        experimentAuthorization.assertCanView(experiment, requestingUserId, requestingUserRole);
 
         List<Change> allChanges = new ArrayList<>(javers.findChanges(
                 QueryBuilder.byInstanceId(experimentUuid, Experiment.class).build()

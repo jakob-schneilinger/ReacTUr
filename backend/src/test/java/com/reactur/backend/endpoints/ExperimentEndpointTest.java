@@ -1,5 +1,6 @@
 package com.reactur.backend.endpoints;
 
+import com.reactur.backend.dtos.experiments.ExperimentHistoryDto;
 import com.reactur.backend.dtos.experiments.GetExperimentDto;
 import com.reactur.backend.dtos.experiments.MeasurementDataDto;
 import com.reactur.backend.dtos.experiments.SaveExperimentDto;
@@ -33,8 +34,10 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.RequestPostProcessor;
 import tools.jackson.databind.ObjectMapper;
 
+import java.time.Instant;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -224,10 +227,68 @@ class ExperimentEndpointTest {
 
 
   @Test
+  void getAuditLogs_whenFoundAndAuthorized_returns200OkWithHistory() throws Exception {
+    UUID experimentId = UUID.randomUUID();
+    ExperimentHistoryDto historyEntry = new ExperimentHistoryDto(
+      "author-123", Instant.parse("2024-01-01T00:00:00Z"), "UPDATE", Map.of("temperature", "20.0 -> 25.0")
+    );
+
+    Mockito.when(experimentHistoryService.getExperimentHistory(Mockito.eq(experimentId), Mockito.anyString(), any(Role.class)))
+      .thenReturn(List.of(historyEntry));
+
+    mockMvc.perform(get("/api/experiment/" + experimentId + "/history")
+        .with(asUser("random-user-id")))
+      .andExpect(status().isOk())
+      .andExpect(jsonPath("$.length()").value(1))
+      .andExpect(jsonPath("$[0].authorId").value("author-123"))
+      .andExpect(jsonPath("$[0].commitType").value("UPDATE"));
+  }
+
+  @Test
+  void getAuditLogs_whenServiceThrowsForbidden_returns403() throws Exception {
+    UUID experimentId = UUID.randomUUID();
+
+    Mockito.when(experimentHistoryService.getExperimentHistory(Mockito.eq(experimentId), Mockito.anyString(), any(Role.class)))
+      .thenThrow(new AccessDeniedException("Forbidden"));
+
+    mockMvc.perform(get("/api/experiment/" + experimentId + "/history")
+        .with(asUser("snooping-user-id")))
+      .andExpect(status().isForbidden());
+  }
+
+  @Test
+  void getAuditLogs_whenServiceThrowsNotFound_returns404() throws Exception {
+    UUID experimentId = UUID.randomUUID();
+
+    Mockito.when(experimentHistoryService.getExperimentHistory(Mockito.eq(experimentId), Mockito.anyString(), any(Role.class)))
+      .thenThrow(new ResourceNotFoundException("Not found"));
+
+    mockMvc.perform(get("/api/experiment/" + experimentId + "/history")
+        .with(asUser("any-user-id")))
+      .andExpect(status().isNotFound());
+  }
+
+  @Test
+  void getAuditLogs_whenAuthorizedAsAdmin_passesRequestingUserIdAndRoleToService() throws Exception {
+    UUID experimentId = UUID.randomUUID();
+    String adminId = "admin-user-777";
+
+    Mockito.when(experimentHistoryService.getExperimentHistory(experimentId, adminId, Role.ADMIN))
+      .thenReturn(List.of());
+
+    mockMvc.perform(get("/api/experiment/" + experimentId + "/history")
+        .with(jwt().jwt(builder -> builder.subject(adminId)).authorities(new SimpleGrantedAuthority("ROLE_ADMIN"))))
+      .andExpect(status().isOk())
+      .andExpect(jsonPath("$.length()").value(0));
+
+    Mockito.verify(experimentHistoryService).getExperimentHistory(experimentId, adminId, Role.ADMIN);
+  }
+
+  @Test
   void archiveExperiment_whenAuthorized_returns204NoContent() throws Exception {
     UUID experimentId = UUID.randomUUID();
 
-    // The service method is void, so we just perform the request
+    // Mock service method is empty by default, so we just perform the request
     mockMvc.perform(delete("/api/experiment/" + experimentId)
         .with(csrf())
         .with(asUser("creator-123")))
