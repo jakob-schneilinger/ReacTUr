@@ -91,6 +91,28 @@ class ExperimentFilesEndpointTest {
     }
 
     @Test
+    void downloadFile_ShouldEscapeEmbeddedQuote_WhenFileNameContainsOne() throws Exception {
+        UUID fileId = UUID.randomUUID();
+        String fileName = "the \"best\" run.csv";
+
+        ExperimentAttachmentDetailsDto mockDetails = new ExperimentAttachmentDetailsDto(
+                fileId, fileName, "text/csv", 500L, "checksum", "/api/file/" + fileId
+        );
+        Resource mockResource = new ByteArrayResource("CSV Data".getBytes());
+
+        when(fileService.getAttachmentDetail(eq(fileId), any(), any(Role.class))).thenReturn(mockDetails);
+        when(fileService.loadFileAsResource(eq(fileId), any(), any(Role.class))).thenReturn(mockResource);
+
+        mockMvc.perform(get("/api/file/" + fileId)
+                        .with(approvedUser("viewer-user-id")))
+                .andExpect(status().isOk())
+                .andExpect(header().string(HttpHeaders.CONTENT_DISPOSITION,
+                        "attachment; filename=\"the \\\"best\\\" run.csv\""))
+                .andExpect(content().contentTypeCompatibleWith("text/csv"))
+                .andExpect(content().string("CSV Data"));
+    }
+
+    @Test
     void getFileDetails_ShouldReturn200_WhenFileExists() throws Exception {
         UUID fileId = UUID.randomUUID();
         ExperimentAttachmentDetailsDto mockResponse = new ExperimentAttachmentDetailsDto(

@@ -14,6 +14,7 @@ import com.reactur.backend.entities.Reactant;
 import com.reactur.backend.entities.User;
 import com.reactur.backend.exeptions.ResourceConflictException;
 import com.reactur.backend.exeptions.ResourceNotFoundException;
+import com.reactur.backend.exeptions.ValidationException;
 import com.reactur.backend.mappers.ReactantMapper;
 import com.reactur.backend.repositories.ReactantRepository;
 import com.reactur.backend.services.implementations.ReactantServiceImpl;
@@ -21,6 +22,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mapstruct.factory.Mappers;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
@@ -28,6 +30,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import java.time.Instant;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -172,6 +175,61 @@ class ReactantServiceTest {
         when(reactantRepository.hasNameConflict(anyCollection())).thenReturn(true);
 
         assertThrows(ResourceConflictException.class, () -> reactantService.createReactant(newReactantDto, MOCK_USER_ID));
+    }
+
+    @Test
+    void createReactant_ShouldThrowValidationException_WhenAdditionalShortNamesDifferOnlyByCase() {
+        CreateReactantDto newReactantDto = new CreateReactantDto(
+                "Cl", VALID_CHEMICAL_TYPE_ID, "Hydrochloric Acid",
+                List.of("HCl", "hcl"),
+                "Hydrochloric acid", null, null, null, null
+        );
+
+        assertThrows(ValidationException.class, () -> reactantService.createReactant(newReactantDto, MOCK_USER_ID));
+        verify(reactantRepository, never()).hasNameConflict(anyCollection());
+        verify(reactantRepository, never()).save(any(Reactant.class));
+    }
+
+    @Test
+    void createReactant_ShouldThrowValidationException_WhenShortNameAndAdditionalShortNameDifferOnlyByCase() {
+        CreateReactantDto newReactantDto = new CreateReactantDto(
+                "Cl", VALID_CHEMICAL_TYPE_ID, "HCl",
+                List.of("hcl"),
+                "Hydrochloric acid", null, null, null, null
+        );
+
+        assertThrows(ValidationException.class, () -> reactantService.createReactant(newReactantDto, MOCK_USER_ID));
+        verify(reactantRepository, never()).hasNameConflict(anyCollection());
+        verify(reactantRepository, never()).save(any(Reactant.class));
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    void createReactant_ShouldPassLowercasedNamesToRepository_WhenCheckingForConflicts() {
+        CreateReactantDto newReactantDto = new CreateReactantDto(
+                "Cl", VALID_CHEMICAL_TYPE_ID, "HCl",
+                List.of("Muriatic Acid"),
+                "Hydrochloric acid", null, null, null, null
+        );
+
+        when(userRepository.findById(MOCK_USER_ID)).thenReturn(Optional.of(mockUser));
+        when(reactantRepository.hasNameConflict(anyCollection())).thenReturn(false);
+        when(reactantRepository.save(any(Reactant.class))).thenAnswer(invocation -> {
+            Reactant saved = invocation.getArgument(0);
+            saved.setId(VALID_UUID);
+            return saved;
+        });
+        when(chemicalTypeRepository.findById(VALID_CHEMICAL_TYPE_ID)).thenReturn(Optional.of(mockChemicalType));
+
+        reactantService.createReactant(newReactantDto, MOCK_USER_ID);
+
+        ArgumentCaptor<Collection<String>> namesCaptor = ArgumentCaptor.forClass(Collection.class);
+        verify(reactantRepository).hasNameConflict(namesCaptor.capture());
+        Collection<String> capturedNames = namesCaptor.getValue();
+
+        assertEquals(2, capturedNames.size());
+        assertTrue(capturedNames.contains("hcl"));
+        assertTrue(capturedNames.contains("muriatic acid"));
     }
 
     @Test

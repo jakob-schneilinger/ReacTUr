@@ -8,6 +8,7 @@ import com.reactur.backend.services.FileService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.Resource;
+import org.springframework.http.ContentDisposition;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -57,9 +58,13 @@ public class ExperimentFilesEndpoint {
         ExperimentAttachmentDetailsDto details = fileService.getAttachmentDetail(fileId, jwt.getSubject(), userRole);
         Resource fileResource = fileService.loadFileAsResource(fileId, jwt.getSubject(), userRole);
 
+        ContentDisposition contentDisposition = ContentDisposition.attachment()
+                .filename(details.fileName())
+                .build();
+
         return ResponseEntity.ok()
                 .contentType(MediaType.parseMediaType(details.fileType()))
-                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + details.fileName() + "\"")
+                .header(HttpHeaders.CONTENT_DISPOSITION, contentDisposition.toString())
                 .body(fileResource);
     }
 
