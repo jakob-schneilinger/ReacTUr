@@ -84,6 +84,14 @@ public class ReactantValidator {
             validateAdditionalShortNames(patchDto.shortName(), patchDto.additionalShortNames(), validationErrors);
         }
 
+        if (patchDto.shortName() != null && patchDto.shortName().isBlank()) {
+            validationErrors.add("The 'shortName' must not be blank.");
+        }
+
+        if (patchDto.smiles() != null && patchDto.smiles().isBlank()) {
+            validationErrors.add("The 'smiles' must not be blank.");
+        }
+
         if (!validationErrors.isEmpty()) {
             throw new ValidationException(validationErrors);
         }

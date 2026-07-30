@@ -379,49 +379,44 @@ class ReactantServiceTest {
     }
 
     @Test
-    void updateReactant_ShouldCurrentlyAllowBlankingMandatoryShortName_WhenEmptyStringProvided() {
-        // KNOWN GAP (see API_UPDATE_SEMANTICS.md "Open questions"): unlike CreateReactantDto,
-        // UpdateReactantDto.shortName has no @NotBlank constraint, so the "" = clear convention
-        // currently allows PATCH to blank out shortName even though it is documented as
-        // mandatory/unique on the entity. This test pins down the CURRENT behavior; it is not
-        // an endorsement of it. If this is fixed, this test's expectations must be revisited.
+    void updateReactant_ShouldThrowValidationException_WhenShortNameBlanked() {
+        // shortName is nullable = false, unique = true on the entity; PATCH must reject an
+        // explicit empty string instead of silently persisting a blank/non-unique value.
         UpdateReactantDto patchDto = new UpdateReactantDto(
                 null, null, "", null, null, null, null, null, null
         );
 
         when(reactantRepository.findById(VALID_UUID)).thenReturn(Optional.of(mockReactant));
-        when(reactantRepository.save(any(Reactant.class))).thenAnswer(invocation -> invocation.getArgument(0));
-        when(structureService.getStructuresByReactant(VALID_UUID)).thenReturn(List.of());
 
-        when(reactantRepository.hasNameConflictExcludingId(anyCollection(), eq(VALID_UUID))).thenReturn(false);
-
-        ReactantDetailDto result = reactantService.updateReactant(VALID_UUID, patchDto);
-
-        assertEquals("", result.shortName());
-
-        ArgumentCaptor<Collection<String>> namesCaptor = ArgumentCaptor.forClass(Collection.class);
-        verify(reactantRepository).hasNameConflictExcludingId(namesCaptor.capture(), eq(VALID_UUID));
-        assertFalse(namesCaptor.getValue().contains(""), "blank shortName must never leak into the uniqueness check as a candidate name");
+        assertThrows(ValidationException.class, () -> reactantService.updateReactant(VALID_UUID, patchDto));
+        verify(reactantRepository, never()).save(any(Reactant.class));
     }
 
     @Test
-    void updateReactant_ShouldCurrentlyAllowBlankingRequiredSmiles_WhenEmptyStringProvided() {
-        // KNOWN GAP (see API_UPDATE_SEMANTICS.md "Open questions"): unlike CreateReactantDto,
-        // UpdateReactantDto.smiles has no @NotBlank constraint, so the "" = clear convention
-        // currently allows PATCH to blank out the SMILES structure string, even though it is a
-        // NOT NULL column and required at creation time. Documents CURRENT behavior only.
+    void updateReactant_ShouldThrowValidationException_WhenShortNameBlankedWithWhitespaceOnly() {
+        // Whitespace-only must be rejected too, since isBlank() covers more than just "".
+        UpdateReactantDto patchDto = new UpdateReactantDto(
+                null, null, "   ", null, null, null, null, null, null
+        );
+
+        when(reactantRepository.findById(VALID_UUID)).thenReturn(Optional.of(mockReactant));
+
+        assertThrows(ValidationException.class, () -> reactantService.updateReactant(VALID_UUID, patchDto));
+        verify(reactantRepository, never()).save(any(Reactant.class));
+    }
+
+    @Test
+    void updateReactant_ShouldThrowValidationException_WhenSmilesBlanked() {
+        // smiles is nullable = false on the entity; PATCH must reject an explicit empty string
+        // instead of silently persisting a blank SMILES structure.
         UpdateReactantDto patchDto = new UpdateReactantDto(
                 "", null, null, null, null, null, null, null, null
         );
 
         when(reactantRepository.findById(VALID_UUID)).thenReturn(Optional.of(mockReactant));
-        when(reactantRepository.hasNameConflictExcludingId(anyCollection(), eq(VALID_UUID))).thenReturn(false);
-        when(reactantRepository.save(any(Reactant.class))).thenAnswer(invocation -> invocation.getArgument(0));
-        when(structureService.getStructuresByReactant(VALID_UUID)).thenReturn(List.of());
 
-        ReactantDetailDto result = reactantService.updateReactant(VALID_UUID, patchDto);
-
-        assertEquals("", result.smiles());
+        assertThrows(ValidationException.class, () -> reactantService.updateReactant(VALID_UUID, patchDto));
+        verify(reactantRepository, never()).save(any(Reactant.class));
     }
 
     @Test

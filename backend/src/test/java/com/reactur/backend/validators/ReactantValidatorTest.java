@@ -192,4 +192,37 @@ class ReactantValidatorTest {
         assertThrows(ResourceNotFoundException.class,
                 () -> reactantValidator.validateForUpdate(reactantId, patchDto, existingReactant));
     }
+
+    // --- validateForUpdate: mandatory shortName/smiles blank-rejection ---
+
+    @Test
+    void validateForUpdate_shouldThrowValidationException_whenShortNameIsBlank() {
+        UpdateReactantDto patchDto = new UpdateReactantDto(
+                null, null, "", null, null, null, null, null, null
+        );
+
+        assertThrows(ValidationException.class,
+                () -> reactantValidator.validateForUpdate(reactantId, patchDto, existingReactant));
+    }
+
+    @Test
+    void validateForUpdate_shouldThrowValidationException_whenShortNameIsWhitespaceOnly() {
+        // isBlank() must catch whitespace-only strings too, not just "".
+        UpdateReactantDto patchDto = new UpdateReactantDto(
+                null, null, "   ", null, null, null, null, null, null
+        );
+
+        assertThrows(ValidationException.class,
+                () -> reactantValidator.validateForUpdate(reactantId, patchDto, existingReactant));
+    }
+
+    @Test
+    void validateForUpdate_shouldThrowValidationException_whenSmilesIsBlank() {
+        UpdateReactantDto patchDto = new UpdateReactantDto(
+                "", null, null, null, null, null, null, null, null
+        );
+
+        assertThrows(ValidationException.class,
+                () -> reactantValidator.validateForUpdate(reactantId, patchDto, existingReactant));
+    }
 }
