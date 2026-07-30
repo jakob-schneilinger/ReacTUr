@@ -78,7 +78,7 @@ class ReactantServiceTest {
 
     @BeforeEach
     void setUp() {
-        ReactantValidator validator = new ReactantValidator(reactantRepository);
+        ReactantValidator validator = new ReactantValidator(reactantRepository, userRepository, chemicalTypeRepository);
         ReflectionTestUtils.setField(reactantService, "reactantValidator", validator);
 
         mockUser = new User();
@@ -252,6 +252,43 @@ class ReactantServiceTest {
         assertEquals(1, result.structures().size());
         assertEquals(StructureFlag.ACTIVE, result.structures().getFirst().flag());
         verify(reactantRepository, times(1)).save(mockReactant);
+    }
+
+    @Test
+    void updateReactant_ShouldUpdateChemicalType_WhenNewChemicalTypeProvided() {
+        UUID newChemicalTypeId = UUID.randomUUID();
+        ChemicalType newChemicalType = new ChemicalType();
+        newChemicalType.setId(newChemicalTypeId);
+
+        UpdateReactantDto updateDto = new UpdateReactantDto(
+                null, newChemicalTypeId, null, null, null, null, null, null, null
+        );
+
+        when(reactantRepository.findById(VALID_UUID)).thenReturn(Optional.of(mockReactant));
+        when(reactantRepository.hasNameConflictExcludingId(anyCollection(), eq(VALID_UUID))).thenReturn(false);
+        when(chemicalTypeRepository.findById(newChemicalTypeId)).thenReturn(Optional.of(newChemicalType));
+        when(reactantRepository.save(any(Reactant.class))).thenReturn(mockReactant);
+        when(structureService.getStructuresByReactant(VALID_UUID)).thenReturn(List.of());
+
+        reactantService.updateReactant(VALID_UUID, updateDto);
+
+        assertEquals(newChemicalType, mockReactant.getType());
+    }
+
+    @Test
+    void updateReactant_ShouldThrowResourceNotFound_WhenNewChemicalTypeDoesNotExist() {
+        UUID newChemicalTypeId = UUID.randomUUID();
+
+        UpdateReactantDto updateDto = new UpdateReactantDto(
+                null, newChemicalTypeId, null, null, null, null, null, null, null
+        );
+
+        when(reactantRepository.findById(VALID_UUID)).thenReturn(Optional.of(mockReactant));
+        when(reactantRepository.hasNameConflictExcludingId(anyCollection(), eq(VALID_UUID))).thenReturn(false);
+        when(chemicalTypeRepository.findById(newChemicalTypeId)).thenReturn(Optional.empty());
+
+        assertThrows(ResourceNotFoundException.class, () -> reactantService.updateReactant(VALID_UUID, updateDto));
+        verify(reactantRepository, never()).save(any(Reactant.class));
     }
 
     @Test

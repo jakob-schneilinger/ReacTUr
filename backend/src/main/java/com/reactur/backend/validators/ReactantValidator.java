@@ -3,9 +3,14 @@ package com.reactur.backend.validators;
 import com.reactur.backend.dtos.reactants.CreateReactantDto;
 import com.reactur.backend.dtos.reactants.UpdateReactantDto;
 import com.reactur.backend.entities.Reactant;
+import com.reactur.backend.entities.User;
+import com.reactur.backend.entities.options.ChemicalType;
 import com.reactur.backend.exeptions.ResourceConflictException;
+import com.reactur.backend.exeptions.ResourceNotFoundException;
 import com.reactur.backend.exeptions.ValidationException;
 import com.reactur.backend.repositories.ReactantRepository;
+import com.reactur.backend.repositories.UserRepository;
+import com.reactur.backend.repositories.options.ChemicalTypeRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -16,13 +21,29 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 
+/**
+ * Validates the semantic (conflict and reference-existence) correctness of the create/update
+ * DTOs for a {@link Reactant}, shared between {@code createReactant} and {@code updateReactant}
+ * in {@code ReactantServiceImpl}.
+ * <p>
+ * This validator's methods also return the resolved entities via {@link ValidatedReferences}.
+ */
 @Component
 @AllArgsConstructor
 public class ReactantValidator {
 
     private final ReactantRepository reactantRepository;
+    private final UserRepository userRepository;
+    private final ChemicalTypeRepository chemicalTypeRepository;
 
-    public void validateForCreate(CreateReactantDto saveReactant) {
+    /**
+     * Bundles the entities resolved while validating a reactant create/update so that
+     * callers can reuse them without re-fetching by ID.
+     */
+    public record ValidatedReferences(User activeUser, ChemicalType chemicalType) {
+    }
+
+    public ValidatedReferences validateForCreate(CreateReactantDto saveReactant, String userId) {
         List<String> validationErrors = new ArrayList<>();
         validateAdditionalShortNames(saveReactant.shortName(), saveReactant.additionalShortNames(), validationErrors);
 
@@ -46,9 +67,17 @@ public class ReactantValidator {
         if (!conflictErrors.isEmpty()) {
             throw new ResourceConflictException(conflictErrors);
         }
+
+        User activeUser = userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("Current User could not be found"));
+
+        ChemicalType chemicalType = chemicalTypeRepository.findById(saveReactant.chemicalType())
+                .orElseThrow(() -> new ResourceNotFoundException("ChemicalType with ID " + saveReactant.chemicalType() + " not found"));
+
+        return new ValidatedReferences(activeUser, chemicalType);
     }
 
-    public void validateForUpdate(UUID uuid, UpdateReactantDto patchDto, Reactant existingReactant) {
+    public ValidatedReferences validateForUpdate(UUID uuid, UpdateReactantDto patchDto, Reactant existingReactant) {
         List<String> validationErrors = new ArrayList<>();
 
         if (patchDto.additionalShortNames() != null) {
@@ -84,6 +113,14 @@ public class ReactantValidator {
         if (!conflictErrors.isEmpty()) {
             throw new ResourceConflictException(conflictErrors);
         }
+
+        ChemicalType chemicalType = null;
+        if (patchDto.chemicalType() != null) {
+            chemicalType = chemicalTypeRepository.findById(patchDto.chemicalType())
+                    .orElseThrow(() -> new ResourceNotFoundException("ChemicalType with ID " + patchDto.chemicalType() + " not found"));
+        }
+
+        return new ValidatedReferences(null, chemicalType);
     }
     
     private void validateAdditionalShortNames(String shortName, List<String> additionalShortNames, List<String> validationErrors) {

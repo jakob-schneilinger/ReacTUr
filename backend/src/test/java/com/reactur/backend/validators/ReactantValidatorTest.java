@@ -1,0 +1,195 @@
+package com.reactur.backend.validators;
+
+import com.reactur.backend.dtos.reactants.CreateReactantDto;
+import com.reactur.backend.dtos.reactants.UpdateReactantDto;
+import com.reactur.backend.entities.Reactant;
+import com.reactur.backend.entities.User;
+import com.reactur.backend.entities.options.ChemicalType;
+import com.reactur.backend.exeptions.ResourceConflictException;
+import com.reactur.backend.exeptions.ResourceNotFoundException;
+import com.reactur.backend.exeptions.ValidationException;
+import com.reactur.backend.repositories.ReactantRepository;
+import com.reactur.backend.repositories.UserRepository;
+import com.reactur.backend.repositories.options.ChemicalTypeRepository;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.anyCollection;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.when;
+
+/**
+ * Unit tests for {@link ReactantValidator}, covering the short-name/CAS/InChIKey conflict
+ * validation (pre-existing behavior, previously only covered indirectly through
+ * {@code ReactantServiceTest}) as well as the {@code User}/{@code ChemicalType} resolution that
+ * this validator now also performs and returns via {@link ReactantValidator.ValidatedReferences}.
+ */
+@ExtendWith(MockitoExtension.class)
+class ReactantValidatorTest {
+
+    @Mock private ReactantRepository reactantRepository;
+    @Mock private UserRepository userRepository;
+    @Mock private ChemicalTypeRepository chemicalTypeRepository;
+
+    @InjectMocks
+    private ReactantValidator reactantValidator;
+
+    private final String userId = "keycloak-123";
+    private final UUID chemicalTypeId = UUID.randomUUID();
+    private final UUID reactantId = UUID.randomUUID();
+
+    private User activeUser;
+    private ChemicalType chemicalType;
+    private Reactant existingReactant;
+
+    @BeforeEach
+    void setUp() {
+        activeUser = new User();
+        activeUser.setId(userId);
+
+        chemicalType = new ChemicalType();
+        chemicalType.setId(chemicalTypeId);
+
+        existingReactant = Reactant.builder()
+                .id(reactantId)
+                .shortName("Ethanol")
+                .additionalShortNames(List.of("EtOH"))
+                .casNumber("64-17-5")
+                .inChiKey("LFQSCWFLJHTTHZ-UHFFFAOYSA-N")
+                .type(chemicalType)
+                .build();
+    }
+
+    private CreateReactantDto buildCreateDto(String shortName, List<String> additionalShortNames, String casNumber) {
+        return new CreateReactantDto(
+                "CCO", chemicalTypeId, shortName, additionalShortNames,
+                "Ethyl alcohol", casNumber, null, null, null
+        );
+    }
+
+    // --- validateForCreate: happy path -----------------------------------
+
+    @Test
+    void validateForCreate_shouldReturnResolvedReferences_whenAllReferencesValid() {
+        when(reactantRepository.hasNameConflict(anyCollection())).thenReturn(false);
+        when(userRepository.findById(userId)).thenReturn(Optional.of(activeUser));
+        when(chemicalTypeRepository.findById(chemicalTypeId)).thenReturn(Optional.of(chemicalType));
+
+        ReactantValidator.ValidatedReferences result =
+                reactantValidator.validateForCreate(buildCreateDto("Ethanol", List.of("EtOH"), null), userId);
+
+        assertNotNull(result.activeUser());
+        assertNotNull(result.chemicalType());
+        assertEquals(activeUser, result.activeUser());
+        assertEquals(chemicalType, result.chemicalType());
+    }
+
+    // --- validateForCreate: user / chemical type existence ---------------
+
+    @Test
+    void validateForCreate_shouldThrowResourceNotFound_whenUserDoesNotExist() {
+        when(reactantRepository.hasNameConflict(anyCollection())).thenReturn(false);
+        when(userRepository.findById(userId)).thenReturn(Optional.empty());
+
+        assertThrows(ResourceNotFoundException.class,
+                () -> reactantValidator.validateForCreate(buildCreateDto("Ethanol", List.of("EtOH"), null), userId));
+    }
+
+    @Test
+    void validateForCreate_shouldThrowResourceNotFound_whenChemicalTypeDoesNotExist() {
+        when(reactantRepository.hasNameConflict(anyCollection())).thenReturn(false);
+        when(userRepository.findById(userId)).thenReturn(Optional.of(activeUser));
+        when(chemicalTypeRepository.findById(chemicalTypeId)).thenReturn(Optional.empty());
+
+        assertThrows(ResourceNotFoundException.class,
+                () -> reactantValidator.validateForCreate(buildCreateDto("Ethanol", List.of("EtOH"), null), userId));
+    }
+
+    // --- validateForCreate: pre-existing conflict/validation paths -------
+
+    @Test
+    void validateForCreate_shouldThrowResourceConflict_whenShortNameAlreadyExists() {
+        when(reactantRepository.hasNameConflict(anyCollection())).thenReturn(true);
+
+        assertThrows(ResourceConflictException.class,
+                () -> reactantValidator.validateForCreate(buildCreateDto("Ethanol", List.of("EtOH"), null), userId));
+    }
+
+    @Test
+    void validateForCreate_shouldThrowResourceConflict_whenCasNumberAlreadyTaken() {
+        when(reactantRepository.hasNameConflict(anyCollection())).thenReturn(false);
+        when(reactantRepository.existsByCasNumber("64-17-5")).thenReturn(true);
+
+        assertThrows(ResourceConflictException.class,
+                () -> reactantValidator.validateForCreate(buildCreateDto("Ethanol", List.of("EtOH"), "64-17-5"), userId));
+    }
+
+    @Test
+    void validateForCreate_shouldThrowValidationException_whenAdditionalShortNamesDifferOnlyByCase() {
+        assertThrows(ValidationException.class,
+                () -> reactantValidator.validateForCreate(buildCreateDto("Hydrochloric Acid", List.of("HCl", "hcl"), null), userId));
+    }
+
+    // --- validateForUpdate: happy paths ----------------------------------
+
+    @Test
+    void validateForUpdate_shouldReturnNewChemicalType_whenChemicalTypeChanged() {
+        UUID newChemicalTypeId = UUID.randomUUID();
+        ChemicalType newChemicalType = new ChemicalType();
+        newChemicalType.setId(newChemicalTypeId);
+
+        UpdateReactantDto patchDto = new UpdateReactantDto(
+                null, newChemicalTypeId, null, null, null, null, null, null, null
+        );
+
+        when(reactantRepository.hasNameConflictExcludingId(anyCollection(), eq(reactantId))).thenReturn(false);
+        when(chemicalTypeRepository.findById(newChemicalTypeId)).thenReturn(Optional.of(newChemicalType));
+
+        ReactantValidator.ValidatedReferences result =
+                reactantValidator.validateForUpdate(reactantId, patchDto, existingReactant);
+
+        assertNull(result.activeUser());
+        assertEquals(newChemicalType, result.chemicalType());
+    }
+
+    @Test
+    void validateForUpdate_shouldReturnNullChemicalType_whenChemicalTypeNotChanged() {
+        UpdateReactantDto patchDto = new UpdateReactantDto(
+                null, null, null, null, "New Name", null, null, null, null
+        );
+
+        when(reactantRepository.hasNameConflictExcludingId(anyCollection(), eq(reactantId))).thenReturn(false);
+
+        ReactantValidator.ValidatedReferences result =
+                reactantValidator.validateForUpdate(reactantId, patchDto, existingReactant);
+
+        assertNull(result.activeUser());
+        assertNull(result.chemicalType());
+    }
+
+    @Test
+    void validateForUpdate_shouldThrowResourceNotFound_whenNewChemicalTypeDoesNotExist() {
+        UUID newChemicalTypeId = UUID.randomUUID();
+        UpdateReactantDto patchDto = new UpdateReactantDto(
+                null, newChemicalTypeId, null, null, null, null, null, null, null
+        );
+
+        when(reactantRepository.hasNameConflictExcludingId(anyCollection(), eq(reactantId))).thenReturn(false);
+        when(chemicalTypeRepository.findById(newChemicalTypeId)).thenReturn(Optional.empty());
+
+        assertThrows(ResourceNotFoundException.class,
+                () -> reactantValidator.validateForUpdate(reactantId, patchDto, existingReactant));
+    }
+}

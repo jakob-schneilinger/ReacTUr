@@ -12,8 +12,6 @@ import com.reactur.backend.enums.StructureFlag;
 import com.reactur.backend.exeptions.ResourceNotFoundException;
 import com.reactur.backend.mappers.ReactantMapper;
 import com.reactur.backend.repositories.ReactantRepository;
-import com.reactur.backend.repositories.UserRepository;
-import com.reactur.backend.repositories.options.ChemicalTypeRepository;
 import com.reactur.backend.services.ReactantService;
 import com.reactur.backend.services.StructureService;
 import com.reactur.backend.validators.ReactantValidator;
@@ -32,22 +30,17 @@ import java.util.stream.Collectors;
 public class ReactantServiceImpl implements ReactantService {
 
     private final ReactantRepository reactantRepository;
-    private final UserRepository userRepository;
     private final ReactantValidator reactantValidator;
     private final ReactantMapper reactantMapper;
     private final StructureService structureService;
-    private final ChemicalTypeRepository chemicalTypeRepository;
 
     @Override
     @Transactional
     public ReactantDetailDto createReactant(CreateReactantDto saveReactant, String userId) {
 
-        reactantValidator.validateForCreate(saveReactant);
-
-        User activeUser = userRepository.findById(userId).orElseThrow(() -> new ResourceNotFoundException("Current User could not be found"));
-
-        ChemicalType chemicalType = chemicalTypeRepository.findById(saveReactant.chemicalType())
-                .orElseThrow(() -> new ResourceNotFoundException("ChemicalType with ID " + saveReactant.chemicalType() + " not found"));
+        ReactantValidator.ValidatedReferences validated = reactantValidator.validateForCreate(saveReactant, userId);
+        User activeUser = validated.activeUser();
+        ChemicalType chemicalType = validated.chemicalType();
 
         Reactant reactant = Reactant.builder()
                 .shortName(saveReactant.shortName())
@@ -72,12 +65,9 @@ public class ReactantServiceImpl implements ReactantService {
         Reactant reactant = reactantRepository.findById(uuid)
                 .orElseThrow(() -> new ResourceNotFoundException("Reactant with ID " + uuid + " not found"));
 
-        reactantValidator.validateForUpdate(uuid, patchDto, reactant);
-
-        if (patchDto.chemicalType() != null) {
-            ChemicalType chemicalType = chemicalTypeRepository.findById(patchDto.chemicalType())
-                    .orElseThrow(() -> new ResourceNotFoundException("ChemicalType with ID " + patchDto.chemicalType() + " not found"));
-            reactant.setType(chemicalType);
+        ReactantValidator.ValidatedReferences validated = reactantValidator.validateForUpdate(uuid, patchDto, reactant);
+        if (validated.chemicalType() != null) {
+            reactant.setType(validated.chemicalType());
         }
 
         // PATCH: Update if not null. "" clears strings, [] empties lists.
