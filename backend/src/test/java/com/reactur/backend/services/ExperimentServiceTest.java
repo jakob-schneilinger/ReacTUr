@@ -517,6 +517,90 @@ class ExperimentServiceTest {
   }
 
   @Test
+  void updateExperiment_ShouldFullyReplaceEveryDtoField_WhenUpdating() {
+    // Regression test for full-replacement PUT semantics: every field present in
+    // SaveExperimentDto/SaveMetadataDto/MeasurementDataDto must end up on the saved entity,
+    // while server-managed fields not present in the DTO (createdBy, both archivedAt fields)
+    // must remain untouched.
+    UUID experimentId = randomUUID();
+    String creatorId = "creator-123";
+
+    Experiment existingExperiment = createMockEntityForSecurity(experimentId, creatorId, "scientist-456", null);
+    existingExperiment.setDois(List.of("10.1000/old-doi"));
+    existingExperiment.getMetadata().setTemperature(20.0);
+    existingExperiment.getMetadata().setConcentrationA(0.1);
+    existingExperiment.getMetadata().setConcentrationB(0.2);
+    existingExperiment.getMetadata().setWavelength(100.0);
+    existingExperiment.getMetadata().setComment("Old comment");
+    existingExperiment.getResult().setRateConstant(0.001);
+    existingExperiment.getResult().setPfoRateConstant(0.002);
+    existingExperiment.getResult().setErrorValue(0.5);
+    existingExperiment.getResult().setIsErrorPercentage(true);
+
+    SaveExperimentDto updateDto = createDummyExperimentDto();
+
+    when(experimentRepository.findById(experimentId)).thenReturn(Optional.of(existingExperiment));
+
+    User newScientist = new User(); newScientist.setId(updateDto.metadata().scientist());
+    when(userRepository.findById(updateDto.metadata().scientist())).thenReturn(Optional.of(newScientist));
+
+    Reactant rA = new Reactant(); rA.setId(updateDto.reactantA());
+    when(reactantRepository.findById(updateDto.reactantA())).thenReturn(Optional.of(rA));
+
+    Reactant rB = new Reactant(); rB.setId(updateDto.reactantB());
+    when(reactantRepository.findById(updateDto.reactantB())).thenReturn(Optional.of(rB));
+
+    ReactantStructure activeStructure = new ReactantStructure();
+    activeStructure.setFlag(StructureFlag.ACTIVE);
+    when(structureRepository.findByReactant_Id(any())).thenReturn(List.of(activeStructure));
+
+    Solvent sol = new Solvent(); sol.setId(updateDto.metadata().solvent());
+    when(solventRepository.findById(updateDto.metadata().solvent())).thenReturn(Optional.of(sol));
+
+    Instrument inst = new Instrument(); inst.setId(updateDto.metadata().instrument());
+    when(instrumentRepository.findById(updateDto.metadata().instrument())).thenReturn(Optional.of(inst));
+
+    Modality mod = new Modality(); mod.setId(updateDto.metadata().modality());
+    when(modalityRepository.findById(updateDto.metadata().modality())).thenReturn(Optional.of(mod));
+
+    when(experimentRepository.save(any(Experiment.class))).thenAnswer(i -> i.getArgument(0));
+
+    experimentService.updateExperiment(experimentId, updateDto, creatorId, Role.USER);
+
+    ArgumentCaptor<Experiment> experimentCaptor = ArgumentCaptor.forClass(Experiment.class);
+    Mockito.verify(experimentRepository).save(experimentCaptor.capture());
+    Experiment saved = experimentCaptor.getValue();
+
+    // Top-level Experiment fields
+    assertEquals(updateDto.dois(), saved.getDois(), "dois should be fully replaced");
+    assertEquals(updateDto.reactantA(), saved.getReactantA().getId(), "reactantA should be fully replaced");
+    assertEquals(updateDto.reactantB(), saved.getReactantB().getId(), "reactantB should be fully replaced");
+
+    // Metadata fields
+    assertEquals(updateDto.metadata().date(), saved.getMetadata().getDate(), "metadata.date should be fully replaced");
+    assertEquals(updateDto.metadata().scientist(), saved.getMetadata().getScientist().getId(), "metadata.scientist should be fully replaced");
+    assertEquals(updateDto.metadata().temperature(), saved.getMetadata().getTemperature(), "metadata.temperature should be fully replaced");
+    assertEquals(updateDto.metadata().solvent(), saved.getMetadata().getSolvent().getId(), "metadata.solvent should be fully replaced");
+    assertEquals(updateDto.metadata().concentrationA(), saved.getMetadata().getConcentrationA(), "metadata.concentrationA should be fully replaced");
+    assertEquals(updateDto.metadata().concentrationB(), saved.getMetadata().getConcentrationB(), "metadata.concentrationB should be fully replaced");
+    assertEquals(updateDto.metadata().instrument(), saved.getMetadata().getInstrument().getId(), "metadata.instrument should be fully replaced");
+    assertEquals(updateDto.metadata().modality(), saved.getMetadata().getModality().getId(), "metadata.modality should be fully replaced");
+    assertEquals(updateDto.metadata().wavelength(), saved.getMetadata().getWavelength(), "metadata.wavelength should be fully replaced");
+    assertEquals(updateDto.metadata().comment(), saved.getMetadata().getComment(), "metadata.comment should be fully replaced");
+
+    // ExperimentResult (measurementData) fields
+    assertEquals(updateDto.measurementData().rateConstant(), saved.getResult().getRateConstant(), "result.rateConstant should be fully replaced");
+    assertEquals(updateDto.measurementData().pFO_rateConstant(), saved.getResult().getPfoRateConstant(), "result.pfoRateConstant should be fully replaced");
+    assertEquals(updateDto.measurementData().error(), saved.getResult().getErrorValue(), "result.errorValue should be fully replaced");
+    assertEquals(updateDto.measurementData().isErrorPercentage(), saved.getResult().getIsErrorPercentage(), "result.isErrorPercentage should be fully replaced");
+
+    // Server-managed fields NOT present in SaveExperimentDto must remain untouched by PUT
+    assertEquals(creatorId, saved.getCreatedBy().getId(), "createdBy is not in the DTO and must never change during an update");
+    Assertions.assertNull(saved.getArchivedAt(), "archivedAt is not in the DTO and must never be set by an update");
+    Assertions.assertNull(saved.getMetadata().getArchivedAt(), "metadata.archivedAt is not in the DTO and must never be set by an update");
+  }
+
+  @Test
   void updateExperiment_whenUnauthorizedUser_throwsAccessDeniedException() {
     UUID experimentId = randomUUID();
     String snooperId = "snooper-000";

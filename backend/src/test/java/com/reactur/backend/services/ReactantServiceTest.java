@@ -324,12 +324,21 @@ class ReactantServiceTest {
         assertEquals("Neuer Chemischer Name", result.chemicalName());
         assertEquals("Ethanol", result.shortName());
         assertEquals("CCO", result.smiles());
+        assertEquals("64-17-5", result.casNumber());
+        assertEquals("LFQSCWFLJHTTHZ-UHFFFAOYSA-N", result.inChiKey());
+        assertEquals("A test comment", result.comment());
+        assertIterableEquals(List.of("EtOH", "Alkohol"), result.additionalShortNames());
+        assertIterableEquals(List.of("Ref1", "Ref2"), result.references());
+        // chemicalType omitted (null) in the patch: the existing association must be preserved,
+        // i.e. the validator/service must not attempt to re-resolve or clear it.
+        assertEquals(mockChemicalType, mockReactant.getType());
+        verify(chemicalTypeRepository, never()).findById(any());
     }
 
     @Test
     void updateReactant_ShouldClearFields_WhenEmptyStringOrListProvided() {
         UpdateReactantDto clearDto = new UpdateReactantDto(
-                null, null, null, Collections.emptyList(), null, "", "", "", Collections.emptyList()
+                null, null, null, Collections.emptyList(), "", "", "", "", Collections.emptyList()
         );
 
         when(reactantRepository.findById(VALID_UUID)).thenReturn(Optional.of(mockReactant));
@@ -341,7 +350,78 @@ class ReactantServiceTest {
 
         assertEquals("", result.casNumber());
         assertEquals("", result.inChiKey());
+        assertEquals("", result.chemicalName());
+        assertEquals("", result.comment());
         assertTrue(result.additionalShortNames().isEmpty());
+        assertTrue(result.references().isEmpty());
+    }
+
+    @Test
+    void updateReactant_ShouldSetSmilesAndShortNameToNewValue_WhenPatching() {
+        // Distinct from the "preserved when omitted" case above: here smiles/shortName are
+        // provided with a genuinely NEW non-empty value and must actually be applied.
+        UpdateReactantDto patchDto = new UpdateReactantDto(
+                "C1=CC=CC=C1", null, "Benzene", null, null, null, null, null, null
+        );
+
+        when(reactantRepository.findById(VALID_UUID)).thenReturn(Optional.of(mockReactant));
+        when(reactantRepository.hasNameConflictExcludingId(anyCollection(), eq(VALID_UUID))).thenReturn(false);
+        when(reactantRepository.save(any(Reactant.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        when(structureService.getStructuresByReactant(VALID_UUID)).thenReturn(List.of());
+
+        ReactantDetailDto result = reactantService.updateReactant(VALID_UUID, patchDto);
+
+        assertEquals("C1=CC=CC=C1", result.smiles());
+        assertEquals("Benzene", result.shortName());
+        // Untouched fields should still be preserved alongside the new values.
+        assertEquals("Ethyl alcohol", result.chemicalName());
+        assertEquals("64-17-5", result.casNumber());
+    }
+
+    @Test
+    void updateReactant_ShouldCurrentlyAllowBlankingMandatoryShortName_WhenEmptyStringProvided() {
+        // KNOWN GAP (see API_UPDATE_SEMANTICS.md "Open questions"): unlike CreateReactantDto,
+        // UpdateReactantDto.shortName has no @NotBlank constraint, so the "" = clear convention
+        // currently allows PATCH to blank out shortName even though it is documented as
+        // mandatory/unique on the entity. This test pins down the CURRENT behavior; it is not
+        // an endorsement of it. If this is fixed, this test's expectations must be revisited.
+        UpdateReactantDto patchDto = new UpdateReactantDto(
+                null, null, "", null, null, null, null, null, null
+        );
+
+        when(reactantRepository.findById(VALID_UUID)).thenReturn(Optional.of(mockReactant));
+        when(reactantRepository.save(any(Reactant.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        when(structureService.getStructuresByReactant(VALID_UUID)).thenReturn(List.of());
+
+        when(reactantRepository.hasNameConflictExcludingId(anyCollection(), eq(VALID_UUID))).thenReturn(false);
+
+        ReactantDetailDto result = reactantService.updateReactant(VALID_UUID, patchDto);
+
+        assertEquals("", result.shortName());
+
+        ArgumentCaptor<Collection<String>> namesCaptor = ArgumentCaptor.forClass(Collection.class);
+        verify(reactantRepository).hasNameConflictExcludingId(namesCaptor.capture(), eq(VALID_UUID));
+        assertFalse(namesCaptor.getValue().contains(""), "blank shortName must never leak into the uniqueness check as a candidate name");
+    }
+
+    @Test
+    void updateReactant_ShouldCurrentlyAllowBlankingRequiredSmiles_WhenEmptyStringProvided() {
+        // KNOWN GAP (see API_UPDATE_SEMANTICS.md "Open questions"): unlike CreateReactantDto,
+        // UpdateReactantDto.smiles has no @NotBlank constraint, so the "" = clear convention
+        // currently allows PATCH to blank out the SMILES structure string, even though it is a
+        // NOT NULL column and required at creation time. Documents CURRENT behavior only.
+        UpdateReactantDto patchDto = new UpdateReactantDto(
+                "", null, null, null, null, null, null, null, null
+        );
+
+        when(reactantRepository.findById(VALID_UUID)).thenReturn(Optional.of(mockReactant));
+        when(reactantRepository.hasNameConflictExcludingId(anyCollection(), eq(VALID_UUID))).thenReturn(false);
+        when(reactantRepository.save(any(Reactant.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        when(structureService.getStructuresByReactant(VALID_UUID)).thenReturn(List.of());
+
+        ReactantDetailDto result = reactantService.updateReactant(VALID_UUID, patchDto);
+
+        assertEquals("", result.smiles());
     }
 
     @Test
