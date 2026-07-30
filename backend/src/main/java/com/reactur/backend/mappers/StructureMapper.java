@@ -8,7 +8,7 @@ import org.mapstruct.Mapping;
 @Mapper(componentModel = "spring")
 public interface StructureMapper {
 
-    @Mapping(source = "reactant.id", target = "reactant")
-    @Mapping(source = "fileName", target = "name")
+    @Mapping(target = "reactant", source = "reactant.id")
+    @Mapping(target = "name", source = "fileName")
     StructureDto toDto(ReactantStructure entity);
 }

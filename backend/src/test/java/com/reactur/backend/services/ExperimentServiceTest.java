@@ -35,6 +35,7 @@ import com.reactur.backend.repositories.ReactantRepository;
 import com.reactur.backend.repositories.options.SolventRepository;
 import com.reactur.backend.repositories.UserRepository;
 import com.reactur.backend.services.implementations.ExperimentServiceImpl;
+import com.reactur.backend.validators.ExperimentValidator;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -105,7 +106,12 @@ class ExperimentServiceTest {
 
   @BeforeEach
   void setUp() {
-    // Manually wire the nested mappers into the corresponding mapper(s)
+    // Manual Wire of non-mocked dependencies
+
+    ExperimentValidator experimentValidator = new ExperimentValidator(
+      userRepository, reactantRepository, solventRepository, instrumentRepository, modalityRepository, structureRepository
+    );
+    ReflectionTestUtils.setField(experimentService, "experimentValidator", experimentValidator);
 
     ReflectionTestUtils.setField(metadataMapper, "userMapper", userMapper);
     ReflectionTestUtils.setField(metadataMapper, "solventMapper", solventMapper);

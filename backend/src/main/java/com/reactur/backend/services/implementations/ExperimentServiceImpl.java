@@ -3,7 +3,6 @@ package com.reactur.backend.services.implementations;
 import com.reactur.backend.dtos.experiments.GetExperimentDto;
 import com.reactur.backend.dtos.experiments.SaveExperimentDto;
 import com.reactur.backend.dtos.experiments.SearchParametersDto;
-import com.reactur.backend.entities.ReactantStructure;
 import com.reactur.backend.entities.experiment.Experiment;
 import com.reactur.backend.entities.experiment.ExperimentResult;
 import com.reactur.backend.entities.experiment.Metadata;
@@ -12,21 +11,14 @@ import com.reactur.backend.entities.options.Instrument;
 import com.reactur.backend.entities.options.Modality;
 import com.reactur.backend.entities.options.Solvent;
 import com.reactur.backend.entities.User;
-import com.reactur.backend.enums.StructureFlag;
 import com.reactur.backend.exeptions.ResourceConflictException;
 import com.reactur.backend.exeptions.ResourceNotFoundException;
-import com.reactur.backend.exeptions.UnprocessableEntityException;
-import com.reactur.backend.exeptions.ValidationException;
 import com.reactur.backend.mappers.ExperimentMapper;
 import com.reactur.backend.repositories.ExperimentRepository;
-import com.reactur.backend.repositories.ReactantStructureRepository;
-import com.reactur.backend.repositories.options.InstrumentRepository;
-import com.reactur.backend.repositories.options.ModalityRepository;
-import com.reactur.backend.repositories.ReactantRepository;
-import com.reactur.backend.repositories.options.SolventRepository;
 import com.reactur.backend.repositories.UserRepository;
 import com.reactur.backend.services.ExperimentService;
 import com.reactur.backend.services.FileService;
+import com.reactur.backend.validators.ExperimentValidator;
 import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.Predicate;
 import lombok.RequiredArgsConstructor;
@@ -51,15 +43,11 @@ import java.util.UUID;
 public class ExperimentServiceImpl implements ExperimentService {
 
   private final ExperimentRepository experimentRepository;
-  private final ReactantRepository reactantRepository;
-  private final SolventRepository solventRepository;
-  private final InstrumentRepository instrumentRepository;
-  private final ModalityRepository modalityRepository;
   private final UserRepository userRepository;
   private final ExperimentMapper experimentMapper;
-  private final ReactantStructureRepository structureRepository;
   private final FileService fileService;
   private final ExperimentAuthorization experimentAuthorization;
+  private final ExperimentValidator experimentValidator;
 
   @Override
   @Transactional
@@ -78,41 +66,16 @@ public class ExperimentServiceImpl implements ExperimentService {
         return new IllegalStateException("System state error: Authenticated user lacks internal profile.");
       });
 
-    // Who actually performed the experiment: (Extracted from DTO payload)
-    User scientist = userRepository.findById(experimentDto.metadata().scientist())
-      .orElseThrow(() -> new UnprocessableEntityException(
-        "Scientist with ID " + experimentDto.metadata().scientist() + " not found."
-      ));
-
-    // TODO: Move to Validator? We can discuss Later
-
-    Reactant reactantA = reactantRepository.findById(experimentDto.reactantA())
-      .orElseThrow(() -> new UnprocessableEntityException("Reactant A does not exist."));
-
-    Reactant reactantB = reactantRepository.findById(experimentDto.reactantB())
-      .orElseThrow(() -> new UnprocessableEntityException("Reactant B does not exist."));
-
-    if (reactantA.getId().equals(reactantB.getId())) {
-      throw new ValidationException("Reactants A and B cannot be the same.");
-    }
-
-    validateReactantHasActiveStructure(reactantA, "A");
-    validateReactantHasActiveStructure(reactantB, "B");
-
-    Solvent solvent = solventRepository.findById(experimentDto.metadata().solvent())
-      .orElseThrow(() -> new UnprocessableEntityException("Solvent does not exist."));
-
-    Instrument instrument = null;
-    if (experimentDto.metadata().instrument() != null) {
-      instrument = instrumentRepository.findById(experimentDto.metadata().instrument())
-        .orElseThrow(() -> new UnprocessableEntityException("Instrument does not exist."));
-    }
-
-    Modality modality = null;
-    if (experimentDto.metadata().modality() != null) {
-      modality = modalityRepository.findById(experimentDto.metadata().modality())
-        .orElseThrow(() -> new UnprocessableEntityException("Modality does not exist."));
-    }
+    // Who actually performed the experiment, plus every other referenced entity (reactants,
+    // solvent, instrument, modality): validated and resolved via ExperimentValidator, which
+    // returns them so we don't have to re-fetch them here.
+    ExperimentValidator.ValidatedReferences validated = experimentValidator.validateForCreate(experimentDto);
+    User scientist = validated.scientist();
+    Reactant reactantA = validated.reactantA();
+    Reactant reactantB = validated.reactantB();
+    Solvent solvent = validated.solvent();
+    Instrument instrument = validated.instrument();
+    Modality modality = validated.modality();
 
     log.debug("All chemical and lookup entities successfully validated and fetched.");
 
@@ -266,38 +229,15 @@ public class ExperimentServiceImpl implements ExperimentService {
       throw new ResourceConflictException("Cannot update an archived experiment. Please restore it first.");
     }
 
-    // 4. Semantic Validation (Lookups for new DTO data)
-    User scientist = userRepository.findById(experimentDto.metadata().scientist())
-      .orElseThrow(() -> new UnprocessableEntityException("Scientist with ID " + experimentDto.metadata().scientist() + " not found."));
-
-    Reactant reactantA = reactantRepository.findById(experimentDto.reactantA())
-      .orElseThrow(() -> new UnprocessableEntityException("Reactant A does not exist."));
-
-    Reactant reactantB = reactantRepository.findById(experimentDto.reactantB())
-      .orElseThrow(() -> new UnprocessableEntityException("Reactant B does not exist."));
-
-    if (reactantA.getId().equals(reactantB.getId())) {
-      log.warn("Reactant A and B cannot be the same in an update.");
-      throw new ValidationException("Reactant A and B cannot be the same in an update.");
-    }
-
-    validateReactantHasActiveStructure(reactantA, "A");
-    validateReactantHasActiveStructure(reactantB, "B");
-
-    Solvent solvent = solventRepository.findById(experimentDto.metadata().solvent())
-      .orElseThrow(() -> new UnprocessableEntityException("Solvent does not exist."));
-
-    Instrument instrument = null;
-    if (experimentDto.metadata().instrument() != null) {
-      instrument = instrumentRepository.findById(experimentDto.metadata().instrument())
-        .orElseThrow(() -> new UnprocessableEntityException("Instrument does not exist."));
-    }
-
-    Modality modality = null;
-    if (experimentDto.metadata().modality() != null) {
-      modality = modalityRepository.findById(experimentDto.metadata().modality())
-        .orElseThrow(() -> new UnprocessableEntityException("Modality does not exist."));
-    }
+    // 4. Semantic Validation (Lookups for new DTO data) - validated and resolved via
+    // ExperimentValidator, which returns the entities so we don't have to re-fetch them here.
+    ExperimentValidator.ValidatedReferences validated = experimentValidator.validateForUpdate(experimentDto);
+    User scientist = validated.scientist();
+    Reactant reactantA = validated.reactantA();
+    Reactant reactantB = validated.reactantB();
+    Solvent solvent = validated.solvent();
+    Instrument instrument = validated.instrument();
+    Modality modality = validated.modality();
 
     log.debug("All chemical and lookup entities successfully validated for update.");
 
@@ -451,24 +391,4 @@ public class ExperimentServiceImpl implements ExperimentService {
       return cb.and(predicates.toArray(new Predicate[0]));
     };
   }
-
-    /**
-     * Validates that a given Reactant has at least one associated ReactantStructure
-     * with the flag set to ACTIVE via the repository.
-     *
-     * @param reactant The Reactant to validate.
-     * @param label A label (e.g., "A" or "B") for clearer error messages.
-     */
-    private void validateReactantHasActiveStructure(Reactant reactant, String label) {
-        List<ReactantStructure> structures = structureRepository.findByReactant_Id(reactant.getId());
-
-        boolean hasActiveStructure = structures.stream()
-                .anyMatch(structure -> structure.getFlag() == StructureFlag.ACTIVE);
-
-        if (!hasActiveStructure) {
-            throw new UnprocessableEntityException(
-                    "Reactant " + label + " (ID: " + reactant.getId() + ") cannot be used. It does not have an ACTIVE 3D structure."
-            );
-        }
-    }
 }

@@ -15,14 +15,14 @@ import java.util.List;
 @Mapper(componentModel = "spring")
 public interface ReactantMapper {
 
-    @Mapping(source = "reactant.id", target = "uuid")
-    @Mapping(source = "reactant.type", target = "chemicalType")
-    @Mapping(source = "structure", target = "structures")
+    @Mapping(target = "uuid", source = "reactant.id")
+    @Mapping(target = "chemicalType", source = "reactant.type")
+    @Mapping(target = "structures", source = "structure")
     ReactantDetailDto toDetailDto(Reactant reactant, List<StructureDto> structure);
 
-    @Mapping(source = "reactant.id", target = "uuid")
-    @Mapping(source = "reactant.type", target = "chemicalType")
-    @Mapping(source = "flag", target = "flag") // TODO: Sync with Frontend: We have to add this explicit mapping!
+    @Mapping(target = "uuid", source = "reactant.id")
+    @Mapping(target = "chemicalType", source = "reactant.type")
+    @Mapping(target = "flag", source = "flag") // TODO: Sync with Frontend: We have to add this explicit mapping!
     ReactantDto toDto(Reactant reactant, StructureFlag flag);
 
     // RESTORED: MapStruct needs this to know how to map a Reactant with no flag provided

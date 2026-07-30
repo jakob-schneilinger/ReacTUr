@@ -45,6 +45,11 @@ public class UserEndpoint {
     // AuthService.getLoggedInUser) so it must keep working even for UNAUTHORIZED users, which is
     // why this path is also exempted from the role-based gate in SecurityConfig). Checking someone
     // ELSE's role requires ADMIN.
+    // TODO-CLAUDE (future thread, minor/non-blocking): UserEndpointTest only covers the
+    // self-lookup success/404 paths for getRole. Missing test cases: ADMIN checking someone
+    // ELSE's role (should be 200), and a non-admin checking someone else's role (should be 403).
+    // The annotation below is correct and untouched - this is purely a missing-test-case gap
+    // noticed while verifying the SUPERVISOR permission rollout, not a behavior bug.
     @GetMapping("/{id}/role")
     @PreAuthorize("#id == authentication.name or hasRole('ADMIN')")
     public ResponseEntity<RoleDto> getRole(@PathVariable String id) {
