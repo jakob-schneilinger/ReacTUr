@@ -5,7 +5,7 @@ import java.util.List;
 /**
  * Thrown when request payload validation or business rule validation fails.
  * <p>
- * Handled globally to automatically return an HTTP {@code 400 Bad Request} status.
+ * Handled globally to automatically return an HTTP {@code 422 Unprocessable Entity} status.
  */
 public class ValidationException extends RuntimeException {
     public ValidationException(String message) {

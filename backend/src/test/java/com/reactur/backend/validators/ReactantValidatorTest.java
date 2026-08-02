@@ -7,6 +7,7 @@ import com.reactur.backend.entities.User;
 import com.reactur.backend.entities.options.ChemicalType;
 import com.reactur.backend.exeptions.ResourceConflictException;
 import com.reactur.backend.exeptions.ResourceNotFoundException;
+import com.reactur.backend.exeptions.UnprocessableEntityException;
 import com.reactur.backend.exeptions.ValidationException;
 import com.reactur.backend.repositories.ReactantRepository;
 import com.reactur.backend.repositories.UserRepository;
@@ -115,12 +116,12 @@ class ReactantValidatorTest {
     }
 
     @Test
-    void validateForCreate_shouldThrowResourceNotFound_whenChemicalTypeDoesNotExist() {
+    void validateForCreate_shouldThrowUnprocessableEntity_whenChemicalTypeDoesNotExist() {
         when(reactantRepository.hasNameConflict(anyCollection())).thenReturn(false);
         when(userRepository.findById(userId)).thenReturn(Optional.of(activeUser));
         when(chemicalTypeRepository.findById(chemicalTypeId)).thenReturn(Optional.empty());
 
-        assertThrows(ResourceNotFoundException.class,
+        assertThrows(UnprocessableEntityException.class,
                 () -> reactantValidator.validateForCreate(buildCreateDto("Ethanol", List.of("EtOH"), null), userId));
     }
 
@@ -211,7 +212,7 @@ class ReactantValidatorTest {
     }
 
     @Test
-    void validateForUpdate_shouldThrowResourceNotFound_whenNewChemicalTypeDoesNotExist() {
+    void validateForUpdate_shouldThrowUnprocessableEntity_whenNewChemicalTypeDoesNotExist() {
         UUID newChemicalTypeId = UUID.randomUUID();
         UpdateReactantDto patchDto = new UpdateReactantDto(
                 null, newChemicalTypeId, null, null, null, null, null, null, null
@@ -220,7 +221,7 @@ class ReactantValidatorTest {
         when(reactantRepository.hasNameConflictExcludingId(anyCollection(), eq(reactantId))).thenReturn(false);
         when(chemicalTypeRepository.findById(newChemicalTypeId)).thenReturn(Optional.empty());
 
-        assertThrows(ResourceNotFoundException.class,
+        assertThrows(UnprocessableEntityException.class,
                 () -> reactantValidator.validateForUpdate(reactantId, patchDto, existingReactant));
     }
 

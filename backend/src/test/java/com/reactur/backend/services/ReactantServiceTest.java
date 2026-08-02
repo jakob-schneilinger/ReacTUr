@@ -14,6 +14,7 @@ import com.reactur.backend.entities.Reactant;
 import com.reactur.backend.entities.User;
 import com.reactur.backend.exeptions.ResourceConflictException;
 import com.reactur.backend.exeptions.ResourceNotFoundException;
+import com.reactur.backend.exeptions.UnprocessableEntityException;
 import com.reactur.backend.exeptions.ValidationException;
 import com.reactur.backend.mappers.ReactantMapper;
 import com.reactur.backend.repositories.ReactantRepository;
@@ -137,13 +138,13 @@ class ReactantServiceTest {
     }
 
     @Test
-    void createReactant_ShouldThrowResourceNotFound_WhenChemicalTypeDoesNotExist() {
+    void createReactant_ShouldThrowUnprocessableEntity_WhenChemicalTypeDoesNotExist() {
         when(userRepository.findById(MOCK_USER_ID)).thenReturn(Optional.of(mockUser));
         when(reactantRepository.hasNameConflict(anyCollection())).thenReturn(false);
 
         when(chemicalTypeRepository.findById(VALID_CHEMICAL_TYPE_ID)).thenReturn(Optional.empty());
 
-        assertThrows(ResourceNotFoundException.class, () -> reactantService.createReactant(sampleCreateDto, MOCK_USER_ID));
+        assertThrows(UnprocessableEntityException.class, () -> reactantService.createReactant(sampleCreateDto, MOCK_USER_ID));
         verify(reactantRepository, never()).save(any(Reactant.class));
     }
 
@@ -285,7 +286,7 @@ class ReactantServiceTest {
     }
 
     @Test
-    void updateReactant_ShouldThrowResourceNotFound_WhenNewChemicalTypeDoesNotExist() {
+    void updateReactant_ShouldThrowUnprocessableEntity_WhenNewChemicalTypeDoesNotExist() {
         UUID newChemicalTypeId = UUID.randomUUID();
 
         UpdateReactantDto updateDto = new UpdateReactantDto(
@@ -296,7 +297,7 @@ class ReactantServiceTest {
         when(reactantRepository.hasNameConflictExcludingId(anyCollection(), eq(VALID_UUID))).thenReturn(false);
         when(chemicalTypeRepository.findById(newChemicalTypeId)).thenReturn(Optional.empty());
 
-        assertThrows(ResourceNotFoundException.class, () -> reactantService.updateReactant(VALID_UUID, updateDto));
+        assertThrows(UnprocessableEntityException.class, () -> reactantService.updateReactant(VALID_UUID, updateDto));
         verify(reactantRepository, never()).save(any(Reactant.class));
     }
 
