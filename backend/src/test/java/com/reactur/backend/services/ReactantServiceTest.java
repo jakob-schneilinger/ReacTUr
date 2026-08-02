@@ -165,6 +165,15 @@ class ReactantServiceTest {
     }
 
     @Test
+    void createReactant_ShouldThrowResourceConflictException_WhenInChiKeyExists() {
+        when(reactantRepository.hasNameConflict(anyCollection())).thenReturn(false);
+        when(reactantRepository.existsByInChiKey("LFQSCWFLJHTTHZ-UHFFFAOYSA-N")).thenReturn(true);
+
+        assertThrows(ResourceConflictException.class, () -> reactantService.createReactant(sampleCreateDto, MOCK_USER_ID));
+        verify(reactantRepository, never()).save(any(Reactant.class));
+    }
+
+    @Test
     void createReactant_ShouldThrowConflict_WhenAdditionalShortNameAlreadyExistsAsPrimary() {
         CreateReactantDto newReactantDto = new CreateReactantDto(
                 "C", UUID.randomUUID(), "Methane",

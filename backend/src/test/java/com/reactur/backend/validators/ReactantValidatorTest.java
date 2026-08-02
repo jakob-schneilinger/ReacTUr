@@ -79,6 +79,13 @@ class ReactantValidatorTest {
         );
     }
 
+    private CreateReactantDto buildCreateDtoWithInChiKey(String shortName, List<String> additionalShortNames, String inChiKey) {
+        return new CreateReactantDto(
+                "CCO", chemicalTypeId, shortName, additionalShortNames,
+                "Ethyl alcohol", null, inChiKey, null, null
+        );
+    }
+
     // --- validateForCreate: happy path -----------------------------------
 
     @Test
@@ -134,6 +141,30 @@ class ReactantValidatorTest {
 
         assertThrows(ResourceConflictException.class,
                 () -> reactantValidator.validateForCreate(buildCreateDto("Ethanol", List.of("EtOH"), "64-17-5"), userId));
+    }
+
+    @Test
+    void validateForCreate_shouldThrowResourceConflict_whenInChiKeyAlreadyExists() {
+        when(reactantRepository.hasNameConflict(anyCollection())).thenReturn(false);
+        when(reactantRepository.existsByInChiKey("LFQSCWFLJHTTHZ-UHFFFAOYSA-N")).thenReturn(true);
+
+        assertThrows(ResourceConflictException.class,
+                () -> reactantValidator.validateForCreate(
+                        buildCreateDtoWithInChiKey("Ethanol", List.of("EtOH"), "LFQSCWFLJHTTHZ-UHFFFAOYSA-N"), userId));
+    }
+
+    @Test
+    void validateForCreate_shouldReturnResolvedReferences_whenInChiKeyIsNovel() {
+        when(reactantRepository.hasNameConflict(anyCollection())).thenReturn(false);
+        when(reactantRepository.existsByInChiKey("LFQSCWFLJHTTHZ-UHFFFAOYSA-N")).thenReturn(false);
+        when(userRepository.findById(userId)).thenReturn(Optional.of(activeUser));
+        when(chemicalTypeRepository.findById(chemicalTypeId)).thenReturn(Optional.of(chemicalType));
+
+        ReactantValidator.ValidatedReferences result = reactantValidator.validateForCreate(
+                buildCreateDtoWithInChiKey("Ethanol", List.of("EtOH"), "LFQSCWFLJHTTHZ-UHFFFAOYSA-N"), userId);
+
+        assertNotNull(result.activeUser());
+        assertNotNull(result.chemicalType());
     }
 
     @Test

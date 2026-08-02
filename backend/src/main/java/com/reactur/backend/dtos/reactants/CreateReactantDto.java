@@ -45,13 +45,7 @@ public record CreateReactantDto(
         // (Semantic - Service Layer): If non-blank, verify no other reactant already uses this CAS number.
         String casNumber,
 
-        // TODO (Semantic - Service Layer): Unlike casNumber above, inChiKey uniqueness is NOT verified on
-        //  create today - ReactantValidator#validateForCreate never checks it, even though the update path
-        //  (validateForUpdate) does via ReactantRepository#existsByInChiKeyAndIdNot, and a same-purpose
-        //  ReactantRepository#existsByInChiKey(String) method already exists but is never called. This means
-        //  two reactants can currently be created with the same non-blank inChiKey via POST, but the second one
-        //  could never have its inChiKey set to that same value again via PATCH. Flagged as a currently-unenforced
-        //  gap, not fixed here - see DTO validation review report.
+        // (Semantic - Service Layer): If non-blank, verify no other reactant already uses this InChIKey.
         String inChiKey,
         String comment,
         List<String> references

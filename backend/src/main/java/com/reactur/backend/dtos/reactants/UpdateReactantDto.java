@@ -47,9 +47,7 @@ public record UpdateReactantDto(
         String casNumber,
 
         // (Semantic - Service Layer): If provided (non-null), changed, and non-blank, verify no other
-        //  reactant already uses this InChIKey (ReactantValidator#validateForUpdate). Unlike CreateReactantDto,
-        //  this check IS enforced here - see the inChiKey TODO on CreateReactantDto for the create/update
-        //  asymmetry this creates.
+        //  reactant already uses this InChIKey (ReactantValidator#validateForUpdate).
         String inChiKey,
         String comment,
         List<String> references
