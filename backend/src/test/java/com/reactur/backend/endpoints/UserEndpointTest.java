@@ -151,6 +151,34 @@ class UserEndpointTest {
     }
 
     @Test
+    void getRole_WhenAdmin_ChecksSomeoneElsesRole_ShouldReturn200() throws Exception {
+        String targetId = "target-user-id";
+        String adminId = "admin-user-id";
+        RoleDto mockResponse = new RoleDto(Role.SUPERVISOR);
+
+        when(userService.getRole(targetId)).thenReturn(mockResponse);
+
+        mockMvc.perform(get("/api/users/" + targetId + "/role")
+                        .with(jwt().jwt(builder -> builder.subject(adminId))
+                                .authorities(new SimpleGrantedAuthority("ROLE_ADMIN"))))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.role").value("SUPERVISOR"));
+    }
+
+    @Test
+    void getRole_WhenNonAdmin_ChecksSomeoneElsesRole_ShouldReturn403() throws Exception {
+        String targetId = "target-user-id";
+        String requesterId = "admin-user-id";
+
+        mockMvc.perform(get("/api/users/" + targetId + "/role")
+                        .with(jwt().jwt(builder -> builder.subject(requesterId))
+                                .authorities(new SimpleGrantedAuthority("ROLE_USER"))))
+                .andExpect(status().isForbidden());
+
+        verify(userService, never()).getRole(any());
+    }
+
+    @Test
     void archiveUser_WhenAdmin_ShouldReturn200_WhenSuccessful() throws Exception {
         String id = "some-id-lol";
 
