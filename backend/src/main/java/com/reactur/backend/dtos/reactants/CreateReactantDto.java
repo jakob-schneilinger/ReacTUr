@@ -27,13 +27,31 @@ public record CreateReactantDto(
 
         @NotNull(message = "Chemical type must not be null.")
         UUID chemicalType,
+        // (Semantic - Service Layer): Verify ChemicalType UUID exists in the database
+        // (ReactantValidator#validateForCreate).
 
         @NotBlank(message = "Short name is a required field.")
         @Size(max = 100, message = "Short name must not exceed 100 characters.")
         String shortName,
+        // (Semantic - Service Layer): Verify this short name isn't already used (case-insensitively)
+        // as another reactant's shortName or additionalShortNames.
+
+        // (Semantic - Service Layer): Verify no blank/duplicate (case-insensitive) entries, no overlap
+        //  with shortName, and no conflict with any existing reactant's shortName/additionalShortNames
+        //  (same check as shortName above, see ReactantValidator#validateForCreate/#validateAdditionalShortNames).
         List<String> additionalShortNames,
         String chemicalName,
+
+        // (Semantic - Service Layer): If non-blank, verify no other reactant already uses this CAS number.
         String casNumber,
+
+        // TODO (Semantic - Service Layer): Unlike casNumber above, inChiKey uniqueness is NOT verified on
+        //  create today - ReactantValidator#validateForCreate never checks it, even though the update path
+        //  (validateForUpdate) does via ReactantRepository#existsByInChiKeyAndIdNot, and a same-purpose
+        //  ReactantRepository#existsByInChiKey(String) method already exists but is never called. This means
+        //  two reactants can currently be created with the same non-blank inChiKey via POST, but the second one
+        //  could never have its inChiKey set to that same value again via PATCH. Flagged as a currently-unenforced
+        //  gap, not fixed here - see DTO validation review report.
         String inChiKey,
         String comment,
         List<String> references

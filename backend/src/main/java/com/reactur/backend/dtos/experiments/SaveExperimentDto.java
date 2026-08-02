@@ -19,10 +19,14 @@ import java.util.UUID;
 public record SaveExperimentDto(
 
   @NotNull(message = "Reactant A is required")
-  UUID reactantA,  // (Semantic - Service Layer): Verify this UUID actually exists in the Reactant DB table.
+  UUID reactantA,
+  // (Semantic - Service Layer): Verify this UUID exists in the Reactant DB table, differs from reactantB,
+  // and has an ACTIVE 3D structure (see ExperimentValidator#validate).
 
   @NotNull(message = "Reactant B is required")
-  UUID reactantB,  // (Semantic - Service Layer): Verify this UUID actually exists in the Reactant DB table.
+  UUID reactantB,
+  // (Semantic - Service Layer): Verify this UUID exists in the Reactant DB table, differs from reactantA,
+  // and has an ACTIVE 3D structure (see ExperimentValidator#validate).
 
   @Valid
   @NotNull(message = "Metadata is required")

@@ -43,16 +43,19 @@ public record SearchParametersDto(
 
   @Min(value = -273, message = "Temperature cannot be below absolute zero")
   Double temperatureMin,
+  @Min(value = -273, message = "Temperature cannot be below absolute zero")
   Double temperatureMax,
 
   UUID solvent,
 
   @PositiveOrZero(message = "Concentration cannot be negative")
   Double concentrationA_Min,
+  @PositiveOrZero(message = "Concentration cannot be negative")
   Double concentrationA_Max,
 
   @PositiveOrZero(message = "Concentration cannot be negative")
   Double concentrationB_Min,
+  @PositiveOrZero(message = "Concentration cannot be negative")
   Double concentrationB_Max,
 
   UUID instrument,
@@ -60,6 +63,7 @@ public record SearchParametersDto(
 
   @Positive(message = "Wavelength must be positive")
   Double wavelengthMin,
+  @Positive(message = "Wavelength must be positive")
   Double wavelengthMax,
 
   @Size(max = 1023, message = "Comment search string is too long")
@@ -70,6 +74,8 @@ public record SearchParametersDto(
 
   // (Semantic - Service/DB Layer): Range overlaps (e.g., dateMin > dateMax, or tempMin > tempMax)
   // are intentionally left unvalidated here. The database will safely handle impossible ranges
-  // by returning an empty result set
+  // by returning an empty result set. Note this is distinct from the standalone per-field bounds
+  // above (e.g. @Min(-273) on both temperatureMin/Max): those apply symmetrically to each bound
+  // independently, regardless of what the other bound in the pair is set to.
 ) {
 }

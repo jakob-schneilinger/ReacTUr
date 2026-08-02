@@ -20,13 +20,36 @@ import java.util.UUID;
  */
 public record UpdateReactantDto(
 
+        // (Semantic - Service Layer): If provided (non-null), must not be blank/whitespace-only - rejected
+        //  with a ValidationException in ReactantValidator#validateForUpdate. Deliberately not a Jakarta
+        //  @NotBlank, since that would also reject omitting this field entirely, breaking the PATCH
+        //  null-means-preserve convention (see docs/API_UPDATE_SEMANTICS.md).
         String smiles,
+
+        // (Semantic - Service Layer): If provided (non-null), verify ChemicalType UUID exists in the database
+        //  (ReactantValidator#validateForUpdate).
         UUID chemicalType,
+
+        // (Semantic - Service Layer): If provided (non-null), must not be blank/whitespace-only (same
+        //  PATCH-aware exception as smiles above), and must not conflict (case-insensitively) with another
+        //  reactant's shortName/additionalShortNames.
         @Size(max = 100, message = "Short name must not exceed 100 characters.")
         String shortName,
+
+        // (Semantic - Service Layer): If provided (non-null), verify no blank/duplicate (case-insensitive)
+        //  entries, no overlap with the effective shortName, and no conflict with any other reactant's
+        //  shortName/additionalShortNames (ReactantValidator#validateForUpdate/#validateAdditionalShortNames).
         List<String> additionalShortNames,
         String chemicalName,
+
+        // (Semantic - Service Layer): If provided (non-null), changed, and non-blank, verify no other
+        //  reactant already uses this CAS number (ReactantValidator#validateForUpdate).
         String casNumber,
+
+        // (Semantic - Service Layer): If provided (non-null), changed, and non-blank, verify no other
+        //  reactant already uses this InChIKey (ReactantValidator#validateForUpdate). Unlike CreateReactantDto,
+        //  this check IS enforced here - see the inChiKey TODO on CreateReactantDto for the create/update
+        //  asymmetry this creates.
         String inChiKey,
         String comment,
         List<String> references

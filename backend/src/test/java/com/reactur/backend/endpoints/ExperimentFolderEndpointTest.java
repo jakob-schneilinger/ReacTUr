@@ -91,6 +91,22 @@ class ExperimentFolderEndpointTest {
   }
 
   @Test
+  void createFolder_whenNameExceedsMaxLength_returns400BadRequest() throws Exception {
+    // Validation Test: Name exceeds 255 characters, which violates the newly-added @Size(max = 255)
+    // (matching ExperimentFolder.name's default, unannotated DB column length).
+    SaveFolderDto invalidRequestDto = new SaveFolderDto("a".repeat(256));
+
+    mockMvc.perform(post("/api/folders")
+        .with(csrf())
+        .with(asUser(userId))
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(objectMapper.writeValueAsString(invalidRequestDto)))
+      .andExpect(status().isBadRequest());
+
+    Mockito.verifyNoInteractions(folderService);
+  }
+
+  @Test
   void getMyFolders_returns200OkWithList() throws Exception {
     UUID folderId = UUID.randomUUID();
     GetFolderDto responseDto = new GetFolderDto(folderId, "My Synthesis", List.of(UUID.randomUUID()));
