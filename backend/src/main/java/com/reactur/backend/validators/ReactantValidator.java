@@ -6,13 +6,13 @@ import com.reactur.backend.entities.Reactant;
 import com.reactur.backend.entities.User;
 import com.reactur.backend.entities.options.ChemicalType;
 import com.reactur.backend.exeptions.ResourceConflictException;
-import com.reactur.backend.exeptions.ResourceNotFoundException;
 import com.reactur.backend.exeptions.UnprocessableEntityException;
 import com.reactur.backend.exeptions.ValidationException;
 import com.reactur.backend.repositories.ReactantRepository;
 import com.reactur.backend.repositories.UserRepository;
 import com.reactur.backend.repositories.options.ChemicalTypeRepository;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -31,6 +31,7 @@ import java.util.UUID;
  */
 @Component
 @AllArgsConstructor
+@Slf4j
 public class ReactantValidator {
 
     private final ReactantRepository reactantRepository;
@@ -75,14 +76,14 @@ public class ReactantValidator {
             throw new ResourceConflictException(conflictErrors);
         }
 
-        // TODO-CLAUDE: This throws ResourceNotFoundException (404) for the authenticated user not
-        // being found, which is inconsistent with the path-parameter-only meaning of 404 agreed in
-        // the status-code taxonomy re-alignment (see task: "Align status-code semantics for
-        // referenced entity not found and business-rule validation"). Left untouched intentionally;
-        // flagged as a separate, unresolved question (compare with ExperimentServiceImpl's own
-        // "authenticated user not found" case, which throws IllegalStateException -> 500).
         User activeUser = userRepository.findById(userId)
-                .orElseThrow(() -> new ResourceNotFoundException("Current User could not be found"));
+                .orElseThrow(() -> {
+                    log.error(
+                            "CRITICAL: Authenticated Keycloak user {} not found in internal database. " +
+                                    "CustomJwtAuthenticationConverter's user-sync may have failed.", userId
+                    );
+                    return new IllegalStateException("System state error: Authenticated user lacks internal profile.");
+                });
 
         ChemicalType chemicalType = chemicalTypeRepository.findById(saveReactant.chemicalType())
                 .orElseThrow(() -> new UnprocessableEntityException("ChemicalType with ID " + saveReactant.chemicalType() + " not found"));

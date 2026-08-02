@@ -149,11 +149,11 @@ class ReactantServiceTest {
     }
 
     @Test
-    void createReactant_ShouldThrowResourceNotFound_WhenUserDoesNotExist() {
+    void createReactant_ShouldThrowIllegalState_WhenCurrentUserDoesNotExist() {
         when(reactantRepository.hasNameConflict(anyCollection())).thenReturn(false);
         when(userRepository.findById(MOCK_USER_ID)).thenReturn(Optional.empty());
 
-        assertThrows(ResourceNotFoundException.class, () -> reactantService.createReactant(sampleCreateDto, MOCK_USER_ID));
+        assertThrows(IllegalStateException.class, () -> reactantService.createReactant(sampleCreateDto, MOCK_USER_ID));
         verify(reactantRepository, never()).save(any(Reactant.class));
     }
 

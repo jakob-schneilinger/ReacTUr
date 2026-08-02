@@ -6,7 +6,6 @@ import com.reactur.backend.entities.Reactant;
 import com.reactur.backend.entities.User;
 import com.reactur.backend.entities.options.ChemicalType;
 import com.reactur.backend.exeptions.ResourceConflictException;
-import com.reactur.backend.exeptions.ResourceNotFoundException;
 import com.reactur.backend.exeptions.UnprocessableEntityException;
 import com.reactur.backend.exeptions.ValidationException;
 import com.reactur.backend.repositories.ReactantRepository;
@@ -107,11 +106,11 @@ class ReactantValidatorTest {
     // --- validateForCreate: user / chemical type existence ---------------
 
     @Test
-    void validateForCreate_shouldThrowResourceNotFound_whenUserDoesNotExist() {
+    void validateForCreate_shouldThrowIllegalState_whenCurrentUserDoesNotExist() {
         when(reactantRepository.hasNameConflict(anyCollection())).thenReturn(false);
         when(userRepository.findById(userId)).thenReturn(Optional.empty());
 
-        assertThrows(ResourceNotFoundException.class,
+        assertThrows(IllegalStateException.class,
                 () -> reactantValidator.validateForCreate(buildCreateDto("Ethanol", List.of("EtOH"), null), userId));
     }
 
