@@ -12,12 +12,3 @@ spring:
   h2:
     console:
       enabled: true
-  sql:
-    init:
-      # Todo: Remove this explanatory comment
-      # src/main/resources/data.sql is currently empty. Spring Boot's default script-based
-      # initializer runs it automatically against any detected embedded database (mode: embedded)
-      # and fails with "'script' must not be null or empty" if it finds nothing to execute. This
-      # was never exercised before ReactantRepositoryTest, the first test to boot a real
-      # datasource via the "test" profile/config.
-      mode: never
