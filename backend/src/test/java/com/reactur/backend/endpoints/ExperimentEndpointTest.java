@@ -117,7 +117,7 @@ class ExperimentEndpointTest {
     mockMvc.perform(post("/api/experiment")
         // CSRF token (required for POST requests)
         .with(csrf())
-        // Keycloak JWT Mock for how UserSyncFilter expects it
+        // Keycloak JWT Mock for how CustomJwtAuthenticationConverter expects it
         .with(jwt().jwt(builder -> builder
           .subject("mock-keycloak-id-123")
           .claim("email", "chemist@tuwien.ac.at")

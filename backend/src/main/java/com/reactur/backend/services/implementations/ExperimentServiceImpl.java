@@ -61,7 +61,7 @@ public class ExperimentServiceImpl implements ExperimentService {
       .orElseThrow(() -> {
         log.error(
           "CRITICAL: Authenticated Keycloak user {} not found in internal database. " +
-            "UserSyncFilter may have failed.", requestingUserId
+            "CustomJwtAuthenticationConverter's user-sync may have failed.", requestingUserId
         );
         return new IllegalStateException("System state error: Authenticated user lacks internal profile.");
       });

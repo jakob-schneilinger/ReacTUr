@@ -39,10 +39,10 @@ public class User {
     @Builder.Default
     private Role role = Role.UNAUTHORIZED;
 
-    /* TODO: Discuss how Roles are extracted:
-        Currently, UserSyncFilter does not extract the Role from the Keycloak JWT.
-        Are we reading roles from the token, or managing them purely in our DB?
-    */
+    // Roles are always read fresh from this column on every request, via
+    // CustomJwtAuthenticationConverter (wired into SecurityConfig as the JWT-to-Authentication
+    // converter) - the Keycloak JWT itself carries no role claim, it's only used to identify which
+    // user's DB row to look up. Intentional design, not an open question.
 
     @Column(name = "created_at", updatable = false)
     @Builder.Default
