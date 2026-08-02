@@ -35,13 +35,14 @@ class SolventMapperTest {
     }
 
     @Test
-    void toEntity_shouldMapUuidToId() {
+    void toEntity_shouldIgnoreClientSuppliedUuidAndArchivedAt_soIdIsServerGeneratedAndOptionStartsUnarchived() {
         UUID uuid = UUID.randomUUID();
-        SolventDto dto = new SolventDto(uuid, "Ethanol", null);
+        Instant archivedAt = Instant.now();
+        SolventDto dto = new SolventDto(uuid, "Ethanol", archivedAt);
 
         Solvent entity = mapper.toEntity(dto);
 
-        assertEquals(uuid, entity.getId());
+        assertNull(entity.getId());
         assertEquals(dto.name(), entity.getName());
         assertNull(entity.getArchivedAt());
     }

@@ -20,7 +20,8 @@ public interface BaseMapper<E, T> {
     @Mapping(target = "uuid", source = "id")
     T toDto(E entity);
 
-    @Mapping(target = "id", source = "uuid")
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "archivedAt", ignore = true)
     E toEntity(T dto);
 
     List<T> toDtoList(List<E> entities);
