@@ -1,0 +1,1123 @@
+﻿<?xml version="1.0" encoding="utf-8"?><!DOCTYPE html SYSTEM "about:legacy-compat"><html xmlns="http://www.w3.org/1999/xhtml"><head><meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" /><title>Einzelbeispiel (SE PR), Wintersemester 2025</title><link rel="stylesheet" type="text/css" href="doc.css" /></head><body><main><h1>Einzelbeispiel (SE PR), Wintersemester 2025</h1>
+		
+		<table class="document-version-info with-margin centered">
+			<tbody>
+				<tr><td>Datum</td><td>03.10.2025</td></tr>
+				<tr><td>Zeit</td><td>13:43:26</td></tr>
+				<tr><td>Dokumentrevision</td><td>1</td></tr>
+			</tbody>
+		</table>
+		<div class="bordered-box"><strong>Bitte lesen Sie dieses Dokument aufmerksam und bis zum Ende durch, bevor Sie mit der Arbeit beginnen.
+	Nur so können Sie sicherstellen, dass Sie die gesamte Angabe verstanden haben!</strong></div><div class="dp-selflink-container"><a class="dp-selflink" href="#_p-1"><span class="dp-selflink-icon">§</span></a><p class="dp-p" id="_p-1">Um an der Gruppenphase der Lehrveranstaltung Software Engineering Projekt teilnehmen zu
+können, muss das Einzelbeispiel <strong>selbständig</strong> erfolgreich gelöst werden.</p></div><h3 id="revisionen-dieses-dokuments">Revisionen dieses Dokuments</h3><div class="dp-selflink-container"><a class="dp-selflink" href="#_ol-2"><span class="dp-selflink-icon">§</span></a><ol class="dp-ol" id="_ol-2" start="0"><li>(01.10.2025): Ursprüngliche Version der Angabe</li><li>(03.10.2025): JUnit-Version in Technologieübersicht von 5 auf 6 korrigiert</li></ol></div><h3 id="zu-verwendende-technologien">Zu verwendende Technologien</h3><table class="centered version-table">
+	<tbody>
+		<tr><td>Programmiersprache</td><td>Java OpenJDK 25</td></tr>
+		<tr><td>Backend-Framework</td><td>Spring Boot 3.5</td></tr>
+		<tr><td>JavaScript-Runtime</td><td>Node.js 22.20.0</td></tr>
+		<tr><td>Frontend-Framework</td><td>Angular 20</td></tr>
+		<tr><td>Relationale Datenbank</td><td>H2 2.4.x</td></tr>
+		<tr><td>Test-Framework</td><td>JUnit 6.x<br />AssertJ</td></tr>
+		<tr><td>Build &amp; Dependency Management</td><td>Maven 3<br />NPM 10.9.3</td></tr>
+		<tr><td>Versionskontrolle</td><td>Git 2.x</td></tr>
+	</tbody>
+</table><div class="dp-selflink-container"><a class="dp-selflink" href="#_p-3"><span class="dp-selflink-icon">§</span></a><p class="dp-p" id="_p-3">Als Entwicklungsumgebung empfehlen wir IntelliJ IDEA in der
+<a href="https://www.jetbrains.com/idea/download/">aktuellen Version</a>.</p></div><h3 id="betreuung-durch-unsere-tutorinnen-wahrend-der-eingangsphase">Betreuung durch unsere Tutor/innen während der Eingangsphase</h3><div class="dp-selflink-container"><a class="dp-selflink" href="#_p-4"><span class="dp-selflink-icon">§</span></a><p class="dp-p" id="_p-4">Bei Fragen und Unklarheiten während der Eingangsphase stehen Ihnen unsere Tutor/innen per TUWEL Diskussionsforum zur Verfügung.
+Wir erwarten, dass Sie die Aussendungen via Tuwel lesen und das Forum durchsuchen, bevor Sie eine Frage doppelt stellen.
+Zusätzlich gibt Betreuungsstunden, zu denen unsere Tutor/innen online zur Verfügung stehen, um bei der Problemlösung behilflich zu sein.
+<em xmlns:ht="http://www.w3.org/1999/xhtml" xmlns:dpx="dp:dp:ext" xmlns:val="dp:vars:values"><strong>Wichtig: </strong>Je genauer Sie Ihre Fragen formulieren, desto besser kann Ihnen geholfen werden.</em></p></div><div class="dp-selflink-container"><a class="dp-selflink" href="#_p-5"><span class="dp-selflink-icon">§</span></a><p class="dp-p" id="_p-5"><strong>Online-Supportstunden:</strong> Termine und Informationen finden Sie in TUWEL.</p></div><h3 id="erwartete-vorkenntnisse">Erwartete Vorkenntnisse</h3><div class="dp-selflink-container"><a class="dp-selflink" href="#_p-6"><span class="dp-selflink-icon">§</span></a><p class="dp-p" id="_p-6">Fachliche und methodische Kompetenzen:</p></div><div class="dp-selflink-container"><a class="dp-selflink" href="#_ul-7"><span class="dp-selflink-icon">§</span></a><ul class="dp-ul" id="_ul-7"><li>Objektorientierte Analyse, Design und Programmierung</li><li>Grundlagen der Unified Modeling Language (UML)</li><li>Grundkenntnisse aus Algorithmen und Datenstrukturen</li><li>Grundkenntnisse zu Datenbanksystemen</li></ul></div><div class="dp-selflink-container"><a class="dp-selflink" href="#_p-8"><span class="dp-selflink-icon">§</span></a><p class="dp-p" id="_p-8">Kognitive und praktische Kompetenzen:</p></div><div class="dp-selflink-container"><a class="dp-selflink" href="#_ul-9"><span class="dp-selflink-icon">§</span></a><ul class="dp-ul" id="_ul-9"><li>Eine praxisrelevante Programmiersprache und moderne Werkzeuge (z.B. Java) anwenden</li><li>Eine IDE und Quellcodeverwaltung anwenden</li></ul></div>
+	<nav class="dp-toc"><h2>Inhaltsverzeichnis</h2><ol class="dp-toc-list"><li class="dp-toc-entry"><a href="#angabe">Angabe</a><ol class="dp-toc-list">
+      <li class="dp-toc-entry"><a href="#domänenmodell">Domänenmodell</a><ol class="dp-toc-list" /></li>
+      <li class="dp-toc-entry"><a href="#dokumentation">Dokumentation</a><ol class="dp-toc-list" /></li>
+      <li class="dp-toc-entry"><a href="#implementierungsreihenfolge">Implementierungsreihenfolge</a><ol class="dp-toc-list">
+          <li class="dp-toc-entry"><a href="#reihenfolge-userstories">Userstories</a><ol class="dp-toc-list" /></li>
+          <li class="dp-toc-entry"><a href="#reihenfolge-techstories">Techstories</a><ol class="dp-toc-list" /></li>
+        </ol></li>
+      <li class="dp-toc-entry"><a href="#angabe-implementierung">Implementierung</a><ol class="dp-toc-list" /></li>
+      <li class="dp-toc-entry"><a href="#userstories">Userstories (80 Punkte)</a><ol class="dp-toc-list" /></li>
+      <li class="dp-toc-entry"><a href="#techstories">Techstories</a><ol class="dp-toc-list">
+          <li class="dp-toc-entry"><a href="#ts-stakeholder-qualitätsmanager">Qualitätsmanager/in</a><ol class="dp-toc-list" /></li>
+          <li class="dp-toc-entry"><a href="#ts-stakeholder-usability-engineer">Usability Engineer</a><ol class="dp-toc-list" /></li>
+          <li class="dp-toc-entry"><a href="#ts-stakeholder-technischer-architekt">Technische/r Architekt/in</a><ol class="dp-toc-list" /></li>
+          <li class="dp-toc-entry"><a href="#ts-stakeholder-datenmanager">Datenmanager/in</a><ol class="dp-toc-list" /></li>
+        </ol></li>
+    </ol></li><li class="dp-toc-entry"><a href="#implementierung">Implementierung</a><ol class="dp-toc-list">
+      <li class="dp-toc-entry"><a href="#erste-schritte">Erste Schritte</a><ol class="dp-toc-list">
+          <li class="dp-toc-entry"><a href="#erste-schritte-backend">Backend</a><ol class="dp-toc-list" /></li>
+          <li class="dp-toc-entry"><a href="#erste-schritte-frontend">Frontend</a><ol class="dp-toc-list" /></li>
+          <li class="dp-toc-entry"><a href="#erste-schritte-template">Aufbau des Templates</a><ol class="dp-toc-list" /></li>
+        </ol></li>
+      <li class="dp-toc-entry"><a href="#implementierung-spring">Spring</a><ol class="dp-toc-list" /></li>
+      <li class="dp-toc-entry"><a href="#implementierung-backend-build-und-dependency-management">Backend Build- und Dependencymanagement</a><ol class="dp-toc-list" /></li>
+      <li class="dp-toc-entry"><a href="#implementierung-angular-cli">Angular CLI</a><ol class="dp-toc-list" /></li>
+      <li class="dp-toc-entry"><a href="#implementierung-vom-domänenmodell-zur-datenbank">Vom Domänenmodell zur Datenbank</a><ol class="dp-toc-list" /></li>
+      <li class="dp-toc-entry"><a href="#implementierung-reihenfolge">Reihenfolge der Implementierung</a><ol class="dp-toc-list">
+          <li class="dp-toc-entry"><a href="#implementierung-reihenfolge-persistenz">Persistenz</a><ol class="dp-toc-list" /></li>
+          <li class="dp-toc-entry"><a href="#implementierung-reihenfolge-service">Service</a><ol class="dp-toc-list" /></li>
+          <li class="dp-toc-entry"><a href="#implementierung-reihenfolge-rest">REST</a><ol class="dp-toc-list" /></li>
+        </ol></li>
+      <li class="dp-toc-entry"><a href="#implementierung-testen">Testen</a><ol class="dp-toc-list">
+          <li class="dp-toc-entry"><a href="#implementierung-testen-normal-und-fehlerfall">Normal- und Fehlerfall</a><ol class="dp-toc-list" /></li>
+          <li class="dp-toc-entry"><a href="#implementierung-testen-manuell">Manuelle Tests</a><ol class="dp-toc-list" /></li>
+          <li class="dp-toc-entry"><a href="#implementierung-testen-automatisch">Automatische Tests</a><ol class="dp-toc-list" /></li>
+        </ol></li>
+      <li class="dp-toc-entry"><a href="#implementierung-versionskontrolle">Versionskontrolle</a><ol class="dp-toc-list">
+          <li class="dp-toc-entry"><a href="#implementierung-versionskontrolle-initialisieren">Initialisieren</a><ol class="dp-toc-list" /></li>
+          <li class="dp-toc-entry"><a href="#implementierung-versionskontrolle-add-und-commit">Add und Commit</a><ol class="dp-toc-list" /></li>
+          <li class="dp-toc-entry"><a href="#implementierung-versionskontrolle-remotes-push-und-pull">Remotes, Push und Pull</a><ol class="dp-toc-list" /></li>
+        </ol></li>
+      <li class="dp-toc-entry"><a href="#implementierung-weiterführende-links">Weiterführende Links und Literatur</a><ol class="dp-toc-list" /></li>
+    </ol></li><li class="dp-toc-entry"><a href="#bewertung">Bewertung</a><ol class="dp-toc-list">
+      <li class="dp-toc-entry"><a href="#bewertung-einzelphase">Bestehen der Einzelphase</a><ol class="dp-toc-list">
+          <li class="dp-toc-entry"><a href="#bewertung-einstiegstest">Einstiegstest (max. 10 Punkte)</a><ol class="dp-toc-list" /></li>
+          <li class="dp-toc-entry"><a href="#bewertung-einzelbeispiel">Einzelbeispiel (max. 80 Punkte)</a><ol class="dp-toc-list" /></li>
+        </ol></li>
+      <li class="dp-toc-entry"><a href="#bewertung-endnote">Einfluss auf die Endnote</a><ol class="dp-toc-list" /></li>
+    </ol></li><li class="dp-toc-entry"><a href="#abgabe">Abgabe</a><ol class="dp-toc-list">
+      <li class="dp-toc-entry"><a href="#abgabe-vorbedingungen">Vorbedingungen</a><ol class="dp-toc-list" /></li>
+      <li class="dp-toc-entry"><a href="#abgabe-ablauf">Ablauf des Abgabegesprächs</a><ol class="dp-toc-list" /></li>
+      <li class="dp-toc-entry"><a href="#abgabe-hinweise">Wichtige Hinweise zur Abgabe</a><ol class="dp-toc-list" /></li>
+      <li class="dp-toc-entry"><a href="#abgabe-nach-der-bewertung">Nach der Bewertung</a><ol class="dp-toc-list" /></li>
+    </ol></li></ol></nav>
+		<section id="angabe"><h2 class="dp-heading dp-heading-section dp-selflink-container"><a class="dp-selflink" href="#angabe"><span class="dp-selflink-icon">§</span></a><span class="dp-heading-text">Angabe</span></h2><div class="dp-content dp-section-content">
+		<div class="dp-selflink-container"><a class="dp-selflink" href="#angabe_p-1"><span class="dp-selflink-icon">§</span></a><p class="dp-p" id="angabe_p-1">Sie sind als Softwareentwickler/in in einem kleinen österreichischen Unternehmen tätig.
+Ihr Unternehmen wurde beauftragt eine Plattform für <em>Wendy’s Family Tree</em> zur Verwaltung von Pferden und deren Vorfahren zu entwickeln.
+Diese Plattform soll als Web Applikation ausgerollt werden und aus einem Backend und einem Frontend bestehen.</p></div><div class="dp-selflink-container"><a class="dp-selflink" href="#angabe_p-2"><span class="dp-selflink-icon">§</span></a><p class="dp-p" id="angabe_p-2">Die Anforderungsanalyse des Gesamtsystems wurde bereits durchgeführt und die Wünsche des Kunden in Stories erfasst.
+Desweiteren haben einige andere Stakeholder zusätzliche Anforderungen an die Umsetzung formuliert.
+In der Aufgabenstellung wird zwischen Userstories und Techstories unterschieden.
+Userstories beschreiben konkrete Anwendungsfälle der zu erstellenden Software aus Sicht eines bestimmten Stakeholders.
+Userstories, die von einer fehlerhaften Implementierung betroffen sind, werden nicht abgenommen.
+Techstories enthalten Anforderungen an die Implementierung sowie weitere Implementierungsdetails.
+Lesen Sie alle Stories, insbesondere die Techstories aufmerksam durch,
+bevor Sie mit der Implementierung beginnen.
+Nicht alle Techstories können nachträglich erfüllt werden.
+Diese müssen von Anfang an beachtet werden.</p></div><div class="dp-selflink-container"><a class="dp-selflink" href="#angabe_p-3"><span class="dp-selflink-icon">§</span></a><p class="dp-p" id="angabe_p-3">Das bereitgestellte Template beinhaltet sowohl einen generellen Durchstich durch alle Schichten,
+als auch die Implementierung von manchen User Stories entweder im Frontend oder im Backend.
+Dadurch soll ein besserer Überblick über den gewünschten Stil bereitgestellt werden.
+Es wird erwartet, dass Sie dennoch für jede Story sicherstellen, dass diese am Ende vollständig implementiert ist.
+Im Template gibt es keinerlei Garantien auf Vollständigkeit
+– weder im Hinblick auf User- noch auf Techstories.
+Weiters wird erwartet, dass Sie bestehenden Code durchlesen, verstehen und weiterverwenden.</p></div>
+		<section id="domänenmodell"><h3 class="dp-heading dp-heading-section dp-selflink-container"><a class="dp-selflink" href="#domänenmodell"><span class="dp-selflink-icon">§</span></a><span class="dp-heading-text">Domänenmodell</span></h3><div class="dp-content dp-section-content">
+		<div class="dp-selflink-container"><a class="dp-selflink" href="#domänenmodell_p-1"><span class="dp-selflink-icon">§</span></a><p class="dp-p" id="domänenmodell_p-1">
+			Um die Domäne etwas zu veranschaulichen, wurde bereits ein Domänenmodell erstellt.
+		</p></div>
+		<div class="dp-selflink-container"><a class="dp-selflink" href="#fig-domänenmodell"><span class="dp-selflink-icon">§</span></a><div class="doc-figure" id="fig-domänenmodell" xmlns:ht="http://www.w3.org/1999/xhtml" xmlns:dpx="dp:dp:ext" xmlns:val="dp:vars:values"><div>Domänenmodell</div>
+		
+		
+		<img src="images/family_tree_domain_model.png" />
+	</div></div>
+	</div></section>
+		<section id="dokumentation"><h3 class="dp-heading dp-heading-section dp-selflink-container"><a class="dp-selflink" href="#dokumentation"><span class="dp-selflink-icon">§</span></a><span class="dp-heading-text">Dokumentation</span></h3><div class="dp-content dp-section-content">
+		<div class="dp-selflink-container"><a class="dp-selflink" href="#dokumentation_p-1"><span class="dp-selflink-icon">§</span></a><p class="dp-p" id="dokumentation_p-1">Im Rahmen der Stories werden Sie Code-Dokumentation erstellen.</p></div>
+		<div class="dp-selflink-container"><a class="dp-selflink" href="#dokumentation_p-2"><span class="dp-selflink-icon">§</span></a><p class="dp-p" id="dokumentation_p-2"><em xmlns:ht="http://www.w3.org/1999/xhtml" xmlns:dpx="dp:dp:ext" xmlns:val="dp:vars:values"><strong>Wichtig: </strong>Bitte drucken Sie die Code-Dokumentation nicht aus!</em></p></div>
+		<div class="dp-selflink-container"><a class="dp-selflink" href="#dokumentation_p-3"><span class="dp-selflink-icon">§</span></a><p class="dp-p" id="dokumentation_p-3">
+			Außerdem müssen Sie eine Stundenliste führen, in der Sie Datum und Dauer sowie die Story an der Sie arbeiten festhalten.
+			Diese müssen Sie in einer Plaintextdatei im obersten Verzeichnis des Repositories ablegen.
+			Vermerken Sie zudem Ihren Namen und Ihre Matrikelnummer darin.
+		</p></div>
+	</div></section>
+		<section id="implementierungsreihenfolge"><h3 class="dp-heading dp-heading-section dp-selflink-container"><a class="dp-selflink" href="#implementierungsreihenfolge"><span class="dp-selflink-icon">§</span></a><span class="dp-heading-text">Implementierungsreihenfolge</span></h3><div class="dp-content dp-section-content">
+		<section id="reihenfolge-userstories"><h4 class="dp-heading dp-heading-section dp-selflink-container"><a class="dp-selflink" href="#reihenfolge-userstories"><span class="dp-selflink-icon">§</span></a><span class="dp-heading-text">Userstories</span></h4><div class="dp-content dp-section-content">
+				<div class="dp-selflink-container"><a class="dp-selflink" href="#reihenfolge-userstories_p-1"><span class="dp-selflink-icon">§</span></a><p class="dp-p" id="reihenfolge-userstories_p-1">
+					Am besten implementieren Sie vertikal nach Userstories;
+					alle Tests und Schichten einer Userstory sollten fertig sein, bevor Sie mit der Nächsten beginnen.
+					Natürlich können Sie später auch bei bereits implementierten Userstories nacharbeiten.
+					Dieses Vorgehen hilft Ihnen dabei möglichst viele der Userstories abzuschließen.
+				</p></div>
+			</div></section>
+		<section id="reihenfolge-techstories"><h4 class="dp-heading dp-heading-section dp-selflink-container"><a class="dp-selflink" href="#reihenfolge-techstories"><span class="dp-selflink-icon">§</span></a><span class="dp-heading-text">Techstories</span></h4><div class="dp-content dp-section-content">
+				<div class="dp-selflink-container"><a class="dp-selflink" href="#reihenfolge-techstories_p-1"><span class="dp-selflink-icon">§</span></a><p class="dp-p" id="reihenfolge-techstories_p-1">
+					Techstories haben Einfluss auf die Implementierung aller Userstories.
+					Sie sind daher laufend während der gesamten Entwicklung zu berücksichtigen.
+				</p></div>
+			</div></section>
+	</div></section>
+		<section id="angabe-implementierung"><h3 class="dp-heading dp-heading-section dp-selflink-container"><a class="dp-selflink" href="#angabe-implementierung"><span class="dp-selflink-icon">§</span></a><span class="dp-heading-text">Implementierung</span></h3><div class="dp-content dp-section-content">
+		<div class="dp-selflink-container"><a class="dp-selflink" href="#angabe-implementierung_p-1"><span class="dp-selflink-icon">§</span></a><p class="dp-p" id="angabe-implementierung_p-1">
+			Ihr/e technische/r Architekt/in hat zusätzlich zu den Anforderungen verschiedene Hilfestellungen im Abschnitt
+			<a href="#implementierung"><em>Implementierung</em></a>
+			für Sie zusammengestellt, um Ihnen den Aufbau des Programms zu erleichtern.
+		</p></div>
+	</div></section>
+		<section id="userstories"><h3 class="dp-heading dp-heading-section dp-selflink-container"><a class="dp-selflink" href="#userstories"><span class="dp-selflink-icon">§</span></a><span class="dp-heading-text">Userstories (80 Punkte)</span></h3><div class="dp-content dp-section-content">
+		<div class="dp-selflink-container"><a class="dp-selflink" href="#userstories_p-1"><span class="dp-selflink-icon">§</span></a><p class="dp-p" id="userstories_p-1">
+			Userstories stellen Anforderungen eines Stakeholders an das Gesamtsystem dar.
+			Jede Userstory muss dabei in allen Schichten des Backend (REST, Businesslogik, Persistenz) und im Frontend implementiert werden.
+			Alle in der Userstory angegebenen Daten müssen im Frontend sichtbar sein.
+		</p></div>
+		<div class="dp-selflink-container"><a class="dp-selflink" href="#userstories_p-2"><span class="dp-selflink-icon">§</span></a><p class="dp-p" id="userstories_p-2">
+			Für die Erfüllung von Userstories erhalten Sie Punkte entsprechend den angegebenen Storypoints (oder bei Mängeln entsprechend weniger).
+			Orientieren Sie sich beim Design des Frontends an den bereits vorgegebenen Teilen.
+		</p></div>
+		<div class="dp-selflink-container"><a class="dp-selflink" href="#userstories_p-3"><span class="dp-selflink-icon">§</span></a><p class="dp-p" id="userstories_p-3">
+			<em xmlns:ht="http://www.w3.org/1999/xhtml" xmlns:dpx="dp:dp:ext" xmlns:val="dp:vars:values"><strong>Wichtig: </strong>
+				Die Aufschlüsselung der Userstories auf Stakeholder dient ausschließlich dem leichteren Verständnis.
+				Sie sollen kein Mehrbenutzersystem entwickeln. Sie können daher auch die Möglichkeit von Race Conditions durch gleichzeitiges Arbeiten mehrerer User ignorieren.
+				Weiters wird in der Einzelphase auch auf Log-in bzw. Authentifizierung verzichtet.
+			</em>
+		</p></div>
+
+		<section id="pferdebesitzer"><h4 class="dp-heading dp-heading-section dp-selflink-container"><a class="dp-selflink" href="#pferdebesitzer"><span class="dp-selflink-icon">§</span></a><span class="dp-heading-text">Pferdebesitzer/in</span></h4><div class="dp-content dp-section-content"><stories>
+		<div class="dp-selflink-container"><a class="dp-selflink" href="#us-pferd-anlegen"><span class="dp-selflink-icon">§</span></a><div id="us-pferd-anlegen" class="story-box user-story-box"><div class="story-box-id"><strong>ID: </strong>1</div><div class="story-box-title"><strong>Titel:</strong><span class="story-box-title-text">Als Pferdebesitzer/in möchte ich neue Pferde im System anlegen können.</span></div><div class="story-box-content"><div class="dp-selflink-container"><a class="dp-selflink" href="#pferdebesitzer_ul-4"><span class="dp-selflink-icon">§</span></a><ul class="dp-ul" id="pferdebesitzer_ul-4"><li>Als Pferdebesitzer/in möchte ich neue Pferde im System anlegen können:
+<div class="dp-selflink-container"><a class="dp-selflink" href="#pferdebesitzer_ul-5"><span class="dp-selflink-icon">§</span></a><ul class="dp-ul" id="pferdebesitzer_ul-5"><li>Jedes angelegte Pferd muss in einer Datenbank gespeichert werden.</li><li>Zu jedem Pferd müssen dabei folgende Werte gespeichert werden:
+<div class="dp-selflink-container"><a class="dp-selflink" href="#pferdebesitzer_ul-6"><span class="dp-selflink-icon">§</span></a><ul class="dp-ul" id="pferdebesitzer_ul-6"><li>Name (verpflichtend)</li><li>Beschreibung (optional)</li><li>Geburtsdatum (verpflichtend)</li><li>Geschlecht (biologisches Geschlecht, männlich/weiblich) (verpflichtend)</li><li>Bild (optional)</li><li>Besitzer/in (optional, maximal einer)</li></ul></div></li></ul></div></li></ul></div></div><div class="story-box-points"><strong>Storypoints: </strong>10</div></div></div>
+
+		<div class="dp-selflink-container"><a class="dp-selflink" href="#us-pferd-bearbeiten"><span class="dp-selflink-icon">§</span></a><div id="us-pferd-bearbeiten" class="story-box user-story-box"><div class="story-box-id"><strong>ID: </strong>2</div><div class="story-box-title"><strong>Titel:</strong><span class="story-box-title-text">Als Pferdebesitzer/in möchte ich bestehende Pferde bearbeiten können.</span></div><div class="story-box-content"><div class="dp-selflink-container"><a class="dp-selflink" href="#pferdebesitzer_ul-7"><span class="dp-selflink-icon">§</span></a><ul class="dp-ul" id="pferdebesitzer_ul-7"><li>Als Pferdebesitzer/in möchte ich bestehende Pferde bearbeiten können:
+<div class="dp-selflink-container"><a class="dp-selflink" href="#pferdebesitzer_ul-8"><span class="dp-selflink-icon">§</span></a><ul class="dp-ul" id="pferdebesitzer_ul-8"><li>Jedes Pferd, das bereits im System erfasst ist, soll bearbeitet werden können.</li><li>Alle Werte, die beim Erstellen erfasst werden, müssen auch veränderbar sein.</li><li>Das Pferd soll von der Bearbeitungsansicht aus gelöscht werden können.</li></ul></div></li></ul></div></div><div class="story-box-points"><strong>Storypoints: </strong>8</div></div></div>
+
+		<div class="dp-selflink-container"><a class="dp-selflink" href="#us-pferd-loeschen"><span class="dp-selflink-icon">§</span></a><div id="us-pferd-loeschen" class="story-box user-story-box"><div class="story-box-id"><strong>ID: </strong>3</div><div class="story-box-title"><strong>Titel:</strong><span class="story-box-title-text">Als Pferdebesitzer/in möchte ich ein Pferd löschen können.</span></div><div class="story-box-content"><div class="dp-selflink-container"><a class="dp-selflink" href="#pferdebesitzer_ul-9"><span class="dp-selflink-icon">§</span></a><ul class="dp-ul" id="pferdebesitzer_ul-9"><li>Als Pferdebesitzer/in möchte ich ein Pferd löschen können:
+<div class="dp-selflink-container"><a class="dp-selflink" href="#pferdebesitzer_ul-10"><span class="dp-selflink-icon">§</span></a><ul class="dp-ul" id="pferdebesitzer_ul-10"><li>Ein gelöschtes Pferd muss restlos aus der Datenbank entfernt werden und darf nicht wiederherstellbar sein.</li><li>Ab dem Zeitpunkt der Löschung darf das Pferd nicht mehr im System aufscheinen und keine Aktion mehr damit durchgeführt werden können.</li><li>Alle Beziehungen des Pferdes müssen entfernt werden, ohne andere Pferde zu beeinflussen. Falls das zu löschende Pferd ein Elternteil eines anderen Pferdes ist, soll diese Verknüpfung ebenfalls entfernt werden.</li></ul></div></li></ul></div></div><div class="story-box-points"><strong>Storypoints: </strong>5</div></div></div>
+
+		<div class="dp-selflink-container"><a class="dp-selflink" href="#us-pferd-eltern"><span class="dp-selflink-icon">§</span></a><div id="us-pferd-eltern" class="story-box user-story-box"><div class="story-box-id"><strong>ID: </strong>4</div><div class="story-box-title"><strong>Titel:</strong><span class="story-box-title-text">Als Pferdebesitzer/in möchte ich für ein Pferd dessen Eltern eintragen.</span></div><div class="story-box-content"><div class="dp-selflink-container"><a class="dp-selflink" href="#pferdebesitzer_ul-11"><span class="dp-selflink-icon">§</span></a><ul class="dp-ul" id="pferdebesitzer_ul-11"><li>Als Pferdebesitzer/in möchte ich für ein Pferd dessen Eltern eintragen:
+<div class="dp-selflink-container"><a class="dp-selflink" href="#pferdebesitzer_ul-12"><span class="dp-selflink-icon">§</span></a><ul class="dp-ul" id="pferdebesitzer_ul-12"><li>Jedes Pferd kann bis zu zwei Elternteile haben.</li><li>Sind zwei Elternteile eingetragen, dürfen sie nicht das gleiche Geschlecht haben.</li><li>Die Eltern sollen bereits beim Erstellen des Pferdes eingetragen werden können. (siehe <a href="#us-pferd-anlegen">US 1</a>)</li><li>Die Eltern sollen später bearbeitet werden können. (siehe <a href="#us-pferd-bearbeiten">US 2</a>)</li></ul></div></li></ul></div></div><div class="story-box-points"><strong>Storypoints: </strong>10</div></div></div>
+
+		<div class="dp-selflink-container"><a class="dp-selflink" href="#us-pferd-details"><span class="dp-selflink-icon">§</span></a><div id="us-pferd-details" class="story-box user-story-box"><div class="story-box-id"><strong>ID: </strong>5</div><div class="story-box-title"><strong>Titel:</strong><span class="story-box-title-text">Als Pferdebesitzer/in möchte ich die Daten eines Pferdes in einer Detailansicht sehen können.</span></div><div class="story-box-content"><div class="dp-selflink-container"><a class="dp-selflink" href="#pferdebesitzer_ul-13"><span class="dp-selflink-icon">§</span></a><ul class="dp-ul" id="pferdebesitzer_ul-13"><li>Als Pferdebesitzer/in möchte ich die Daten eines Pferdes in einer Detailansicht sehen können:
+<div class="dp-selflink-container"><a class="dp-selflink" href="#pferdebesitzer_ul-14"><span class="dp-selflink-icon">§</span></a><ul class="dp-ul" id="pferdebesitzer_ul-14"><li>In der Detailansicht sollen alle erfassten Informationen zum Pferd zu sehen sein.</li><li>Von dieser Ansicht soll man direkt zum Bearbeitungsdialog (siehe <a href="#us-pferd-bearbeiten">US 2</a>) kommen können.</li><li>Von dieser Ansicht soll das Pferd direkt gelöscht werden können (siehe <a href="#us-pferd-loeschen">US 3</a>).</li><li>Von dieser Ansicht aus soll man direkt zur Detailansicht der Elternpferde kommen können.</li></ul></div></li></ul></div></div><div class="story-box-points"><strong>Storypoints: </strong>9</div></div></div>
+
+		<div class="dp-selflink-container"><a class="dp-selflink" href="#us-pferd-suchen"><span class="dp-selflink-icon">§</span></a><div id="us-pferd-suchen" class="story-box user-story-box"><div class="story-box-id"><strong>ID: </strong>6</div><div class="story-box-title"><strong>Titel:</strong><span class="story-box-title-text">Als Pferdebesitzer/in möchte ich nach Pferden suchen können.</span></div><div class="story-box-content"><div class="dp-selflink-container"><a class="dp-selflink" href="#pferdebesitzer_ul-15"><span class="dp-selflink-icon">§</span></a><ul class="dp-ul" id="pferdebesitzer_ul-15"><li>Als Pferdebesitzer/in möchte ich nach Pferden suchen können:
+<div class="dp-selflink-container"><a class="dp-selflink" href="#pferdebesitzer_ul-16"><span class="dp-selflink-icon">§</span></a><ul class="dp-ul" id="pferdebesitzer_ul-16"><li>Die Pferde sollen nach folgenden Kriterien suchbar sein:
+<div class="dp-selflink-container"><a class="dp-selflink" href="#pferdebesitzer_ul-17"><span class="dp-selflink-icon">§</span></a><ul class="dp-ul" id="pferdebesitzer_ul-17"><li>Name</li><li>Beschreibung</li><li>Geburtsdatum (älter als das eingegebene Datum)</li><li>Geschlecht</li><li>Besitzer/in (die Suche muss auch mit einem Teil des Namens des Besitzers funktionieren)</li></ul></div></li><li>Die Suchkriterien sollen beliebig kombinierbar sein:
+<div class="dp-selflink-container"><a class="dp-selflink" href="#pferdebesitzer_ul-18"><span class="dp-selflink-icon">§</span></a><ul class="dp-ul" id="pferdebesitzer_ul-18"><li>Wird mehr als ein Kriterium eingegeben, sollen die Pferde aufgelistet werden, die alle erfüllen.</li><li>Eine Suche ohne eingegebene Kriterien listet alle Pferde auf.</li></ul></div></li><li>Mit den Suchergebnissen möchte ich folgende Aktionen durchführen können:
+<div class="dp-selflink-container"><a class="dp-selflink" href="#pferdebesitzer_ul-19"><span class="dp-selflink-icon">§</span></a><ul class="dp-ul" id="pferdebesitzer_ul-19"><li>Zur Detailansicht gehen (siehe <a href="#us-pferd-details">US 5</a>)</li><li>Zum Bearbeitungsdialog gehen (siehe <a href="#us-pferd-bearbeiten">US 2</a>)</li><li>Das Pferd löschen</li><li>Den Stammbaum des Pferdes anzeigen</li></ul></div></li></ul></div></li></ul></div></div><div class="story-box-points"><strong>Storypoints: </strong>10</div></div></div>
+
+		<div class="dp-selflink-container"><a class="dp-selflink" href="#us-besitzer-erstellen"><span class="dp-selflink-icon">§</span></a><div id="us-besitzer-erstellen" class="story-box user-story-box"><div class="story-box-id"><strong>ID: </strong>7</div><div class="story-box-title"><strong>Titel:</strong><span class="story-box-title-text">Als Pferdebesitzer/in möchte ich neue Besitzer/innen eintragen können.</span></div><div class="story-box-content"><div class="dp-selflink-container"><a class="dp-selflink" href="#pferdebesitzer_ul-20"><span class="dp-selflink-icon">§</span></a><ul class="dp-ul" id="pferdebesitzer_ul-20"><li>Als Pferdebesitzer/in möchte ich neue Besitzer/innen eintragen können:
+<div class="dp-selflink-container"><a class="dp-selflink" href="#pferdebesitzer_ul-21"><span class="dp-selflink-icon">§</span></a><ul class="dp-ul" id="pferdebesitzer_ul-21"><li>Jeder angelegte Besitzende muss in der Datenbank gespeichert werden.</li><li>Zu jedem Besitzenden müssen dabei folgende Werte gespeichert werden:
+<div class="dp-selflink-container"><a class="dp-selflink" href="#pferdebesitzer_ul-22"><span class="dp-selflink-icon">§</span></a><ul class="dp-ul" id="pferdebesitzer_ul-22"><li>Name (verpflichtend)</li><li>Email (optional)</li></ul></div></li></ul></div></li></ul></div></div><div class="story-box-points"><strong>Storypoints: </strong>7</div></div></div>
+
+		<div class="dp-selflink-container"><a class="dp-selflink" href="#us-besitzer-anzeigen"><span class="dp-selflink-icon">§</span></a><div id="us-besitzer-anzeigen" class="story-box user-story-box"><div class="story-box-id"><strong>ID: </strong>8</div><div class="story-box-title"><strong>Titel:</strong><span class="story-box-title-text">Als Pferdebesitzer/in möchte ich alle Besitzer/innen sehen können.</span></div><div class="story-box-content"><div class="dp-selflink-container"><a class="dp-selflink" href="#pferdebesitzer_ul-23"><span class="dp-selflink-icon">§</span></a><ul class="dp-ul" id="pferdebesitzer_ul-23"><li>Als Pferdebesitzer/in möchte ich alle Besitzer/innen sehen können:
+<div class="dp-selflink-container"><a class="dp-selflink" href="#pferdebesitzer_ul-24"><span class="dp-selflink-icon">§</span></a><ul class="dp-ul" id="pferdebesitzer_ul-24"><li>Alle Besitzenden sollen angezeigt werden.</li><li>Zu allen Besitzenden müssen dabei folgende Werte angezeigt werden:
+<div class="dp-selflink-container"><a class="dp-selflink" href="#pferdebesitzer_ul-25"><span class="dp-selflink-icon">§</span></a><ul class="dp-ul" id="pferdebesitzer_ul-25"><li>Name</li><li>Email</li></ul></div></li></ul></div></li></ul></div></div><div class="story-box-points"><strong>Storypoints: </strong>7</div></div></div>
+
+		<div class="dp-selflink-container"><a class="dp-selflink" href="#us-stammbaum"><span class="dp-selflink-icon">§</span></a><div id="us-stammbaum" class="story-box user-story-box"><div class="story-box-id"><strong>ID: </strong>9</div><div class="story-box-title"><strong>Titel:</strong><span class="story-box-title-text">Als Pferdebesitzer/in möchte ich den Stammbaum eines Pferdes ansehen können.</span></div><div class="story-box-content"><div class="dp-selflink-container"><a class="dp-selflink" href="#pferdebesitzer_ul-26"><span class="dp-selflink-icon">§</span></a><ul class="dp-ul" id="pferdebesitzer_ul-26"><li>Als Pferdebesitzer/in möchte ich den Stammbaum eines Pferdes ansehen können:
+<div class="dp-selflink-container"><a class="dp-selflink" href="#pferdebesitzer_ul-27"><span class="dp-selflink-icon">§</span></a><ul class="dp-ul" id="pferdebesitzer_ul-27"><li>Es sollen die Vorfahren des gewählten Pferdes angezeigt werden, nicht die Nachfahren.</li><li>Der Stammbaum soll hierarchisch in Form eines Baums dargestellt werden:
+<div class="dp-selflink-container"><a class="dp-selflink" href="#pferdebesitzer_ul-28"><span class="dp-selflink-icon">§</span></a><ul class="dp-ul" id="pferdebesitzer_ul-28"><li>Zu jedem Pferd soll im Baum Name und Geburtsdatum sichtbar sein.</li><li>Der Unterbaum, an dessen Wurzel ein Pferd steht, beinhaltet dessen Vorfahren.</li><li>Die einzelnen Knoten sollen auf- und einklappbar sein.</li><li>Man soll von dieser Ansicht aus direkt zur Detailansicht jedes aufgelisteten Pferdes kommen können. (siehe <a href="#us-pferd-details">US 5</a>)</li><li>Es soll möglich sein, ein Pferd direkt aus dieser Ansicht zu löschen.</li></ul></div></li><li>Es soll eine maximale Anzahl von Generationen, die angezeigt werden sollen, angegeben werden können.</li><li>Der so erzeugte Stammbaum soll initial vollständig aufgeklappt sein.</li></ul></div></li></ul></div></div><div class="story-box-points"><strong>Storypoints: </strong>14</div></div></div>
+
+		<div class="dp-selflink-container"><a class="dp-selflink" href="#fig-beispiel-stammbaum"><span class="dp-selflink-icon">§</span></a><div class="doc-figure" id="fig-beispiel-stammbaum"><div>Beispiel für einen Stammbaum</div>
+				<img src="images/example_stammbaum.png" alt="Beispielskizze einer Darstellung des Stammbaums" />
+			</div></div>
+
+	</stories></div></section>
+	</div></section>
+		<section id="techstories"><h3 class="dp-heading dp-heading-section dp-selflink-container"><a class="dp-selflink" href="#techstories"><span class="dp-selflink-icon">§</span></a><span class="dp-heading-text">Techstories</span></h3><div class="dp-content dp-section-content">
+		<div class="dp-selflink-container"><a class="dp-selflink" href="#techstories_p-1"><span class="dp-selflink-icon">§</span></a><p class="dp-p" id="techstories_p-1">Techstories haben Einfluss auf die Implementierung aller Userstories. Sie sind daher laufend während der gesamten Entwicklung zu berücksichtigen.</p></div>
+
+		<section id="ts-stakeholder-qualitätsmanager"><h4 class="dp-heading dp-heading-section dp-selflink-container"><a class="dp-selflink" href="#ts-stakeholder-qualitätsmanager"><span class="dp-selflink-icon">§</span></a><span class="dp-heading-text">Qualitätsmanager/in</span></h4><div class="dp-content dp-section-content"><stories>
+		<div class="dp-selflink-container"><a class="dp-selflink" href="#ts-qa-logging"><span class="dp-selflink-icon">§</span></a><div id="ts-qa-logging" class="story-box tech-story-box"><div class="story-box-id"><strong>ID: </strong>10</div><div class="story-box-title"><strong>Titel:</strong><span class="story-box-title-text">Als Qualitätsmanager/in möchte ich, dass das Backend Logfiles schreibt.</span></div><div class="story-box-content">
+				<div class="dp-selflink-container"><a class="dp-selflink" href="#ts-stakeholder-qualitätsmanager_ul-2"><span class="dp-selflink-icon">§</span></a><ul class="dp-ul" id="ts-stakeholder-qualitätsmanager_ul-2">
+					<li>
+						Log-Einträge müssen mit sinnvollen Loglevels versehen werden.
+						Einige Beispiele für Dinge, die Sie in dieser Aufgabe loggen <em>müssen</em>:
+						<div class="dp-selflink-container"><a class="dp-selflink" href="#ts-stakeholder-qualitätsmanager_ul-3"><span class="dp-selflink-icon">§</span></a><ul class="dp-ul" id="ts-stakeholder-qualitätsmanager_ul-3">
+							<li><code>error</code> für schwere, unerwartete Fehler, zum Beispiel:
+							<div class="dp-selflink-container"><a class="dp-selflink" href="#ts-stakeholder-qualitätsmanager_ul-4"><span class="dp-selflink-icon">§</span></a><ul class="dp-ul" id="ts-stakeholder-qualitätsmanager_ul-4">
+								<li>Datenbank nicht zugreifbar</li>
+								<li>Programmierfehler</li>
+							</ul></div>
+							</li>
+
+							<li><code>warn</code> für Fehler, die bei normalem Betrieb auftreten können und die keine Beeinträchtigung des Systems darstellen. Zum Beispiel:
+							<div class="dp-selflink-container"><a class="dp-selflink" href="#ts-stakeholder-qualitätsmanager_ul-5"><span class="dp-selflink-icon">§</span></a><ul class="dp-ul" id="ts-stakeholder-qualitätsmanager_ul-5">
+								<li>Validierung von Anfragedaten schlägt fehl</li>
+								<li>Anfrage kann nicht durchgeführt werden, wegen eines Konflikts mit anderen Daten des Systems</li>
+							</ul></div>
+							</li>
+							<li><code>info</code> für vom User durchgeführte Aktionen, zB. am Anfang einer REST-Endpointmethode</li>
+							<li><code>debug</code> für Nachrichten in komplexeren Codestücken die beim Suchen von Problemen wertvoll sein können</li>
+							<li><code>trace</code> am Anfang aller Methoden die nicht schon anderwertig geloggt wurden</li>
+						</ul></div>
+					</li>
+
+					<li>Grundsätzlich sollen Meldungen ab Level <code>info</code> im Log aufscheinen.
+					Für das Paket in dem das Programm selbst liegt (im Gegensatz zu den Bibliotheken) soll zumindest <code>debug</code> ebenfalls ausgegeben werden.</li>
+					<li>Exceptions müssen exakt einmal geloggt werden.</li>
+					<li>Für Exceptions, die einen unerwarteten, schweren Fehler darstellen (siehe Loglevel <code>error</code>)
+					muss zusätzlich der volle Stacktrace in das Log geschrieben werden.
+					Wird eine Exception gewrappt, so muss die wrappende und nicht die ursprüngliche Exception geloggt werden,
+					da die wrappende (=äußere) einen längeren Stacktrace besitzt und damit mehr Informationen bereit stellt.
+					</li>
+					<li>Das Logfile muss mindestens täglich rotiert werden. Der Dateiname von älteren Logfiles muss das Datum enthalten. Für das aktuelle Logfile ist dies nicht notwendig.</li>
+					<li>Das Programm darf ausschließlich über das Logging Framework Ausgaben auf die Standardausgabe (stdout) sowie die Standardfehlerausgabe (stderr) schreiben.</li>
+					<li>Wenn Exceptions gewrappt / weitergereicht werden, so darf die ursprüngliche Exception inklusive Stacktrace nicht verloren gehen.</li>
+					<li>Die Konfiguration des Loggers darf ausschließlich in der application.yml erfolgen. Verwenden Sie keine XML Dateien dafür.</li>
+					<li>Wenn Sie den Aufruf von Methoden loggen, so stellen Sie sicher, dass auch die Parameter sinnvoll im Log aufscheinen.</li>
+					<li>Es soll nachvollziehbar sein, zu welchem HTTP-Request ein Log-Eintrag gehört.</li>
+				</ul></div>
+
+				<hr />
+				<div class="dp-selflink-container"><a class="dp-selflink" href="#ts-stakeholder-qualitätsmanager_p-6"><span class="dp-selflink-icon">§</span></a><p class="dp-p" id="ts-stakeholder-qualitätsmanager_p-6"><em>Einige geforderte Dinge sind so bereits im Template umgesetzt. Es ist Teil der Aufgabe, die Dokumentation der beteiligten Technologien zu lesen und daraus abzuleiten, was Sie noch anpassen müssen.</em></p></div>
+			</div></div></div>
+
+		<div class="dp-selflink-container"><a class="dp-selflink" href="#ts-qa-dokumentation"><span class="dp-selflink-icon">§</span></a><div id="ts-qa-dokumentation" class="story-box tech-story-box"><div class="story-box-id"><strong>ID: </strong>11</div><div class="story-box-title"><strong>Titel:</strong><span class="story-box-title-text">Als Qualitätsmanager/in möchte ich, dass das Programm in Englisch geschrieben und gut dokumentiert ist.</span></div><div class="story-box-content">
+				<div class="dp-selflink-container"><a class="dp-selflink" href="#ts-stakeholder-qualitätsmanager_ul-7"><span class="dp-selflink-icon">§</span></a><ul class="dp-ul" id="ts-stakeholder-qualitätsmanager_ul-7">
+					<li>Der Quellcode (Klassennamen, Variablennamen sowie Methodennamen) muss auf Englisch verfasst sein.</li>
+					<li>Für alle Interfaces und Deklarationen in Interfaces muss JavaDoc existieren.</li>
+					<li>Zweck und Bedeutung von Exceptionklassen müssen beschrieben sein.</li>
+					<li>Die JavaDoc enthält Informationen zu:
+					<div class="dp-selflink-container"><a class="dp-selflink" href="#ts-stakeholder-qualitätsmanager_ul-8"><span class="dp-selflink-icon">§</span></a><ul class="dp-ul" id="ts-stakeholder-qualitätsmanager_ul-8">
+						<li>Übergabeparametern</li>
+						<li>Rückgabewerten</li>
+						<li>möglichen Fehlerfällen und Exceptions</li>
+					</ul></div>
+					</li>
+					<li>Die JavaDoc ist auf Englisch geschrieben.</li>
+				</ul></div>
+			</div></div></div>
+
+		<div class="dp-selflink-container"><a class="dp-selflink" href="#ts-qa-stundenliste"><span class="dp-selflink-icon">§</span></a><div id="ts-qa-stundenliste" class="story-box tech-story-box"><div class="story-box-id"><strong>ID: </strong>12</div><div class="story-box-title"><strong>Titel:</strong><span class="story-box-title-text">Als Qualitätsmanager/in möchte ich, dass eine Stundenliste bei der Entwicklung geführt wird.</span></div><div class="story-box-content">
+				<div class="dp-selflink-container"><a class="dp-selflink" href="#ts-stakeholder-qualitätsmanager_ul-9"><span class="dp-selflink-icon">§</span></a><ul class="dp-ul" id="ts-stakeholder-qualitätsmanager_ul-9">
+					<li>Die Stundenliste muss in Form einer Markdown-Tabelle in der <code>README.md</code> im obersten Verzeichnis des Projekts zu finden sein.</li>
+					<li>Die Stundenliste-Tabelle muss im GitLab richtig dargestellt werden.</li>
+					<li>Folgende Daten müssen auf der Stundenliste zu finden sein:
+					<div class="dp-selflink-container"><a class="dp-selflink" href="#ts-stakeholder-qualitätsmanager_ul-10"><span class="dp-selflink-icon">§</span></a><ul class="dp-ul" id="ts-stakeholder-qualitätsmanager_ul-10">
+						<li>Name</li>
+						<li>Matrikelnummer</li>
+						<li>Gesamtsumme der Arbeitszeit am Projekt</li>
+					</ul></div>
+					</li>
+					<li>Jeder Eintrag muss folgende Daten enthalten:
+					<div class="dp-selflink-container"><a class="dp-selflink" href="#ts-stakeholder-qualitätsmanager_ul-11"><span class="dp-selflink-icon">§</span></a><ul class="dp-ul" id="ts-stakeholder-qualitätsmanager_ul-11">
+						<li>Datum</li>
+						<li>Dauer</li>
+						<li>bearbeitete Story</li>
+					</ul></div>
+					</li>
+				</ul></div>
+			</div></div></div>
+
+		<div class="dp-selflink-container"><a class="dp-selflink" href="#ts-qa-test"><span class="dp-selflink-icon">§</span></a><div id="ts-qa-test" class="story-box tech-story-box"><div class="story-box-id"><strong>ID: </strong>13</div><div class="story-box-title"><strong>Titel:</strong><span class="story-box-title-text">Als Qualitätsmanager/in möchte ich, dass Kernfunktionalitäten des Programms getestet sind.</span></div><div class="story-box-content">
+				<div class="dp-selflink-container"><a class="dp-selflink" href="#ts-stakeholder-qualitätsmanager_ul-12"><span class="dp-selflink-icon">§</span></a><ul class="dp-ul" id="ts-stakeholder-qualitätsmanager_ul-12">
+					<li>Es müssen mindestens vier Tests für jede Backendschicht (REST, Service, Persistence) erstellt werden.</li>
+					<li>Es müssen sowohl Positivtests (Normalfall) als auch Negativtests (Fehlerfall) in jeder Schicht erstellt werden.</li>
+					<li>Mindestens ein Positivtest pro Schicht muss eine schreibende Operation betreffen.</li>
+					<li>In Summe sollen mindestens 12 neue Tests geschrieben werden.</li>
+					<li>Sie können sowohl Unit als auch Integration Tests erstellen.</li>
+					<li>
+						Tests müssen Assertions verwenden um sicher zu stellen, dass sich das Programm richtig verhält.
+						Es reicht zum Beispiel bei einem Integrationstest, welcher ein Pferd nach seiner ID lädt, nicht, wenn Sie nur den HTTP Status überprüfen.
+						Sie sollen hier zum Beispiel auch sicher stellen, dass sich in allen Feldern auch wirklich die erwarteten Daten befinden.
+					</li>
+				</ul></div>
+			</div></div></div>
+
+		<div class="dp-selflink-container"><a class="dp-selflink" href="#ts-qa-git"><span class="dp-selflink-icon">§</span></a><div id="ts-qa-git" class="story-box tech-story-box"><div class="story-box-id"><strong>ID: </strong>14</div><div class="story-box-title"><strong>Titel:</strong><span class="story-box-title-text">Als Qualitätsmanager/in erwarte ich einen sauberen Git Workflow.</span></div><div class="story-box-content">
+				<div class="dp-selflink-container"><a class="dp-selflink" href="#ts-stakeholder-qualitätsmanager_ul-13"><span class="dp-selflink-icon">§</span></a><ul class="dp-ul" id="ts-stakeholder-qualitätsmanager_ul-13">
+					<li>Es müssen regelmäßig Commits erstellt werden.</li>
+					<li>
+						Ein Commit gehört meistens zu genau einer Userstory und/oder Techstory.
+						Es kann Überschneidungen von Stories geben, jedoch sollte dies nicht die Regel sein.
+						Die ID der Story soll am Anfang der Commitmessage angegeben werden.
+					</li>
+					<li>Jeder Commit enthält eine aussagekräftige Commitmessage, die genau beschreibt, was Sie implementiert haben.</li>
+					<li>Vom Build und Dependency Management erstellte Dateien dürfen nicht committed werden. Dies betrifft unter anderem den <code>target</code> Ordner im Backend und die <code>dist</code> und <code>node_modules</code> Ordner im Frontend.</li>
+					<li>Daten des laufenden Betriebs, die nicht zum Programm gehören, wie die Datenbank-Datei, dürfen nicht committed werden.</li>
+					<li>Force-push ist auf unserem Server deaktiviert. Sie dürfen die History von gepushten Commits nicht bearbeiten.</li>
+					<li>Alle bewertungsrelevanten Commits müssen vor Ende der Deadline auf den master Branch des bereitgestellten GitLab Repository gepusht werden.</li>
+				</ul></div>
+			</div></div></div>
+
+		<div class="dp-selflink-container"><a class="dp-selflink" href="#ts-qa-validierung"><span class="dp-selflink-icon">§</span></a><div id="ts-qa-validierung" class="story-box tech-story-box"><div class="story-box-id"><strong>ID: </strong>15</div><div class="story-box-title"><strong>Titel:</strong><span class="story-box-title-text">Als Qualitätsmanager/in möchte ich, dass alle Eingaben validiert werden.</span></div><div class="story-box-content">
+				<div class="dp-selflink-container"><a class="dp-selflink" href="#ts-stakeholder-qualitätsmanager_ul-14"><span class="dp-selflink-icon">§</span></a><ul class="dp-ul" id="ts-stakeholder-qualitätsmanager_ul-14">
+					<li>Eingabeparameter (Zahlenwerte oder Textwerte) müssen den Userstories entsprechend validiert werden.</li>
+					<li>Bei der Validierung muss darauf geachtet werden, ob Parameter verpflichtend oder optional sind.</li>
+					<li>Es muss zumindest in der Serviceschicht des Backends validiert werden.</li>
+					<li>Validierung soll in einem (oder mehreren) Validator(en) implementiert sein.</li>
+				</ul></div>
+			</div></div></div>
+
+		<div class="dp-selflink-container"><a class="dp-selflink" href="#ts-qa-coding-conventions"><span class="dp-selflink-icon">§</span></a><div id="ts-qa-coding-conventions" class="story-box tech-story-box"><div class="story-box-id"><strong>ID: </strong>16</div><div class="story-box-title"><strong>Titel:</strong><span class="story-box-title-text">Als Qualitätsmanager/in erwarte ich sinnvolles Code-Design mit Einhaltung üblicher Coding Conventions und Best Practices.</span></div><div class="story-box-content">
+				<div class="dp-selflink-container"><a class="dp-selflink" href="#ts-stakeholder-qualitätsmanager_ul-15"><span class="dp-selflink-icon">§</span></a><ul class="dp-ul" id="ts-stakeholder-qualitätsmanager_ul-15">
+					<li>
+						Einhaltung von Namenskonventionen der jeweiligen Sprache/Technologie.
+						<div class="dp-selflink-container"><a class="dp-selflink" href="#ts-stakeholder-qualitätsmanager_ul-16"><span class="dp-selflink-icon">§</span></a><ul class="dp-ul" id="ts-stakeholder-qualitätsmanager_ul-16">
+							<li>Dies betrifft zum Beispiel die Namen (und deren Schreibung) von Variablen, Klassen und Packages.</li>
+							<li>Klassen, die eine bestimmte Rolle einnehmen, sollen das in ihrem Namen reflektieren (beispielsweise Services, DAOs, etc.)</li>
+						</ul></div>
+					</li>
+					<li>Einheitliche Code-Formatierung (Einrückung, Spacing bei Klammern, …).</li>
+					<li>
+						Vermeidung von aus früheren Versionen übrig gebliebenem Code.
+						<div class="dp-selflink-container"><a class="dp-selflink" href="#ts-stakeholder-qualitätsmanager_ul-17"><span class="dp-selflink-icon">§</span></a><ul class="dp-ul" id="ts-stakeholder-qualitätsmanager_ul-17">
+							<li>unbenutzte Imports</li>
+							<li>auskommentierte Code-Blöcke</li>
+						</ul></div>
+					</li>
+					<li>Sinnvolle Wahl von Datentypen (zum Beispiel ein Enum für fixe Aufzählungen).</li>
+				</ul></div>
+			</div></div></div>
+
+		<div class="dp-selflink-container"><a class="dp-selflink" href="#ts-qa-ci"><span class="dp-selflink-icon">§</span></a><div id="ts-qa-ci" class="story-box tech-story-box"><div class="story-box-id"><strong>ID: </strong>17</div><div class="story-box-title"><strong>Titel:</strong><span class="story-box-title-text">Als Qualitätsmanager/in möchte ich, dass CI sinnvoll eingesetzt wird.</span></div><div class="story-box-content">
+				<div class="dp-selflink-container"><a class="dp-selflink" href="#ts-stakeholder-qualitätsmanager_ul-18"><span class="dp-selflink-icon">§</span></a><ul class="dp-ul" id="ts-stakeholder-qualitätsmanager_ul-18">
+					<li>Das bereitgestellte <code>.gitlab-ci.yml</code> muss sich im Wurzelverzeichnis befinden.</li>
+					<li>Bei der Abgabe soll die Pipeline grün sein.</li>
+					<li>Die Datei muss nicht verändert werden.
+					<div class="dp-selflink-container"><a class="dp-selflink" href="#ts-stakeholder-qualitätsmanager_ul-19"><span class="dp-selflink-icon">§</span></a><ul class="dp-ul" id="ts-stakeholder-qualitätsmanager_ul-19">
+						<li>Sollten Sie dennoch Anpassungen vornehmen wollen, so halten Sie bitte Rücksprache mit der LVA-Leitung.</li>
+						<li>Die Pipeline darf um weitere Checks erweitert werden und somit strenger werden, aber keinesfalls entschärft (wie z.B. durch das ausschalten von Tests).</li>
+					</ul></div>
+					</li>
+				</ul></div>
+			</div></div></div>
+	</stories></div></section>
+		<section id="ts-stakeholder-usability-engineer"><h4 class="dp-heading dp-heading-section dp-selflink-container"><a class="dp-selflink" href="#ts-stakeholder-usability-engineer"><span class="dp-selflink-icon">§</span></a><span class="dp-heading-text">Usability Engineer</span></h4><div class="dp-content dp-section-content"><stories>
+		<div class="dp-selflink-container"><a class="dp-selflink" href="#ts-ux-übersichtliches-frontend"><span class="dp-selflink-icon">§</span></a><div id="ts-ux-übersichtliches-frontend" class="story-box tech-story-box"><div class="story-box-id"><strong>ID: </strong>18</div><div class="story-box-title"><strong>Titel:</strong><span class="story-box-title-text">Als Usability Engineer möchte ich ein übersichtliches Frontend.</span></div><div class="story-box-content">
+				<div class="dp-selflink-container"><a class="dp-selflink" href="#ts-stakeholder-usability-engineer_ul-1"><span class="dp-selflink-icon">§</span></a><ul class="dp-ul" id="ts-stakeholder-usability-engineer_ul-1">
+					<li>Auf einer Seite soll nicht zu viel Funktionalität zusammengefasst werden, um es für den/die Benutzer/in übersichtlich zu halten (zum Beispiel Bearbeitungsformular separat von Suchmaske).</li>
+					<li>Funktionen sollen intuitiv auffindbar sein (zum Beispiel nicht in den Bearbeitungsdialog eines Elementes gehen müssen um es löschen zu können).</li>
+					<li>Es sollen sinnvolle UI-Elemente und Styles verwendet werden (zum Beispiel Tabellen für tabellarische Daten, Elemente die auf Klicks reagieren als Button, Link oder ähnliches erkennbar sein).</li>
+				</ul></div>
+			</div></div></div>
+
+		<div class="dp-selflink-container"><a class="dp-selflink" href="#ts-ux-sinnvolle-bedienung"><span class="dp-selflink-icon">§</span></a><div id="ts-ux-sinnvolle-bedienung" class="story-box tech-story-box"><div class="story-box-id"><strong>ID: </strong>19</div><div class="story-box-title"><strong>Titel:</strong><span class="story-box-title-text">Als Usability Engineer möchte ich, dass das Frontend für einen Benutzer sinnvoll zu bedienen ist.</span></div><div class="story-box-content">
+				<div class="dp-selflink-container"><a class="dp-selflink" href="#ts-stakeholder-usability-engineer_ul-2"><span class="dp-selflink-icon">§</span></a><ul class="dp-ul" id="ts-stakeholder-usability-engineer_ul-2">
+					<li>
+						Wählen Sie für Eingaben die jeweils passendste Eingabemodalität, zum Beispiel:
+						<div class="dp-selflink-container"><a class="dp-selflink" href="#ts-stakeholder-usability-engineer_ul-3"><span class="dp-selflink-icon">§</span></a><ul class="dp-ul" id="ts-stakeholder-usability-engineer_ul-3">
+							<li>Ein numerisches Eingabefeld für Zahlen</li>
+							<li>Eine Textbox für Freitext</li>
+							<li>Filterbarer Drop-Down zur Auswahl aus einer großen Menge von Optionen</li>
+						</ul></div>
+					</li>
+					<li>
+						Es dürfen keine Datenbank-IDs im UI angezeigt oder eingegeben werden müssen.
+						<div class="dp-selflink-container"><a class="dp-selflink" href="#ts-stakeholder-usability-engineer_ul-4"><span class="dp-selflink-icon">§</span></a><ul class="dp-ul" id="ts-stakeholder-usability-engineer_ul-4">
+							<li>Eine Datenbank-ID ist ein technisches Detail, das für den/die Benutzer/in keine Bedeutung hat.</li>
+							<li>Bei der Kommunikation mit dem Backend über REST dagegen dürfen IDs sowohl in den DTOs als auch den URLs verwendet werden.</li>
+							<li>In den Routen im Frontend dürfen IDs verwendet werden um zum Beispiel die zu bearbeitende Entität zu übergeben, obwohl diese genau genommen für den Benutzer sichtbar sind.</li>
+						</ul></div>
+					</li>
+					<li>
+						Ein vollständiges Neuladen der Seite im Browser durch den/die Benutzer/in darf nicht notwendig sein.
+						Auch die Seite zu wechseln und wieder zur Ausgangsseite zu wechseln gilt in diesem Sinne als <em>Neuladen</em>.
+					</li>
+					<li>
+						Die Navigation muss vollständig aus der Funktionalität der Seite selbst möglich sein.
+						Es darf nicht notwendig sein, die Adresse manuell zu bearbeiten.
+					</li>
+					<li><code>window.alert</code> sowie <code>window.confirm</code> dürfen nicht verwendet werden.</li>
+				</ul></div>
+			</div></div></div>
+
+		<div class="dp-selflink-container"><a class="dp-selflink" href="#ts-ux-fehlermeldungen"><span class="dp-selflink-icon">§</span></a><div id="ts-ux-fehlermeldungen" class="story-box tech-story-box"><div class="story-box-id"><strong>ID: </strong>20</div><div class="story-box-title"><strong>Titel:</strong><span class="story-box-title-text">Als Usability Engineer möchte ich, dass das Frontend den/die Benutzer/in über Ereignisse aussagekräftig informiert.</span></div><div class="story-box-content">
+				<div class="dp-selflink-container"><a class="dp-selflink" href="#ts-stakeholder-usability-engineer_ul-5"><span class="dp-selflink-icon">§</span></a><ul class="dp-ul" id="ts-stakeholder-usability-engineer_ul-5">
+					<li>Der/Die Benutzer/in soll über Ereignisse aller Art immer erkennen können, was gerade passiert ist.</li>
+					<li>Bei Aktionen, bei welchen möglicherweise nicht sofort ein Effekt sichtbar ist, soll eine Erfolgsmeldung angezeigt werden.</li>
+					<li>
+						In Fehlerfällen muss dem Benutzer eine angemessene Fehlermeldung angezeigt werden.
+						<div class="dp-selflink-container"><a class="dp-selflink" href="#ts-stakeholder-usability-engineer_ul-6"><span class="dp-selflink-icon">§</span></a><ul class="dp-ul" id="ts-stakeholder-usability-engineer_ul-6">
+							<li>Insbesondere soll bei Validierungsfehlern darauf hingewiesen werden, welche Eingabe den Fehler verursacht hat.</li>
+						</ul></div>
+					</li>
+					<li>Destruktive Aktionen sollen eine explizite Bestätigung erfordern.</li>
+				</ul></div>
+			</div></div></div>
+
+		<div class="dp-selflink-container"><a class="dp-selflink" href="#ts-ux-browser"><span class="dp-selflink-icon">§</span></a><div id="ts-ux-browser" class="story-box tech-story-box"><div class="story-box-id"><strong>ID: </strong>21</div><div class="story-box-title"><strong>Titel:</strong><span class="story-box-title-text">Als Usability Engineer möchte ich, dass die Anwendung von möglichst vielen Benutzer/innen mit ihrer gewohnten Umgebung genutzt werden kann.</span></div><div class="story-box-content">
+				<div class="dp-selflink-container"><a class="dp-selflink" href="#ts-stakeholder-usability-engineer_ul-7"><span class="dp-selflink-icon">§</span></a><ul class="dp-ul" id="ts-stakeholder-usability-engineer_ul-7">
+					<li>
+						Das Frontend soll zumindest lauffähig sein in:
+						<div class="dp-selflink-container"><a class="dp-selflink" href="#ts-stakeholder-usability-engineer_ul-8"><span class="dp-selflink-icon">§</span></a><ul class="dp-ul" id="ts-stakeholder-usability-engineer_ul-8">
+							<li>Firefox (Version 143)</li>
+							<li>Chrome/Chromium (Version 140)</li>
+						</ul></div>
+					</li>
+				</ul></div>
+			</div></div></div>
+	</stories></div></section>
+		<section id="ts-stakeholder-technischer-architekt"><h4 class="dp-heading dp-heading-section dp-selflink-container"><a class="dp-selflink" href="#ts-stakeholder-technischer-architekt"><span class="dp-selflink-icon">§</span></a><span class="dp-heading-text">Technische/r Architekt/in</span></h4><div class="dp-content dp-section-content"><stories>
+		<div class="dp-selflink-container"><a class="dp-selflink" href="#ts-ta-build"><span class="dp-selflink-icon">§</span></a><div id="ts-ta-build" class="story-box tech-story-box"><div class="story-box-id"><strong>ID: </strong>22</div><div class="story-box-title"><strong>Titel:</strong><span class="story-box-title-text">Als Technische/r Architekt/in erwarte ich die Verwendung eines Build und Dependency Managements.</span></div><div class="story-box-content">
+				<div class="dp-selflink-container"><a class="dp-selflink" href="#ts-stakeholder-technischer-architekt_ul-1"><span class="dp-selflink-icon">§</span></a><ul class="dp-ul" id="ts-stakeholder-technischer-architekt_ul-1">
+					<li>Abhängigkeiten des Backends müssen mittels Maven verwaltet werden.</li>
+					<li>Das Backend muss über Maven gebaut, gestartet und getestet werden können.</li>
+					<li>
+						Das Backend muss mit dem Befehl:<br />
+						<code>mvn compile</code><br />
+						erfolgreich gebaut werden können.
+					</li>
+					<li>
+						Das Backend muss mit dem Befehl:<br />
+						<code>mvn test</code><br />
+						erfolgreich getestet werden können.
+					</li>
+					<li>
+						Das Backend muss mit dem Befehl:<br />
+						<code>java -Dspring.profiles.active=datagen -jar target/e&lt;MATRIKELNUMMER&gt;.jar</code><br />
+						gestartet werden können.
+					</li>
+					<li>
+						Für das Backend muss mit dem Befehl:<br />
+						<code>mvn package</code><br />
+						ein ausführbares jar File erstellt werden können.
+					</li>
+					<li>
+						Abhängigkeiten des Frontends müssen, mittels NPM verwaltet werden.
+						Es dürfen keine externen URLs (z.B. zu einem CDN) verwendet werden um weitere Funktionalitäten hinzuzufügen.
+					</li>
+					<li>
+						Das Frontend muss mit dem Befehl:<br />
+						<code>npm run start</code><br />
+						gestartet werden können.
+					</li>
+					<li>
+						Die Abhängigkeiten des Frontends müssen mit dem Befehl:<br />
+						<code>npm ci</code><br />
+						heruntergeladen werden können.
+					</li>
+					<li>
+						Das Frontend muss mit dem Befehl:<br />
+						<code>npm run build</code><br />
+						fehlerfrei gebaut werden können.
+					</li>
+				</ul></div>
+			</div></div></div>
+
+		<div class="dp-selflink-container"><a class="dp-selflink" href="#ts-ta-architektur"><span class="dp-selflink-icon">§</span></a><div id="ts-ta-architektur" class="story-box tech-story-box"><div class="story-box-id"><strong>ID: </strong>23</div><div class="story-box-title"><strong>Titel:</strong><span class="story-box-title-text">Als Technische/r Architekt/in erwarte ich eine gute Umsetzung der Programmarchitektur.</span></div><div class="story-box-content">
+				<div class="dp-selflink-container"><a class="dp-selflink" href="#ts-stakeholder-technischer-architekt_ul-2"><span class="dp-selflink-icon">§</span></a><ul class="dp-ul" id="ts-stakeholder-technischer-architekt_ul-2">
+					<li>Das Programm muss eine saubere Schichtentrennung aufweisen.</li>
+					<li>Die Austauschbarkeit der Schichten muss gegeben sein.</li>
+					<li>Zur Trennung der Schichten muss das <a href="https://docs.oracle.com/javase/tutorial/java/concepts/interface.html">Interface Pattern</a> verwendet werden.</li>
+					<li>Außerdem dürfen andere Komponenten nie direkt instanziiert werden, sondern müssen mittels <a href="https://www.baeldung.com/inversion-control-and-dependency-injection-in-spring">Dependency Injection</a> injiziert werden.</li>
+					<li>
+						Es muss eine saubere Trennung zwischen DTO- und Entity-Klassen vorhanden sein.
+						<div class="dp-selflink-container"><a class="dp-selflink" href="#ts-stakeholder-technischer-architekt_ul-3"><span class="dp-selflink-icon">§</span></a><ul class="dp-ul" id="ts-stakeholder-technischer-architekt_ul-3">
+							<li>
+								Entity-Objekte stellen bereits in der Datenbank gespeicherte Entitäten dar und werden nicht selbst über die REST-Schnittstelle übertragen.
+								Zum Beispiel:
+								<div class="dp-selflink-container"><a class="dp-selflink" href="#ts-stakeholder-technischer-architekt_ul-4"><span class="dp-selflink-icon">§</span></a><ul class="dp-ul" id="ts-stakeholder-technischer-architekt_ul-4">
+									
+											<li>Pferd</li>
+											<li>Besitzer/in</li>
+										
+								</ul></div>
+							</li>
+							<li>
+								DTOs werden zur Kapselung von nicht-Entity-Daten innerhalb des Backends und zur Übertragung über REST verwendet.
+								Hier bieten sich Java Records an, sofern Sie unveränderliche Datenstrukturen verwenden wollen.
+								Zum Beispiel:
+								<div class="dp-selflink-container"><a class="dp-selflink" href="#ts-stakeholder-technischer-architekt_ul-5"><span class="dp-selflink-icon">§</span></a><ul class="dp-ul" id="ts-stakeholder-technischer-architekt_ul-5">
+									<li>Suchkriterien</li>
+									<li>Daten zum Erstellen einer Entität</li>
+									
+											<li>Stammbaum</li>
+										
+								</ul></div>
+							</li>
+						</ul></div>
+					</li>
+					<li>
+						Suchkriterien sollen auch im REST-Endpointcode nicht als einzelne Parameter, sondern in einem DTO gekapselt aufgenommen werden.
+						In Anwendungsfällen wie der Verarbeitung von Multipart-Blob-Daten kann es jedoch sinnvoll sein, mehrere Parameter flexibel zu akzeptieren,
+						um ressourcenschonende und effiziente Übertragungen zu ermöglichen.
+					</li>
+					<li>Verwenden von Exceptions zum Transportieren von Fehlern.</li>
+					<li>Ein vollständiges Neuladen des Frontend (z.B. mit <code>window.location.reload()</code>) ist nicht erlaubt.</li>
+					<li>
+						Verwenden Sie für Formulare Angulars's <em>Template Driven Forms</em> oder <em>Reactive Forms</em>.
+						<em>Template Variablen</em> zu verwenden, um die Eingabewerte einzelner Elemente abfragen zu können, ist keine geeignete Lösung.
+					</li>
+					<li>Es dürfen im Frontend keine externen Ressourcen eingebunden werden.</li>
+				</ul></div>
+			</div></div></div>
+
+		<div class="dp-selflink-container"><a class="dp-selflink" href="#ts-ta-router"><span class="dp-selflink-icon">§</span></a><div id="ts-ta-router" class="story-box tech-story-box"><div class="story-box-id"><strong>ID: </strong>24</div><div class="story-box-title"><strong>Titel:</strong><span class="story-box-title-text">Als Technische/r Architekt/in erwarte ich eine sinnvolle Verwendung des <a href="https://angular.io/guide/router">Routers</a></span></div><div class="story-box-content">
+				<div class="dp-selflink-container"><a class="dp-selflink" href="#ts-stakeholder-technischer-architekt_ul-6"><span class="dp-selflink-icon">§</span></a><ul class="dp-ul" id="ts-stakeholder-technischer-architekt_ul-6">
+					<li>Jede der Ansichten der Anwendung soll eine eigene Route haben.</li>
+					<li>
+						Navigation zwischen den Ansichten soll ausschließlich durch die von Angular zur Verfügung gestellten Mechanismen passieren.
+						<div class="dp-selflink-container"><a class="dp-selflink" href="#ts-stakeholder-technischer-architekt_ul-7"><span class="dp-selflink-icon">§</span></a><ul class="dp-ul" id="ts-stakeholder-technischer-architekt_ul-7">
+							<li>Im Programmcode sollen die einschlägigen Angular-Klasses, insbesondere <code>Router</code> verwendet werden.</li>
+							<li>Links in den HTML-Templates sollen <a href="https://angular.dev/api/router/RouterLink"><code>routerLink</code></a> verwenden, anstatt von <code>href</code>.</li>
+						</ul></div>
+					</li>
+					<li>Die Routen sollen sinnvoll aufgebaut sein.
+					<div class="dp-selflink-container"><a class="dp-selflink" href="#ts-stakeholder-technischer-architekt_ul-8"><span class="dp-selflink-icon">§</span></a><ul class="dp-ul" id="ts-stakeholder-technischer-architekt_ul-8">
+						<li>Es soll eine sinnvolle Hierarchie erkennbar sein.</li>
+						<li>Eventuelle Parameter, die die Ansicht benötigt, sollen über die Route übertragen werden.</li>
+						<li>Routen dürfen – im Gegensatz zu REST-URIs – Verben enthalten.</li>
+						<li>Routen und zugehörige Links dürfen – im Gegensatz zum restlichen UI – für den/die Benutzer/in sichtbare IDs enthalten.</li>
+						<li>
+							Beispiele für konkrete Routen:
+							<div class="dp-selflink-container"><a class="dp-selflink" href="#ts-stakeholder-technischer-architekt_ul-9"><span class="dp-selflink-icon">§</span></a><ul class="dp-ul" id="ts-stakeholder-technischer-architekt_ul-9">
+								
+										<li>Erstellen eines Pferdes: <code>/horses/create</code></li>
+										<li>Bearbeiten des Pferdes mit ID 42: <code>/horses/42/edit</code></li>
+										<li>Stammbaum des Pferdes mit ID 42 mit 3 Generationen: <code>/horses/42/familytree?generations=3</code></li>
+									
+							</ul></div>
+						</li>
+					</ul></div>
+					</li>
+					<li>
+						Sie sollen auf Änderungen der Router Parameter sinnvoll reagieren.
+						Ändert sich z.B. in einer Detailansicht der Parameter für die ID der angezeigten Entität, so sollen Sie die Daten der entsprechenden Entität laden und anzeigen.
+					</li>
+				</ul></div>
+			</div></div></div>
+
+		<div class="dp-selflink-container"><a class="dp-selflink" href="#ts-ta-resourcen"><span class="dp-selflink-icon">§</span></a><div id="ts-ta-resourcen" class="story-box tech-story-box"><div class="story-box-id"><strong>ID: </strong>25</div><div class="story-box-title"><strong>Titel:</strong><span class="story-box-title-text">Als Technische/r Architekt/in erwarte ich vorausschauenden Umgang mit Ressourcen.</span></div><div class="story-box-content">
+				<div class="dp-selflink-container"><a class="dp-selflink" href="#ts-stakeholder-technischer-architekt_ul-10"><span class="dp-selflink-icon">§</span></a><ul class="dp-ul" id="ts-stakeholder-technischer-architekt_ul-10">
+					<li>Schließen von externen Ressourcen (z.B. Datenbank-Verbindung), sofern vorhanden.</li>
+					<li>Suchen müssen aus Performancegründen in der Datenbank vorgenommen werden.</li>
+					<li>
+						Es dürfen nicht unnötig viele HTTP-Requests ausgeführt werden.
+						
+							Insbesondere in Fällen, wo eine Liste oder Tabelle von Elementen oder im Fall der Baumstruktur (siehe <a href="#us-stammbaum">US 9</a>)
+							sollen alle für die Anzeige notwendigen Daten in einem Request übertragen werden.
+						
+
+					</li>
+					<li>
+						Es dürfen nicht mehr Datensätze in einem Request übertragen werden, als tatsächlich benötigt.
+						<div class="dp-selflink-container"><a class="dp-selflink" href="#ts-stakeholder-technischer-architekt_ul-11"><span class="dp-selflink-icon">§</span></a><ul class="dp-ul" id="ts-stakeholder-technischer-architekt_ul-11">
+							<li>Übertragen Sie zum Beispiel nicht alle Einträge einer Entität, wenn Sie nur zehn davon anzeigen.</li>
+							<li>Sie müssen sich bei diesem Projekt aus Gründen der Einfachheit noch nicht mit Pagination oder ähnlichem auseinandersetzen.</li>
+						</ul></div>
+					</li>
+				</ul></div>
+			</div></div></div>
+
+		<div class="dp-selflink-container"><a class="dp-selflink" href="#ts-ta-exception-handling"><span class="dp-selflink-icon">§</span></a><div id="ts-ta-exception-handling" class="story-box tech-story-box"><div class="story-box-id"><strong>ID: </strong>26</div><div class="story-box-title"><strong>Titel:</strong><span class="story-box-title-text">Als Technische/r Architekt/in erwarte ich eine durchdachte Fehlerbehandlung.</span></div><div class="story-box-content">
+				<div class="dp-selflink-container"><a class="dp-selflink" href="#ts-stakeholder-technischer-architekt_ul-12"><span class="dp-selflink-icon">§</span></a><ul class="dp-ul" id="ts-stakeholder-technischer-architekt_ul-12">
+					<li>Je nach Art des Fehlers wird eine passende Exception gewählt.</li>
+					<li>Exceptions werden ausschließlich zum Transportieren von Fehlern verwendet.</li>
+					<li>
+						Exceptionbehandlung folgt dem im Architekturtutorial beschriebenen Schema:
+						<div class="dp-selflink-container"><a class="dp-selflink" href="#ts-stakeholder-technischer-architekt_ul-13"><span class="dp-selflink-icon">§</span></a><ul class="dp-ul" id="ts-stakeholder-technischer-architekt_ul-13">
+							<li>
+								Für Fälle, die im Zuge des normalen Betriebs des Systems erwartet werden, werden Checked Exceptions verwendet.
+								Beispiele dafür sind:
+								<div class="dp-selflink-container"><a class="dp-selflink" href="#ts-stakeholder-technischer-architekt_ul-14"><span class="dp-selflink-icon">§</span></a><ul class="dp-ul" id="ts-stakeholder-technischer-architekt_ul-14">
+									<li>Vom Frontend kommen ungültige Daten</li>
+								</ul></div>
+							</li>
+							<li>
+								Für Fälle, wo unerwartete Fehler auftreten, werden Unchecked Exceptions verwendet.
+								<div class="dp-selflink-container"><a class="dp-selflink" href="#ts-stakeholder-technischer-architekt_ul-15"><span class="dp-selflink-icon">§</span></a><ul class="dp-ul" id="ts-stakeholder-technischer-architekt_ul-15">
+									<li>Programmierfehler</li>
+									<li>Problem mit der Laufzeitumgebung</li>
+									<li>Zugriff auf andere benötigte Services (z.B. Datenbank)</li>
+								</ul></div>
+							</li>
+						</ul></div>
+					</li>
+					<li>Es darf keine catch-all Klauseln geben.</li>
+					<li>Fehler müssen im Log aufscheinen.</li>
+					<li>Fehler müssen <em>entweder</em> behandelt <em>oder</em> weitergereicht werden.</li>
+					<li>Das Programm darf zu keinem Zeitpunkt einfach abstürzen.</li>
+				</ul></div>
+			</div></div></div>
+
+		<div class="dp-selflink-container"><a class="dp-selflink" href="#ts-ta-rest"><span class="dp-selflink-icon">§</span></a><div id="ts-ta-rest" class="story-box tech-story-box"><div class="story-box-id"><strong>ID: </strong>27</div><div class="story-box-title"><strong>Titel:</strong><span class="story-box-title-text">Als Technische/r Architekt/in erwarte ich eine <a href="https://hackernoon.com/restful-api-design-step-by-step-guide-2f2c9f9fcdbf">REST-konforme</a> Umsetzung des Backend.</span></div><div class="story-box-content">
+				<div class="dp-selflink-container"><a class="dp-selflink" href="#ts-stakeholder-technischer-architekt_ul-16"><span class="dp-selflink-icon">§</span></a><ul class="dp-ul" id="ts-stakeholder-technischer-architekt_ul-16">
+					<li>
+						Für jede Response muss der korrekte HTTP-Statuscode zurückgegeben werden.
+						Dabei soll vor allem zwischen 2xx (OK), 4xx (Client Error) und 5xx (Server Error) unterschieden werden.
+					</li>
+					<li>
+						Es soll immer der HTTP Status Code gewählt werden,
+						dessen Beschreibung in der HTTP-Spezifikation und übliche Verwendung am besten zur Situation passt.
+						Insbesonders folgende Status Codes werden dabei erwartet.
+						<div class="dp-selflink-container"><a class="dp-selflink" href="#ts-stakeholder-technischer-architekt_ul-17"><span class="dp-selflink-icon">§</span></a><ul class="dp-ul" id="ts-stakeholder-technischer-architekt_ul-17">
+							<li>200 <em>OK</em></li>
+							<li>201 <em>Created</em></li>
+							<li>204 <em>No Content</em></li>
+							<li>
+								400 <em>Bad Request</em>
+								<br />
+								im Fall eines syntaktisch falschen Requests
+							</li>
+							<li>
+								404 <em>Not Found</em>
+								<br />
+								Im Fall, dass eine bestimmte angefragte Ressource nicht existiert,
+								wie zum Beispiel, wenn ein Pferd mit bestimmter ID angefragt wird.
+								Nicht aber, bei einer leeren Menge.
+							</li>
+							<li>
+								422 <em>Unprocessable Entity</em>
+								<br />
+								im Fall eines Validierungsfehlers
+							</li>
+							<li>
+								409 <em>Conflict</em>
+								<br />
+								im Fall, dass die Entity im Request selbst valide ist, aber aufgrund des Gesamtzustands trotzdem nicht akzeptiert werden kann.
+							</li>
+							<li>
+								500 <em>Internal Server Error</em>
+								<br />
+								Programmierfehler, nicht behandelbarer Fehler.
+							</li>
+						</ul></div>
+					</li>
+					<li>Bei jedem Request und Response sollen nur Informationen übertragen werden, die auch wirklich benötigt werden.
+					</li>
+					<li>Für jeden HTTP-Request wird immer die richtige HTTP-Anfragemethode (Verb) verwendet.
+					</li>
+					<li>Das Backend an sich speichert niemals den Status eines Requests ab. Der Zustand der Applikation wird ausschließlich in der Datenbank gespeichert.
+					</li>
+					<li>Uniform Resource Identifiers (URI) bestehen hauptsächlich aus Nomen im Plural und enthalten keine Verben.
+					</li>
+					<li>
+						Übertragung von strukturierten Daten von und zum Backend erfolgt primär über JSON (<code>Content-type: application/json</code>).
+						Ausnahmen gibt es für:
+						<div class="dp-selflink-container"><a class="dp-selflink" href="#ts-stakeholder-technischer-architekt_ul-18"><span class="dp-selflink-icon">§</span></a><ul class="dp-ul" id="ts-stakeholder-technischer-architekt_ul-18">
+							<li>Suchparameter, welche in Form von Query Parametern als Teil des URI übertragen werden sollten,</li>
+							<li>
+								aus Sicht der Anwendung unstrukturierte BLOBs (Binary Large Objects),
+								welche als Teil eines Domänenobjekts übertragen werden sollen.
+								Für sowohl den Upload zum, als auch die Abfrage vom Backend, solcher eingebetteter BLOBs gibt es mehrere Möglichkeiten.
+								Recherchieren Sie diese Möglichkeiten und wählen sie sowohl für Upload als auch Download dann die Variante,
+								die ressourcenschonend und performant ist.
+								Die Methode sollte den Datenverkehr effizient halten, unnötigen Overhead vermeiden
+								und speziell für den effizienten Umgang mit binären Daten ausgelegt sein.
+								Beim Abgabegespräch sollten Sie:
+								<div class="dp-selflink-container"><a class="dp-selflink" href="#ts-stakeholder-technischer-architekt_ul-19"><span class="dp-selflink-icon">§</span></a><ul class="dp-ul" id="ts-stakeholder-technischer-architekt_ul-19">
+									<li>die von ihnen gewählte Implementierung erklären können,</li>
+									<li>begründen können, warum sie diese gewählt haben, und</li>
+									<li>die alternativen Möglichkeiten, die Sie in Ihrer Recherche gefunden haben, erklären können.</li>
+								</ul></div>
+								Beachten Sie, dass der Media Type des BLOBs dabei nicht verloren gehen darf.
+							</li>
+						</ul></div>
+					</li>
+				</ul></div>
+			</div></div></div>
+	</stories></div></section>
+		<section id="ts-stakeholder-datenmanager"><h4 class="dp-heading dp-heading-section dp-selflink-container"><a class="dp-selflink" href="#ts-stakeholder-datenmanager"><span class="dp-selflink-icon">§</span></a><span class="dp-heading-text">Datenmanager/in</span></h4><div class="dp-content dp-section-content"><stories>
+		<div class="dp-selflink-container"><a class="dp-selflink" href="#ts-db-persistenz"><span class="dp-selflink-icon">§</span></a><div id="ts-db-persistenz" class="story-box tech-story-box"><div class="story-box-id"><strong>ID: </strong>28</div><div class="story-box-title"><strong>Titel:</strong><span class="story-box-title-text">Als Datenmanager/in erwarte ich, dass die Anwendung ihre Daten in einem relationalen Datenbanksystem (RDBMS) persistiert.</span></div><div class="story-box-content">
+				<div class="dp-selflink-container"><a class="dp-selflink" href="#ts-stakeholder-datenmanager_ul-1"><span class="dp-selflink-icon">§</span></a><ul class="dp-ul" id="ts-stakeholder-datenmanager_ul-1">
+					<li>
+						Die Anwendung muss ihre Daten in einem RDBMS persistieren.
+						Ausgenommen davon sind:
+						<div class="dp-selflink-container"><a class="dp-selflink" href="#ts-stakeholder-datenmanager_ul-2"><span class="dp-selflink-icon">§</span></a><ul class="dp-ul" id="ts-stakeholder-datenmanager_ul-2">
+							<li>
+								Logs (siehe <a href="#ts-qa-logging">TS 10</a>), welche keine eigentlichen Anwendungsdaten darstellen,
+								sondern dem Debugging und der Nachvollziehbarkeit der Systemausführung dienen.
+								Diese Logs dürfen <em>nicht</em> in der Datenbank abgelegt werden.
+							</li>
+							<li>
+								„BLOBs“ (Binary Large Objects): aus Sicht der Anwendung unstrukturierte Datenobjekte, welche möglicherweise sehr groß sind.
+								BLOBs <em>dürfen</em> in der Datenbank mit einem geeignetem Datentyp abgelegt werden.
+								Alternativ <em>dürfen</em> sie auch außerhalb der Datenbank, in einem dediziertem Datenverzeichnis abgelegt, und aus der Datenbank referenziert werden.
+								Wenn ein BLOB nicht mehr benötigt wird, muss es auch entfernt werden.
+							</li>
+						</ul></div>
+					</li>
+					<li>Der <a href="https://www.iana.org/assignments/media-types/media-types.xhtml">Media Type</a> eines BLOBs soll ebenfalls gespeichert werden.</li>
+					<li>Der Zustand der Daten muss nach einem Neustart der Anwendung erhalten bleiben.</li>
+					
+					<li>Die Anwendung darf beim Start bestehende Daten nicht löschen.</li>
+					<li>Die Anwendung muss in der Lage sein, beim Start die benötigten Strukturen in der Datenbank selbst zu erstellen.</li>
+					<li>
+						Die Anwendung muss in der Lage sein, ein angemessenes Set von Demodaten
+						(zumindest 10 Stück pro Domänenobjekt,)
+						in die Datenbank einzufügen, wenn sie mit dem Profil <code>datagen</code> gestartet wird.
+						Daten, welche nicht durch durch diesen Mechanismus eingefügt wurden, dürfen dabei nicht verändert werden.
+						Ihr Programm muss mit diesen Demodaten vollständig testbar sein.
+
+						
+							Dies impliziert einen Bedarf nach einer ausreichenden Anzahl von Beziehungen und auch Pferde mit einem großen Stammbaum.
+						
+					</li>
+				</ul></div>
+			</div></div></div>
+
+		<div class="dp-selflink-container"><a class="dp-selflink" href="#ts-db-datenmodell"><span class="dp-selflink-icon">§</span></a><div id="ts-db-datenmodell" class="story-box tech-story-box"><div class="story-box-id"><strong>ID: </strong>29</div><div class="story-box-title"><strong>Titel:</strong><span class="story-box-title-text">Als Datenmanager/in erwarte ich ein sinnvolles Datenmodell.</span></div><div class="story-box-content">
+				<div class="dp-selflink-container"><a class="dp-selflink" href="#ts-stakeholder-datenmanager_ul-3"><span class="dp-selflink-icon">§</span></a><ul class="dp-ul" id="ts-stakeholder-datenmanager_ul-3">
+					<li>Primärschlüssel müssen laufende Nummern sein, die von der Datenbank erstellt werden.</li>
+					<li>
+						Um Relationen abbilden zu können, müssen sinnvolle Fremdschlüssel gewählt werden.
+						<div class="dp-selflink-container"><a class="dp-selflink" href="#ts-stakeholder-datenmanager_ul-4"><span class="dp-selflink-icon">§</span></a><ul class="dp-ul" id="ts-stakeholder-datenmanager_ul-4">
+							<li>Die Integrität eines Fremdschlüssels muss mit einem Constraint sichergestellt werden.</li>
+						</ul></div>
+					</li>
+					<li>
+						Es müssen sinnvolle Constraints verwendet werden, um die Einhaltung von Einschränkungen auf den gespeicherten Daten sicherzustellen. Zum Beispiel:
+						<div class="dp-selflink-container"><a class="dp-selflink" href="#ts-stakeholder-datenmanager_ul-5"><span class="dp-selflink-icon">§</span></a><ul class="dp-ul" id="ts-stakeholder-datenmanager_ul-5">
+							<li>Fremdschlüssel mit einem Foreign-Key-Constraint versehen (siehe oberer Punkt)</li>
+							<li>Uniqueness-Constraint auf Feldern, welche keine doppelten Werte haben dürfen (eindeutige Email, Primärschlüssel, …)</li>
+						</ul></div>
+					</li>
+					<li>Verwenden Sie nur so viele Tabellen wie (unter Einhaltung der dritten Normalform) notwendig.</li>
+					<li>Verwenden Sie sinnvolle Datentypen für die Tabellenspalten (zum Beispiel für einen Zeitpunkt nicht <code>VARCHAR</code> sondern <code>DATE</code> oder <code>TIMESTAMP</code>).</li>
+					<li>Jede Beziehung, deren Multiplizität auf beiden Seiten größer als 1 ist, ist als <span class="it">m</span>:<span class="it">n</span>-Beziehung abzubilden.</li>
+				</ul></div>
+			</div></div></div>
+
+		<div class="dp-selflink-container"><a class="dp-selflink" href="#ts-db-zugriff"><span class="dp-selflink-icon">§</span></a><div id="ts-db-zugriff" class="story-box tech-story-box"><div class="story-box-id"><strong>ID: </strong>30</div><div class="story-box-title"><strong>Titel:</strong><span class="story-box-title-text">Als Datenmanager/in möchte ich, dass der Zugriff auf die Datenbank sauber durchgeführt wird.</span></div><div class="story-box-content">
+				<div class="dp-selflink-container"><a class="dp-selflink" href="#ts-stakeholder-datenmanager_ul-6"><span class="dp-selflink-icon">§</span></a><ul class="dp-ul" id="ts-stakeholder-datenmanager_ul-6">
+					<li>SQL-Statements müssen als Prepared Statement ausgeführt werden.</li>
+					<li>Es darf keine SQL-Injection möglich sein.</li>
+					<li>
+						Es sollen nicht mehr Daten aus der Datenbank abgefragt werden, als benötigt werden.
+						<div class="dp-selflink-container"><a class="dp-selflink" href="#ts-stakeholder-datenmanager_ul-7"><span class="dp-selflink-icon">§</span></a><ul class="dp-ul" id="ts-stakeholder-datenmanager_ul-7">
+							<li>Zum Beispiel fragen Sie nicht alle Einträge einer Tabelle ab, wenn Sie wissen, dass Sie nur die brauchen, die ein bestimmtes Kriterium erfüllen.</li>
+						</ul></div>
+					</li>
+				</ul></div>
+			</div></div></div>
+
+		<div class="dp-selflink-container"><a class="dp-selflink" href="#ts-db-test"><span class="dp-selflink-icon">§</span></a><div id="ts-db-test" class="story-box tech-story-box"><div class="story-box-id"><strong>ID: </strong>31</div><div class="story-box-title"><strong>Titel:</strong><span class="story-box-title-text">Als Datenmanager/in erwarte ich eine Trennung von Produktiv- und Testdatenbank.</span></div><div class="story-box-content">
+				<div class="dp-selflink-container"><a class="dp-selflink" href="#ts-stakeholder-datenmanager_ul-8"><span class="dp-selflink-icon">§</span></a><ul class="dp-ul" id="ts-stakeholder-datenmanager_ul-8">
+					<li>Bei einem Testlauf darf es keinen Zugriff auf die Produktivdatenbank geben.</li>
+					<li>
+						Die Testdatenbank muss sich am Start jedes Testlaufs im gleichen Zustand befinden.
+						Ein vorhergender Durchlauf der Tests darf den Aktuellen nicht beeinflussen.
+					</li>
+				</ul></div>
+			</div></div></div>
+	</stories></div></section>
+	</div></section>
+	</div></section>
+		<section id="implementierung"><h2 class="dp-heading dp-heading-section dp-selflink-container"><a class="dp-selflink" href="#implementierung"><span class="dp-selflink-icon">§</span></a><span class="dp-heading-text">Implementierung</span></h2><div class="dp-content dp-section-content">
+		<div class="dp-selflink-container"><a class="dp-selflink" href="#implementierung_p-1"><span class="dp-selflink-icon">§</span></a><p class="dp-p" id="implementierung_p-1">
+			Der folgende Abschnitt der Angabe stellt einen Leitfaden zur Implementierung dar;
+			er soll Ihnen helfen die richtige Herangehensweise an die Erstellung Ihres Programms zu wählen.
+		</p></div>
+		<section id="erste-schritte"><h3 class="dp-heading dp-heading-section dp-selflink-container"><a class="dp-selflink" href="#erste-schritte"><span class="dp-selflink-icon">§</span></a><span class="dp-heading-text">Erste Schritte</span></h3><div class="dp-content dp-section-content">
+				<div class="dp-selflink-container"><a class="dp-selflink" href="#erste-schritte_p-1"><span class="dp-selflink-icon">§</span></a><p class="dp-p" id="erste-schritte_p-1">Im ersten Schritt sollten Sie <em>Java OpenJDK 25</em> herunterladen und installieren.
+Öffnen Sie das Terminal und führen Sie den Befehl <code>java -version</code> aus, um zu überprüfen, ob Ihr Betriebssystem auch wirklich Java OpenJDK 25 verwendet.
+Desweiteren benötigen Sie Maven.</p></div><div class="dp-selflink-container"><a class="dp-selflink" href="#erste-schritte_p-2"><span class="dp-selflink-icon">§</span></a><p class="dp-p" id="erste-schritte_p-2">Als Nächstes sollten Sie <em>Node.js 22.20.0</em> installieren.
+Überprüfen Sie auch wieder hier, ob Sie die richtige Version installiert haben.
+Führen Sie dazu den Befehl <code>node -v</code> aus.</p></div><div class="dp-selflink-container"><a class="dp-selflink" href="#erste-schritte_p-3"><span class="dp-selflink-icon">§</span></a><p class="dp-p" id="erste-schritte_p-3">Danach sollten Sie Ihre Entwicklungsumgebung einrichten.
+Nachdem Sie <em>IntelliJ IDEA</em> installiert haben, laden Sie das Template aus TUWEL herunter.
+Entpacken Sie das Template in einen Ordner Ihrer Wahl.
+Das Template enthält die beiden Ordner backend und frontend sowie die Datei <code>.gitlab-ci.yml</code>.
+Öffnen Sie die beiden Projekte/Ordner jeweils in einem eigenen Fenster in Ihrer Entwicklungsumgebung.
+Initialisieren Sie ein Git Repository im Ordner, welcher sowohl die beiden Ordner und die Datei enthält.
+Damit befindet sich die Datei <code>.gitlab-ci.yml</code> sowie die beiden Ordner backend und frontend im Wurzelverzeichnis Ihres Git-Repositories.</p></div>
+				<section id="erste-schritte-backend"><h4 class="dp-heading dp-heading-section dp-selflink-container"><a class="dp-selflink" href="#erste-schritte-backend"><span class="dp-selflink-icon">§</span></a><span class="dp-heading-text">Backend</span></h4><div class="dp-content dp-section-content"><div class="dp-selflink-container"><a class="dp-selflink" href="#erste-schritte-backend_p-1"><span class="dp-selflink-icon">§</span></a><p class="dp-p" id="erste-schritte-backend_p-1">Im Backend wird als Buildsystem Maven verwendet.
+Eine systemweit installierte Version von Maven wird über den Befehl <code>mvn</code> aufgerufen.
+Unter Windows sollten Sie Git-Bash und nicht CMD oder PowerShell verwenden.
+In den vergangenen Semestern gab es mit letzteren immer wieder Probleme mit Crashes der JVM, wenn viel Text in kurzer Zeit (z.B. bei der Testausführung) ausgegeben wurde.
+Generell beziehen sich die in diesem Dokument für Windows angegebenen Befehle auf Git-Bash und nicht auf CMD oder PowerShell.</p></div><div class="dp-selflink-container"><a class="dp-selflink" href="#erste-schritte-backend_p-2"><span class="dp-selflink-icon">§</span></a><p class="dp-p" id="erste-schritte-backend_p-2">Das zur Verfügung gestellte Template beinhaltet bereits einen einfachen Durchstich durch alle Schichten, von der Persistenz- über die Service- bis zur REST-Schicht und bis in das Frontend.
+Um das Backend zu starten, führen Sie den Befehl <code>mvn spring-boot:run</code> im Ordner <code>backend</code> des Templates aus.
+Alternativ kann die Klasse <code>java/.../SeprIndividualAssignmentApplication.java</code> über Ihre IDE gestartet werden.
+Das Datenbankschema wird beim Start der Anwendung automatisch erstellt.
+Um die Anwendung zu kompilieren verwenden Sie den Befehl <code>mvn clean package</code>.
+Um initiale Demodaten in die Datenbank einzufügen, können Sie die Applikation mit dem Profil <code>datagen</code> starten
+(die Anwendung wie beschrieben builden und mit <code>java -Dspring.profiles.active=datagen -jar target/e01234567-0.0.1-SNAPSHOT.jar</code> ausführen).
+Das Backend besteht aus einem Webserver, welcher über die URL <a href="http://localhost:8080"><code>http://localhost:8080</code></a> erreichbar ist.
+Nach dem Senden einer GET-Anfrage mittels Browser oder <a href="https://curl.se">Curl</a> an die URL
+<a href="http://localhost:8080/horses"><code>http://localhost:8080/horses</code></a>
+bekommen Sie die Liste der aktuell gespeicherten Pferde von Ihrem Backend-System zurück.</p></div></div></section>
+				<section id="erste-schritte-frontend"><h4 class="dp-heading dp-heading-section dp-selflink-container"><a class="dp-selflink" href="#erste-schritte-frontend"><span class="dp-selflink-icon">§</span></a><span class="dp-heading-text">Frontend</span></h4><div class="dp-content dp-section-content"><div class="dp-selflink-container"><a class="dp-selflink" href="#erste-schritte-frontend_p-1"><span class="dp-selflink-icon">§</span></a><p class="dp-p" id="erste-schritte-frontend_p-1">Wenn Sie das Backend erfolgreich gestartet haben, wechseln Sie in den Ordner frontend.
+Führen Sie hier den Befehl <code>npm ci</code> aus, um die Abhängigkeiten herunterzuladen.
+Anschließend führen Sie <code>npm run start</code> aus und wechseln Sie in Ihrem Browser zur URL <a href="http://localhost:4200"><code>http://localhost:4200/</code></a>.
+Wenn Sie ein grünes Feld mit der Meldung „Well done!“ sehen hat die Integration von Frontend
+und Backend funktioniert, sehen Sie ein rotes Feld mit der Meldung „Error!“, dann ist etwas schief gelaufen.
+Zusätzlich zu diesem einfachen Durchstich ist in dem Backend-Template bereits das Build und Dependency Management Tooling mittels Maven aufgesetzt.</p></div><div class="dp-selflink-container"><a class="dp-selflink" href="#erste-schritte-frontend_p-2"><span class="dp-selflink-icon">§</span></a><p class="dp-p" id="erste-schritte-frontend_p-2">Nachdem Sie das Projekt nun erfolgreich geöffnet haben sollten Sie als Erstes die Platzhalter für ihre Matrikelnummer <code>e01234567</code> durch Ihre eigene Matrikelnummer ersetzen.
+Solche Platzhalter gibt es unter anderem im Backend in <code>pom.xml</code> oder im Frontend in <code>package.json</code>.
+Danach können Sie mit der Implementierung beginnen.</p></div></div></section>
+				<section id="erste-schritte-template"><h4 class="dp-heading dp-heading-section dp-selflink-container"><a class="dp-selflink" href="#erste-schritte-template"><span class="dp-selflink-icon">§</span></a><span class="dp-heading-text">Aufbau des Templates</span></h4><div class="dp-content dp-section-content"><div class="dp-selflink-container"><a class="dp-selflink" href="#erste-schritte-template_p-1"><span class="dp-selflink-icon">§</span></a><p class="dp-p" id="erste-schritte-template_p-1">Das zur Verfügung gestellte Template folgt einer streng vorgegeben Orderstruktur, die Sie auch nicht ändern sollten.
+Bestimmte Dateien und Ordner sollten ebenfalls weder umbenannt noch verändert werden.
+Genauere Informationen dazu finden Sie in der nachfolgenden Liste.</p></div><div class="dp-selflink-container"><a class="dp-selflink" href="#erste-schritte-template_p-2"><span class="dp-selflink-icon">§</span></a><p class="dp-p" id="erste-schritte-template_p-2">Folgende Ordner und Dateien sind im Backend-Template enthalten:</p></div><div class="dp-selflink-container"><a class="dp-selflink" href="#erste-schritte-template_ul-3"><span class="dp-selflink-icon">§</span></a><ul class="dp-ul" id="erste-schritte-template_ul-3"><li><code>src/main/java</code> beinhaltet den Quellcode Ihrer Anwendung.</li><li><code>src/main/resources</code> beinhaltet alle Ressourcen auf die Ihr Programm zugreifen muss,
+wie z.B. die Spring-Konfigurationsdatei application.yml.</li><li><code>src/test/java</code> beinhaltet den Quellcode Ihrer Tests.</li><li><code>target/</code> wird automatisch vom Build und Dependencymanagement Tool erstellt und sollte nicht verändert werden.</li><li><code>.gitignore</code> enthält eine Liste an Dateien die nicht in Git versioniert werden sollen.</li><li><code>pom.xml</code> enthält die Konfiguration für das Build- und Dependencymanagement Tool.</li><li><code>README.md</code> enthält Informationen über das Projekt.</li></ul></div><div class="dp-selflink-container"><a class="dp-selflink" href="#erste-schritte-template_p-4"><span class="dp-selflink-icon">§</span></a><p class="dp-p" id="erste-schritte-template_p-4">Alle für Sie wichtigen Order und Dateien des Frontend Templates liegen unter <code>src/app</code>:</p></div><div class="dp-selflink-container"><a class="dp-selflink" href="#erste-schritte-template_ul-5"><span class="dp-selflink-icon">§</span></a><ul class="dp-ul" id="erste-schritte-template_ul-5"><li><code>component</code> beinhaltet die Angular Komponenten welche zusammen die Web UI bilden.</li><li><code>dto</code> beinhaltet die Data Transfer Objects.</li><li><code>environments</code> beinhaltet globale Konstanten, die sich in unterschiedlichen Umgebungen (Entwicklung, Produktion, …) ändern können.</li><li><code>service</code> beinhaltet die Services, die auf das REST-Backend zugreifen.</li><li><code>app.component.*</code> diese drei Dateien bilden die Grundstruktur der Angular App.
+Sie sollten diese Dateien nicht ändern, außer Sie haben schon Erfahrung mit Angular und wollen die App grundlegend anders aufbauen.</li><li><code>app.config.ts</code> ist die Konfigurationsdatei Ihrer Angular-Anwendung.</li><li><code>app.routes.ts</code> definiert die Routen der App.</li><li><code>.editorconfig</code> enthält eine einfache Konfiguration für die Formatierung von Quellcode, die von vielen Texteditoren und IDEs beachtet wird.</li></ul></div></div></section>
+			</div></section>
+
+		<section id="implementierung-spring"><h3 class="dp-heading dp-heading-section dp-selflink-container"><a class="dp-selflink" href="#implementierung-spring"><span class="dp-selflink-icon">§</span></a><span class="dp-heading-text">Spring</span></h3><div class="dp-content dp-section-content">
+				<div class="dp-selflink-container"><a class="dp-selflink" href="#implementierung-spring_p-1"><span class="dp-selflink-icon">§</span></a><p class="dp-p" id="implementierung-spring_p-1">
+					Spring Boot ist ein Java Framework, das verschiedene Best Practices und andere Frameworks, wie z.B. das Logging Framework, JUnit oder Jackson vereint.
+					Weiters beinhaltet das Framework den Webserver Tomcat, der das Backend hostet.
+					Die Datei <code>resources/application.yml</code> enthält die Konfiguration des Frameworks.
+				</p></div>
+			</div></section>
+
+		<section id="implementierung-backend-build-und-dependency-management"><h3 class="dp-heading dp-heading-section dp-selflink-container"><a class="dp-selflink" href="#implementierung-backend-build-und-dependency-management"><span class="dp-selflink-icon">§</span></a><span class="dp-heading-text">Backend Build- und Dependencymanagement</span></h3><div class="dp-content dp-section-content"><div class="dp-selflink-container"><a class="dp-selflink" href="#implementierung-backend-build-und-dependency-management_p-1"><span class="dp-selflink-icon">§</span></a><p class="dp-p" id="implementierung-backend-build-und-dependency-management_p-1">Als Build- und Dependencymanagement Tool werden Sie Apache Maven einsetzen.
+Installieren Sie eine aktuelle Version von Maven.</p></div><div class="dp-selflink-container"><a class="dp-selflink" href="#implementierung-backend-build-und-dependency-management_p-2"><span class="dp-selflink-icon">§</span></a><p class="dp-p" id="implementierung-backend-build-und-dependency-management_p-2">Maven erfüllt zwei verschiedene Aufgaben.
+Zum einen wird es als <em>Buildtool</em> verwendet.
+Die Aufgabe eines Buildtools ist die verschiedenen Schritte des Buildprozesses zu automatisieren und damit reproduzierbar zu machen.
+Dazu bietet Maven folgende, für Sie wichtige Befehle an:</p></div><div class="dp-selflink-container"><a class="dp-selflink" href="#implementierung-backend-build-und-dependency-management_ul-3"><span class="dp-selflink-icon">§</span></a><ul class="dp-ul" id="implementierung-backend-build-und-dependency-management_ul-3"><li><code>mvn clean</code> löscht alle beim Kompilieren erstellten Dateien.</li><li><code>mvn compile</code> kompiliert das Programm.</li><li><code>mvn test</code> lässt alle erstellten Testfälle laufen.</li><li><code>java -jar target/e01234567-0.0.1-SNAPSHOT.jar</code> startet das Programm.</li><li><code>java -Dspring.profiles.active=datagen -jar target/e01234567-0.0.1-SNAPSHOT.jar</code> startet das Programm und fügt initiale Demodaten in die Datenbank ein.</li><li><code>mvn clean package</code> erstellt ein ausführbares Jar-File, wenn alle Tests erfolgreich ausführbar sind.</li><li><code>mvn clean package -DskipTests</code> erstellt ein ausführbares Jar-File, ohne die Tests auszuführen.</li></ul></div><div class="dp-selflink-container"><a class="dp-selflink" href="#implementierung-backend-build-und-dependency-management_p-4"><span class="dp-selflink-icon">§</span></a><p class="dp-p" id="implementierung-backend-build-und-dependency-management_p-4"><em xmlns:ht="http://www.w3.org/1999/xhtml" xmlns:dpx="dp:dp:ext" xmlns:val="dp:vars:values"><strong>Wichtig: </strong>Der Befehl mvn kann nur im Hauptordner des (Backend-)Projekts ausgeführt werden.</em></p></div><div class="dp-selflink-container"><a class="dp-selflink" href="#implementierung-backend-build-und-dependency-management_p-5"><span class="dp-selflink-icon">§</span></a><p class="dp-p" id="implementierung-backend-build-und-dependency-management_p-5">Die zweite wichtige Aufgabe von Maven ist das <em>Dependencymanagement</em>.
+Dependencymanagement oder auch Abhängigkeitsmanagement wird vor allem dann verwendet wenn das erstellte Programm Abhängigkeiten auf Libraries oder Frameworks hat.
+Im Fall des Einzelbeispiels sind das beispielweise Abhängigkeiten auf Spring Boot oder H2.
+Maven wird über die <code>pom.xml</code>-Datei konfiguriert.
+Sie enthält die Abhängigkeiten sowie weitere Informationen über das zu erstellende Projekt.
+Bei den vorhandenen Projektinformationen ist für Sie vor allem die <code>artifactId</code> relevant.
+Dieses müssen Sie entsprechend Ihrer Matrikelnummer verändern.
+Für die Versionen werden dabei Platzhalter verwendet die unter <code>properties</code> definiert sind.</p></div><div class="dp-selflink-container"><a class="dp-selflink" href="#implementierung-backend-build-und-dependency-management_p-6"><span class="dp-selflink-icon">§</span></a><p class="dp-p" id="implementierung-backend-build-und-dependency-management_p-6">Maven unterscheidet bei den Abhängigkeiten zwischen vier verschiedenen <em>scopes</em>.</p></div><div class="dp-selflink-container"><a class="dp-selflink" href="#implementierung-backend-build-und-dependency-management_ul-7"><span class="dp-selflink-icon">§</span></a><ul class="dp-ul" id="implementierung-backend-build-und-dependency-management_ul-7"><li><code>compile</code> sagt aus, dass die Bibliothek bereits beim Kompilieren benötigt wird.</li><li><code>test</code> sagt aus, dass die Bibliothek nur zum Testen benötigt wird.</li><li><code>runtime</code> sagt aus, dass die Bibliothek nur zur Laufzeit benötigt wird.</li><li><code>provided</code> sagt aus, dass die Bibliothek extern zur Verfügung gestellt wird.</li></ul></div></div></section>
+
+		<section id="implementierung-angular-cli"><h3 class="dp-heading dp-heading-section dp-selflink-container"><a class="dp-selflink" href="#implementierung-angular-cli"><span class="dp-selflink-icon">§</span></a><span class="dp-heading-text">Angular CLI</span></h3><div class="dp-content dp-section-content"><div class="dp-selflink-container"><a class="dp-selflink" href="#implementierung-angular-cli_p-1"><span class="dp-selflink-icon">§</span></a><p class="dp-p" id="implementierung-angular-cli_p-1">Zum Verwalten der Angular-Applikation sollten Sie ausschließlich die Angular CLI verwenden.
+Wenn Sie beispielsweise eine neue Komponente anlegen wollen, besteht diese immer aus mehreren Teilen.
+Verwenden Sie jedoch die Angular CLI dafür passiert das alles automatisch und hilft Ihnen Fehler zu vermeiden.</p></div><div class="dp-selflink-container"><a class="dp-selflink" href="#implementierung-angular-cli_p-2"><span class="dp-selflink-icon">§</span></a><p class="dp-p" id="implementierung-angular-cli_p-2">Die Angular CLI wird im Allgemeinen mit dem Befehl <code>ng</code> bezeichnet.
+Es gibt mehrere Möglichkeiten, wie sie diesen genau aufrufen können.
+Wir empfehlen, die Angular CLI <em>nicht</em> global zu installieren, da dies öfter zu Komplikationen führt.
+Stattdessen Sie Angular CLI verwenden, die als Teil der Development Dependencies Ihres Projekts bei <code>npm install</code> in den <code>node_modules</code> des Projektverzeichnisses installiert wird.
+Auf diese Weise verwenden Sie immer die Version der Angular CLI, die zum Projekt passt.</p></div><div class="dp-selflink-container"><a class="dp-selflink" href="#implementierung-angular-cli_p-3"><span class="dp-selflink-icon">§</span></a><p class="dp-p" id="implementierung-angular-cli_p-3">Sie können die Angular CLI (<code>ng</code>) dann durch <code>npm exec</code> beziehungsweise dessen Wrapper <code>npx</code> oder durch das in der <code>package.json</code> definierte Skript <code>ng</code> mit <code>npm run</code> <em>innerhalb Ihres Projektverzeichnisses</em> ausführen.
+Wenn in diesem Dokument von einem Befehl <code>ng foo</code> die Rede ist, könnte die Kommandozeile konkret wie eines der folgenden Beispiele aussehen:</p></div><div class="dp-selflink-container"><a class="dp-selflink" href="#implementierung-angular-cli_ul-4"><span class="dp-selflink-icon">§</span></a><ul class="dp-ul" id="implementierung-angular-cli_ul-4"><li><code>npm run ng -- foo</code></li><li><code>npm exec ng -- foo</code></li><li><code>npx '@angular/cli' foo</code></li><li><code>npx ng foo</code></li></ul></div><div class="dp-selflink-container"><a class="dp-selflink" href="#implementierung-angular-cli_p-5"><span class="dp-selflink-icon">§</span></a><p class="dp-p" id="implementierung-angular-cli_p-5">Um Ihre Angular-Applikation zu erweitern, wechseln Sie im Terminal in den Ordner in dem Sie die Dateien generieren wollen und führen eine der folgenden Befehle aus:</p></div><div class="dp-selflink-container"><a class="dp-selflink" href="#implementierung-angular-cli_ul-6"><span class="dp-selflink-icon">§</span></a><ul class="dp-ul" id="implementierung-angular-cli_ul-6"><li><code>ng generate component</code> legt eine neu Komponente an.</li><li><code>ng generate service</code> legt einen neuen Service an.</li><li><code>ng generate class</code> legt eine neue Klasse an.</li></ul></div></div></section>
+
+		<section id="implementierung-vom-domänenmodell-zur-datenbank"><h3 class="dp-heading dp-heading-section dp-selflink-container"><a class="dp-selflink" href="#implementierung-vom-domänenmodell-zur-datenbank"><span class="dp-selflink-icon">§</span></a><span class="dp-heading-text">Vom Domänenmodell zur Datenbank</span></h3><div class="dp-content dp-section-content"><div class="dp-selflink-container"><a class="dp-selflink" href="#implementierung-vom-domänenmodell-zur-datenbank_p-1"><span class="dp-selflink-icon">§</span></a><p class="dp-p" id="implementierung-vom-domänenmodell-zur-datenbank_p-1">
+		Ein Domänenmodell stellt Ihre Sicht/Ihr Verständnis des Datenmodells in der realen Welt dar.
+		Es ist daher keine eins-zu-eins Abbildung des Datenbankdesigns.
+		Um die Domäne etwas zu veranschaulichen, wurde bereits ein Domänenmodell erstellt.
+	</p></div><div class="dp-selflink-container"><a class="dp-selflink" href="#fig-implementierung-domänenmodell"><span class="dp-selflink-icon">§</span></a><div class="doc-figure" id="fig-implementierung-domänenmodell" xmlns:ht="http://www.w3.org/1999/xhtml" xmlns:dpx="dp:dp:ext" xmlns:val="dp:vars:values"><div>Domänenmodell</div>
+		
+		
+		<img src="images/family_tree_domain_model.png" />
+	</div></div><div class="dp-selflink-container"><a class="dp-selflink" href="#implementierung-vom-domänenmodell-zur-datenbank_p-2"><span class="dp-selflink-icon">§</span></a><p class="dp-p" id="implementierung-vom-domänenmodell-zur-datenbank_p-2">
+		Wie Sie sehen, besteht die Domäne aus mehreren Entitäten, die miteinander in Beziehung stehen.
+		Um Relationen auch in der Datenbank abbilden zu können, benötigen Sie Fremdschlüssel.
+		Diese ist ein technisches Implementierungsdetail und daher nicht Teil des Domänenmodells.
+		Überführen Sie die Entitäten in <code>CREATE TABLE…</code> Statements Ihrer Datenbank.
+		Beachten Sie dabei, dass nicht jede Tabelle auch eine Entität darstellt; für die Abbildung von <em>m</em>:<em>n</em>-Beziehungen benötigen sie auch eine Tabelle, die dann nicht notwendigerweise auch als eigene Entität zu betrachten ist.
+	</p></div><div class="dp-selflink-container"><a class="dp-selflink" href="#implementierung-vom-domänenmodell-zur-datenbank_p-3"><span class="dp-selflink-icon">§</span></a><p class="dp-p" id="implementierung-vom-domänenmodell-zur-datenbank_p-3">
+		Sie müssen und sollen nicht das gesamte Domänenmodell sofort in SQL umsetzen.
+		Am besten ist es, wenn Sie Ihre SQL-Dateien laufend erweitern und verbessern.
+		Wichtig ist, dass Sie regelmäßig die Einhaltung aller Userstories und Techstories überprüfen.
+	</p></div></div></section>
+
+		<section id="implementierung-reihenfolge"><h3 class="dp-heading dp-heading-section dp-selflink-container"><a class="dp-selflink" href="#implementierung-reihenfolge"><span class="dp-selflink-icon">§</span></a><span class="dp-heading-text">Reihenfolge der Implementierung</span></h3><div class="dp-content dp-section-content">
+				<div class="dp-selflink-container"><a class="dp-selflink" href="#implementierung-reihenfolge_p-1"><span class="dp-selflink-icon">§</span></a><p class="dp-p" id="implementierung-reihenfolge_p-1">Bei der Reihenfolge der Implementierung sollten Sie nach Kundenpriorität vorgehen.
+Es bringt Ihnen beispielsweise nichts, wenn Sie Daten schön filtern können, wenn es nicht einmal die Möglichkeit gibt neue Daten in Ihr Programm einzuspielen.
+Als erstes wählen Sie eine Userstory mitmöglichst hoher Kundenpriorität zum Beispiel <a href="#us-pferd-anlegen">Userstory 1</a>.
+Diese Userstory implementieren Sie dann durch alle Backend-Schichten:
+Persistenz, Service und REST,
+sowie im Frontend.
+Vergessen Sie dabei nicht auf die Einhaltung der Techstories.</p></div><div class="dp-selflink-container"><a class="dp-selflink" href="#implementierung-reihenfolge_p-2"><span class="dp-selflink-icon">§</span></a><p class="dp-p" id="implementierung-reihenfolge_p-2">Um die verschiedenen Schichten voneinander zu entkoppeln, verwenden Sie Data Transfer Objects, Exceptions, Interfaces und Dependency Injection.
+Auch hier empfiehlt es sich wieder zwischen Interface und Implementierung zu trennen.
+Außerdem ist es wichtig, dass die REST-Schicht nie direkt auf die Persistenzschicht zugreift und umgekehrt.</p></div>
+				<section id="implementierung-reihenfolge-persistenz"><h4 class="dp-heading dp-heading-section dp-selflink-container"><a class="dp-selflink" href="#implementierung-reihenfolge-persistenz"><span class="dp-selflink-icon">§</span></a><span class="dp-heading-text">Persistenz</span></h4><div class="dp-content dp-section-content"><div class="dp-selflink-container"><a class="dp-selflink" href="#implementierung-reihenfolge-persistenz_p-1"><span class="dp-selflink-icon">§</span></a><p class="dp-p" id="implementierung-reihenfolge-persistenz_p-1">Die Persistenzschicht regelt den Zugriff auf Ihre Daten, dabei ist es egal ob die Daten im Filesystem oder in einer Datenbank gespeichert sind.
+Erstellen Sie als Erstes die benötigten DAOs (Data Access Objects) für Ihre Entitäten beziehungsweise erweitern Sie die bereits erstellten DAOs um die für die zu implementierende Userstory benötigte Funktionalität.</p></div><div class="dp-selflink-container"><a class="dp-selflink" href="#implementierung-reihenfolge-persistenz_p-2"><span class="dp-selflink-icon">§</span></a><p class="dp-p" id="implementierung-reihenfolge-persistenz_p-2">Die geläufigsten DAO-Operationen sind:</p></div><div class="dp-selflink-container"><a class="dp-selflink" href="#implementierung-reihenfolge-persistenz_ul-3"><span class="dp-selflink-icon">§</span></a><ul class="dp-ul" id="implementierung-reihenfolge-persistenz_ul-3"><li>create</li><li>read/find/search</li><li>update</li><li>delete</li></ul></div><div class="dp-selflink-container"><a class="dp-selflink" href="#implementierung-reihenfolge-persistenz_p-4"><span class="dp-selflink-icon">§</span></a><p class="dp-p" id="implementierung-reihenfolge-persistenz_p-4">Erstellen Sie immer nur die Methoden, die Sie sicher brauchen werden.
+Informieren Sie sich über den Sinn und Zweck von Data Access Objects und die Umsetzung des DAO-Patterns.
+Stellen Sie sicher, dass Sie verstanden haben, warum das DAO-Pattern verwendet wird und warum es eine Trennung zwischen Interface und Implementierung gibt.</p></div><div class="dp-selflink-container"><a class="dp-selflink" href="#implementierung-reihenfolge-persistenz_ul-5"><span class="dp-selflink-icon">§</span></a><ul class="dp-ul" id="implementierung-reihenfolge-persistenz_ul-5"><li><a href="https://docs.oracle.com/javase/tutorial/java/concepts/interface.html">Interfaces</a></li><li><a href="https://www.oracle.com/technetwork/java/dataaccessobject-138824.html">DAO-Pattern</a></li><li><a href="https://www.oracle.com/technetwork/java/transferobject-139757.html">Data Transfer Objects</a></li></ul></div><div class="dp-selflink-container"><a class="dp-selflink" href="#implementierung-reihenfolge-persistenz_p-6"><span class="dp-selflink-icon">§</span></a><p class="dp-p" id="implementierung-reihenfolge-persistenz_p-6">Die Datenbankverbindung wird von Spring verwaltet und ist im application.yml definiert.
+Dabei werden der default Benutzername „sa“ und ein leerer Passwortstring verwendet.</p></div><div class="dp-selflink-container"><a class="dp-selflink" href="#implementierung-reihenfolge-persistenz_p-7"><span class="dp-selflink-icon">§</span></a><p class="dp-p" id="implementierung-reihenfolge-persistenz_p-7">Um das Datenbankschema Schrittweise zu erweitern, fügen Sie Ihre <code>CREATE TABLE...</code> Statements zur Datei <code>resources/sql/createSchema.sql</code> hinzu.
+Diese wird beim Aufbau der Datenbankverbindung automatisch ausgeführt.
+Um die Datenbank mit Demodaten zu befüllen, fügen Sie Ihre <code>INSERT INTO...</code> Statements zur Datei <code>resources/sql/insertData.sql</code> hinzu.
+Sie wird von der Komponente <code>at/.../persistence/DataGeneratorBean.java</code> am Start der Anwendung ausgeführt, sofern das Backend mit dem Profil <code>datagen</code> gestartet wird.
+Sollte die Datenbank noch nicht existieren, wird sie automatisch erstellt.
+In diesem Beispiel wird das Datenbankfile direkt erstellt.
+Dabei werden folgende Dateien im Hauptverzeichnis des Backendprojekts angelegt:</p></div><div class="dp-selflink-container"><a class="dp-selflink" href="#implementierung-reihenfolge-persistenz_ul-8"><span class="dp-selflink-icon">§</span></a><ul class="dp-ul" id="implementierung-reihenfolge-persistenz_ul-8"><li><code>wendydb.mv.db</code></li><li><code>wendydb.trace.db</code></li></ul></div><div class="dp-selflink-container"><a class="dp-selflink" href="#implementierung-reihenfolge-persistenz_p-9"><span class="dp-selflink-icon">§</span></a><p class="dp-p" id="implementierung-reihenfolge-persistenz_p-9"><em xmlns:ht="http://www.w3.org/1999/xhtml" xmlns:dpx="dp:dp:ext" xmlns:val="dp:vars:values"><strong>Wichtig: </strong>Beachten Sie, dass Sie das Verwalten der Datenbankverbindungen entsprechend der Techstories umsetzen müssen.</em></p></div><div class="dp-selflink-container"><a class="dp-selflink" href="#implementierung-reihenfolge-persistenz_p-10"><span class="dp-selflink-icon">§</span></a><p class="dp-p" id="implementierung-reihenfolge-persistenz_p-10">Die bereit gestellte Datenbank URL startet die Datenbank im <a href="http://www.h2database.com/html/features.html#auto_mixed_mode">„Automatic mixed mode“</a>.
+Dies erlaubt Ihnen sich zu dieser auch z.B. mittels der IDE zu verbinden, unabhängig davon, ob Ihre Anwendung bereits läuft.</p></div></div></section>
+				<section id="implementierung-reihenfolge-service"><h4 class="dp-heading dp-heading-section dp-selflink-container"><a class="dp-selflink" href="#implementierung-reihenfolge-service"><span class="dp-selflink-icon">§</span></a><span class="dp-heading-text">Service</span></h4><div class="dp-content dp-section-content">
+						<div class="dp-selflink-container"><a class="dp-selflink" href="#implementierung-reihenfolge-service_p-1"><span class="dp-selflink-icon">§</span></a><p class="dp-p" id="implementierung-reihenfolge-service_p-1">
+							Die Serviceschicht stellt das Herzstück einer Anwendung dar.
+							Sie beinhaltet normalerweise die komplette Businesslogik.
+							Da diese Applikation sehr einfach ist, wird es so sein, dass die Serviceschicht nicht viel mehr macht als die Daten aus der REST-Schicht an die Persistenzschicht durchzureichen.
+							Allerdings ermöglicht sie es die Anwendung einfacher anzupassen und modularer zu gestalten.
+						</p></div>
+						<div class="dp-selflink-container"><a class="dp-selflink" href="#implementierung-reihenfolge-service_p-2"><span class="dp-selflink-icon">§</span></a><p class="dp-p" id="implementierung-reihenfolge-service_p-2">
+							Achten Sie bei der Erstellung Ihrer Serviceklassen darauf, dass Ihre Services nur kleine zusammenhängende Aufgaben erfüllen und vermeiden sehr große monolithische Serviceklassen.
+						</p></div>
+					</div></section>
+				<section id="implementierung-reihenfolge-rest"><h4 class="dp-heading dp-heading-section dp-selflink-container"><a class="dp-selflink" href="#implementierung-reihenfolge-rest"><span class="dp-selflink-icon">§</span></a><span class="dp-heading-text">REST</span></h4><div class="dp-content dp-section-content">
+						Nun fehlt noch die Implementierung der REST-Schicht.
+						Diese Schicht ist die Schnittstelle nach außen und ermöglicht es Ihrem Web Frontend mit Ihrem Backend zu kommunizieren.
+					</div></section>
+			</div></section>
+
+		<section id="implementierung-testen"><h3 class="dp-heading dp-heading-section dp-selflink-container"><a class="dp-selflink" href="#implementierung-testen"><span class="dp-selflink-icon">§</span></a><span class="dp-heading-text">Testen</span></h3><div class="dp-content dp-section-content">
+				<div class="dp-selflink-container"><a class="dp-selflink" href="#implementierung-testen_p-1"><span class="dp-selflink-icon">§</span></a><p class="dp-p" id="implementierung-testen_p-1">Die erstellte Software zu testen gehört zu den wichtigsten Aktivitäten des Entwicklungsprozesses.
+Ziel ist es, Fehler so früh wie möglich zu finden, jeder Entwickler ist dabei auch Tester.
+Um sicherzustellen, dass Fehler möglichst früh gefunden werden, wird der Testprozess direkt mit dem Entwicklungsprozess verwoben
+(zum Beispiel mittels Test Driven Development, hierbei ist die Erstellung der Tests sogar eine Vorbedingung zum Erstellen der Implementierung).</p></div><div class="dp-selflink-container"><a class="dp-selflink" href="#implementierung-testen_p-2"><span class="dp-selflink-icon">§</span></a><p class="dp-p" id="implementierung-testen_p-2">Im Rahmen des Einzelbeispiels werden Sie ein Framework zur Testautomatisierung verwenden um Integrationstests zu erstellen.
+Außerdem empfiehlt es sich im Laufe des Entwicklungsprozesses insbesondere die Kernfunktionalitäten Ihrer Anwendung immer wieder manuell zu testen.</p></div>
+				<section id="implementierung-testen-normal-und-fehlerfall"><h4 class="dp-heading dp-heading-section dp-selflink-container"><a class="dp-selflink" href="#implementierung-testen-normal-und-fehlerfall"><span class="dp-selflink-icon">§</span></a><span class="dp-heading-text">Normal- und Fehlerfall</span></h4><div class="dp-content dp-section-content"><div class="dp-selflink-container"><a class="dp-selflink" href="#implementierung-testen-normal-und-fehlerfall_p-1"><span class="dp-selflink-icon">§</span></a><p class="dp-p" id="implementierung-testen-normal-und-fehlerfall_p-1">Beim Testen wird zwischen Tests für den Normalfall und Tests für den Fehlerfall unterschieden.
+Ein Normalfall (NF) stellt einen Test einer gültigen Eingabe in das System dar.
+Hierbei wird geprüft ob sich das Programm bei einer richtigen Eingabe korrekt verhält.
+Ein Fehlerfall (FF) stellt einen Test einer ungültigen Eingabe in das System dar.
+Hierbei wird geprüft ob sich das Programm bei einer falschen Eingabe korrekt verhält.
+Ein typisches Beispiel eines Fehlerfalls wäre wenn der/die Nutzer/in ein Pferd mittels ID laden möchte und diese ID im System nicht existiert.
+In dem Fall muss eine entsprechende Exception geworfen werden mit deren Hilfe der Fehler behandelt beziehungsweise an den/die Nutzer/in kommuniziert werden kann.</p></div><div class="dp-selflink-container"><a class="dp-selflink" href="#implementierung-testen-normal-und-fehlerfall_p-2"><span class="dp-selflink-icon">§</span></a><p class="dp-p" id="implementierung-testen-normal-und-fehlerfall_p-2"><em xmlns:ht="http://www.w3.org/1999/xhtml" xmlns:dpx="dp:dp:ext" xmlns:val="dp:vars:values"><strong>Wichtig: </strong>Vergessen Sie nicht, dass Sie sowohl für den Normalfall als auch den Fehlerfall in
+jeder Schicht Tests erstellen müssen.</em></p></div></div></section>
+				<section id="implementierung-testen-manuell"><h4 class="dp-heading dp-heading-section dp-selflink-container"><a class="dp-selflink" href="#implementierung-testen-manuell"><span class="dp-selflink-icon">§</span></a><span class="dp-heading-text">Manuelle Tests</span></h4><div class="dp-content dp-section-content"><div class="dp-selflink-container"><a class="dp-selflink" href="#implementierung-testen-manuell_p-1"><span class="dp-selflink-icon">§</span></a><p class="dp-p" id="implementierung-testen-manuell_p-1">
+		Im Rahmen des Einzelbeispiels werden Sie auch manuelle Tests durchführen. Hierbei ist es wichtig, dass sie strukturiert vorgehen.
+		Gehen Sie dazu die bereits implementierten Userstories Punkt für Punkt durch und prüfen Sie die Einhaltung aller Punkte der Userstory sowie der Techstories.
+		Am einfachsten fällt das Testen wenn Sie sich dabei einen roten Faden zurecht legen.
+		Ein Beispiel, in stark vereinfachter Form, wäre:
+	</p></div><div class="dp-selflink-container"><a class="dp-selflink" href="#implementierung-testen-manuell_ul-2"><span class="dp-selflink-icon">§</span></a><ul class="dp-ul" id="implementierung-testen-manuell_ul-2">
+	
+			<li>Pferde mit festgelegten Namen, Geburtsdaten, etc. anlegen.</li>
+			<li>Ein bestehendes Pferd bearbeiten und Eltern hinzufügen.</li>
+			<li>Den Stammbaum für das erstellte Pferd anzeigen und überprüfen, ob die Eltern korrekt dargestellt werden.</li>
+		
+	</ul></div></div></section>
+				<section id="implementierung-testen-automatisch"><h4 class="dp-heading dp-heading-section dp-selflink-container"><a class="dp-selflink" href="#implementierung-testen-automatisch"><span class="dp-selflink-icon">§</span></a><span class="dp-heading-text">Automatische Tests</span></h4><div class="dp-content dp-section-content"><div class="dp-selflink-container"><a class="dp-selflink" href="#implementierung-testen-automatisch_p-1"><span class="dp-selflink-icon">§</span></a><p class="dp-p" id="implementierung-testen-automatisch_p-1">Im Rahmen der Umsetzung bestimmter Stories werden Sie automatisierte Tests erstellen.
+Dafür verwenden Sie in der Einzelphase das Framework JUnit.
+Die mittels JUnit erstellten Tests sollten Sie regelmäßig über den Befehl <code>mvn clean test</code> ausführen.</p></div><div class="dp-selflink-container"><a class="dp-selflink" href="#implementierung-testen-automatisch_p-2"><span class="dp-selflink-icon">§</span></a><p class="dp-p" id="implementierung-testen-automatisch_p-2">Wenn Sie im Rahmen der Softwareentwicklung Tests erstellen, machen Sie das häufig nach dem Prinzip des Test-Driven-Development (TDD).
+Dabei erstellen Sie zuerst die Interfaces für die zu testenden Klassen.
+Danach erstellen Sie Tests sowie leere Implementierungen für die Interfaces.
+Diese Tests sollen natürlich fehlschlagen, da es noch keine entsprechend vollständige Implementierung gibt.
+Im nächsten Schritt implementieren Sie das Interface, danach sollten die Tests fehlerfrei ausgeführt werden können.
+Diese Vorgehensweise garantiert, dass jeder Programmcode einen Test besitzt und Sie nur den minimal notwendigen Programmcode erstellen, um der Spezifikation zu genügen.
+Hier zeigt sich wie wichtig es ist, vollständige und korrekte Dokumentation im Code zu haben.
+Nur aus einer vollständigen Interface-Dokumentation lassen sich ausreichend viele und gute Tests erstellen.</p></div><div class="dp-selflink-container"><a class="dp-selflink" href="#implementierung-testen-automatisch_p-3"><span class="dp-selflink-icon">§</span></a><p class="dp-p" id="implementierung-testen-automatisch_p-3"><em xmlns:ht="http://www.w3.org/1999/xhtml" xmlns:dpx="dp:dp:ext" xmlns:val="dp:vars:values"><strong>Wichtig: </strong>Beachten Sie, dass Sie auf Grund der limitierten Zeit für die Einzelphase nur eine geringere Anzahl an Tests erstellen müssen und nicht jede Klasse getestet sein muss.</em></p></div><div class="dp-selflink-container"><a class="dp-selflink" href="#implementierung-testen-automatisch_p-4"><span class="dp-selflink-icon">§</span></a><p class="dp-p" id="implementierung-testen-automatisch_p-4">JUnit führt beim Ausführen der Tests alle mit <code>@Test</code> annotierten Methoden aus.
+Die Reihenfolge der Testausführung ist nicht definiert, daher müssen Sie darauf achten, dass die verschiedenen Testfälle nicht voneinander abhängig sind.
+Außerdem sollten Tests so simpel und selbsterklärend wie möglich geschrieben sein.
+Vermeiden Sie in Tests die Verwendung von Schleifen sowie kompliziertes Exceptionhandling.
+Achten Sie auch darauf, dass Ihre Testklassen und Methoden aussagekräftige Namen haben.</p></div></div></section>
+			</div></section>
+
+		<section id="implementierung-versionskontrolle"><h3 class="dp-heading dp-heading-section dp-selflink-container"><a class="dp-selflink" href="#implementierung-versionskontrolle"><span class="dp-selflink-icon">§</span></a><span class="dp-heading-text">Versionskontrolle</span></h3><div class="dp-content dp-section-content">
+				<div class="dp-selflink-container"><a class="dp-selflink" href="#implementierung-versionskontrolle_p-1"><span class="dp-selflink-icon">§</span></a><p class="dp-p" id="implementierung-versionskontrolle_p-1">Im Rahmen der Einzelphase verwenden Sie das Versionskontrollsystem Git um den Quelltext, Ihre Demodaten, Ihre Dokumente sowie Ihre Programmdateien in einem Repository zu verwalten.
+Git ist ein <em>verteiltes Versionskontrollsystem (DVCS)</em>, das heißt, dass Sie eine vollständige, lokale Kopie des Repositories auf Ihrem Entwicklungssystem haben.
+In diesem machen Sie Ihre Commits, die Sie danach auf das zur Verfügung gestellte Repository pushen.
+Das Versionskontrollsystem ist ein sehr mächtiges Werkzeug, insbesondere wenn Sie im Team arbeiten.
+In der Einzelphase benötigen Sie nur ein minimales Set an Befehlen:</p></div><div class="dp-selflink-container"><a class="dp-selflink" href="#implementierung-versionskontrolle_ul-2"><span class="dp-selflink-icon">§</span></a><ul class="dp-ul" id="implementierung-versionskontrolle_ul-2"><li><code>git init</code></li><li><code>git status</code></li><li><code>git clone</code></li><li><code>git add</code></li><li><code>git commit</code></li><li><code>git push</code></li><li><code>git pull</code></li></ul></div><div class="dp-selflink-container"><a class="dp-selflink" href="#implementierung-versionskontrolle_p-3"><span class="dp-selflink-icon">§</span></a><p class="dp-p" id="implementierung-versionskontrolle_p-3"><em xmlns:ht="http://www.w3.org/1999/xhtml" xmlns:dpx="dp:dp:ext" xmlns:val="dp:vars:values"><strong>Wichtig: </strong>Beachten Sie, dass aus organisatorischen Gründen die Zugänge zum Versionskontrollsystem ein paar Tage verzögert zur Verfügung gestellt werden.
+Sie können und sollen schon davor mit Ihrer Implementierung beginnen und auch (lokale) Git commits erstellen.</em></p></div>
+				<section id="implementierung-versionskontrolle-initialisieren"><h4 class="dp-heading dp-heading-section dp-selflink-container"><a class="dp-selflink" href="#implementierung-versionskontrolle-initialisieren"><span class="dp-selflink-icon">§</span></a><span class="dp-heading-text">Initialisieren</span></h4><div class="dp-content dp-section-content"><div class="dp-selflink-container"><a class="dp-selflink" href="#implementierung-versionskontrolle-initialisieren_p-1"><span class="dp-selflink-icon">§</span></a><p class="dp-p" id="implementierung-versionskontrolle-initialisieren_p-1">Um Git in einem Projekt nutzen zu können, müssen Sie das Projekt zuerst für Git initialisieren.
+Dazu wechseln Sie in den Ordner den Sie unter Versionskontrolle stellen wollen und benutzen den Befehl <code>git init</code>.
+Die Interaktion im Terminal könnte dabei ungefähr so aussehen:</p></div><pre><code>$ cd sepr-individual-assignment/
+$ git init
+Initialized empty Git repository in /projects/sepr-individual-assignment/.git/
+$ git status
+On branch master
+
+No commits yet
+
+nothing to commit (create/copy files and use "git add" to track)
+</code></pre><div class="dp-selflink-container"><a class="dp-selflink" href="#implementierung-versionskontrolle-initialisieren_p-2"><span class="dp-selflink-icon">§</span></a><p class="dp-p" id="implementierung-versionskontrolle-initialisieren_p-2">Mit dem Befehl <code>git status</code> können Sie sich den Status ihres Repositories anzeigen lassen.
+Alternativ zur Initialisierung eines lokalen Ordners können Sie auch ein bereits initialisierten Ordner klonen.
+Dazu verwenden Sie den Befehl <code>git clone &lt;url&gt;</code>.
+Weitere Informationen finden Sie nach der Freischaltung des Repositories direkt in RESET.</p></div></div></section>
+				<section id="implementierung-versionskontrolle-add-und-commit"><h4 class="dp-heading dp-heading-section dp-selflink-container"><a class="dp-selflink" href="#implementierung-versionskontrolle-add-und-commit"><span class="dp-selflink-icon">§</span></a><span class="dp-heading-text">Add und Commit</span></h4><div class="dp-content dp-section-content"><div class="dp-selflink-container"><a class="dp-selflink" href="#fig-git-commit"><span class="dp-selflink-icon">§</span></a><div class="doc-figure" id="fig-git-commit" xmlns:ht="http://www.w3.org/1999/xhtml" xmlns:dpx="dp:dp:ext" xmlns:val="dp:vars:values"><div>Git Commit: <a href="https://xkcd.com/1296/">xkcd 1296</a></div><img src="images/git_commit.png" /></div></div><div class="dp-selflink-container"><a class="dp-selflink" href="#implementierung-versionskontrolle-add-und-commit_p-1"><span class="dp-selflink-icon">§</span></a><p class="dp-p" id="implementierung-versionskontrolle-add-und-commit_p-1">Um Änderungen permanent zu Ihrem lokalen Repository hinzuzufügen, benötigen Sie zwei Befehle.
+Als Erstes verwenden Sie den Befehl <code>git add .</code> um alle Änderungen an Ihrem Arbeitsverzeichnis zu markieren.
+Sie können mittels <code>git add &lt;filename&gt;</code> auch Änderungen an einzelnen Dateien markieren und mit <code>git add --interactive</code> sogar einzelne Zeilen.
+Nach dem Sie Änderungen so hinzugefügt haben, befinden sich diese im „staging“ Bereich.
+Um diese Änderungen permanent zu Ihrem Repository hinzuzufügen müssen Sie die Änderungen mit dem Befehl <code>git commit -m &lt;message&gt;</code> commiten.
+Beim Commiten ist es wichtig eine sinnvolle Commitmessage zu wählen die relevante Informationen für die durchgeführte Änderung enthält.
+Versuchen Sie Ihre Commitmessages auf Englisch zu halten und achten Sie dabei darauf, die Nachricht kurz und prägnant zu formulieren.
+Jedes Set an Änderungen sollte zudem genau einer Userstory und/oder Techstory zugeordnet sein.
+So erreichen Sie, dass die Commits übersichtlich bleiben und nur zusammenhängende Inhalte haben.</p></div><div class="dp-selflink-container"><a class="dp-selflink" href="#implementierung-versionskontrolle-add-und-commit_p-2"><span class="dp-selflink-icon">§</span></a><p class="dp-p" id="implementierung-versionskontrolle-add-und-commit_p-2">Beispiele für schlechte Commitmessages:</p></div><div class="dp-selflink-container"><a class="dp-selflink" href="#implementierung-versionskontrolle-add-und-commit_ul-3"><span class="dp-selflink-icon">§</span></a><ul class="dp-ul" id="implementierung-versionskontrolle-add-und-commit_ul-3"><li>„Neue Implementierung hinzugefügt“</li><li>„Added changes to Horse and Owners“</li><li>„Fix Bug“</li><li>„panic!!1!“</li></ul></div><div class="dp-selflink-container"><a class="dp-selflink" href="#implementierung-versionskontrolle-add-und-commit_p-4"><span class="dp-selflink-icon">§</span></a><p class="dp-p" id="implementierung-versionskontrolle-add-und-commit_p-4">Beispiele für gute Commitmessages:</p></div><div class="dp-selflink-container"><a class="dp-selflink" href="#implementierung-versionskontrolle-add-und-commit_ul-5"><span class="dp-selflink-icon">§</span></a><ul class="dp-ul" id="implementierung-versionskontrolle-add-und-commit_ul-5"><li>„[US1] Fixed bug where name is not stored correctly.“</li><li>„[1, 14] Added validation to horse.“</li></ul></div></div></section>
+				<section id="implementierung-versionskontrolle-remotes-push-und-pull"><h4 class="dp-heading dp-heading-section dp-selflink-container"><a class="dp-selflink" href="#implementierung-versionskontrolle-remotes-push-und-pull"><span class="dp-selflink-icon">§</span></a><span class="dp-heading-text">Remotes, Push und Pull</span></h4><div class="dp-content dp-section-content"><div class="dp-selflink-container"><a class="dp-selflink" href="#implementierung-versionskontrolle-remotes-push-und-pull_p-1"><span class="dp-selflink-icon">§</span></a><p class="dp-p" id="implementierung-versionskontrolle-remotes-push-und-pull_p-1">Nachdem Sie Änderungen zu Ihrem lokalen Repository hinzugefügt haben, müssen Sie diese auf unseren Server befördern.
+Git verwendet zu solchen Zwecken sogenannte <em>Remotes</em>.
+Ein Remote ist ein anderes Git-Repository, dass im lokalen Repository konfiguriert ist um Daten damit austauschen zu können.
+Wenn Sie, wie diesem Dokument beschrieben, Ihr lokales Repository erstellt haben, indem sie per <code>git init</code> ein neues initialisiert haben, müssen Sie dieses Remote erst einrichten.
+Mit dem Befehl <code>git remote add Server &lt;URI&gt;</code> erstellen Sie ein Remote mit dem Namen „Server“, wobei sie <code>&lt;URI&gt;</code> durch die URI des Repositories am Server ersetzen.
+Wir werden Ihnen die URI zu ihrem Git-Repository im Verlauf des Projekts über RESET zur Verfügung stellen.</p></div><div class="dp-selflink-container"><a class="dp-selflink" href="#implementierung-versionskontrolle-remotes-push-und-pull_p-2"><span class="dp-selflink-icon">§</span></a><p class="dp-p" id="implementierung-versionskontrolle-remotes-push-und-pull_p-2">Von GitLab werden Sie eine Liste von Optionen ähnlich zur <a href="#fig-gitlab-instructions">gegebenen Abbildung</a> erhalten, wenn Sie das Ihnen bereit gestellte Repository in der GUI von GitLab öffnen.
+Davon ist jedoch nur die „Push an existing Git repository“-Variante relevant.
+Auf keinen Fall sollen Sie „Create a new repository“ oder „Push an existing folder“ ausführen;
+Sie können nämlich nicht mehrere verschiedene lokale Repositories auf den geforderten <code>master</code>-Branch vom bereitgestellten remote Repository pushen.
+Daher wollen Sie eben nicht ein weiteres lokales repository erstellen, sondern folgend „Push an existing Git repository“ das bereits existierende Repository pushen.
+Um Ihre lokalen Commits nun auf den konfigurierten Remote zu befördern, verwenden Sie den Befehl <code>git push</code>.
+Wenn Sie einen Branch zum ersten Mal pushen wollen, ist es notwendig Git darüber zu informieren, zu welchem Remote Sie pushen wollen und unter welchem Namen der Branch dort aufscheinen soll.
+Beachten Sie dazu die Anweisungen die Git Ihnen anzeigt, wenn das der Fall ist.
+Wenn Sie die Anleitung befolgt haben, ist der Remote Branch nun als Upstream des lokalen Branch konfiguriert und weitere Push-Befehle werden automatisch dorthin pushen.</p></div><div class="dp-selflink-container"><a class="dp-selflink" href="#implementierung-versionskontrolle-remotes-push-und-pull_p-3"><span class="dp-selflink-icon">§</span></a><p class="dp-p" id="implementierung-versionskontrolle-remotes-push-und-pull_p-3">Damit Ihre Abgabe gewertet wird, muss diese rechtzeitig auf den Server gepushed werden.
+Am besten pushen Sie Ihre Änderungen so häufig wie möglich. So stellen Sie sicher das zur
+Deadline alle relevanten Daten auf unseren Servern vorhanden sind und beugen Datenverlust vor.</p></div><div class="dp-selflink-container"><a class="dp-selflink" href="#implementierung-versionskontrolle-remotes-push-und-pull_p-4"><span class="dp-selflink-icon">§</span></a><p class="dp-p" id="implementierung-versionskontrolle-remotes-push-und-pull_p-4">Git macht es Ihnen auch möglich von mehreren Rechnern aus am gleichen Code zu arbeiten.
+Dazu bietet Git, mittels dem Befehl <code>git pull</code>, die Möglichkeit alle Änderungen vom Server zu laden und so Ihr lokales Repository auf den aktuellen Stand zu bringen.
+Wie auch bei Push müssen Sie hier, falls ein Branch noch keinen Upstream hat, einmal explizit sagen, von wo Sie pullen wollen.</p></div><div class="dp-selflink-container"><a class="dp-selflink" href="#fig-gitlab-instructions"><span class="dp-selflink-icon">§</span></a><div class="doc-figure" id="fig-gitlab-instructions" xmlns:ht="http://www.w3.org/1999/xhtml" xmlns:dpx="dp:dp:ext" xmlns:val="dp:vars:values"><div>Angebotene Befehle von GitLab</div><img src="images/gitlab_steps.png" /></div></div></div></section>
+			</div></section>
+
+		<section id="implementierung-weiterführende-links"><h3 class="dp-heading dp-heading-section dp-selflink-container"><a class="dp-selflink" href="#implementierung-weiterführende-links"><span class="dp-selflink-icon">§</span></a><span class="dp-heading-text">Weiterführende Links und Literatur</span></h3><div class="dp-content dp-section-content"><div class="dp-selflink-container"><a class="dp-selflink" href="#implementierung-weiterführende-links_ul-1"><span class="dp-selflink-icon">§</span></a><ul class="dp-ul" id="implementierung-weiterführende-links_ul-1"><li><a href="https://angular.dev/">Angular 20</a></li><li><a href="https://www.h2database.com/html/main.html">H2 2.4.x</a></li><li><a href="http://junit.org/junit5/">JUnit 6.x</a></li><li><a href="https://maven.apache.org/">Maven 3</a></li><li><a href="https://git-scm.com/">Git 2.x</a><div class="dp-selflink-container"><a class="dp-selflink" href="#implementierung-weiterführende-links_ul-2"><span class="dp-selflink-icon">§</span></a><ul class="dp-ul" id="implementierung-weiterführende-links_ul-2"><li><a href="https://rogerdudler.github.io/git-guide/">Deutscher Git Guide</a></li><li><a href="https://ndpsoftware.com/git-cheatsheet.html">Git Cheatsheet</a></li><li><a href="https://learngitbranching.js.org/">Learn Git Branching</a></li></ul></div></li><li>Design Patterns
+<div class="dp-selflink-container"><a class="dp-selflink" href="#implementierung-weiterführende-links_ul-3"><span class="dp-selflink-icon">§</span></a><ul class="dp-ul" id="implementierung-weiterführende-links_ul-3"><li><a href="https://sourcemaking.com/design_patterns">Source Making: Design Patterns</a></li><li><a href="http://java-design-patterns.com/">http://java-design-patterns.com/</a></li><li><a href="https://sourcemaking.com/design_patterns/singleton">Singleton</a></li><li><a href="https://docs.oracle.com/javase/tutorial/java/concepts/interface.html">Interface</a></li><li><a href="https://www.oracle.com/technetwork/java/dataaccessobject-138824.html">DAO</a></li><li><a href="https://www.oracle.com/technetwork/java/transferobject-139757.html">DTO</a></li></ul></div></li><li><a href="https://www.jetbrains.com/idea/download/">IntelliJ IDEA</a></li><li><a href="https://spring.io/projects/spring-boot">Spring Boot</a></li><li>Maven
+<div class="dp-selflink-container"><a class="dp-selflink" href="#implementierung-weiterführende-links_ul-4"><span class="dp-selflink-icon">§</span></a><ul class="dp-ul" id="implementierung-weiterführende-links_ul-4"><li><a href="https://mvnrepository.com/">Maven Repository Search</a></li><li><a href="https://search.maven.org/">Maven Central Search</a></li></ul></div></li><li>Vertiefendes Testen
+<div class="dp-selflink-container"><a class="dp-selflink" href="#implementierung-weiterführende-links_ul-5"><span class="dp-selflink-icon">§</span></a><ul class="dp-ul" id="implementierung-weiterführende-links_ul-5"><li><a href="http://en.wikipedia.org/wiki/Mock_object">Mocking</a></li><li><a href="http://googletesting.blogspot.co.at/">Google Testing Blog</a></li></ul></div></li><li>Clean Code
+<div class="dp-selflink-container"><a class="dp-selflink" href="#implementierung-weiterführende-links_ul-6"><span class="dp-selflink-icon">§</span></a><ul class="dp-ul" id="implementierung-weiterführende-links_ul-6"><li>2009; Clean Code: A Handbook of Agile Software Craftsmanship</li></ul></div></li><li><a href="https://hackernoon.com/restful-api-design-step-by-step-guide-2f2c9f9fcdbf">RESTful API Design</a></li><li>Vorträge und Vorlesungen an der TU
+<div class="dp-selflink-container"><a class="dp-selflink" href="#implementierung-weiterführende-links_ul-7"><span class="dp-selflink-icon">§</span></a><ul class="dp-ul" id="implementierung-weiterführende-links_ul-7"><li>180.764; Software-Qualitätssicherung; VU</li></ul></div></li></ul></div></div></section>
+	</div></section>
+		<section id="bewertung"><h2 class="dp-heading dp-heading-section dp-selflink-container"><a class="dp-selflink" href="#bewertung"><span class="dp-selflink-icon">§</span></a><span class="dp-heading-text">Bewertung</span></h2><div class="dp-content dp-section-content">
+		<div class="dp-selflink-container"><a class="dp-selflink" href="#bewertung_p-1"><span class="dp-selflink-icon">§</span></a><p class="dp-p" id="bewertung_p-1">
+			Sie erhalten Punkte für die Implementierung jeder einzelnen Userstory.
+			Die Punkte, die Sie für jede Userstory erhalten können, entsprechen den definierten Storypoints für jede der Userstories.
+			Die Gesamtpunkte für die Userstories summieren sich auf 80 Punkte.
+			Die Userstories werden einzeln Punkt für Punkt abgenommen.
+			Mangelhafte Userstories werden mit 0 Punkten beurteilt.
+			Die Einhaltung der Techstories wird Punkt für Punkt abgenommen.
+			Für die Nichterfüllung von Techstories erhalten Sie Punkteabzüge.
+			Die Techstories sind auf 4 Stakeholder aufgeteilt.
+			Jeder Stakeholder hat einen Punktemaximum von 20 Punkte;
+			es wird bei keinem Stakeholder mehr Punkte als dieses Maximum abgezogen.
+			Sollten zum Beispiel bei Techstories eines Stakeholders insgesamt 25 Punkteabzüge zusammenkommen,
+			werden Ihnen tatsächlich nur 20 Punkte abgezogen.
+			Die einzelnen Teilbereiche einer Userstory sind bezüglich der zu erreichenden beziehungsweise abzuziehenden Punkte einer Story nicht gleichverteilt!
+		</p></div>
+
+		<section id="bewertung-einzelphase"><h3 class="dp-heading dp-heading-section dp-selflink-container"><a class="dp-selflink" href="#bewertung-einzelphase"><span class="dp-selflink-icon">§</span></a><span class="dp-heading-text">Bestehen der Einzelphase</span></h3><div class="dp-content dp-section-content">
+				<div class="dp-selflink-container"><a class="dp-selflink" href="#bewertung-einzelphase_p-1"><span class="dp-selflink-icon">§</span></a><p class="dp-p" id="bewertung-einzelphase_p-1">
+					Um an der Gruppenphase teilnehmen zu können, benötigen Sie in Summe aus dem Einstiegstest (bis zu 10 Punkte) und Einzelbeispiel (bis zu 80 Punkte) mindestens 45 Punkte.
+					Außerdem benötigen Sie mindestens 40 Punkte auf das Einzelbeispiel.
+				</p></div>
+				<section id="bewertung-einstiegstest"><h4 class="dp-heading dp-heading-section dp-selflink-container"><a class="dp-selflink" href="#bewertung-einstiegstest"><span class="dp-selflink-icon">§</span></a><span class="dp-heading-text">Einstiegstest (max. 10 Punkte)</span></h4><div class="dp-content dp-section-content">
+						<div class="dp-selflink-container"><a class="dp-selflink" href="#bewertung-einstiegstest_p-1"><span class="dp-selflink-icon">§</span></a><p class="dp-p" id="bewertung-einstiegstest_p-1">
+							Für das Lösen des Einstiegstests haben Sie einen Versuch und 60 Minuten Zeit.
+							Der Einstiegstest wird automatisiert bewertet und sie müssen keine Mindestpunkte erreichen.
+						</p></div>
+					</div></section>
+				<section id="bewertung-einzelbeispiel"><h4 class="dp-heading dp-heading-section dp-selflink-container"><a class="dp-selflink" href="#bewertung-einzelbeispiel"><span class="dp-selflink-icon">§</span></a><span class="dp-heading-text">Einzelbeispiel (max. 80 Punkte)</span></h4><div class="dp-content dp-section-content"><div class="dp-selflink-container"><a class="dp-selflink" href="#bewertung-einzelbeispiel_p-1"><span class="dp-selflink-icon">§</span></a><p class="dp-p" id="bewertung-einzelbeispiel_p-1">Sie müssen mindestens 40 Punkte erreichen.</p></div></div></section>
+			</div></section>
+
+		<section id="bewertung-endnote"><h3 class="dp-heading dp-heading-section dp-selflink-container"><a class="dp-selflink" href="#bewertung-endnote"><span class="dp-selflink-icon">§</span></a><span class="dp-heading-text">Einfluss auf die Endnote</span></h3><div class="dp-content dp-section-content">
+				<div class="dp-selflink-container"><a class="dp-selflink" href="#bewertung-endnote_p-1"><span class="dp-selflink-icon">§</span></a><p class="dp-p" id="bewertung-endnote_p-1">
+					Für die Gruppenphase erhalten Sie vom Assistenten eine Note.
+					Diese Note bestimmt drei Viertel Ihrer Endnote, ein Viertel Ihrer Endnote macht die Einzelphase aus.
+					Der Notenschlüssel für die Einzelphase entspricht der Standardnotenverteilung.
+				</p></div>
+
+				
+				<table class="centered grading-table">
+					<thead>
+						<tr><th>Prozent</th><th>Punkte</th><th>Note</th></tr>
+					</thead>
+					<tbody>
+						<tr><td>100% – 88%</td><td>90 – 79</td><td>S1</td></tr>
+						<tr><td>87,99% – 75%</td><td>78 – 67</td><td>U2</td></tr>
+						<tr><td>74,99% – 63%</td><td>66 – 56</td><td>B3</td></tr>
+						<tr><td>62,99% – 50%</td><td>55 – 45</td><td>G4</td></tr>
+					</tbody>
+				</table>
+
+				<div class="dp-selflink-container"><a class="dp-selflink" href="#bewertung-endnote_p-2"><span class="dp-selflink-icon">§</span></a><p class="dp-p" id="bewertung-endnote_p-2">
+					Zur Veranschaulichung noch zwei Beispiele:
+					Wenn Sie in der Einzelphase ein B3 erreichen und in der Gruppenphase ein S1 ergibt das die Notensumme von 1,5 und Sie bekommen als Gesamtnote ein S1.
+					Wenn Sie in der Einzelphase eine U2 und in der Gruppenphase ein B3 erreichen ergibt das die Notensumme von 2,75 und Sie bekommen als Gesamtnote ein B3.
+					Gerundet wird dabei immer auf die nächste ganze Zahl (&gt; 0.5 wird aufgerundet und ≤ 0.5 wird abgerundet).
+				</p></div>
+				<div class="dp-selflink-container"><a class="dp-selflink" href="#bewertung-endnote_p-3"><span class="dp-selflink-icon">§</span></a><p class="dp-p" id="bewertung-endnote_p-3"><em xmlns:ht="http://www.w3.org/1999/xhtml" xmlns:dpx="dp:dp:ext" xmlns:val="dp:vars:values"><strong>Wichtig: </strong>
+					Für eine positive Gesamtnote müssen Sie in der Einzelphase und in der Gruppenphase positiv sein.
+				</em></p></div>
+			</div></section>
+	</div></section>
+		<section id="abgabe"><h2 class="dp-heading dp-heading-section dp-selflink-container"><a class="dp-selflink" href="#abgabe"><span class="dp-selflink-icon">§</span></a><span class="dp-heading-text">Abgabe</span></h2><div class="dp-content dp-section-content">
+		<section id="abgabe-vorbedingungen"><h3 class="dp-heading dp-heading-section dp-selflink-container"><a class="dp-selflink" href="#abgabe-vorbedingungen"><span class="dp-selflink-icon">§</span></a><span class="dp-heading-text">Vorbedingungen</span></h3><div class="dp-content dp-section-content">
+				<div class="dp-selflink-container"><a class="dp-selflink" href="#abgabe-vorbedingungen_p-1"><span class="dp-selflink-icon">§</span></a><p class="dp-p" id="abgabe-vorbedingungen_p-1">
+					Ihr Projekt ist vollständig im Git vorhanden
+					(Dokumente, Programmdateien, Demodaten und Quelltext; kein Sourcecode oder Binärdaten von Libraries die Sie über Dependencymanagement beziehen).
+					Nur Code und Dokumentation, die ins GitLab-Projekt gepusht wurden, werden für die Bewertung herangezogen.
+				</p></div>
+			</div></section>
+
+		<section id="abgabe-ablauf"><h3 class="dp-heading dp-heading-section dp-selflink-container"><a class="dp-selflink" href="#abgabe-ablauf"><span class="dp-selflink-icon">§</span></a><span class="dp-heading-text">Ablauf des Abgabegesprächs</span></h3><div class="dp-content dp-section-content">
+				<div class="dp-selflink-container"><a class="dp-selflink" href="#abgabe-ablauf_ul-1"><span class="dp-selflink-icon">§</span></a><ul class="dp-ul" id="abgabe-ablauf_ul-1">
+					<li><strong>Produktcheck:</strong>
+					Der/die Tutor/Tutorin lässt sich alle Userstories von Ihnen erklären und vorführen, außerdem prüft er/sie die Einhaltung der Techstories und führt selbständig Tests durch.</li>
+					<li><strong>Verständnisfragen:</strong>
+					Der/die Tutor/Tutorin überprüft Ihr Verständnis zum Produkt, zu den Technologien sowie zur Entwicklungsumgebung.</li>
+				</ul></div>
+			</div></section>
+
+		<section id="abgabe-hinweise"><h3 class="dp-heading dp-heading-section dp-selflink-container"><a class="dp-selflink" href="#abgabe-hinweise"><span class="dp-selflink-icon">§</span></a><span class="dp-heading-text">Wichtige Hinweise zur Abgabe</span></h3><div class="dp-content dp-section-content">
+				<div class="dp-selflink-container"><a class="dp-selflink" href="#abgabe-hinweise_ul-1"><span class="dp-selflink-icon">§</span></a><ul class="dp-ul" id="abgabe-hinweise_ul-1">
+					<li><strong>Plagiate werden ausnahmslos negativ beurteilt!</strong></li>
+					<li>Änderungen <strong>nach der Deadline</strong> werden <strong>nicht akzeptiert!</strong></li>
+					<li>Das Programm muss lauffähig sein!</li>
+					<li>Achten Sie auf die <strong>Vollständigkeit</strong> der Funktionalität Ihres Programms.</li>
+					<li>
+						Die Datenbank muss mit einer entsprechenden Anzahl an realistischen Demodatensätzen befüllt sein
+						
+								(<strong>zumindest 10 Stück</strong> pro Entität, achten Sie ebenfalls darauf, dass Relationen in den Demodaten vorhanden sind).
+							
+					</li>
+				</ul></div>
+			</div></section>
+
+		<section id="abgabe-nach-der-bewertung"><h3 class="dp-heading dp-heading-section dp-selflink-container"><a class="dp-selflink" href="#abgabe-nach-der-bewertung"><span class="dp-selflink-icon">§</span></a><span class="dp-heading-text">Nach der Bewertung</span></h3><div class="dp-content dp-section-content">
+				<div class="dp-selflink-container"><a class="dp-selflink" href="#abgabe-nach-der-bewertung_p-1"><span class="dp-selflink-icon">§</span></a><p class="dp-p" id="abgabe-nach-der-bewertung_p-1">
+					Nach der Bewertung werden Sie einer Forschungsgruppe zugeordnet, dabei versuchen wir nach Möglichkeit, Ihren Forschungsgruppenwunsch zu berücksichtigen.
+					Je nach Forschungsgruppe haben Sie nach der Zuordnung, möglichst vor dem ersten Tutorenmeeting, Folgendes zu tun:
+				</p></div>
+				<div class="dp-selflink-container"><a class="dp-selflink" href="#abgabe-nach-der-bewertung_ul-2"><span class="dp-selflink-icon">§</span></a><ul class="dp-ul" id="abgabe-nach-der-bewertung_ul-2">
+					<li><strong>QSE:</strong> Erarbeiten Sie einen eigenen Projektvorschlag, den Sie präsentieren müssen.</li>
+					<li><strong>INSO:</strong> Machen Sie sich mit der Umsetzung des Beispielprojekts vertraut.</li>
+				</ul></div>
+				<div class="dp-selflink-container"><a class="dp-selflink" href="#abgabe-nach-der-bewertung_p-3"><span class="dp-selflink-icon">§</span></a><p class="dp-p" id="abgabe-nach-der-bewertung_p-3"><em xmlns:ht="http://www.w3.org/1999/xhtml" xmlns:dpx="dp:dp:ext" xmlns:val="dp:vars:values"><strong>Wichtig: </strong>
+					Melden Sie sich auch rechtzeitig für ein Abgabegespräch an. Nutzen Sie die Hilfestellungen durch das TUWEL-Forum und unsere Tutor/innen.
+				</em></p></div>
+			</div></section>
+	</div></section>
+
+		<div class="fun">
+			<strong>Viel Spaß und Erfolg beim Einzelbeispiel aus dem SE PR!</strong>
+			<hr />
+			<strong>Deadline: 29.10.2025, 18:00</strong>
+		</div>
+	</main></body></html>
