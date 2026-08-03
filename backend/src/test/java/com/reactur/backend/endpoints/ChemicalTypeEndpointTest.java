@@ -46,6 +46,12 @@ class ChemicalTypeEndpointTest {
     }
 
     @Test
+    void anyEndpoint_whenUnauthenticated_returns401() throws Exception {
+        mockMvc.perform(get(BASE_URL))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
     void getKnownOptions_asAdmin_shouldReturnOk() throws Exception {
         mockMvc.perform(get(BASE_URL)
                         .with(jwt().authorities(new SimpleGrantedAuthority("ROLE_ADMIN"))))

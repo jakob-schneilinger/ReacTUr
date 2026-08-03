@@ -225,6 +225,17 @@ class ReactantEndpointTest {
     }
 
     @Test
+    void archiveReactant_WhenSupervisor_ShouldReturn403() throws Exception {
+        UUID id = UUID.randomUUID();
+
+        mockMvc.perform(delete("/api/reactant/" + id)
+                        .with(jwt().authorities(new SimpleGrantedAuthority("ROLE_SUPERVISOR"))))
+                .andExpect(status().isForbidden());
+
+        verify(reactantService, never()).archiveReactant(any());
+    }
+
+    @Test
     void archiveReactant_WhenUser_ShouldReturn403() throws Exception {
         UUID id = UUID.randomUUID();
 

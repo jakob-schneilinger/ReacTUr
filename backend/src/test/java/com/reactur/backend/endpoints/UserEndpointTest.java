@@ -212,6 +212,17 @@ class UserEndpointTest {
     }
 
     @Test
+    void restoreUser_WhenAdmin_ShouldReturn200_WhenSuccessful() throws Exception {
+        String id = "some-id-lol";
+
+        mockMvc.perform(put("/api/users/" + id + "/restore")
+                        .with(jwt().authorities(new SimpleGrantedAuthority("ROLE_ADMIN"))))
+                .andExpect(status().isOk());
+
+        verify(userService, times(1)).restoreUser(id);
+    }
+
+    @Test
     void restoreUser_WhenAdmin_ShouldReturn404_WhenUserNotFound() throws Exception {
         String id = "some-id-lol";
 
