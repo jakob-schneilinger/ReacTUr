@@ -5,6 +5,7 @@ import com.reactur.backend.dtos.experiments.ExperimentAttachmentDto;
 import com.reactur.backend.entities.experiment.Experiment;
 import com.reactur.backend.entities.experiment.ExperimentAttachment;
 import com.reactur.backend.enums.Role;
+import com.reactur.backend.exeptions.ResourceConflictException;
 import com.reactur.backend.exeptions.ResourceNotFoundException;
 import com.reactur.backend.repositories.ExperimentAttachmentRepository;
 import com.reactur.backend.repositories.ExperimentRepository;
@@ -27,6 +28,7 @@ import software.amazon.awssdk.services.s3.model.GetObjectResponse;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 import software.amazon.awssdk.services.s3.model.PutObjectResponse;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -110,6 +112,24 @@ class FileServiceTests {
         assertThrows(ResourceNotFoundException.class,
                 () -> fileService.storeFile(experimentId, file, REQUESTING_USER_ID, REQUESTING_USER_ROLE));
 
+        verify(s3Client, never()).putObject(any(PutObjectRequest.class), any(RequestBody.class));
+    }
+
+    @Test
+    void storeFile_ShouldThrowResourceConflict_WhenExperimentIsArchived() {
+        UUID experimentId = UUID.randomUUID();
+        Experiment experiment = new Experiment();
+        experiment.setArchivedAt(Instant.now());
+
+        MockMultipartFile file = new MockMultipartFile(
+                "file", "test.pdf", "application/pdf", "Dummy Content".getBytes());
+
+        when(experimentRepository.findById(experimentId)).thenReturn(Optional.of(experiment));
+
+        assertThrows(ResourceConflictException.class,
+                () -> fileService.storeFile(experimentId, file, REQUESTING_USER_ID, REQUESTING_USER_ROLE));
+
+        verify(attachmentRepository, never()).save(any());
         verify(s3Client, never()).putObject(any(PutObjectRequest.class), any(RequestBody.class));
     }
 
@@ -221,5 +241,39 @@ class FileServiceTests {
         fileService.archiveFile(fileId, REQUESTING_USER_ID, REQUESTING_USER_ROLE);
 
         verify(attachmentRepository, times(1)).save(attachment);
+    }
+
+    @Test
+    void archiveFile_ShouldThrowResourceConflict_WhenExperimentIsArchived() {
+        UUID fileId = UUID.randomUUID();
+        Experiment archivedExperiment = new Experiment();
+        archivedExperiment.setArchivedAt(Instant.now());
+
+        ExperimentAttachment attachment = new ExperimentAttachment();
+        attachment.setArchivedAt(null);
+        attachment.setExperiment(archivedExperiment);
+
+        when(attachmentRepository.findById(fileId)).thenReturn(Optional.of(attachment));
+
+        assertThrows(ResourceConflictException.class, () -> fileService.archiveFile(fileId, REQUESTING_USER_ID, REQUESTING_USER_ROLE));
+
+        verify(attachmentRepository, never()).save(any());
+    }
+
+    @Test
+    void archiveFile_ShouldBeNoOp_WhenFileAlreadyArchived() {
+        UUID fileId = UUID.randomUUID();
+        Instant originalArchivedAt = Instant.now();
+
+        ExperimentAttachment attachment = new ExperimentAttachment();
+        attachment.setArchivedAt(originalArchivedAt);
+        attachment.setExperiment(new Experiment());
+
+        when(attachmentRepository.findById(fileId)).thenReturn(Optional.of(attachment));
+
+        fileService.archiveFile(fileId, REQUESTING_USER_ID, REQUESTING_USER_ROLE);
+
+        assertEquals(originalArchivedAt, attachment.getArchivedAt(), "Archived timestamp should remain unchanged");
+        verify(attachmentRepository, never()).save(any());
     }
 }

@@ -427,6 +427,37 @@ class ExperimentServiceTest {
 
       verify(experimentRepository, never()).save(any());
     }
+
+    @Test
+    void archiveExperiment_whenNotFound_throwsResourceNotFoundException() {
+      UUID experimentId = randomUUID();
+      String creatorId = "creator-123";
+
+      when(experimentRepository.findById(experimentId)).thenReturn(Optional.empty());
+
+      ResourceNotFoundException exception = assertThrows(
+        ResourceNotFoundException.class,
+        () -> experimentService.archiveExperiment(experimentId, creatorId, Role.USER)
+      );
+
+      assertTrue(exception.getMessage().contains("Experiment with ID " + experimentId + " not found"));
+      verify(experimentRepository, never()).save(any());
+    }
+
+    @Test
+    void archiveExperiment_whenAlreadyArchived_isNoOpAndDoesNotSave() {
+      UUID experimentId = randomUUID();
+      String creatorId = "creator-123";
+      Instant originalArchivedAt = Instant.now();
+
+      Experiment mockExperiment = createMockEntityForSecurity(experimentId, creatorId, "scientist-456", originalArchivedAt);
+      when(experimentRepository.findById(experimentId)).thenReturn(Optional.of(mockExperiment));
+
+      experimentService.archiveExperiment(experimentId, creatorId, Role.USER);
+
+      assertEquals(originalArchivedAt, mockExperiment.getArchivedAt(), "Archived timestamp should remain unchanged");
+      verify(experimentRepository, never()).save(any());
+    }
   }
 
   @Nested
@@ -459,6 +490,38 @@ class ExperimentServiceTest {
         experimentService.restoreExperiment(experimentId, "snooper-000", Role.USER)
       );
 
+      verify(experimentRepository, never()).save(any());
+    }
+
+    @Test
+    void restoreExperiment_whenNotFound_throwsResourceNotFoundException() {
+      UUID experimentId = randomUUID();
+      String scientistId = "scientist-456";
+
+      when(experimentRepository.findById(experimentId)).thenReturn(Optional.empty());
+
+      ResourceNotFoundException exception = assertThrows(
+        ResourceNotFoundException.class,
+        () -> experimentService.restoreExperiment(experimentId, scientistId, Role.USER)
+      );
+
+      assertTrue(exception.getMessage().contains("Experiment with ID " + experimentId + " not found"));
+      verify(experimentRepository, never()).save(any());
+    }
+
+    @Test
+    void restoreExperiment_whenAlreadyActive_isNoOpAndDoesNotSave() {
+      UUID experimentId = randomUUID();
+      String scientistId = "scientist-456";
+
+      // Experiment is already active (not archived)
+      Experiment mockExperiment = createMockEntityForSecurity(experimentId, "creator-123", scientistId, null);
+      when(experimentRepository.findById(experimentId)).thenReturn(Optional.of(mockExperiment));
+
+      GetExperimentDto result = experimentService.restoreExperiment(experimentId, scientistId, Role.USER);
+
+      Assertions.assertNull(mockExperiment.getArchivedAt(), "Archived timestamp should remain null");
+      assertNotNull(result, "The returned DTO should still be built");
       verify(experimentRepository, never()).save(any());
     }
   }

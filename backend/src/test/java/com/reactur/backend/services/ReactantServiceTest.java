@@ -486,6 +486,62 @@ class ReactantServiceTest {
             assertEquals("Ethanol", result.getFirst().shortName());
             assertEquals(StructureFlag.PENDING, result.getFirst().flag());
         }
+
+        @Test
+        void getAllReactants_ShouldAggregateAsActive_WhenAnyStructureIsActive() {
+            when(reactantRepository.findAllByArchivedAtIsNull()).thenReturn(List.of(mockReactant));
+
+            StructureDto rejectedStruct = new StructureDto(UUID.randomUUID(), VALID_UUID, "test", "data", StructureFlag.REJECTED);
+            StructureDto activeStruct = new StructureDto(UUID.randomUUID(), VALID_UUID, "test", "data", StructureFlag.ACTIVE);
+            when(structureService.getStructuresByReactant(VALID_UUID)).thenReturn(List.of(rejectedStruct, activeStruct));
+
+            List<ReactantDto> result = reactantService.getAllReactants();
+
+            assertEquals(1, result.size());
+            assertEquals(StructureFlag.ACTIVE, result.getFirst().flag());
+        }
+
+        @Test
+        void getAllReactants_ShouldAggregateAsReady_WhenAnyStructureIsReadyAndNoneActive() {
+            when(reactantRepository.findAllByArchivedAtIsNull()).thenReturn(List.of(mockReactant));
+
+            StructureDto rejectedStruct = new StructureDto(UUID.randomUUID(), VALID_UUID, "test", "data", StructureFlag.REJECTED);
+            StructureDto readyStruct = new StructureDto(UUID.randomUUID(), VALID_UUID, "test", "data", StructureFlag.READY);
+            when(structureService.getStructuresByReactant(VALID_UUID)).thenReturn(List.of(rejectedStruct, readyStruct));
+
+            List<ReactantDto> result = reactantService.getAllReactants();
+
+            assertEquals(1, result.size());
+            assertEquals(StructureFlag.READY, result.getFirst().flag());
+        }
+
+        @Test
+        void getAllReactants_ShouldAggregateAsFailed_WhenAllStructuresAreFailed() {
+            when(reactantRepository.findAllByArchivedAtIsNull()).thenReturn(List.of(mockReactant));
+
+            StructureDto failedStruct1 = new StructureDto(UUID.randomUUID(), VALID_UUID, "test", "data", StructureFlag.FAILED);
+            StructureDto failedStruct2 = new StructureDto(UUID.randomUUID(), VALID_UUID, "test", "data", StructureFlag.FAILED);
+            when(structureService.getStructuresByReactant(VALID_UUID)).thenReturn(List.of(failedStruct1, failedStruct2));
+
+            List<ReactantDto> result = reactantService.getAllReactants();
+
+            assertEquals(1, result.size());
+            assertEquals(StructureFlag.FAILED, result.getFirst().flag());
+        }
+
+        @Test
+        void getAllReactants_ShouldAggregateAsRejected_WhenStructuresAreMixOfFailedAndRejected() {
+            when(reactantRepository.findAllByArchivedAtIsNull()).thenReturn(List.of(mockReactant));
+
+            StructureDto failedStruct = new StructureDto(UUID.randomUUID(), VALID_UUID, "test", "data", StructureFlag.FAILED);
+            StructureDto rejectedStruct = new StructureDto(UUID.randomUUID(), VALID_UUID, "test", "data", StructureFlag.REJECTED);
+            when(structureService.getStructuresByReactant(VALID_UUID)).thenReturn(List.of(failedStruct, rejectedStruct));
+
+            List<ReactantDto> result = reactantService.getAllReactants();
+
+            assertEquals(1, result.size());
+            assertEquals(StructureFlag.REJECTED, result.getFirst().flag());
+        }
     }
 
     @Nested

@@ -19,6 +19,7 @@ import java.time.LocalDate;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 class MetadataMapperTest {
 
@@ -76,5 +77,20 @@ class MetadataMapperTest {
         assertEquals(metadata.getModality().getId(), dto.modality().uuid());
         assertEquals(metadata.getWavelength(), dto.wavelength());
         assertEquals(metadata.getComment(), dto.comment());
+    }
+
+    @Test
+    void metadataToGetMetadataDto_shouldMapNullInstrumentAndModality_whenNotProvided() {
+        // Instrument and modality are legitimately optional per ExperimentValidator.
+        metadata.setInstrument(null);
+        metadata.setModality(null);
+
+        GetMetadataDto dto = mapper.metadataToGetMetadataDto(metadata);
+
+        assertNull(dto.instrument());
+        assertNull(dto.modality());
+        // Everything else should still map normally.
+        assertEquals(metadata.getId(), dto.uuid());
+        assertEquals(metadata.getSolvent().getId(), dto.solvent().uuid());
     }
 }

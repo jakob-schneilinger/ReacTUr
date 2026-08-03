@@ -17,6 +17,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
@@ -71,6 +72,34 @@ class ExperimentFilesEndpointTest {
     }
 
     @Test
+    void uploadFile_ShouldReturn404_WhenExperimentNotFound() throws Exception {
+        UUID experimentId = UUID.randomUUID();
+        MockMultipartFile file = new MockMultipartFile(
+                "file", "test.pdf", MediaType.APPLICATION_PDF_VALUE, "Dummy PDF Content".getBytes());
+
+        when(fileService.storeFile(eq(experimentId), any(), any(), any(Role.class)))
+                .thenThrow(new ResourceNotFoundException("Experiment not found"));
+
+        mockMvc.perform(multipart("/api/file/" + experimentId).file(file)
+                        .with(approvedUser("uploader-user-id")))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void uploadFile_ShouldReturn403_WhenUserCannotModifyExperiment() throws Exception {
+        UUID experimentId = UUID.randomUUID();
+        MockMultipartFile file = new MockMultipartFile(
+                "file", "test.pdf", MediaType.APPLICATION_PDF_VALUE, "Dummy PDF Content".getBytes());
+
+        when(fileService.storeFile(eq(experimentId), any(), any(), any(Role.class)))
+                .thenThrow(new AccessDeniedException("You do not have permission to modify this experiment."));
+
+        mockMvc.perform(multipart("/api/file/" + experimentId).file(file)
+                        .with(approvedUser("non-owner-user-id")))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
     void downloadFile_ShouldReturnResourceWithCorrectHeaders() throws Exception {
         UUID fileId = UUID.randomUUID();
 
@@ -113,6 +142,28 @@ class ExperimentFilesEndpointTest {
     }
 
     @Test
+    void downloadFile_ShouldReturn404_WhenFileNotFound() throws Exception {
+        UUID fileId = UUID.randomUUID();
+        when(fileService.getAttachmentDetail(eq(fileId), any(), any(Role.class)))
+                .thenThrow(new ResourceNotFoundException("File not found"));
+
+        mockMvc.perform(get("/api/file/" + fileId)
+                        .with(approvedUser("viewer-user-id")))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void downloadFile_ShouldReturn403_WhenUserCannotViewExperiment() throws Exception {
+        UUID fileId = UUID.randomUUID();
+        when(fileService.getAttachmentDetail(eq(fileId), any(), any(Role.class)))
+                .thenThrow(new AccessDeniedException("You do not have permission to view this experiment."));
+
+        mockMvc.perform(get("/api/file/" + fileId)
+                        .with(approvedUser("non-owner-user-id")))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
     void getFileDetails_ShouldReturn200_WhenFileExists() throws Exception {
         UUID fileId = UUID.randomUUID();
         ExperimentAttachmentDetailsDto mockResponse = new ExperimentAttachmentDetailsDto(
@@ -147,5 +198,39 @@ class ExperimentFilesEndpointTest {
         mockMvc.perform(delete("/api/file/" + fileId)
                         .with(approvedUser("deleter-user-id")))
                 .andExpect(status().isNoContent());
+    }
+
+    @Test
+    void archiveFile_ShouldReturn404_WhenFileNotFound() throws Exception {
+        UUID fileId = UUID.randomUUID();
+
+        doThrow(new ResourceNotFoundException("File not found"))
+                .when(fileService).archiveFile(eq(fileId), any(), any(Role.class));
+
+        mockMvc.perform(delete("/api/file/" + fileId)
+                        .with(approvedUser("deleter-user-id")))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void archiveFile_ShouldReturn403_WhenUserCannotModifyExperiment() throws Exception {
+        UUID fileId = UUID.randomUUID();
+
+        doThrow(new AccessDeniedException("You do not have permission to modify this experiment."))
+                .when(fileService).archiveFile(eq(fileId), any(), any(Role.class));
+
+        mockMvc.perform(delete("/api/file/" + fileId)
+                        .with(approvedUser("non-owner-user-id")))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void anyEndpoint_whenUnauthenticated_returns401() throws Exception {
+        // Mirrors StructureEndpointTest/ChemicalTypeEndpointTest's pattern: a plain request with no
+        // JWT at all must be rejected by SecurityConfig before it ever reaches the controller.
+        UUID fileId = UUID.randomUUID();
+
+        mockMvc.perform(get("/api/file/" + fileId + "/details"))
+                .andExpect(status().isUnauthorized());
     }
 }

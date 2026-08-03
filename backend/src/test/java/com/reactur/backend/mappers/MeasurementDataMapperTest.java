@@ -42,4 +42,25 @@ class MeasurementDataMapperTest {
 
         assertNull(dto.pFO_rateConstant());
     }
+
+    @Test
+    void resultToMeasurementDataDto_shouldMapNullErrorValue() {
+        ExperimentResult result = ExperimentResult.builder()
+                .rateConstant(1.23)
+                .pfoRateConstant(4.56)
+                .errorValue(null)
+                .isErrorPercentage(true)
+                .build();
+
+        MeasurementDataDto dto = mapper.resultToMeasurementDataDto(result);
+
+        assertNull(dto.error());
+    }
+
+    @Test
+    void resultToMeasurementDataDto_shouldReturnNull_whenResultIsNull() {
+        MeasurementDataDto dto = mapper.resultToMeasurementDataDto(null);
+
+        assertNull(dto);
+    }
 }

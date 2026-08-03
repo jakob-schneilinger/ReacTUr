@@ -2,11 +2,13 @@ package com.reactur.backend.endpoints;
 
 import com.reactur.backend.dtos.folders.GetFolderDto;
 import com.reactur.backend.dtos.folders.SaveFolderDto;
+import com.reactur.backend.exeptions.ResourceNotFoundException;
 import com.reactur.backend.repositories.UserRepository;
 import com.reactur.backend.security.SecurityConfig;
 import com.reactur.backend.services.ExperimentFolderService;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
@@ -123,6 +125,19 @@ class ExperimentFolderEndpointTest {
   }
 
   @Test
+  void getMyFolders_whenServiceThrowsUnexpectedException_returns500InternalServerError() throws Exception {
+    // Negative path: even though getMyFolders has no ownership-related failure mode of its own
+    // (it only ever lists the requesting user's own folders), an unexpected service failure must
+    // still surface as a 500 via GlobalExceptionHandler's catch-all, not leak past the endpoint.
+    Mockito.when(folderService.getMyFolders(userId))
+      .thenThrow(new RuntimeException("Unexpected failure"));
+
+    mockMvc.perform(get("/api/folders")
+        .with(asUser(userId)))
+      .andExpect(status().isInternalServerError());
+  }
+
+  @Test
   void addExperimentToFolder_returns200Ok() throws Exception {
     UUID folderId = UUID.randomUUID();
     UUID experimentId = UUID.randomUUID();
@@ -136,6 +151,34 @@ class ExperimentFolderEndpointTest {
         .with(asUser(userId)))
       .andExpect(status().isOk())
       .andExpect(jsonPath("$.experimentIds[0]").value(experimentId.toString()));
+  }
+
+  @Test
+  void addExperimentToFolder_whenFolderNotOwnedByUser_returns403Forbidden() throws Exception {
+    UUID folderId = UUID.randomUUID();
+    UUID experimentId = UUID.randomUUID();
+
+    Mockito.when(folderService.addExperimentToFolder(folderId, experimentId, userId))
+      .thenThrow(new AccessDeniedException("You do not have permission to access this folder."));
+
+    mockMvc.perform(post("/api/folders/" + folderId + "/experiments/" + experimentId)
+        .with(csrf())
+        .with(asUser(userId)))
+      .andExpect(status().isForbidden());
+  }
+
+  @Test
+  void addExperimentToFolder_whenFolderNotFound_returns404NotFound() throws Exception {
+    UUID folderId = UUID.randomUUID();
+    UUID experimentId = UUID.randomUUID();
+
+    Mockito.when(folderService.addExperimentToFolder(folderId, experimentId, userId))
+      .thenThrow(new ResourceNotFoundException("Folder not found."));
+
+    mockMvc.perform(post("/api/folders/" + folderId + "/experiments/" + experimentId)
+        .with(csrf())
+        .with(asUser(userId)))
+      .andExpect(status().isNotFound());
   }
 
   @Test
@@ -157,6 +200,34 @@ class ExperimentFolderEndpointTest {
   }
 
   @Test
+  void removeExperimentFromFolder_whenFolderNotOwnedByUser_returns403Forbidden() throws Exception {
+    UUID folderId = UUID.randomUUID();
+    UUID experimentId = UUID.randomUUID();
+
+    Mockito.when(folderService.removeExperimentFromFolder(folderId, experimentId, userId))
+      .thenThrow(new AccessDeniedException("You do not have permission to access this folder."));
+
+    mockMvc.perform(delete("/api/folders/" + folderId + "/experiments/" + experimentId)
+        .with(csrf())
+        .with(asUser(userId)))
+      .andExpect(status().isForbidden());
+  }
+
+  @Test
+  void removeExperimentFromFolder_whenFolderNotFound_returns404NotFound() throws Exception {
+    UUID folderId = UUID.randomUUID();
+    UUID experimentId = UUID.randomUUID();
+
+    Mockito.when(folderService.removeExperimentFromFolder(folderId, experimentId, userId))
+      .thenThrow(new ResourceNotFoundException("Folder not found."));
+
+    mockMvc.perform(delete("/api/folders/" + folderId + "/experiments/" + experimentId)
+        .with(csrf())
+        .with(asUser(userId)))
+      .andExpect(status().isNotFound());
+  }
+
+  @Test
   void deleteFolder_returns204NoContent() throws Exception {
     UUID folderId = UUID.randomUUID();
 
@@ -166,5 +237,39 @@ class ExperimentFolderEndpointTest {
       .andExpect(status().isNoContent());
 
     Mockito.verify(folderService).deleteFolder(folderId, userId);
+  }
+
+  @Test
+  void deleteFolder_whenFolderNotOwnedByUser_returns403Forbidden() throws Exception {
+    UUID folderId = UUID.randomUUID();
+
+    Mockito.doThrow(new AccessDeniedException("You do not have permission to access this folder."))
+      .when(folderService).deleteFolder(folderId, userId);
+
+    mockMvc.perform(delete("/api/folders/" + folderId)
+        .with(csrf())
+        .with(asUser(userId)))
+      .andExpect(status().isForbidden());
+  }
+
+  @Test
+  void deleteFolder_whenFolderNotFound_returns404NotFound() throws Exception {
+    UUID folderId = UUID.randomUUID();
+
+    Mockito.doThrow(new ResourceNotFoundException("Folder not found."))
+      .when(folderService).deleteFolder(folderId, userId);
+
+    mockMvc.perform(delete("/api/folders/" + folderId)
+        .with(csrf())
+        .with(asUser(userId)))
+      .andExpect(status().isNotFound());
+  }
+
+  @Test
+  void anyEndpoint_whenUnauthenticated_returns401() throws Exception {
+    // Mirrors StructureEndpointTest/ChemicalTypeEndpointTest's pattern: a plain request with no
+    // JWT at all must be rejected by SecurityConfig before it ever reaches the controller.
+    mockMvc.perform(get("/api/folders"))
+      .andExpect(status().isUnauthorized());
   }
 }

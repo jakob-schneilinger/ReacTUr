@@ -26,8 +26,11 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyCollection;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 /**
@@ -255,5 +258,91 @@ class ReactantValidatorTest {
 
         assertThrows(ValidationException.class,
                 () -> reactantValidator.validateForUpdate(reactantId, patchDto, existingReactant));
+    }
+
+    // --- validateForUpdate: additionalShortNames validation -------------
+
+    @Test
+    void validateForUpdate_shouldThrowValidationException_whenAdditionalShortNamesDifferOnlyByCase() {
+        UpdateReactantDto patchDto = new UpdateReactantDto(
+                null, null, null, List.of("HCl", "hcl"), null, null, null, null, null
+        );
+
+        assertThrows(ValidationException.class,
+                () -> reactantValidator.validateForUpdate(reactantId, patchDto, existingReactant));
+    }
+
+    // --- validateForUpdate: short-name conflict --------------------------
+
+    @Test
+    void validateForUpdate_shouldThrowResourceConflict_whenShortNameConflictsWithAnotherReactant() {
+        UpdateReactantDto patchDto = new UpdateReactantDto(
+                null, null, "NewName", null, null, null, null, null, null
+        );
+
+        when(reactantRepository.hasNameConflictExcludingId(anyCollection(), eq(reactantId))).thenReturn(true);
+
+        assertThrows(ResourceConflictException.class,
+                () -> reactantValidator.validateForUpdate(reactantId, patchDto, existingReactant));
+    }
+
+    // --- validateForUpdate: CAS number conflict --------------------------
+
+    @Test
+    void validateForUpdate_shouldThrowResourceConflict_whenCasNumberChangedAndAlreadyTaken() {
+        UpdateReactantDto patchDto = new UpdateReactantDto(
+                null, null, null, null, null, "99-99-9", null, null, null
+        );
+
+        when(reactantRepository.hasNameConflictExcludingId(anyCollection(), eq(reactantId))).thenReturn(false);
+        when(reactantRepository.existsByCasNumberAndIdNot("99-99-9", reactantId)).thenReturn(true);
+
+        assertThrows(ResourceConflictException.class,
+                () -> reactantValidator.validateForUpdate(reactantId, patchDto, existingReactant));
+    }
+
+    @Test
+    void validateForUpdate_shouldSkipCasNumberConflictCheck_whenCasNumberUnchanged() {
+        UpdateReactantDto patchDto = new UpdateReactantDto(
+                null, null, null, null, null, "64-17-5", null, null, null
+        );
+
+        when(reactantRepository.hasNameConflictExcludingId(anyCollection(), eq(reactantId))).thenReturn(false);
+
+        ReactantValidator.ValidatedReferences result =
+                reactantValidator.validateForUpdate(reactantId, patchDto, existingReactant);
+
+        assertNotNull(result);
+        verify(reactantRepository, never()).existsByCasNumberAndIdNot(any(), any());
+    }
+
+    // --- validateForUpdate: InChIKey conflict -----------------------------
+
+    @Test
+    void validateForUpdate_shouldThrowResourceConflict_whenInChiKeyChangedAndAlreadyTaken() {
+        UpdateReactantDto patchDto = new UpdateReactantDto(
+                null, null, null, null, null, null, "NEWINCHIKEY123456789", null, null
+        );
+
+        when(reactantRepository.hasNameConflictExcludingId(anyCollection(), eq(reactantId))).thenReturn(false);
+        when(reactantRepository.existsByInChiKeyAndIdNot("NEWINCHIKEY123456789", reactantId)).thenReturn(true);
+
+        assertThrows(ResourceConflictException.class,
+                () -> reactantValidator.validateForUpdate(reactantId, patchDto, existingReactant));
+    }
+
+    @Test
+    void validateForUpdate_shouldSkipInChiKeyConflictCheck_whenInChiKeyUnchanged() {
+        UpdateReactantDto patchDto = new UpdateReactantDto(
+                null, null, null, null, null, null, "LFQSCWFLJHTTHZ-UHFFFAOYSA-N", null, null
+        );
+
+        when(reactantRepository.hasNameConflictExcludingId(anyCollection(), eq(reactantId))).thenReturn(false);
+
+        ReactantValidator.ValidatedReferences result =
+                reactantValidator.validateForUpdate(reactantId, patchDto, existingReactant);
+
+        assertNotNull(result);
+        verify(reactantRepository, never()).existsByInChiKeyAndIdNot(any(), any());
     }
 }

@@ -49,4 +49,17 @@ class FolderMapperTest {
 
         assertTrue(dto.experimentIds().isEmpty());
     }
+
+    @Test
+    void folderToGetFolderDto_shouldMapEmptyList_whenExperimentsIsNull() {
+        ExperimentFolder folder = ExperimentFolder.builder()
+                .id(UUID.randomUUID())
+                .name("Null Experiments Folder")
+                .experiments(null)
+                .build();
+
+        GetFolderDto dto = mapper.folderToGetFolderDto(folder);
+
+        assertTrue(dto.experimentIds().isEmpty());
+    }
 }

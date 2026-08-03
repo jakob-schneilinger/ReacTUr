@@ -71,6 +71,20 @@ class ReactantMapperTest {
     }
 
     @Test
+    void toDetailDto_shouldMapNullStructures_whenStructuresListIsNull() {
+        ReactantDetailDto dto = mapper.toDetailDto(reactant, null);
+
+        assertNull(dto.structures());
+    }
+
+    @Test
+    void toDetailDto_shouldMapEmptyStructures_whenStructuresListIsEmpty() {
+        ReactantDetailDto dto = mapper.toDetailDto(reactant, List.of());
+
+        assertEquals(List.of(), dto.structures());
+    }
+
+    @Test
     void toDto_withFlag_shouldMapReactantIdToUuid_andPassThroughFlag() {
         ReactantDto dto = mapper.toDto(reactant, StructureFlag.READY);
 

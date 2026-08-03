@@ -102,6 +102,20 @@ class ReactantEndpointTest {
     }
 
     @Test
+    void createReactant_WhenShortNameMissing_ShouldReturn400BadRequest() throws Exception {
+        // Validation Test: shortName is @NotBlank on CreateReactantDto but is missing/null here.
+        CreateReactantDto invalidDto = new CreateReactantDto("C=C", UUID.randomUUID(), null, null, "Ethene", "74-85-1", "VGGSQFCHJZSIN-UHFFFAOYSA-N", null, null);
+
+        mockMvc.perform(post("/api/reactant")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(invalidDto))
+                        .with(jwt().authorities(new SimpleGrantedAuthority("ROLE_ADMIN"))))
+                .andExpect(status().isBadRequest());
+
+        verify(reactantService, never()).createReactant(any(), any());
+    }
+
+    @Test
     void updateReactant_WhenAdmin_ShouldReturn200() throws Exception {
         UUID id = UUID.randomUUID();
         UpdateReactantDto saveDto = new UpdateReactantDto("C=C", UUID.randomUUID(), "Ethene", null, "Ethene", "74-85-1", "VGGSQFCHJZSIN-UHFFFAOYSA-N", null, null);
@@ -282,5 +296,13 @@ class ReactantEndpointTest {
                 .andExpect(status().isForbidden());
 
         verify(reactantService, never()).restoreReactant(any());
+    }
+
+    @Test
+    void anyEndpoint_whenUnauthenticated_returns401() throws Exception {
+        // Mirrors StructureEndpointTest/ChemicalTypeEndpointTest's pattern: a plain request with no
+        // JWT at all must be rejected by SecurityConfig before it ever reaches the controller.
+        mockMvc.perform(get("/api/reactant"))
+                .andExpect(status().isUnauthorized());
     }
 }

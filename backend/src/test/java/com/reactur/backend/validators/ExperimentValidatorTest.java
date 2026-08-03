@@ -191,6 +191,16 @@ class ExperimentValidatorTest {
         assertTrue(exception.getMessage().contains("Scientist with ID"));
     }
 
+    @Test
+    void validateForUpdate_shouldThrowUnprocessableEntity_whenScientistNotFound() {
+        when(userRepository.findById(scientistId)).thenReturn(Optional.empty());
+
+        UnprocessableEntityException exception = assertThrows(UnprocessableEntityException.class,
+                () -> experimentValidator.validateForUpdate(buildDto(reactantAId, reactantBId, instrumentId, modalityId)));
+
+        assertTrue(exception.getMessage().contains("Scientist with ID"));
+    }
+
     // --- 2. Reactant A / B existence --------------------------------------
 
     @Test
@@ -205,6 +215,17 @@ class ExperimentValidatorTest {
     }
 
     @Test
+    void validateForUpdate_shouldThrowUnprocessableEntity_whenReactantAMissing() {
+        when(userRepository.findById(scientistId)).thenReturn(Optional.of(scientist));
+        when(reactantRepository.findById(reactantAId)).thenReturn(Optional.empty());
+
+        UnprocessableEntityException exception = assertThrows(UnprocessableEntityException.class,
+                () -> experimentValidator.validateForUpdate(buildDto(reactantAId, reactantBId, instrumentId, modalityId)));
+
+        assertEquals("Reactant A does not exist.", exception.getMessage());
+    }
+
+    @Test
     void validateForCreate_shouldThrowUnprocessableEntity_whenReactantBMissing() {
         when(userRepository.findById(scientistId)).thenReturn(Optional.of(scientist));
         when(reactantRepository.findById(reactantAId)).thenReturn(Optional.of(reactantA));
@@ -212,6 +233,18 @@ class ExperimentValidatorTest {
 
         UnprocessableEntityException exception = assertThrows(UnprocessableEntityException.class,
                 () -> experimentValidator.validateForCreate(buildDto(reactantAId, reactantBId, instrumentId, modalityId)));
+
+        assertEquals("Reactant B does not exist.", exception.getMessage());
+    }
+
+    @Test
+    void validateForUpdate_shouldThrowUnprocessableEntity_whenReactantBMissing() {
+        when(userRepository.findById(scientistId)).thenReturn(Optional.of(scientist));
+        when(reactantRepository.findById(reactantAId)).thenReturn(Optional.of(reactantA));
+        when(reactantRepository.findById(reactantBId)).thenReturn(Optional.empty());
+
+        UnprocessableEntityException exception = assertThrows(UnprocessableEntityException.class,
+                () -> experimentValidator.validateForUpdate(buildDto(reactantAId, reactantBId, instrumentId, modalityId)));
 
         assertEquals("Reactant B does not exist.", exception.getMessage());
     }
@@ -288,6 +321,20 @@ class ExperimentValidatorTest {
                 () -> experimentValidator.validateForCreate(buildDto(reactantAId, reactantBId, instrumentId, modalityId)));
     }
 
+    @Test
+    void validateForUpdate_shouldThrowUnprocessableEntity_whenReactantStructureIsNotActive() {
+        when(userRepository.findById(scientistId)).thenReturn(Optional.of(scientist));
+        when(reactantRepository.findById(reactantAId)).thenReturn(Optional.of(reactantA));
+        when(reactantRepository.findById(reactantBId)).thenReturn(Optional.of(reactantB));
+
+        ReactantStructure inactiveStructure = new ReactantStructure();
+        inactiveStructure.setFlag(StructureFlag.REJECTED);
+        when(structureRepository.findByReactant_Id(any())).thenReturn(List.of(inactiveStructure));
+
+        assertThrows(UnprocessableEntityException.class,
+                () -> experimentValidator.validateForUpdate(buildDto(reactantAId, reactantBId, instrumentId, modalityId)));
+    }
+
     // --- 5. Solvent existence ----------------------------------------------
 
     @Test
@@ -304,6 +351,24 @@ class ExperimentValidatorTest {
 
         UnprocessableEntityException exception = assertThrows(UnprocessableEntityException.class,
                 () -> experimentValidator.validateForCreate(buildDto(reactantAId, reactantBId, instrumentId, modalityId)));
+
+        assertEquals("Solvent does not exist.", exception.getMessage());
+    }
+
+    @Test
+    void validateForUpdate_shouldThrowUnprocessableEntity_whenSolventNotFound() {
+        when(userRepository.findById(scientistId)).thenReturn(Optional.of(scientist));
+        when(reactantRepository.findById(reactantAId)).thenReturn(Optional.of(reactantA));
+        when(reactantRepository.findById(reactantBId)).thenReturn(Optional.of(reactantB));
+
+        ReactantStructure activeStructure = new ReactantStructure();
+        activeStructure.setFlag(StructureFlag.ACTIVE);
+        when(structureRepository.findByReactant_Id(any())).thenReturn(List.of(activeStructure));
+
+        when(solventRepository.findById(solventId)).thenReturn(Optional.empty());
+
+        UnprocessableEntityException exception = assertThrows(UnprocessableEntityException.class,
+                () -> experimentValidator.validateForUpdate(buildDto(reactantAId, reactantBId, instrumentId, modalityId)));
 
         assertEquals("Solvent does not exist.", exception.getMessage());
     }
@@ -325,6 +390,25 @@ class ExperimentValidatorTest {
 
         UnprocessableEntityException exception = assertThrows(UnprocessableEntityException.class,
                 () -> experimentValidator.validateForCreate(buildDto(reactantAId, reactantBId, instrumentId, modalityId)));
+
+        assertEquals("Instrument does not exist.", exception.getMessage());
+    }
+
+    @Test
+    void validateForUpdate_shouldThrowUnprocessableEntity_whenInstrumentProvidedButNotFound() {
+        when(userRepository.findById(scientistId)).thenReturn(Optional.of(scientist));
+        when(reactantRepository.findById(reactantAId)).thenReturn(Optional.of(reactantA));
+        when(reactantRepository.findById(reactantBId)).thenReturn(Optional.of(reactantB));
+
+        ReactantStructure activeStructure = new ReactantStructure();
+        activeStructure.setFlag(StructureFlag.ACTIVE);
+        when(structureRepository.findByReactant_Id(any())).thenReturn(List.of(activeStructure));
+
+        when(solventRepository.findById(solventId)).thenReturn(Optional.of(solvent));
+        when(instrumentRepository.findById(instrumentId)).thenReturn(Optional.empty());
+
+        UnprocessableEntityException exception = assertThrows(UnprocessableEntityException.class,
+                () -> experimentValidator.validateForUpdate(buildDto(reactantAId, reactantBId, instrumentId, modalityId)));
 
         assertEquals("Instrument does not exist.", exception.getMessage());
     }
@@ -367,6 +451,26 @@ class ExperimentValidatorTest {
 
         UnprocessableEntityException exception = assertThrows(UnprocessableEntityException.class,
                 () -> experimentValidator.validateForCreate(buildDto(reactantAId, reactantBId, instrumentId, modalityId)));
+
+        assertEquals("Modality does not exist.", exception.getMessage());
+    }
+
+    @Test
+    void validateForUpdate_shouldThrowUnprocessableEntity_whenModalityProvidedButNotFound() {
+        when(userRepository.findById(scientistId)).thenReturn(Optional.of(scientist));
+        when(reactantRepository.findById(reactantAId)).thenReturn(Optional.of(reactantA));
+        when(reactantRepository.findById(reactantBId)).thenReturn(Optional.of(reactantB));
+
+        ReactantStructure activeStructure = new ReactantStructure();
+        activeStructure.setFlag(StructureFlag.ACTIVE);
+        when(structureRepository.findByReactant_Id(any())).thenReturn(List.of(activeStructure));
+
+        when(solventRepository.findById(solventId)).thenReturn(Optional.of(solvent));
+        when(instrumentRepository.findById(instrumentId)).thenReturn(Optional.of(instrument));
+        when(modalityRepository.findById(modalityId)).thenReturn(Optional.empty());
+
+        UnprocessableEntityException exception = assertThrows(UnprocessableEntityException.class,
+                () -> experimentValidator.validateForUpdate(buildDto(reactantAId, reactantBId, instrumentId, modalityId)));
 
         assertEquals("Modality does not exist.", exception.getMessage());
     }

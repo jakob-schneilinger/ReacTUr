@@ -5,6 +5,7 @@ import com.reactur.backend.entities.User;
 import com.reactur.backend.entities.experiment.Experiment;
 import com.reactur.backend.entities.experiment.ExperimentResult;
 import com.reactur.backend.entities.experiment.Metadata;
+import com.reactur.backend.entities.options.Solvent;
 import com.reactur.backend.enums.Role;
 import com.reactur.backend.exeptions.ResourceNotFoundException;
 import com.reactur.backend.repositories.ExperimentRepository;
@@ -18,6 +19,7 @@ import com.reactur.backend.services.implementations.ExperimentHistoryServiceImpl
 import org.javers.common.string.PrettyValuePrinter;
 import org.javers.core.Changes;
 import org.javers.core.Javers;
+import org.javers.core.JaversBuilder;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -32,6 +34,8 @@ import java.util.Optional;
 import java.util.UUID;
 
 import static java.util.UUID.randomUUID;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -153,6 +157,198 @@ class ExperimentHistoryServiceTest {
     assertThrows(AccessDeniedException.class, () ->
       experimentHistoryService.getExperimentHistory(experimentId, "snooper-000", Role.USER)
     );
+  }
+
+  // ---------------------------------------------------------------------
+  // Diff/history-building logic tests.
+  //
+  // The tests above all stub javers.findChanges(any()) to return an empty
+  // list, which only exercises the authorization branches. The tests below
+  // instead wire the mocked `javers` field to delegate to a real, in-memory
+  // Javers instance (JaversBuilder.javers().build()) that has had real
+  // entities committed to it, so the genuine Javers Change subtypes
+  // (NewObject/ValueChange/ReferenceChange) returned by findChanges drive
+  // the production code's CREATE/UPDATE/ARCHIVE/RESTORE detection and
+  // diff-building logic. This was chosen over hand-constructing fake Change
+  // objects because Javers' Change subtypes have non-trivial constructors
+  // and internal invariants that would be fragile to fabricate by hand;
+  // exercising the real API end-to-end is more reliable.
+  // ---------------------------------------------------------------------
+
+  @Test
+  void getExperimentHistory_withGenuineFirstCommit_producesCreateCommitType() {
+    UUID experimentId = randomUUID();
+    Metadata metadata = Metadata.builder().id(randomUUID()).temperature(25.0).build();
+    Experiment experiment = experimentWithMetadata(experimentId, metadata);
+
+    Javers realJavers = JaversBuilder.javers().build();
+    realJavers.commit("author-1", metadata);
+
+    when(experimentRepository.findById(experimentId)).thenReturn(Optional.of(experiment));
+    delegateToRealJavers(realJavers);
+    when(userRepository.findAllById(any())).thenReturn(List.of());
+
+    List<ExperimentHistoryDto> result =
+      experimentHistoryService.getExperimentHistory(experimentId, "any-user", Role.USER);
+
+    assertEquals(1, result.size());
+    assertEquals("CREATE", result.get(0).commitType());
+  }
+
+  @Test
+  void getExperimentHistory_withGenuineValueChange_producesUpdateEntryWithOldAndNewValue() {
+    UUID experimentId = randomUUID();
+    UUID metadataId = randomUUID();
+    Metadata metadataV1 = Metadata.builder().id(metadataId).comment("Old comment").build();
+    Metadata metadataV2 = Metadata.builder().id(metadataId).comment("New comment").build();
+    Experiment experiment = experimentWithMetadata(experimentId, metadataV2);
+
+    Javers realJavers = JaversBuilder.javers().build();
+    realJavers.commit("author-1", metadataV1);
+    realJavers.commit("author-1", metadataV2);
+
+    when(experimentRepository.findById(experimentId)).thenReturn(Optional.of(experiment));
+    delegateToRealJavers(realJavers);
+    when(userRepository.findAllById(any())).thenReturn(List.of());
+
+    List<ExperimentHistoryDto> result =
+      experimentHistoryService.getExperimentHistory(experimentId, "any-user", Role.USER);
+
+    assertEquals(2, result.size());
+    ExperimentHistoryDto updateEntry = result.stream()
+      .filter(dto -> "UPDATE".equals(dto.commitType()))
+      .findFirst()
+      .orElseThrow(() -> new AssertionError("Expected an UPDATE entry"));
+
+    assertEquals("Old comment -> New comment", updateEntry.changes().get("comment"));
+  }
+
+  @Test
+  void getExperimentHistory_withGenuineReferenceChange_resolvesEntityNamesInsteadOfRawIds() {
+    UUID experimentId = randomUUID();
+    UUID metadataId = randomUUID();
+    Solvent solventA = Solvent.builder().id(randomUUID()).name("Ethanol").build();
+    Solvent solventB = Solvent.builder().id(randomUUID()).name("Methanol").build();
+    Metadata metadataV1 = Metadata.builder().id(metadataId).solvent(solventA).build();
+    Metadata metadataV2 = Metadata.builder().id(metadataId).solvent(solventB).build();
+    Experiment experiment = experimentWithMetadata(experimentId, metadataV2);
+
+    Javers realJavers = JaversBuilder.javers().build();
+    realJavers.commit("author-1", metadataV1);
+    realJavers.commit("author-1", metadataV2);
+
+    when(experimentRepository.findById(experimentId)).thenReturn(Optional.of(experiment));
+    delegateToRealJavers(realJavers);
+    when(userRepository.findAllById(any())).thenReturn(List.of());
+    when(solventRepository.findAllById(any())).thenReturn(List.of(solventA, solventB));
+
+    List<ExperimentHistoryDto> result =
+      experimentHistoryService.getExperimentHistory(experimentId, "any-user", Role.USER);
+
+    ExperimentHistoryDto updateEntry = result.stream()
+      .filter(dto -> "UPDATE".equals(dto.commitType()))
+      .findFirst()
+      .orElseThrow(() -> new AssertionError("Expected an UPDATE entry"));
+
+    // Resolved via buildEntityLookupMap/extractId: human-readable names, not raw UUIDs.
+    assertEquals("Ethanol -> Methanol", updateEntry.changes().get("solvent"));
+  }
+
+  @Test
+  void getExperimentHistory_whenArchivedAtGoesFromNullToSet_producesArchiveCommitTypeAndOmitsProperty() {
+    UUID experimentId = randomUUID();
+    UUID metadataId = randomUUID();
+    Metadata metadataV1 = Metadata.builder().id(metadataId).archivedAt(null).build();
+    Metadata metadataV2 = Metadata.builder().id(metadataId).archivedAt(Instant.now()).build();
+    Experiment experiment = experimentWithMetadata(experimentId, metadataV2);
+
+    Javers realJavers = JaversBuilder.javers().build();
+    realJavers.commit("author-1", metadataV1);
+    realJavers.commit("author-1", metadataV2);
+
+    when(experimentRepository.findById(experimentId)).thenReturn(Optional.of(experiment));
+    delegateToRealJavers(realJavers);
+    when(userRepository.findAllById(any())).thenReturn(List.of());
+
+    List<ExperimentHistoryDto> result =
+      experimentHistoryService.getExperimentHistory(experimentId, "any-user", Role.USER);
+
+    ExperimentHistoryDto archiveEntry = result.stream()
+      .filter(dto -> "ARCHIVE".equals(dto.commitType()))
+      .findFirst()
+      .orElseThrow(() -> new AssertionError("Expected an ARCHIVE entry"));
+
+    // archivedAt is an IGNORED_PROPERTIES entry: it drives the commit type but must not appear in the diff map.
+    assertFalse(archiveEntry.changes().containsKey("archivedAt"));
+  }
+
+  @Test
+  void getExperimentHistory_whenArchivedAtGoesFromSetToNull_producesRestoreCommitType() {
+    UUID experimentId = randomUUID();
+    UUID metadataId = randomUUID();
+    Metadata metadataV1 = Metadata.builder().id(metadataId).archivedAt(Instant.now()).build();
+    Metadata metadataV2 = Metadata.builder().id(metadataId).archivedAt(null).build();
+    Experiment experiment = experimentWithMetadata(experimentId, metadataV2);
+
+    Javers realJavers = JaversBuilder.javers().build();
+    realJavers.commit("author-1", metadataV1);
+    realJavers.commit("author-1", metadataV2);
+
+    when(experimentRepository.findById(experimentId)).thenReturn(Optional.of(experiment));
+    delegateToRealJavers(realJavers);
+    when(userRepository.findAllById(any())).thenReturn(List.of());
+
+    List<ExperimentHistoryDto> result =
+      experimentHistoryService.getExperimentHistory(experimentId, "any-user", Role.USER);
+
+    boolean hasRestoreEntry = result.stream().anyMatch(dto -> "RESTORE".equals(dto.commitType()));
+    assertTrue(hasRestoreEntry, "Expected a RESTORE commit type when archivedAt transitions from set to null");
+  }
+
+  @Test
+  void getExperimentHistory_withIgnoredNonArchivedAtProperty_isExcludedFromDiffMap() {
+    UUID experimentId = randomUUID();
+    User creator = User.builder().id("creator-1").build();
+    ExperimentResult resultV1 = ExperimentResult.builder()
+      .id(randomUUID()).rateConstant(1.0).errorValue(0.1).isErrorPercentage(false).build();
+    ExperimentResult resultV2 = ExperimentResult.builder()
+      .id(randomUUID()).rateConstant(2.0).errorValue(0.2).isErrorPercentage(false).build();
+
+    Experiment experimentV1 = Experiment.builder()
+      .id(experimentId).createdBy(creator).result(resultV1).build();
+    Experiment experimentV2 = Experiment.builder()
+      .id(experimentId).createdBy(creator).result(resultV2).build();
+
+    Javers realJavers = JaversBuilder.javers().build();
+    realJavers.commit("author-1", experimentV1);
+    realJavers.commit("author-1", experimentV2);
+
+    when(experimentRepository.findById(experimentId)).thenReturn(Optional.of(experimentV2));
+    delegateToRealJavers(realJavers);
+    when(userRepository.findAllById(any())).thenReturn(List.of());
+
+    List<ExperimentHistoryDto> result =
+      experimentHistoryService.getExperimentHistory(experimentId, "creator-1", Role.USER);
+
+    boolean anyChangeMapContainsResultKey = result.stream()
+      .flatMap(dto -> dto.changes().keySet().stream())
+      .anyMatch(key -> key.equals("result"));
+
+    assertFalse(anyChangeMapContainsResultKey,
+      "\"result\" is an IGNORED_PROPERTIES entry and must never appear in the diff map");
+  }
+
+  private void delegateToRealJavers(Javers realJavers) {
+    when(javers.findChanges(any())).thenAnswer(invocation -> realJavers.findChanges(invocation.getArgument(0)));
+  }
+
+  private Experiment experimentWithMetadata(UUID experimentId, Metadata metadata) {
+    User creator = User.builder().id("creator-1").build();
+    return Experiment.builder()
+      .id(experimentId)
+      .createdBy(creator)
+      .metadata(metadata)
+      .build();
   }
 
   private Changes emptyChanges() {

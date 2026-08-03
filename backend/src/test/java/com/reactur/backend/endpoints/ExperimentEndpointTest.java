@@ -539,6 +539,16 @@ class ExperimentEndpointTest {
     Mockito.verify(experimentService, Mockito.never()).searchExperiments(any(), any(), any(), any());
   }
 
+  @Test
+  void anyEndpoint_whenUnauthenticated_returns401() throws Exception {
+    // Mirrors StructureEndpointTest/ChemicalTypeEndpointTest's pattern: a plain request with no
+    // JWT at all must be rejected by SecurityConfig before it ever reaches the controller.
+    UUID experimentId = UUID.randomUUID();
+
+    mockMvc.perform(get("/api/experiment/" + experimentId))
+      .andExpect(status().isUnauthorized());
+  }
+
   private SaveExperimentDto createDummySaveExperimentDto() {
     SaveMetadataDto metadata = new SaveMetadataDto(
       LocalDate.now(), "scientist-id", 25.0, UUID.randomUUID(), 1.0, 1.0, null, null, null, null

@@ -5,6 +5,7 @@ import com.reactur.backend.dtos.experiments.GetExperimentDto;
 import com.reactur.backend.entities.Reactant;
 import com.reactur.backend.entities.User;
 import com.reactur.backend.entities.experiment.Experiment;
+import com.reactur.backend.entities.experiment.ExperimentAttachment;
 import com.reactur.backend.entities.experiment.ExperimentResult;
 import com.reactur.backend.entities.experiment.Metadata;
 import com.reactur.backend.entities.options.Instrument;
@@ -24,6 +25,7 @@ import java.util.List;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class ExperimentMapperTest {
@@ -110,5 +112,34 @@ class ExperimentMapperTest {
         assertTrue(dto.attachments().isEmpty());
         assertEquals(experiment.getResult().getRateConstant(), dto.measurementData().rateConstant());
         assertEquals(experiment.getReactantA().getId(), dto.reactantA().uuid());
+    }
+
+    @Test
+    void experimentToGetExperimentDto_withExplicitAttachments_shouldMapNullResultAndMetadata_toNull() {
+        experiment.setResult(null);
+        experiment.setMetadata(null);
+
+        GetExperimentDto dto = mapper.experimentToGetExperimentDto(experiment, List.of());
+
+        assertNull(dto.measurementData());
+        assertNull(dto.metadata());
+    }
+
+    @Test
+    void experimentToGetExperimentDto_singleArgOverload_shouldDeriveNonEmptyAttachmentsFromFiles() {
+        ExperimentAttachment attachment = ExperimentAttachment.builder()
+                .id(UUID.randomUUID())
+                .fileName("data.csv")
+                .fileType("text/csv")
+                .fileSizeBytes(456L)
+                .build();
+        experiment.setFiles(List.of(attachment));
+
+        GetExperimentDto dto = mapper.experimentToGetExperimentDto(experiment);
+
+        assertEquals(1, dto.attachments().size());
+        assertEquals(attachment.getFileName(), dto.attachments().get(0).fileName());
+        assertEquals(attachment.getFileType(), dto.attachments().get(0).fileType());
+        assertEquals(attachment.getFileSizeBytes(), dto.attachments().get(0).fileSizeBytes());
     }
 }

@@ -125,6 +125,21 @@ class UserEndpointTest {
     }
 
     @Test
+    void setRole_WhenRoleMissing_ShouldReturn400BadRequest() throws Exception {
+        // Validation Test: role is @NotNull on RoleDto but is missing/null here.
+        String id = "some-id-lol";
+        RoleDto invalidDto = new RoleDto(null);
+
+        mockMvc.perform(post("/api/users/" + id)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(invalidDto))
+                        .with(jwt().authorities(new SimpleGrantedAuthority("ROLE_ADMIN"))))
+                .andExpect(status().isBadRequest());
+
+        verify(userService, never()).setRole(any(), any());
+    }
+
+    @Test
     void getRole_ShouldReturn200AndRole_WhenUserExists() throws Exception {
         String id = "some-id-lol";
         RoleDto mockResponse = new RoleDto(Role.SUPERVISOR);
@@ -255,5 +270,13 @@ class UserEndpointTest {
                 .andExpect(status().isForbidden());
 
         verify(userService, never()).restoreUser(any());
+    }
+
+    @Test
+    void anyEndpoint_whenUnauthenticated_returns401() throws Exception {
+        // Mirrors StructureEndpointTest/ChemicalTypeEndpointTest's pattern: a plain request with no
+        // JWT at all must be rejected by SecurityConfig before it ever reaches the controller.
+        mockMvc.perform(get("/api/users"))
+                .andExpect(status().isUnauthorized());
     }
 }
