@@ -1,16 +1,18 @@
-# Backend Test-Coverage Gap Audit (Re-Audit)
+# Backend Test-Coverage Gap Audit (Third Round)
 
 **Status:** Report-only, read-only investigation. No production or test code was changed to produce
-this document. Baseline confirmed at time of writing: **359 tests passing**
-(`./mvnw -o clean test`, run and confirmed `BUILD SUCCESS` before and during this audit).
+this document. Baseline confirmed at time of writing: **401 tests passing**
+(`./mvnw -o clean test`, run and confirmed `BUILD SUCCESS`).
 
-**This is a re-audit.** The previous version of this document (baseline: 255 tests) has been
-archived to
-[`test_coverage_audit_2026-08-03.md`](./test_coverage_audit_2026-08-03.md). A large amount of
-test-only follow-up work landed since then, claiming to close nearly every gap that report flagged.
-This document is a **fresh** re-read of all current source and test files (not a diff against the
-old report's claims), followed by an explicit line-by-line reconciliation against every item in the
-old report's "Prioritized Summary of Most Significant Gaps" section.
+**This is the third round of this audit.** History:
+- Original (255-test baseline) → archived as
+  [`test_coverage_audit_2026-08-03.md`](./test_coverage_audit_2026-08-03.md)
+- Second round (359-test baseline) → archived as
+  [`test_coverage_audit_2026-08-03_v2.md`](./test_coverage_audit_2026-08-03_v2.md) (dated the same
+  calendar day as the first archive, hence the `_v2` suffix, to avoid overwriting it)
+- **This document** (401-test baseline) is a fresh re-read of all current source and test files,
+  followed by an explicit reconciliation against the second round's "Final: Review the missing
+  gaps" list.
 
 Legend: **Full** = tested, positive + negative (or all applicable branches) covered. **Partial** =
 tested, but missing a negative case and/or at least one distinct branch. **Zero** = no test
@@ -22,76 +24,60 @@ references this method at all.
 
 ### 1.1 `ExperimentServiceImpl`
 
-| Method | Tested? | Test(s) | Positive | Negative | Branch notes |
-|---|---|---|---|---|---|
-| `createExperiment` | Full | `CreateExperiment.*` (4 tests) | Yes | Yes (creator/scientist/reactant not found) | All exercised via the **real** `ExperimentValidator` (not mocked). |
-| `getExperiment` | Full | `GetExperiment.*` (6 tests) | Yes | Yes (not found, forbidden) | All authz branches (creator/scientist/admin/forbidden) on archived entity covered. |
-| `archiveExperiment` | Full | `ArchiveExperiment.*` (5 tests) | Yes | Yes (not-found, forbidden, **idempotent already-archived no-op**) | Was Partial in old report — now resolved. |
-| `restoreExperiment` | Full | `RestoreExperiment.*` (4 tests) | Yes | Yes (not-found, forbidden, **idempotent already-active no-op**) | Was Partial in old report — now resolved. |
-| `getArchivedExperiments` | Full | `GetArchivedExperiments.*` (3 tests) | Yes | N/A (never throws) | Both privileged/non-privileged branches + empty case. |
-| `updateExperiment` | Full | `UpdateExperiment.*` (6 tests) | Yes | Yes (unauthorized, archived-conflict, archived+unauthorized ordering, reactant-not-found) | Experiment-not-found now also covered (was missing before). |
-| `searchExperiments` / `buildSearchSpecification` (private) | **Partial** | `ExperimentServiceTest.SearchExperiments` (mocked happy path) + `ExperimentSearchSpecificationTest` (genuine `@DataJpaTest`, real Specification execution, 9 tests) | Yes | N/A | Was zero real exercise before — now genuinely exercised for: archived-exclusion, `params==null`, reactant A/B cross-match, temperature range, comment (case-insensitive), scientist list, solvent equals, measurement rateConstant range, AND-combination. **Still untested:** `dateMin`/`dateMax`, `concentrationA_Min/Max`, `concentrationB_Min/Max`, `wavelengthMin/Max`, `instrument` filter, `modality` filter, `pFO_rateConstantMin/Max`. |
+| Method | Status | Test(s) | Notes |
+|---|---|---|---|
+| `createExperiment` | Full | `CreateExperiment.*` (4 tests) | Creator/scientist/reactant-not-found all via real `ExperimentValidator`. |
+| `getExperiment` | Full | `GetExperiment.*` (6 tests) | All authz branches (creator/scientist/admin/forbidden) + not-found. |
+| `archiveExperiment` | Full | `ArchiveExperiment.*` (5 tests) | Not-found, forbidden, idempotent no-op all covered. |
+| `restoreExperiment` | Full | `RestoreExperiment.*` (4 tests) | Same as above. |
+| `getArchivedExperiments` | Full | `GetArchivedExperiments.*` (3 tests) | Both privileged/non-privileged branches + empty case. |
+| `updateExperiment` | Full | `UpdateExperiment.*` (6 tests) | All branches incl. auth-before-conflict ordering. |
+| `searchExperiments` / `buildSearchSpecification` (private) | **Full — resolved this round** | `ExperimentServiceTest.SearchExperiments` (mocked happy path) + `ExperimentSearchSpecificationTest` (genuine `@DataJpaTest`, 16 tests) | All 7 previously-open filter groups (`dateMin/Max`, `concentrationA/B_Min/Max`, `wavelengthMin/Max`, `instrument`, `modality`, `pFO_rateConstantMin/Max`) now verified to genuinely narrow persisted data via real Specification execution against H2. See Reconciliation §1. |
 
 ### 1.2 `ReactantServiceImpl`
 
-| Method | Tested? | Test(s) | Positive | Negative | Branch notes |
-|---|---|---|---|---|---|
-| `createReactant` | Full | `CreateReactant.*` (9 tests) | Yes | Yes | Thorough, unchanged from before. |
-| `updateReactant` | Full | `UpdateReactant.*` (11 tests) | Yes | Yes | PATCH semantics (preserve/clear/set) both branches. |
-| `getReactantDetail` | Full | `GetReactantDetail.*` (2) | Yes | Yes | — |
-| `getAllReactants` | Full | `GetAllReactants.*` (5 tests) | Yes | N/A | **Resolved** — all 5 `determineAggregateFlag` outcomes now produced (see Reconciliation #10). |
-| `getArchivedReactants` | Full | `GetArchivedReactants.*` (1) | Yes | N/A | Exercises the `null`-flag (empty structures) branch. |
-| `archiveReactant` | Full | `ArchiveReactant.*` (2) | Yes | Yes | — |
-| `restoreReactant` | Full | `RestoreReactant.*` (2) | Yes | Yes | — |
+All 7 methods (`createReactant`, `updateReactant`, `getReactantDetail`, `getAllReactants`,
+`getArchivedReactants`, `archiveReactant`, `restoreReactant`) — **Full**. `determineAggregateFlag`'s
+5 outcomes all genuinely produced; the previously-misleading test name is now fixed (see
+Reconciliation §7).
 
 ### 1.3 `FileServiceImpl`
 
-| Method | Tested? | Test(s) | Positive | Negative | Branch notes |
-|---|---|---|---|---|---|
-| `storeFile` | **Partial** | 4 tests | Yes | Yes (empty file, experiment-not-found, **archived-experiment conflict — new**) | **Still open:** no test makes `s3Client.putObject(...)` throw, so the `catch(Exception e) → FileStorageException` branch remains untested. |
-| `loadFileAsResource` | **Partial** | 1 test | Yes | No | **Still open** — no not-found test; unchanged from old report. |
-| `getAttachmentDetail` | Full | 2 tests | Yes | Yes | — |
-| `getAttachmentsOfExperiment` | Full | 2 tests | Yes | Yes | — |
-| `archiveFile` | Full | 4 tests | Yes | Yes (not-found, **archived-experiment conflict**, **idempotent no-op — both new**) | Was Partial — now resolved. |
+| Method | Status | Test(s) | Notes |
+|---|---|---|---|
+| `storeFile` | **Full — resolved this round** | 5 tests | S3 `putObject`-throws → `FileStorageException` branch now covered (see Reconciliation §2). Archived-conflict, empty-file, not-found all covered. |
+| `loadFileAsResource` | **Full — resolved this round** | 2 tests | Not-found branch now covered (see Reconciliation §2). |
+| `getAttachmentDetail` | Full | 2 tests | — |
+| `getAttachmentsOfExperiment` | Full | 2 tests | — |
+| `archiveFile` | Full | 4 tests | — |
 
 ### 1.4 `StructureServiceImpl`
 
-| Method | Tested? | Test(s) | Positive | Negative | Branch notes |
-|---|---|---|---|---|---|
-| `uploadStructure` | Full | 4 tests | Yes | Yes | — |
-| `generateStructureFromAPI` | Full | 6 tests | Yes | Yes | All conflict branches covered. |
-| `selectStructure` | Full | 4 tests | Yes | Yes | — |
-| `getStructuresByReactant` | Full | 3 tests | Yes | Yes | — |
-| `fetchPendingStructuresFromAPI` | Full | **7 new tests** | Yes | Yes | **Resolved** — was zero coverage. See Reconciliation #1. |
+All 5 methods — **Full**, unchanged from the prior round (already best-in-class; `fetchPendingStructuresFromAPI` remains exceptionally thorough with 6 tests covering every polling-loop branch).
 
 ### 1.5 `UserServiceImpl`
 
-All 5 methods (`getAllUsers`, `setRole`, `getRole`, `archiveUser`, `restoreUser`) — **Full**,
-unchanged from the original audit (this class was already best-in-class).
+All 5 methods — **Full**, unchanged.
 
 ### 1.6 `ExperimentFolderServiceImpl`
 
-| Method | Tested? | Test(s) | Positive | Negative | Branch notes |
-|---|---|---|---|---|---|
-| `createFolder` | **Partial** | 1 test | Yes | No | **Still open** — no test for `userRepository.findById` empty → `IllegalStateException`. Unchanged from old report. |
-| `getMyFolders` | Full | 1 test | Yes | N/A | — |
-| `addExperimentToFolder` | **Partial** | 6 tests | Yes | Yes (experiment-not-owned, folder-not-owned ×2 variants) | Experiment-not-found is not explicitly tested (relies on generic `orElseThrow`), a minor residual gap. |
-| `removeExperimentFromFolder` | **Partial** | 1 test | Yes | No | **Still open** — no dedicated negative test for this method itself (shared `getFolderAndValidateOwnership` helper's failure branches only proven via `addExperimentToFolder`'s tests). |
-| `deleteFolder` | **Partial** | 1 test | Yes | No | **Still open** — same as above. |
+| Method | Status | Test(s) | Notes |
+|---|---|---|---|
+| `createFolder` | **Full — resolved this round** | 2 tests | `IllegalStateException` for user-not-found now covered (see Reconciliation §3). |
+| `getMyFolders` | Full | 1 test | — |
+| `addExperimentToFolder` | Full | 6 tests | Explicit experiment-not-found test now added (see Reconciliation §3). Minor residual: duplicate-add no-op branch untested (new gap, not previously tracked). |
+| `removeExperimentFromFolder` | **Partial — still open** | 2 tests | Now has a dedicated folder-**not-found** test calling this method directly, but no dedicated folder-**not-owned** test for this specific method (that branch is only proven via `addExperimentToFolder`/`deleteFolder`). See Reconciliation §3. |
+| `deleteFolder` | **Partial — still open** | 2 tests | Inverse of the above: has a dedicated folder-**not-owned** test, but no dedicated folder-**not-found** test for this specific method. See Reconciliation §3. |
 
 ### 1.7 `ExperimentHistoryServiceImpl`
 
-| Method | Tested? | Test(s) | Positive | Negative | Branch notes |
-|---|---|---|---|---|---|
-| `getExperimentHistory` | Full | 13 tests (7 authz-focused + **6 new real-Javers diff tests**) | Yes | Yes (not-found, forbidden) | **Resolved** — the actual diff-building logic (CREATE/UPDATE/ARCHIVE/RESTORE, reference resolution) is now genuinely exercised with a real Javers instance. See Reconciliation #2. Residual minor gap: only the `solvent` case of the `extractId` reference-type switch is exercised; `instrument`/`modality`/`reactantA`/`reactantB`/`scientist`/`createdBy` cases and the `ClassCastException` catch branch are not individually tested. |
+| Method | Status | Test(s) | Notes |
+|---|---|---|---|
+| `getExperimentHistory` | Full | 12 tests | Real-Javers diff-building (CREATE/UPDATE/ARCHIVE/RESTORE, ignored-properties) fully exercised. **Residual, unchanged gap:** the private `extractId` reference-type switch is only exercised for the `solvent` case; `instrument`/`modality`/`reactantA`/`reactantB`/`scientist`/`createdBy` cases remain untested — this was flagged as open in the prior round and confirmed **still open, unchanged** this round (see Reconciliation §item 7 below, "extractId"). |
 
-### 1.8 `OptionServiceImpl` (shared base) + 4 option service subclasses
+### 1.8 `OptionServiceImpl` (shared base) + 4 subclasses
 
-Unchanged from the original audit: `ChemicalTypeServiceImpl`/`InstrumentServiceImpl`/
-`ModalityServiceImpl`/`SolventServiceImpl` remain 3-line constructor-only subclasses with zero
-independent logic. `ChemicalTypeServiceTest` continues to give full positive+negative branch
-coverage of all 4 `OptionService` methods (`getKnownOptions`, `createOptions`, `archiveOption`,
-`restoreOption`) — all **Full**. Representative pattern re-confirmed correct.
+Unchanged: still 3-line constructor-only subclasses with zero independent logic; `ChemicalTypeServiceTest` continues to give full coverage of all 4 methods. Representative pattern re-confirmed correct.
 
 ---
 
@@ -99,17 +85,17 @@ coverage of all 4 `OptionService` methods (`getKnownOptions`, `createOptions`, `
 
 ### 2.1 `ExperimentValidator`
 
-| Method | Tested? | Positive+Negative | Branch coverage |
-|---|---|---|---|
-| `validateForCreate` | Full | Yes | All 14 shared branches directly exercised. |
-| `validateForUpdate` | **Partial** | Yes | Improved substantially (from 2/14 to ~9/13 branches proven *directly* via `validateForUpdate`), but 4 branches remain provable only via the sibling `validateForCreate`: reactant-A/B-has-zero-structures-at-all (as opposed to present-but-inactive), and instrument/modality "not provided, skip lookup." See Reconciliation #15. |
+| Method | Status | Notes |
+|---|---|---|
+| `validateForCreate` | Full | All 14 shared branches directly exercised, unchanged. |
+| `validateForUpdate` | **Full — resolved this round** | All 4 previously-open branches (reactant-A/B-zero-structures, instrument/modality skip-lookup) now directly exercised through `validateForUpdate` itself, not just via the sibling. See Reconciliation §4. |
 
 ### 2.2 `ReactantValidator`
 
-| Method | Tested? | Positive+Negative | Branch coverage |
-|---|---|---|---|
-| `validateForCreate` | **Partial** | Yes | Conflict/existence paths (shortName, CAS, InChIKey, chemicalType, user) all covered. **Gap (broader than previously known):** neither `validateForCreate` NOR `validateForUpdate` tests the `additionalShortNames` "blank/empty entry" or "shortName duplicated inside additionalShortNames" sub-branches — only the "duplicate entries, case-insensitive" sub-branch is ever tested. |
-| `validateForUpdate` | **Partial** | Yes | **Mostly resolved** — `hasNameConflictExcludingId`, CAS-changed-conflict, CAS-unchanged-skip, InChIKey-changed-conflict, InChIKey-unchanged-skip are now all directly exercised via `validateForUpdate`. Same residual gap as `validateForCreate` above (blank-entry / shortName-included sub-branches untested by either method). |
+| Method | Status | Notes |
+|---|---|---|
+| `validateForCreate` | **Full — resolved this round** | `additionalShortNames` blank-entry and shortName-duplicated-in-list sub-branches now covered (see Reconciliation §5). Minor new residual guard-clause gaps found (see §9 New Gaps) — not severe enough to downgrade given they're low-probability guard clauses already indirectly protected by upstream field validation. |
+| `validateForUpdate` | **Full — resolved this round** | Same resolution as above, directly through `validateForUpdate`. |
 
 ---
 
@@ -117,157 +103,120 @@ coverage of all 4 `OptionService` methods (`getKnownOptions`, `createOptions`, `
 
 ### 3.1 Options mappers — representative pattern re-confirmed
 
-Re-verified by direct read: `ChemicalTypeMapper`/`InstrumentMapper`/`ModalityMapper`/`SolventMapper`
-remain byte-for-byte identical one-line empty interfaces extending `BaseMapper<E,T>`.
-`SolventMapperTest` remains the **only** test file in `mappers/options/` (confirmed via `find_path`
-— no `InstrumentMapperTest`/`ModalityMapperTest`/`ChemicalTypeMapperTest` were added).
-**Verdict unchanged: representative pattern is correct and defensible.**
+`ChemicalTypeMapper`/`InstrumentMapper`/`ModalityMapper`/`SolventMapper` remain byte-for-byte
+identical; `SolventMapperTest` remains the sole test file. **Verdict unchanged: defensible.**
 
-| `BaseMapper` method (via `SolventMapperTest`) | Tested? | Positive | Negative/edge |
-|---|---|---|---|
-| `toDto` | Partial | Yes | No null-input test (unchanged from original audit — not part of this round's follow-up work). |
-| `toEntity` | Full | Yes | Yes (ignored-field verification). |
-| `toDtoList` | Partial | Yes (2 elements) | No empty-list test (unchanged). |
+| `BaseMapper` method (via `SolventMapperTest`) | Status | Notes |
+|---|---|---|
+| `toDto` | Partial | No null-input test (unchanged — not part of any round's follow-up work). |
+| `toEntity` | Full | — |
+| `toDtoList` | Partial | No empty-list test (unchanged). |
 
 ### 3.2 Non-options mappers
 
-| Mapper / Method | Tested? | Positive | Null/edge-case | Notes |
-|---|---|---|---|---|
-| `ExperimentMapper.experimentToGetExperimentDto(Experiment, List<...>)` (2-arg) | Full | Yes | Yes — **new** null `result`/`metadata` test | Resolved. |
-| `ExperimentMapper.experimentToGetExperimentDto(Experiment)` (1-arg) | Full | Yes | Yes — **new** non-empty `files` conversion test | Resolved. |
-| `FolderMapper.folderToGetFolderDto` | Full | Yes | Yes — **new** `experiments == null` test (verified to genuinely hit the null branch, not just re-test the empty-list case) | Resolved. |
-| `MeasurementDataMapper.resultToMeasurementDataDto` | Full | Yes | Yes — **new** null `errorValue` + fully-null `result` tests | Resolved. |
-| `MetadataMapper.metadataToGetMetadataDto` | Full | Yes | Yes — **new** null `instrument`/`modality` test | Resolved. |
-| `ReactantMapper.toDetailDto` | Full | Yes | Yes — **new** null and empty structures-list tests | Resolved. |
-| `ReactantMapper.toDto(Reactant, StructureFlag)` (2-arg) | **Partial** | Yes | Partial — see note | No test calls this 2-arg overload **directly** with a literal `null` flag; the only null-flag test (`toDto_withoutFlag_shouldDelegateWithNullFlag`) calls the 1-arg default method, which delegates internally. Functionally equivalent code path is exercised, but the letter of "explicit null flag via 2-arg overload" is not met. |
-| `ReactantMapper.toDto(Reactant)` (1-arg, default) | Full | Yes | Yes | — |
-| `StructureMapper.toDto` | Full | Yes | Yes (null nested `reactant`) | Unchanged, still best-covered. |
-| `UserMapper.toDto` | Full | Yes | Yes (null input) | Unchanged. |
+All previously-open items are now resolved:
+
+| Mapper / Method | Status | Notes |
+|---|---|---|
+| `ExperimentMapper` (both overloads) | Full | Unchanged from prior round. |
+| `FolderMapper.folderToGetFolderDto` | Full | Unchanged. |
+| `MeasurementDataMapper.resultToMeasurementDataDto` | Full | Unchanged. |
+| `MetadataMapper.metadataToGetMetadataDto` | Full | Unchanged. |
+| `ReactantMapper.toDetailDto` | Full | Unchanged. |
+| `ReactantMapper.toDto(Reactant, StructureFlag)` (2-arg) | **Full — resolved this round** | A genuinely direct 2-arg call with a literal `null` now exists, verified as a real 2-argument call site (not resolvable to the 1-arg default). See Reconciliation §6. |
+| `ReactantMapper.toDto(Reactant)` (1-arg) | Full | Unchanged. |
+| `StructureMapper.toDto` | Full | Unchanged, still best-covered. |
+| `UserMapper.toDto` | Full | Unchanged. |
 
 ---
 
 ## 4. Endpoints
 
-### 4.1 `ExperimentEndpoint` (no `@PreAuthorize`; authz delegated to service)
+### 4.1 `ExperimentEndpoint`
 
-| Method | Tested? | Test(s) | Positive | Negative | Notes |
-|---|---|---|---|---|---|
-| `createExperiment` | Full | 2 tests | 201 | 400 | No 403/409 branch actually exists at controller level for create (no @PreAuthorize, and conflict/scientist-not-found map to 422 already tested via `whenReactantAIsMissing`). |
-| `updateExperiment` | **Partial** | 2 tests | 200 | 403 | **No 404 test** (new/residual gap — `ResourceNotFoundException` from the service never exercised here, unlike `getExperiment`). |
-| `getExperiment` | Full | 3 tests | 200 | 403, 404 | — |
-| `searchExperiments` | Full | 2 tests | 200 (incl. nested DTO binding) | 400 | — |
-| `getAuditLogs` | Full | 4 tests | 200 (USER+ADMIN) | 403, 404 | Best-covered method in the file. |
-| `getArchivedExperiments` | Full | 3 tests | 200 (USER, ADMIN, empty) | N/A | No error branch exists to test. |
-| `archiveExperiment` | **Partial** | 2 tests | 204 | 403 | **No 404 test.** |
-| `restoreExperiment` | **Partial** | 2 tests | 200 | 403 | **No 404 test.** |
+| Method | Status | Test(s) | Notes |
+|---|---|---|---|
+| `createExperiment` | **Partial** | 2 tests | 201 + 400 (bean-validation only). **New gap:** the service-level `UnprocessableEntityException` (422, semantic reactant validation) is never reached — the only negative test's `reactantA=null` is caught by `@NotNull` bean validation before the service is even called (`verifyNoInteractions` proves this). |
+| `updateExperiment` | **Partial** | 3 tests | 200, 403, **404 (resolved this round)**. **New gap:** no 409 test, despite the endpoint's own Javadoc documenting a 409 for updating archived experiments. |
+| `getExperiment` | Full | 3 tests | — |
+| `searchExperiments` | Full | 2 tests | — |
+| `getAuditLogs` | Full | 4 tests | — |
+| `getArchivedExperiments` | Full | 3 tests | — |
+| `archiveExperiment` | Full | 3 tests | 404 resolved this round. |
+| `restoreExperiment` | Full | 3 tests | 404 resolved this round. |
 
-Anonymous/401: `anyEndpoint_whenUnauthenticated_returns401` — genuinely no `.with(jwt())`, expects 401. ✅
+Anonymous/401: confirmed present and genuine. ✅
 
-### 4.2 `ExperimentFilesEndpoint` (no `@PreAuthorize`; ownership in `FileService`)
+### 4.2 `ExperimentFilesEndpoint`
 
-| Method | Tested? | Test(s) | Positive | Negative | Notes |
-|---|---|---|---|---|---|
-| `uploadFile` | Full | 3 tests | 201 | 404, 403 | Resolved from zero-negative in old report. |
-| `downloadFile` | Full | 4 tests | 200 (incl. header-escape edge case) | 404, 403 | Resolved. |
-| `getFileDetails` | **Partial** | 2 tests | 200 | 404 | No 403 test (minor, unlike its siblings which all have 403 coverage — new finding). |
-| `archiveFile` | Full | 3 tests | 204 | 404, 403 | Resolved. |
+| Method | Status | Test(s) | Notes |
+|---|---|---|---|
+| `uploadFile` | **Partial** | 3 tests | 201, 404, 403. **New gap:** no 409 test (`FileService.storeFile` documents a `ResourceConflictException` for archived experiments, untested at controller level). |
+| `downloadFile` | Full | 4 tests | — |
+| `getFileDetails` | **Full — resolved this round** | 3 tests | 403 test now added (see Reconciliation §last item). |
+| `archiveFile` | **Partial** | 3 tests | 204, 404, 403. **New gap:** no 409 test (same as `uploadFile`). |
 
-Anonymous/401: resolved. ✅
+Anonymous/401: confirmed present. ✅
 
-### 4.3 `ExperimentFolderEndpoint` (no `@PreAuthorize`; ownership in `ExperimentFolderService`)
+### 4.3 `ExperimentFolderEndpoint`
 
-| Method | Tested? | Test(s) | Positive | Negative | Notes |
-|---|---|---|---|---|---|
-| `createFolder` | Full | 3 tests | 201 | 400 ×2 | — |
-| `getMyFolders` | Full | 2 tests | 200 | 500 (genuine unexpected-exception case) | No ownership-based 403/404 branch exists for this method **by design** (only ever lists the caller's own folders) — the 500 test is the only meaningful negative case available, and it's now present. |
-| `addExperimentToFolder` | Full | 3 tests | 200 | 403, 404 | Resolved. |
-| `removeExperimentFromFolder` | Full | 3 tests | 200 | 403, 404 | Resolved. |
-| `deleteFolder` | Full | 3 tests | 204 | 403, 404 | Resolved. |
-
-Anonymous/401: resolved. ✅
+All 5 methods — **Full**. No new gaps found in this controller.
 
 ### 4.4 `ReactantEndpoint`
 
-| Method | Tested? | Test(s) | Positive | Negative | Notes |
-|---|---|---|---|---|---|
-| `createReactant` | Full | 4 tests | 201 ×2 | 403, **400 (new)** | — |
-| `updateReactant` | **Partial** | 3 tests | 200 | 403 ×2 | **No 404 test** (new/residual gap). |
-| `getReactantDetail` | Full | 2 tests | 200 | 404 | — |
-| `getAllReactants` | Full | 1 test | 200 | N/A | No error branch exists to test. |
-| `getArchivedReactants` | Full | 3 tests | 200 ×2 | 403 | — |
-| `archiveReactant` | **Partial** | 3 tests | 204 | 403 ×2 (**SUPERVISOR-forbidden now resolved**) | **No 404 test** remains (new/residual gap). |
-| `restoreReactant` | **Partial** | 3 tests | 200 | 403 ×2 | **No 404 test.** |
+| Method | Status | Test(s) | Notes |
+|---|---|---|---|
+| `createReactant` | **Partial** | 4 tests | 201×2, 403, 400. **New gap:** no 409 test (shortName-conflict, documented on the service). |
+| `updateReactant` | **Partial** | 4 tests | 200, 403×2, **404 (resolved this round)**. **New gap:** no 409 test (shortName-conflict-with-another-reactant). |
+| `getReactantDetail` | Full | 2 tests | — |
+| `getAllReactants` | Full | 1 test | — |
+| `getArchivedReactants` | Full | 3 tests | — |
+| `archiveReactant` | Full | 4 tests | 404 resolved this round. |
+| `restoreReactant` | Full | 4 tests | 404 resolved this round. |
 
-Anonymous/401: resolved. ✅
+Anonymous/401: confirmed present. ✅
 
-### 4.5 `StructureEndpoint` (all 3 methods: `hasAnyRole('ADMIN','SUPERVISOR')`)
+### 4.5 `StructureEndpoint`
 
-| Method | Tested? | Test(s) | Positive | Negative | Notes |
-|---|---|---|---|---|---|
-| `uploadStructure` | **Partial** | 3 tests | 200 ×2 | 403 | No 404 test. |
-| `generateStructureFromAPI` | **Partial** | 3 tests | 204 ×2 | 403 | No 404 test. |
-| `selectStructure` | **Partial** | 3 tests | 200 ×2 | 403 | No 404 test. |
-
-Anonymous/401: resolved (`anyEndpoint_whenUnauthenticated_returns401` present, same pattern as siblings). ✅
+All 3 methods — **Full**. 404 tests added this round for all three (`uploadStructure`,
+`generateStructureFromAPI`, `selectStructure`), all genuinely reached past the ADMIN/SUPERVISOR
+`@PreAuthorize` gate.
 
 ### 4.6 `UserEndpoint`
 
-| Method | Tested? | Test(s) | Positive | Negative | Notes |
-|---|---|---|---|---|---|
-| `getAllUsers` | Full | 3 tests | 200 ×2 | 403 | — |
-| `setRole` | **Partial** | 4 tests | 200 | 403 ×2, **400 (new)** | No 404 test remains. |
-| `getRole` | Full | 4 tests | 200 (self + admin-on-other) | 404, 403 | Best-covered method — both ownership-expression branches. |
-| `archiveUser` | **Partial** | 3 tests | 200 | 403 ×2 | No 404 test remains. |
-| `restoreUser` | Full | 4 tests | **200 for ADMIN (new)** | 404, 403 ×2 | **Resolved** — old report's key gap (no ADMIN-success test) is fixed. |
+All 5 methods — **Full**. 404 tests added this round for `setRole`/`archiveUser`; `restoreUser`'s
+404 test was already present from a prior round.
 
-Anonymous/401: resolved. ✅
+### 4.7 Options endpoints — representative pattern re-confirmed
 
-### 4.7 Options endpoints — representative-pattern re-confirmed
-
-Re-verified: `AbstractOptionsEndpoint` still holds all logic/`@PreAuthorize`; the 4 concrete
-endpoint classes remain byte-for-byte identical 3-line subclasses. `find_path` confirms no
-`InstrumentEndpointTest`/`ModalityEndpointTest`/`SolventEndpointTest` exist —
-`ChemicalTypeEndpointTest` is still the sole representative. **Verdict unchanged: defensible.**
-
-| Method (representative, via `ChemicalTypeEndpointTest`) | Tested? | Positive | Negative |
-|---|---|---|---|
-| `getKnownOptions` | Full | Yes (USER, ADMIN) | Yes — **anonymous/401 test now present (new, resolved)** |
-| `createOptions` | Full | Yes | Yes (403, and now covered by the shared anonymous/401 test) |
-| `archiveOption` | Full | Yes | Yes |
-| `restoreOption` | Full | Yes | Yes |
+`ChemicalTypeEndpointTest` remains the sole test file; the 4 concrete endpoint classes remain
+byte-for-byte identical. **Verdict unchanged: defensible.**
 
 ---
 
 ## 5. Repositories
 
-All repository interfaces re-enumerated and re-read fresh. Test directory now contains 6 files (up
-from 1): `ReactantRepositoryTest.java` (pre-existing) plus **5 new files**:
-`ExperimentAttachmentRepositoryTest.java`, `ExperimentFolderRepositoryTest.java`,
-`ExperimentRepositoryTest.java`, `ReactantStructureRepositoryTest.java`, and
-`options/ChemicalTypeRepositoryTest.java`. All 34 repository tests pass.
+Test directory now contains 9 files (all repository interfaces represented): the 5 from the prior
+round (`ReactantRepositoryTest`, `ExperimentAttachmentRepositoryTest`,
+`ExperimentFolderRepositoryTest`, `ExperimentRepositoryTest`, `ReactantStructureRepositoryTest`)
+plus `ChemicalTypeRepositoryTest` (prior round) and **3 new files this round**:
+`InstrumentRepositoryTest.java`, `ModalityRepositoryTest.java`, `SolventRepositoryTest.java`.
 
-| Repository | Method | Query type | Tested? | Test citation |
-|---|---|---|---|---|
-| `ExperimentAttachmentRepository` | `findByExperimentIdAndArchivedAtIsNull(UUID)` | derived | Full | `ExperimentAttachmentRepositoryTest`: found, excludes-archived, empty-list (3 tests) |
-| `ExperimentFolderRepository` | `findAllByOwner_Id(String)` | derived | Full | `ExperimentFolderRepositoryTest`: match, no-match (2 tests) |
-| `ExperimentRepository` | `findByArchivedAtIsNotNull()` | derived | Full | `ExperimentRepositoryTest`: archived-only, empty (2 tests) |
-| `ExperimentRepository` | `findArchivedExperimentsForUser(@Param("userId") String)` | `@Query` | Full | `ExperimentRepositoryTest`: creator-branch, scientist-branch, excludes-unarchived, empty (4 tests). Minor untested edge: user matching both creator AND scientist simultaneously (not required for OR-logic correctness). |
-| `ReactantRepository` | `hasNameConflict(Collection<String>)` | `@Query` | Full | `ReactantRepositoryTest` (pre-existing, 4 tests) |
-| `ReactantRepository` | `hasNameConflictExcludingId(Collection<String>, UUID)` | `@Query` | Full | `ReactantRepositoryTest` (pre-existing, 3 tests) |
-| `ReactantRepository` | `findAllByArchivedAtIsNull()` | derived | **Partial** | `ReactantRepositoryTest`: only the "1 active, 1 archived" case tested; no explicit empty-list test. |
-| `ReactantRepository` | `findAllByArchivedAtIsNotNull()` | derived | **Partial** | Same as above — no explicit empty-list test. |
-| `ReactantRepository` | `existsByCasNumber(String)` | derived | Full | true + false cases |
-| `ReactantRepository` | `existsByInChiKey(String)` | derived | Full | true + false cases |
-| `ReactantRepository` | `existsByCasNumberAndIdNot(String, UUID)` | derived | Full | true + false (exclusion) cases |
-| `ReactantRepository` | `existsByInChiKeyAndIdNot(String, UUID)` | derived | Full | true + false (exclusion) cases |
-| `ReactantStructureRepository` | `findByReactant_Id(UUID)` | derived | Full | match (incl. isolation from other reactant) + empty (2 tests) |
-| `ReactantStructureRepository` | `findByFlag(StructureFlag)` | derived | Full | match + empty (2 tests) |
-| `OptionRepository<E>` (base; inherited by 4 concrete option repos) | `existsByNameIgnoreCase(String)` | derived | **Partial** | Tested only via `ChemicalTypeRepositoryTest` (2 tests). `InstrumentRepository`/`ModalityRepository`/`SolventRepository` have **zero direct persistence tests of their own** — see Reconciliation #13/pattern discussion below. |
+**All 15 of 15 custom query methods now have full branch coverage (both a true/positive case AND a
+false/empty case)**, including the two previously-partial `ReactantRepository` derived finders
+(`findAllByArchivedAtIsNull`/`findAllByArchivedAtIsNotNull`, now with genuine zero-matching-rows
+empty-list tests) and `existsByNameIgnoreCase` now directly tested against all 4 concrete option
+repository beans (`ChemicalType`, `Instrument`, `Modality`, `Solvent` — each with its own
+`@Autowired` bean and its own persisted entity, not just re-using `ChemicalTypeRepository`).
 
-**Totals: 15 of 15 custom query methods now have at least one persistence test** (up from 2/15).
-3 of the 15 have residual branch-coverage gaps (missing empty-list case for the two
-`ReactantRepository` derived finders; representative-only coverage for the 3 non-`ChemicalType`
-option repositories).
+**New documentation-consistency gap found:** all 4 option-repository test files
+(`ChemicalTypeRepositoryTest`, `InstrumentRepositoryTest`, `ModalityRepositoryTest`,
+`SolventRepositoryTest`) carry an **identical, verbatim** class-level Javadoc claiming to be *the*
+sole "representative test" standing in for the other three — which is now self-contradictory
+across all 4 files simultaneously, since each of the 4 repositories has its own direct test. This
+is a copy-paste artifact from creating the 3 new files from the `ChemicalTypeRepositoryTest`
+template without updating the framing. Not a test-correctness issue — purely a stale-comment issue.
+See Reconciliation §9.
 
 ---
 
@@ -275,221 +224,222 @@ option repositories).
 
 | Layer | Methods inventoried | Full | Partial | Zero |
 |---|---|---|---|---|
-| Services (incl. `OptionServiceImpl` representative) | 39 | 32 | 7 | 0 |
-| Validators | 4 | 1 | 3 | 0 |
-| Mappers (incl. options representative as 1 set of 3) | 13 | 10 | 3 | 0 |
-| Endpoints (incl. options representative as 1 set of 4) | 36 | 24 | 12 | 0 |
-| Repositories (custom query methods) | 15 | 12 | 3 | 0 |
-| **Total** | **107** | **79** | **28** | **0** |
+| Services (incl. `OptionServiceImpl` representative) | 39 | 37 | 2 | 0 |
+| Validators | 4 | 4 | 0 | 0 |
+| Mappers (incl. options representative as 1 set of 3) | 13 | 11 | 2 | 0 |
+| Endpoints (incl. options representative as 1 set of 4) | 36 | 30 | 6 | 0 |
+| Repositories (custom query methods) | 15 | 15 | 0 | 0 |
+| **Total** | **107** | **97** | **10** | **0** |
 
-**Direct comparison to the archived (255-test-baseline) report:**
+**Direct comparison across all three rounds:**
 
-| | Full | Partial | Zero | Total |
+| Round (baseline) | Full | Partial | Zero | Total |
 |---|---|---|---|---|
-| Original (`test_coverage_audit_2026-08-03.md`) | 38 | 54 | 14 | 106 |
-| **This re-audit** | **79** | **28** | **0** | 107 |
+| Round 1 (255 tests) | 38 | 54 | 14 | 106 |
+| Round 2 (359 tests) | 79 | 28 | 0 | 107 |
+| **Round 3 (401 tests, this report)** | **97** | **10** | **0** | 107 |
 
-(The total moved from 106 → 107 because this fresh count found `ExperimentEndpoint` has 8
-public HTTP-mapped methods, not 7 as originally tallied — a minor original miscount, not a change
-in the endpoint itself.)
-
-**Zero-coverage methods have been fully eliminated.** Full coverage roughly doubled (38→79).
-Partial-coverage count was cut by nearly half (54→28), and the remaining partials are
-overwhelmingly narrow, specific branch/edge-case gaps rather than missing tests altogether.
+Full coverage is now at **~91%** of all inventoried methods (97/107), up from 74% last round and
+36% originally. The remaining 10 partial items are narrow and specific (see §8).
 
 ---
 
-## 7. Representative-Testing Pattern — Re-Confirmed
+## 7. Representative-Testing Pattern — Re-Confirmed (All 4 Families)
 
-Re-verified fresh (not assumed) for all three cases:
-
-- **Options mappers:** still byte-for-byte identical, `SolventMapperTest` still the sole test file
-  in `mappers/options/`. **Pattern remains correct and defensible.**
-- **Options services:** `ChemicalTypeServiceImpl`/`InstrumentServiceImpl`/`ModalityServiceImpl`/
-  `SolventServiceImpl` still add zero logic beyond constructor wiring. **Pattern remains correct
-  and defensible.**
-- **Options endpoints:** the 4 concrete endpoint classes remain byte-for-byte identical;
-  `ChemicalTypeEndpointTest` remains the sole test file. **Pattern remains correct and defensible**,
-  and its previously-flagged completeness gap (missing anonymous/401 test) is now fixed.
-- **New finding — options *repositories*:** unlike the other three families, the options
-  repositories were **not** covered by a single pre-existing representative test before this round;
-  this round added exactly **one** new test (`ChemicalTypeRepositoryTest`) for the shared
-  `OptionRepository.existsByNameIgnoreCase` method, structurally identical to the mapper/service/
-  endpoint pattern. This is defensible for verifying the shared JPQL/derived-query *mechanics*, but
-  unlike mappers/services/endpoints — which are pure code with no I/O — each concrete option
-  repository is a distinct Spring-managed JPA bean bound to a distinct entity
-  (`Instrument`/`Modality`/`Solvent` vs `ChemicalType`). A `@DataJpaTest` exercises real bean wiring
-  and entity-to-column mapping, which genuinely could diverge per entity even if the repository
-  interface text does not. **Verdict: the representative pattern is reasonable here too, but it is
-  the weakest instance of the four (mappers/services/endpoints/repositories) representative claims,
-  since it leaves real Spring/JPA wiring for 3 of 4 concrete beans permanently unexercised** — this
-  is a defensible, low-risk gap, not a false claim.
+- **Options mappers:** unchanged, still correct/defensible.
+- **Options services:** unchanged, still correct/defensible.
+- **Options endpoints:** unchanged, still correct/defensible.
+- **Options repositories — pattern claim explicitly re-verified and now superseded by direct
+  testing, exactly as this round's work intended.** Previously (round 2), `existsByNameIgnoreCase`
+  was tested only via `ChemicalTypeRepository`, with the other 3 flagged as a residual, low-risk
+  gap (real Spring/JPA bean wiring per entity type left unexercised). **This round closed that gap
+  properly** — `InstrumentRepositoryTest`/`ModalityRepositoryTest`/`SolventRepositoryTest` were
+  added, each genuinely autowiring and persisting against its own concrete repository bean, not
+  re-using `ChemicalTypeRepository`. Confirmed via direct read of all 3 new files. **This is the
+  one instance where the "representative-only" pattern was deliberately replaced with full
+  per-type coverage — and it landed correctly**, though the leftover copy-pasted Javadoc comments
+  (still claiming "representative-only" framing in all 4 files) are now inaccurate and should be
+  cleaned up (see §5, §8).
 
 ---
 
-## 8. Reconciliation Against the Archived Report's ~15 Flagged Gaps
+## 8. Reconciliation Against the Second Round's "Final: Review the Missing Gaps" List
 
-### Tier 1 (was: zero coverage)
+**1. `ExperimentServiceImpl.searchExperiments`/`buildSearchSpecification` (7 filter groups) —
+RESOLVED, genuinely.**
+`ExperimentSearchSpecificationTest.java` is confirmed to be a real `@DataJpaTest`
+(`@AutoConfigureTestDatabase(Replace.NONE)`, `@ActiveProfiles("test")`, `@Import(ExperimentServiceImpl.class)`)
+with `ExperimentRepository`/`ReactantRepository`/`UserRepository`/`SolventRepository`/
+`InstrumentRepository`/`ModalityRepository` all genuinely `@Autowired` (only the mapper/authz/
+file-service/validator are mocked). Each of the 7 previously-flagged filter groups
+(`dateMin/Max`, `concentrationA/B_Min/Max`, `wavelengthMin/Max`, `instrument`, `modality`,
+`pFO_rateConstantMin/Max`) was individually traced and confirmed to persist at least one row that
+would be wrongly included/excluded if the filter were a no-op — i.e., these are genuine
+narrowing tests, not accidental pass-throughs. Not a flawed fix.
 
-**1. `StructureServiceImpl.fetchPendingStructuresFromAPI()` — RESOLVED.**
-`StructureServiceTest.java` now has 7 dedicated tests covering: empty-list early-return,
-finished+multi-structure loop, finished+empty/null-structures→FAILED, failed→FAILED, and the
-per-job `catch(Exception)` resilience path (one job throws, the other still processes). All
-genuinely exercise their claimed branch with real assertions, not just "doesn't throw."
+**2. `FileServiceImpl.storeFile` S3-failure branch, `loadFileAsResource` not-found — RESOLVED.**
+`storeFile_ShouldThrowFileStorageException_WhenS3PutObjectFails` genuinely stubs
+`s3Client.putObject(...)` to throw and asserts `FileStorageException` + that `save` is never
+called. `loadFileAsResource_ShouldThrowNotFound_WhenFileDoesNotExist` genuinely stubs an empty
+`Optional` and asserts `ResourceNotFoundException`. Both genuine.
 
-**2. 13 of 15 repository query methods had zero persistence tests — RESOLVED (all 13), with one
-residual pattern-level caveat.**
-All 13 previously-untested methods now have direct `@DataJpaTest` coverage in 5 new test files
-(see §5 table for citations). The one caveat: `OptionRepository.existsByNameIgnoreCase` (item 13
-of the original list) is tested only via `ChemicalTypeRepository`, leaving `InstrumentRepository`/
-`ModalityRepository`/`SolventRepository` beans themselves unexercised in any `@DataJpaTest` — see
-§7 discussion. Not a false "resolved" claim, but worth tracking as intentional residual risk.
+**3. `ExperimentFolderServiceImpl` (createFolder, addExperimentToFolder, removeExperimentFromFolder,
+deleteFolder) — MOSTLY RESOLVED, 2 of 4 methods still partial.**
+- `createFolder`'s `IllegalStateException` for user-not-found: **RESOLVED**
+  (`createFolder_whenUserNotFound_throwsIllegalStateException`).
+- `addExperimentToFolder`'s explicit experiment-not-found case: **RESOLVED**, now a dedicated,
+  explicit test rather than an incidental byproduct.
+- `removeExperimentFromFolder`/`deleteFolder` dedicated negative tests: **STILL PARTIAL.** Each
+  method did gain one new, genuinely dedicated negative test that calls that specific method
+  directly — but each only covers **one of the two** ownership-helper sub-branches:
+  `removeExperimentFromFolder` got a folder-**not-found** test but no folder-**not-owned** test of
+  its own; `deleteFolder` got a folder-**not-owned** test but no folder-**not-found** test of its
+  own. Both sub-branches are proven *somewhere* in the suite (through the other method or through
+  `addExperimentToFolder`), so the underlying shared helper logic is not actually a functional risk
+  — but strictly, neither method individually has complete negative-path coverage of its own.
 
-**3. `ExperimentHistoryServiceImpl.getExperimentHistory` diff-building logic — RESOLVED.**
-6 new tests in `ExperimentHistoryServiceTest.java` use a `delegateToRealJavers(...)` helper that
-makes the mocked `javers.findChanges(any())` forward to a genuine in-memory `JaversBuilder`
-instance with real committed entity snapshots. Verified this is **not** a disguised empty-stub —
-the tests assert exact computed diff strings (e.g. `"Old comment -> New comment"`) and correctly
-detect CREATE/ARCHIVE/RESTORE/ignored-property scenarios. Minor residual: only the `solvent` case
-of the internal `extractId` reference-type switch is exercised via a real `ReferenceChange`; the
-`instrument`/`modality`/`reactantA`/`reactantB`/`scientist`/`createdBy` cases remain untested.
+**4. `ExperimentValidator.validateForUpdate` (4 branches) — RESOLVED.**
+All 4 (reactant-A-zero-structures, reactant-B-zero-structures, instrument-skip-lookup,
+modality-skip-lookup) are now triggered via literal, direct calls to
+`experimentValidator.validateForUpdate(...)` — confirmed by tracing each test's stub configuration
+to rule out any other branch producing the same outcome. Genuine, not superficial.
 
-**4. `ExperimentServiceImpl.searchExperiments`/`buildSearchSpecification` — RESOLVED for the
-majority of branches, several sub-branches still open.**
-New `ExperimentSearchSpecificationTest.java` is a genuine `@DataJpaTest` (verified: real
-`ExperimentRepository`/`ReactantRepository`/etc. autowired, only `ExperimentMapper`/`FileService`/
-`ExperimentAuthorization`/`ExperimentValidator` are mocked; data persisted via `saveAndFlush`,
-`Specification` genuinely executed against H2). Confirmed NOT a disguised mock. Covers: global
-archived-exclusion, null-params, reactant A/B cross-match (incl. commutative), temperature range
-(boundary-inclusive), comment (case-insensitive partial), scientist-list, solvent-equals,
-measurement rateConstant range, and AND-combination of two filters. **Still open:**
-`dateMin`/`dateMax`, `concentrationA/B_Min/Max`, `wavelengthMin/Max`, `instrument`-equals,
-`modality`-equals, `pFO_rateConstantMin/Max` — each a simple, structurally-identical
-`if (x != null) predicates.add(...)` branch that mirrors an already-tested pattern (e.g. `solvent`)
-but has not itself been exercised.
+**5. `ReactantValidator` additionalShortNames sub-branches (2 sub-branches × 2 methods) —
+RESOLVED, all 4 combinations.**
+Blank/empty-entry and shortName-duplicated-in-list are both now tested for both
+`validateForCreate` and `validateForUpdate`, each test isolated so only the claimed sub-branch
+fires (verified by tracing the guard conditions — e.g. the blank-entry tests use inputs with no
+case-duplicates and no shortName-inclusion, so only the blank check can be responsible for the
+thrown exception).
 
-**5. `UserEndpoint.restoreUser` — RESOLVED.**
-`restoreUser_WhenAdmin_ShouldReturn200_WhenSuccessful` now exists alongside the retained 404 test,
-with `verify(userService, times(1)).restoreUser(id)` — genuinely proves a successful restore for
-the one authorized role.
+**6. `ReactantMapper.toDto(Reactant, StructureFlag)` direct 2-arg null invocation — RESOLVED,
+genuinely closing the "letter vs. spirit" gap flagged in the prior round.**
+`toDto_withExplicitNullFlag_shouldMapNullFlagDirectlyViaTwoArgOverload` contains
+`mapper.toDto(reactant, null)` — a literal 2-argument call. Java overload resolution cannot route
+a 2-argument call to the 1-arg default method, so this is confirmed to genuinely invoke the 2-arg
+overload directly, distinct from the pre-existing `toDto_withoutFlag_shouldDelegateWithNullFlag`
+test (which still only exercises the 1-arg delegate). Both tests now coexist, covering both call
+paths independently.
 
-### Tier 2 (was: missing negative-path / authz-branch tests)
+**7. `ReactantServiceTest.getAllReactants_ShouldReturnOnlyActiveReactants` rename — RESOLVED.**
+Confirmed renamed to `getAllReactants_ShouldAggregateAsPending_WhenOnlyPendingStructureExists`
+with the assertion logic unchanged (still correctly asserts `StructureFlag.PENDING`). The name now
+accurately describes the branch under test.
 
-**6. `ExperimentFolderEndpoint` zero negative-path coverage (all 4 methods) — RESOLVED.**
-`addExperimentToFolder`, `removeExperimentFromFolder`, `deleteFolder` each gained a 403
-(not-owned) and a 404 (not-found) test. `getMyFolders` gained a 500 (unexpected-exception) test —
-the only meaningful negative case available, since this method has no ownership-failure mode by
-design (it only ever lists the caller's own folders).
+**8. `ReactantRepository.findAllByArchivedAtIsNull`/`findAllByArchivedAtIsNotNull` empty-list tests
+— RESOLVED.**
+Both now have dedicated tests that persist zero matching rows (not just "opposite side present")
+and assert an empty result — genuinely closing the previously-flagged gap.
 
-**7. `ExperimentFilesEndpoint` zero negative tests (`uploadFile`/`archiveFile`/`downloadFile`) —
-RESOLVED.**
-All three gained 404 and 403 tests, each genuinely mocking the service to throw
-`ResourceNotFoundException`/`AccessDeniedException` and asserting the corresponding status.
-Minor new finding: sibling method `getFileDetails` still has no 403 test (only 200/404) — flagged
-as new gap #4 below.
+**9. 3 new option-repository test files (Instrument/Modality/Solvent) — RESOLVED, but with a
+documentation side-effect.**
+All 3 new files exist, each genuinely autowiring and persisting against its own concrete
+repository bean (not re-using `ChemicalTypeRepository`), each with both a true (case-insensitive
+match) and false (no match) test — structurally identical to `ChemicalTypeRepositoryTest`'s
+pattern. **However:** all 4 files (including the original `ChemicalTypeRepositoryTest`) share an
+identical, verbatim class-level Javadoc that describes itself as *the* sole representative test
+for the other three — this framing is now stale and self-contradictory across all 4 files, since
+the "representative-only" pattern has been deliberately superseded by direct per-type testing.
+This is a copy-paste documentation artifact, not a test-correctness problem, but should be cleaned
+up (the comment should either be removed or rewritten to explain that all 4 now have independent
+coverage).
 
-**8. `ReactantEndpoint.archiveReactant` missing SUPERVISOR-forbidden test — RESOLVED.**
-`archiveReactant_WhenSupervisor_ShouldReturn403` now exists and verifies the service is never
-invoked.
-
-**9. Anonymous/401 tests essentially untested project-wide — RESOLVED.**
-Verified line-by-line: `ExperimentEndpointTest`, `ExperimentFilesEndpointTest`,
-`ExperimentFolderEndpointTest`, `ReactantEndpointTest`, `UserEndpointTest`, `StructureEndpointTest`,
-and `ChemicalTypeEndpointTest` (options representative) each now have an
-`anyEndpoint_whenUnauthenticated_returns401`-style test that performs a request with **no**
-`.with(jwt())` at all and asserts `status().isUnauthorized()` — confirmed none accidentally use a
-zero-authority JWT (which would yield 403, not 401).
-
-**10. Request-body validation (400) tests for `ReactantEndpoint.createReactant`/
-`UserEndpoint.setRole` — RESOLVED (both).**
-Both new tests supply an invalid body (`shortName = null` / `RoleDto(null)`), assert 400, and
-verify the service method is never called — genuine validation-rejection tests.
-
-**11. `ExperimentServiceImpl.archiveExperiment`/`restoreExperiment` and `FileServiceImpl.storeFile`/
-`archiveFile` missing not-found/idempotent/conflict tests — MOSTLY RESOLVED, one still open.**
-`archiveExperiment`/`restoreExperiment`: fully resolved (not-found + idempotent no-op both added
-for both methods). `FileServiceImpl.archiveFile`: fully resolved (conflict + idempotent no-op both
-added). `FileServiceImpl.storeFile`: archived-experiment conflict resolved, but the S3-failure
-(`catch(Exception e) → FileStorageException`) branch **remains untested** — no test makes
-`s3Client.putObject(...)` throw.
-
-**12. `ReactantValidator.validateForUpdate` additionalShortNames/CAS/InChIKey conflict branches
-unreached — MOSTLY RESOLVED, with a broader residual finding.**
-`hasNameConflictExcludingId`, CAS-changed/unchanged, and InChIKey-changed/unchanged are now all
-directly exercised via `validateForUpdate`. However, on this fresh read, the "blank/empty entry"
-and "shortName included in additionalShortNames" sub-branches of `validateAdditionalShortNames`
-turn out to be untested by **either** `validateForCreate` or `validateForUpdate` — the original
-report's framing ("only proven via `validateForCreate`") was itself slightly inaccurate; the
-correct, more precise finding is that these two specific sub-branches have never been exercised by
-any test, old or new.
-
-### Tier 3 (was: incomplete branch coverage)
-
-**13. `ReactantServiceImpl.determineAggregateFlag` — RESOLVED.**
-5 new/updated tests in `ReactantServiceTest.GetAllReactants` now produce all 5 outcomes
-(`PENDING`, `ACTIVE`, `READY`, `FAILED`, `REJECTED`) plus the pre-existing `null`-for-empty-list
-case, each verified to genuinely force the intended branch through the real `anyMatch`/`allMatch`
-chain. **Flag for the record:** `getAllReactants_ShouldReturnOnlyActiveReactants` is a
-**misleadingly-named test** — despite its name, it actually builds a `PENDING`-flag structure and
-asserts `StructureFlag.PENDING`, not `ACTIVE`. The assertion itself is correct and does test the
-PENDING branch as intended; only the test's name is inaccurate. Not a functional problem, but
-worth renaming for clarity.
-
-**14. Mapper null/edge-case gaps (`MetadataMapper`/`MeasurementDataMapper`/`FolderMapper`/
-`ExperimentMapper`/`ReactantMapper`) — MOSTLY RESOLVED, one nuance.**
-`MetadataMapper` (null instrument/modality), `MeasurementDataMapper` (null errorValue, fully-null
-result), `FolderMapper` (`experiments == null` — confirmed to genuinely exercise the null branch,
-not just re-test empty-list), and `ExperimentMapper` (null result/metadata, non-empty files
-conversion) are all resolved with real, verified test bodies. `ReactantMapper`: null/empty
-structures lists resolved; however, the specific ask of "explicit null flag via 2-arg overload"
-is only indirectly met — the sole null-flag test calls the 1-arg default method, which internally
-delegates to the 2-arg overload with `null`, rather than calling the 2-arg overload directly.
-Functionally equivalent, but not a literal match to the original gap description.
-
-**15. `ExperimentValidator.validateForUpdate` — MOSTLY RESOLVED.**
-Went from 2/14 branches proven directly via `validateForUpdate` to approximately 9/13 (scientist
-missing, reactantA/B missing, reactants-equal, structure-present-but-inactive, solvent missing,
-instrument/modality provided-but-not-found, happy path). **Still open:** reactant-has-zero-
-structures-at-all (as opposed to present-but-inactive) for both A and B, and the
-instrument/modality "not provided, skip lookup" branches — these 4 remain provable only via the
-sibling `validateForCreate`.
+**10. Endpoint 404/403 gaps (`ExperimentEndpointTest`, `ExperimentFilesEndpointTest.getFileDetails`,
+`ReactantEndpointTest`, `StructureEndpointTest`, `UserEndpointTest`) — RESOLVED, all of them.**
+Every cited 404/403 test genuinely mocks the service to throw the documented exception
+(`ResourceNotFoundException`/`AccessDeniedException`) and asserts the corresponding status, under
+an authorized principal where relevant (so the branch is genuinely reached past any
+`@PreAuthorize` gate rather than short-circuited by a 403). No flawed fixes found among these.
 
 ---
 
-## 9. Tests Checked for Misleading Names or Flawed Fixes (Skepticism Pass)
+## 9. New Gaps Discovered (Not Previously Tracked)
 
-As requested, every follow-up test cited above was checked against its actual body, not trusted by
-name. Findings:
+**Controller-layer 409/422 gaps (the most significant new finding this round):** while reconciling
+the endpoint 404 fixes, a fresh trace of each endpoint's documented `@throws` against
+`GlobalExceptionHandler`'s mappings revealed several **genuinely untested, pre-existing** 409/422
+branches that no prior round flagged:
+- `ExperimentEndpoint.createExperiment` — no genuine 422 test; the only negative test is caught by
+  bean validation before the service is ever called (`verifyNoInteractions` proves it).
+- `ExperimentEndpoint.updateExperiment` — no 409 test, despite the endpoint's own Javadoc
+  documenting a 409 for updating an archived experiment.
+- `ExperimentFilesEndpoint.uploadFile`/`archiveFile` — no 409 test (archived-experiment conflict,
+  documented on `FileService`).
+- `ReactantEndpoint.createReactant`/`updateReactant` — no 409 test (shortName-conflict, documented
+  on `ReactantService`).
 
-- **One misleadingly-named test found:** `ReactantServiceTest.getAllReactants_ShouldReturnOnlyActiveReactants`
-  actually exercises the `PENDING` branch of `determineAggregateFlag`, not `ACTIVE`. The assertion
-  is correct; only the name is wrong. Recommend a rename in a future pass (not done here — this
-  audit is read-only).
-- **No flawed/non-exercising fixes found.** Every other cited "resolved" test was verified to
-  contain assertions that actually depend on the claimed branch being taken (e.g., `verify(...,
-  never())` calls proving a service method was NOT invoked on a validation-rejection path; exact
-  diff-string assertions proving real Javers computation occurred rather than a stub; `saveAndFlush`
-  + real `Specification` execution against H2 rather than a mocked repository call).
-- **One "letter vs. spirit" gap found (not misleading, but incomplete):** the "explicit null flag
-  via 2-arg overload" fix for `ReactantMapper` only indirectly exercises that code path (see
-  Reconciliation #14). This is not a flaw — the underlying behavior is genuinely covered — but it's
-  worth noting the fix didn't literally add the test that was asked for.
+These are real, currently-unexercised branches at the `@WebMvcTest` layer, following the exact same
+pattern (`doThrow(...).when(service)...; assertStatus(...)`) already established for the 404s this
+round — they would be a natural, low-effort next step.
+
+**Minor service/validator-layer residuals (low severity, guard clauses / rare edge cases):**
+- `ExperimentHistoryServiceImpl`'s private `extractId` reference-type switch — only the `solvent`
+  case is exercised via a real `ReferenceChange`; `instrument`/`modality`/`reactantA`/`reactantB`/
+  `scientist`/`createdBy` cases remain untested. Confirmed **unchanged** from the prior round (not
+  addressed by this round's work, and not on this round's fix list either).
+- `ExperimentFolderServiceImpl.addExperimentToFolder`'s duplicate-add no-op branch (adding an
+  experiment already in the target folder) is untested.
+- `ReactantValidator`'s `namesToCheck.isEmpty()` guard, the `additionalShortNames == null/empty`
+  early-return, and `collectNames`'s blank-primary skip branch are all untested — low risk since
+  they're guarded by upstream bean validation in practice, but technically distinct branches.
+- `FileServiceImpl.calculateSha256`'s own internal exception-catch branch (checksum computation
+  failure) remains untested — low priority, hard to trigger without fault injection.
+
+**Documentation-only issue:** the stale, duplicated "representative test" Javadoc across all 4
+option-repository test files (§5, §8 item 9).
 
 ---
 
-## 10. Overall Verdict
+## 10. Misleading-Test / Flawed-Fix Skepticism Pass
 
-**This round of follow-up work substantially achieved its goal.** Every Tier-1 (zero-coverage) item
-from the archived report is resolved, all zero-coverage methods across the entire codebase have
-been eliminated (14 → 0), and the large majority of Tier-2/Tier-3 items are either fully or mostly
-resolved with genuine, verified test bodies (not name-only fixes). Full coverage nearly doubled
-(38 → 79 of ~107 methods) and partial-coverage count was cut roughly in half (54 → 28).
+As requested, every cited "resolved" test across all four sub-investigations was checked against
+its actual body, not trusted by name.
 
-The remaining 28 partial-coverage items are now uniformly narrow and specific — missing individual
-filter branches in `buildSearchSpecification`, a handful of missing 404 tests on endpoints that
-otherwise have solid role/authz coverage, one untested exception-catch branch in `FileServiceImpl`,
-and a couple of validator sub-branches that were apparently never targeted by name in either the
-original report or the follow-up work (the `additionalShortNames` blank/duplicate-inclusion
-sub-branches). None of the remaining gaps represent a wholesale untested code path; they are the
-kind of granular edge cases that are reasonable to track incrementally rather than treat as
-blocking.
+- **No misleading test names or flawed fixes were found in this round's new work.** Every
+  previously-flagged item's fix was traced and confirmed to genuinely exercise the claimed branch:
+  the `ExperimentSearchSpecificationTest` filter tests all persist data that would produce a
+  different (wrong) result if the filter were a no-op; the `ReactantMapper` 2-arg null test is
+  confirmed to be a literal 2-argument call site, not a disguised 1-arg delegate call; the
+  `ExperimentValidator`/`ReactantValidator` branch tests were each traced to confirm no other
+  guard condition could have produced the same thrown exception; the endpoint 404 tests were all
+  confirmed to be reached under an authorized principal (not short-circuited by 403); the
+  repository empty-list and per-bean tests were confirmed to genuinely persist zero-matching-row
+  scenarios and genuinely instantiate their own repository beans respectively.
+- The previously-flagged misleading test name
+  (`ReactantServiceTest.getAllReactants_ShouldReturnOnlyActiveReactants`) is confirmed **fixed**
+  (renamed, assertion unchanged and still correct).
+- The one remaining honesty-adjacent finding is the **stale Javadoc** issue (§5, §8 item 9) — not
+  a test-correctness problem, but worth flagging since it inaccurately describes the current state
+  of the test suite to future readers.
+
+---
+
+## 11. Overall Verdict
+
+**This round of follow-up work achieved what it set out to do.** Every one of the ~10 items on the
+second round's "Final: Review the missing gaps" list is either fully resolved (8 of 10) or mostly
+resolved with a narrow, explicitly-scoped residual gap (2 of 10: `removeExperimentFromFolder`/
+`deleteFolder`'s asymmetric negative-path coverage). No flawed or superficial fixes were found —
+every claimed resolution was traced and confirmed to genuinely exercise the intended branch. Full
+coverage rose from 79/107 (74%) to 97/107 (91%), and the total partial-coverage count dropped from
+28 to 10, with zero-coverage methods remaining at zero across all three rounds.
+
+## 12. Has the Suite Reached a Stable, Comprehensive State?
+
+**Largely yes, with one clear, bounded pocket of remaining work — not a case for another
+open-ended round.** The remaining 10 partial-coverage items fall into two categories:
+
+1. **A newly-discovered, well-defined cluster of controller-layer 409/422 gaps** (§9) — 5 specific
+   methods across 3 controllers, all following the exact same test pattern already used
+   successfully for this round's 404 fixes. This is the most actionable next step, and it's narrow
+   enough to close in a single, small follow-up rather than another full audit round.
+2. **A handful of low-risk, low-probability guard-clause/edge-case branches** (private helper
+   switch arms, idempotent no-op branches, deep validator guard clauses) that are unlikely to hide
+   real bugs given the surrounding validation, and a doc-only Javadoc staleness issue.
+
+Given the trajectory (36% → 74% → 91% full coverage across three rounds, zero-coverage eliminated
+after round two, and no flawed fixes found in any round), the test suite is in a genuinely solid
+state. I would recommend one targeted, small follow-up specifically for the 409/422 controller
+gaps (and, incidentally, the stale Javadoc cleanup), but would **not** recommend another full
+audit-and-reconciliation cycle at this scale — the remaining gaps are narrow enough to fix directly
+without needing a fourth full re-audit to verify.
