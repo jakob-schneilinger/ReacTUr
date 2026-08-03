@@ -178,6 +178,52 @@ class ExperimentSearchSpecificationTest {
         return experimentRepository.saveAndFlush(experiment);
     }
 
+    // Deliberately a distinct name (not an overload of persistExperiment): several existing
+    // persistExperiment(...) call sites above pass null for every trailing argument, which would
+    // make a same-arity overload ambiguous to the compiler. Covers fields (date, concentrationA/B,
+    // wavelength) not exercised by any existing test filter prior to this addition.
+    private Experiment persistExperimentWithExtendedMetadata(
+            User createdBy,
+            Reactant reactantA,
+            Reactant reactantB,
+            User scientist,
+            Solvent solvent,
+            Instrument instrument,
+            Modality modality,
+            Double pfoRateConstant,
+            LocalDate date,
+            Double concentrationA,
+            Double concentrationB,
+            Double wavelength
+    ) {
+        Metadata metadata = Metadata.builder()
+                .date(date)
+                .scientist(scientist)
+                .solvent(solvent)
+                .instrument(instrument)
+                .modality(modality)
+                .concentrationA(concentrationA)
+                .concentrationB(concentrationB)
+                .wavelength(wavelength)
+                .build();
+
+        ExperimentResult result = ExperimentResult.builder()
+                .rateConstant(1.0) // rate_constant column is NOT NULL
+                .pfoRateConstant(pfoRateConstant)
+                .errorValue(0.1)
+                .isErrorPercentage(false)
+                .build();
+
+        Experiment experiment = Experiment.builder()
+                .reactantA(reactantA)
+                .reactantB(reactantB)
+                .metadata(metadata)
+                .result(result)
+                .createdBy(createdBy)
+                .build();
+        return experimentRepository.saveAndFlush(experiment);
+    }
+
     private SearchParametersDto emptyParams() {
         return new SearchParametersDto(
                 null, null, null, null, null, null, null, null,
@@ -234,6 +280,48 @@ class ExperimentSearchSpecificationTest {
         return new SearchParametersDto(
                 null, null, null, null, scientistIds, min, max, null,
                 null, null, null, null, null, null, null, null, null, null
+        );
+    }
+
+    private SearchParametersDto withDateRange(LocalDate min, LocalDate max) {
+        return new SearchParametersDto(
+                null, null, min, max, null, null, null, null,
+                null, null, null, null, null, null, null, null, null, null
+        );
+    }
+
+    private SearchParametersDto withConcentrationARange(Double min, Double max) {
+        return new SearchParametersDto(
+                null, null, null, null, null, null, null, null,
+                min, max, null, null, null, null, null, null, null, null
+        );
+    }
+
+    private SearchParametersDto withConcentrationBRange(Double min, Double max) {
+        return new SearchParametersDto(
+                null, null, null, null, null, null, null, null,
+                null, null, min, max, null, null, null, null, null, null
+        );
+    }
+
+    private SearchParametersDto withInstrument(UUID instrumentId) {
+        return new SearchParametersDto(
+                null, null, null, null, null, null, null, null,
+                null, null, null, null, instrumentId, null, null, null, null, null
+        );
+    }
+
+    private SearchParametersDto withModality(UUID modalityId) {
+        return new SearchParametersDto(
+                null, null, null, null, null, null, null, null,
+                null, null, null, null, null, modalityId, null, null, null, null
+        );
+    }
+
+    private SearchParametersDto withWavelengthRange(Double min, Double max) {
+        return new SearchParametersDto(
+                null, null, null, null, null, null, null, null,
+                null, null, null, null, null, null, min, max, null, null
         );
     }
 
@@ -426,5 +514,141 @@ class ExperimentSearchSpecificationTest {
         );
 
         assertThat(resultIds(result)).containsExactly(matchesBoth.getId());
+    }
+
+    @Test
+    void searchExperiments_dateRangeFilter_isBoundaryInclusiveAndExcludesOutOfRange() {
+        setUpMapperAndFileServiceStubs();
+        User user = persistUser("owner");
+        Reactant a = persistReactant("A" + UUID.randomUUID(), user);
+        Reactant b = persistReactant("B" + UUID.randomUUID(), user);
+
+        LocalDate min = LocalDate.of(2024, 1, 10);
+        LocalDate max = LocalDate.of(2024, 1, 20);
+
+        Experiment atMin = persistExperimentWithExtendedMetadata(user, a, b, user, null, null, null, null, min, null, null, null);
+        Experiment atMax = persistExperimentWithExtendedMetadata(user, a, b, user, null, null, null, null, max, null, null, null);
+        persistExperimentWithExtendedMetadata(user, a, b, user, null, null, null, null, min.minusDays(1), null, null, null);
+        persistExperimentWithExtendedMetadata(user, a, b, user, null, null, null, null, max.plusDays(1), null, null, null);
+
+        Page<GetExperimentDto> result = experimentService.searchExperiments(
+                withDateRange(min, max), defaultPageable, user.getId(), Role.USER
+        );
+
+        assertThat(resultIds(result)).containsExactlyInAnyOrder(atMin.getId(), atMax.getId());
+    }
+
+    @Test
+    void searchExperiments_concentrationARangeFilter_isBoundaryInclusiveAndExcludesOutOfRange() {
+        setUpMapperAndFileServiceStubs();
+        User user = persistUser("owner");
+        Reactant a = persistReactant("A" + UUID.randomUUID(), user);
+        Reactant b = persistReactant("B" + UUID.randomUUID(), user);
+
+        Experiment atMin = persistExperimentWithExtendedMetadata(user, a, b, user, null, null, null, null, LocalDate.now(), 1.0, null, null);
+        Experiment atMax = persistExperimentWithExtendedMetadata(user, a, b, user, null, null, null, null, LocalDate.now(), 5.0, null, null);
+        persistExperimentWithExtendedMetadata(user, a, b, user, null, null, null, null, LocalDate.now(), 0.9, null, null);
+        persistExperimentWithExtendedMetadata(user, a, b, user, null, null, null, null, LocalDate.now(), 5.1, null, null);
+
+        Page<GetExperimentDto> result = experimentService.searchExperiments(
+                withConcentrationARange(1.0, 5.0), defaultPageable, user.getId(), Role.USER
+        );
+
+        assertThat(resultIds(result)).containsExactlyInAnyOrder(atMin.getId(), atMax.getId());
+    }
+
+    @Test
+    void searchExperiments_concentrationBRangeFilter_isBoundaryInclusiveAndExcludesOutOfRange() {
+        setUpMapperAndFileServiceStubs();
+        User user = persistUser("owner");
+        Reactant a = persistReactant("A" + UUID.randomUUID(), user);
+        Reactant b = persistReactant("B" + UUID.randomUUID(), user);
+
+        Experiment atMin = persistExperimentWithExtendedMetadata(user, a, b, user, null, null, null, null, LocalDate.now(), null, 1.0, null);
+        Experiment atMax = persistExperimentWithExtendedMetadata(user, a, b, user, null, null, null, null, LocalDate.now(), null, 5.0, null);
+        persistExperimentWithExtendedMetadata(user, a, b, user, null, null, null, null, LocalDate.now(), null, 0.9, null);
+        persistExperimentWithExtendedMetadata(user, a, b, user, null, null, null, null, LocalDate.now(), null, 5.1, null);
+
+        Page<GetExperimentDto> result = experimentService.searchExperiments(
+                withConcentrationBRange(1.0, 5.0), defaultPageable, user.getId(), Role.USER
+        );
+
+        assertThat(resultIds(result)).containsExactlyInAnyOrder(atMin.getId(), atMax.getId());
+    }
+
+    @Test
+    void searchExperiments_wavelengthRangeFilter_isBoundaryInclusiveAndExcludesOutOfRange() {
+        setUpMapperAndFileServiceStubs();
+        User user = persistUser("owner");
+        Reactant a = persistReactant("A" + UUID.randomUUID(), user);
+        Reactant b = persistReactant("B" + UUID.randomUUID(), user);
+
+        Experiment atMin = persistExperimentWithExtendedMetadata(user, a, b, user, null, null, null, null, LocalDate.now(), null, null, 400.0);
+        Experiment atMax = persistExperimentWithExtendedMetadata(user, a, b, user, null, null, null, null, LocalDate.now(), null, null, 700.0);
+        persistExperimentWithExtendedMetadata(user, a, b, user, null, null, null, null, LocalDate.now(), null, null, 399.9);
+        persistExperimentWithExtendedMetadata(user, a, b, user, null, null, null, null, LocalDate.now(), null, null, 700.1);
+
+        Page<GetExperimentDto> result = experimentService.searchExperiments(
+                withWavelengthRange(400.0, 700.0), defaultPageable, user.getId(), Role.USER
+        );
+
+        assertThat(resultIds(result)).containsExactlyInAnyOrder(atMin.getId(), atMax.getId());
+    }
+
+    @Test
+    void searchExperiments_instrumentFilter_matchesExactly() {
+        setUpMapperAndFileServiceStubs();
+        User user = persistUser("owner");
+        Reactant a = persistReactant("A" + UUID.randomUUID(), user);
+        Reactant b = persistReactant("B" + UUID.randomUUID(), user);
+        Instrument nmr = persistInstrument("NMR-" + UUID.randomUUID());
+        Instrument uv = persistInstrument("UV-" + UUID.randomUUID());
+
+        Experiment withNmr = persistExperiment(user, a, b, user, null, null, null, nmr, null, null, null, null);
+        persistExperiment(user, a, b, user, null, null, null, uv, null, null, null, null);
+
+        Page<GetExperimentDto> result = experimentService.searchExperiments(
+                withInstrument(nmr.getId()), defaultPageable, user.getId(), Role.USER
+        );
+
+        assertThat(resultIds(result)).containsExactly(withNmr.getId());
+    }
+
+    @Test
+    void searchExperiments_modalityFilter_matchesExactly() {
+        setUpMapperAndFileServiceStubs();
+        User user = persistUser("owner");
+        Reactant a = persistReactant("A" + UUID.randomUUID(), user);
+        Reactant b = persistReactant("B" + UUID.randomUUID(), user);
+        Modality absorption = persistModality("Absorption-" + UUID.randomUUID());
+        Modality emission = persistModality("Emission-" + UUID.randomUUID());
+
+        Experiment withAbsorption = persistExperiment(user, a, b, user, null, null, null, null, absorption, null, null, null);
+        persistExperiment(user, a, b, user, null, null, null, null, emission, null, null, null);
+
+        Page<GetExperimentDto> result = experimentService.searchExperiments(
+                withModality(absorption.getId()), defaultPageable, user.getId(), Role.USER
+        );
+
+        assertThat(resultIds(result)).containsExactly(withAbsorption.getId());
+    }
+
+    @Test
+    void searchExperiments_measurementSearchFilter_matchesPfoRateConstantRangeViaResultJoin() {
+        setUpMapperAndFileServiceStubs();
+        User user = persistUser("owner");
+        Reactant a = persistReactant("A" + UUID.randomUUID(), user);
+        Reactant b = persistReactant("B" + UUID.randomUUID(), user);
+
+        Experiment inRange = persistExperimentWithExtendedMetadata(user, a, b, user, null, null, null, 5.0, LocalDate.now(), null, null, null);
+        persistExperimentWithExtendedMetadata(user, a, b, user, null, null, null, 100.0, LocalDate.now(), null, null, null);
+
+        MeasurementSearchDto measurementSearch = new MeasurementSearchDto(1.0, 10.0, null, null);
+
+        Page<GetExperimentDto> result = experimentService.searchExperiments(
+                withMeasurement(measurementSearch), defaultPageable, user.getId(), Role.USER
+        );
+
+        assertThat(resultIds(result)).containsExactly(inRange.getId());
     }
 }

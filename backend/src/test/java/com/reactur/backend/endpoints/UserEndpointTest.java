@@ -125,6 +125,20 @@ class UserEndpointTest {
     }
 
     @Test
+    void setRole_WhenAdmin_ShouldReturn404_WhenUserNotFound() throws Exception {
+        String id = "some-id-lol";
+        RoleDto dto = new RoleDto(Role.SUPERVISOR);
+
+        doThrow(new ResourceNotFoundException("User not found")).when(userService).setRole(id, dto);
+
+        mockMvc.perform(post("/api/users/" + id)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(dto))
+                        .with(jwt().authorities(new SimpleGrantedAuthority("ROLE_ADMIN"))))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
     void setRole_WhenRoleMissing_ShouldReturn400BadRequest() throws Exception {
         // Validation Test: role is @NotNull on RoleDto but is missing/null here.
         String id = "some-id-lol";
@@ -213,6 +227,17 @@ class UserEndpointTest {
                 .andExpect(status().isForbidden());
 
         verify(userService, never()).archiveUser(any());
+    }
+
+    @Test
+    void archiveUser_WhenAdmin_ShouldReturn404_WhenUserNotFound() throws Exception {
+        String id = "some-id-lol";
+
+        doThrow(new ResourceNotFoundException("User not found")).when(userService).archiveUser(id);
+
+        mockMvc.perform(delete("/api/users/" + id)
+                        .with(jwt().authorities(new SimpleGrantedAuthority("ROLE_ADMIN"))))
+                .andExpect(status().isNotFound());
     }
 
     @Test

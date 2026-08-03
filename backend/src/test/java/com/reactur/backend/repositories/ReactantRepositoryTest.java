@@ -155,6 +155,15 @@ class ReactantRepositoryTest {
     }
 
     @Test
+    void findAllByArchivedAtIsNull_ShouldReturnEmptyList_WhenNoUnarchivedReactantsExist() {
+        persistReactantWithArchivedAt("Methanol", Instant.now());
+
+        List<Reactant> result = reactantRepository.findAllByArchivedAtIsNull();
+
+        assertTrue(result.isEmpty());
+    }
+
+    @Test
     void findAllByArchivedAtIsNotNull_ShouldReturnOnlyArchivedReactants() {
         persistReactantWithArchivedAt("Ethanol", null);
         Reactant archived = persistReactantWithArchivedAt("Methanol", Instant.now());
@@ -163,6 +172,15 @@ class ReactantRepositoryTest {
 
         assertEquals(1, result.size());
         assertEquals(archived.getId(), result.get(0).getId());
+    }
+
+    @Test
+    void findAllByArchivedAtIsNotNull_ShouldReturnEmptyList_WhenNoArchivedReactantsExist() {
+        persistReactantWithArchivedAt("Ethanol", null);
+
+        List<Reactant> result = reactantRepository.findAllByArchivedAtIsNotNull();
+
+        assertTrue(result.isEmpty());
     }
 
     @Test

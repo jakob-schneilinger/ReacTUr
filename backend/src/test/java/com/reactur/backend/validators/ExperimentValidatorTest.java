@@ -308,6 +308,38 @@ class ExperimentValidatorTest {
     }
 
     @Test
+    void validateForUpdate_shouldThrowUnprocessableEntity_whenReactantAHasNoActiveStructure() {
+        when(userRepository.findById(scientistId)).thenReturn(Optional.of(scientist));
+        when(reactantRepository.findById(reactantAId)).thenReturn(Optional.of(reactantA));
+        when(reactantRepository.findById(reactantBId)).thenReturn(Optional.of(reactantB));
+        when(structureRepository.findByReactant_Id(reactantAId)).thenReturn(List.of());
+
+        UnprocessableEntityException exception = assertThrows(UnprocessableEntityException.class,
+                () -> experimentValidator.validateForUpdate(buildDto(reactantAId, reactantBId, instrumentId, modalityId)));
+
+        assertTrue(exception.getMessage().contains("Reactant A"));
+        assertTrue(exception.getMessage().contains("ACTIVE 3D structure"));
+    }
+
+    @Test
+    void validateForUpdate_shouldThrowUnprocessableEntity_whenReactantBHasNoActiveStructure() {
+        when(userRepository.findById(scientistId)).thenReturn(Optional.of(scientist));
+        when(reactantRepository.findById(reactantAId)).thenReturn(Optional.of(reactantA));
+        when(reactantRepository.findById(reactantBId)).thenReturn(Optional.of(reactantB));
+
+        ReactantStructure activeStructure = new ReactantStructure();
+        activeStructure.setFlag(StructureFlag.ACTIVE);
+        when(structureRepository.findByReactant_Id(reactantAId)).thenReturn(List.of(activeStructure));
+        when(structureRepository.findByReactant_Id(reactantBId)).thenReturn(List.of());
+
+        UnprocessableEntityException exception = assertThrows(UnprocessableEntityException.class,
+                () -> experimentValidator.validateForUpdate(buildDto(reactantAId, reactantBId, instrumentId, modalityId)));
+
+        assertTrue(exception.getMessage().contains("Reactant B"));
+        assertTrue(exception.getMessage().contains("ACTIVE 3D structure"));
+    }
+
+    @Test
     void validateForCreate_shouldThrowUnprocessableEntity_whenReactantStructureIsNotActive() {
         when(userRepository.findById(scientistId)).thenReturn(Optional.of(scientist));
         when(reactantRepository.findById(reactantAId)).thenReturn(Optional.of(reactantA));
@@ -433,6 +465,26 @@ class ExperimentValidatorTest {
         assertNotNull(result.modality());
     }
 
+    @Test
+    void validateForUpdate_shouldSkipInstrumentLookup_whenInstrumentNotProvided() {
+        when(userRepository.findById(scientistId)).thenReturn(Optional.of(scientist));
+        when(reactantRepository.findById(reactantAId)).thenReturn(Optional.of(reactantA));
+        when(reactantRepository.findById(reactantBId)).thenReturn(Optional.of(reactantB));
+
+        ReactantStructure activeStructure = new ReactantStructure();
+        activeStructure.setFlag(StructureFlag.ACTIVE);
+        when(structureRepository.findByReactant_Id(any())).thenReturn(List.of(activeStructure));
+
+        when(solventRepository.findById(solventId)).thenReturn(Optional.of(solvent));
+        when(modalityRepository.findById(modalityId)).thenReturn(Optional.of(modality));
+
+        ExperimentValidator.ValidatedReferences result =
+                experimentValidator.validateForUpdate(buildDto(reactantAId, reactantBId, null, modalityId));
+
+        assertNull(result.instrument());
+        assertNotNull(result.modality());
+    }
+
     // --- 7. Modality existence (optional) -----------------------------------
 
     @Test
@@ -490,6 +542,26 @@ class ExperimentValidatorTest {
 
         ExperimentValidator.ValidatedReferences result =
                 experimentValidator.validateForCreate(buildDto(reactantAId, reactantBId, instrumentId, null));
+
+        assertNotNull(result.instrument());
+        assertNull(result.modality());
+    }
+
+    @Test
+    void validateForUpdate_shouldSkipModalityLookup_whenModalityNotProvided() {
+        when(userRepository.findById(scientistId)).thenReturn(Optional.of(scientist));
+        when(reactantRepository.findById(reactantAId)).thenReturn(Optional.of(reactantA));
+        when(reactantRepository.findById(reactantBId)).thenReturn(Optional.of(reactantB));
+
+        ReactantStructure activeStructure = new ReactantStructure();
+        activeStructure.setFlag(StructureFlag.ACTIVE);
+        when(structureRepository.findByReactant_Id(any())).thenReturn(List.of(activeStructure));
+
+        when(solventRepository.findById(solventId)).thenReturn(Optional.of(solvent));
+        when(instrumentRepository.findById(instrumentId)).thenReturn(Optional.of(instrument));
+
+        ExperimentValidator.ValidatedReferences result =
+                experimentValidator.validateForUpdate(buildDto(reactantAId, reactantBId, instrumentId, null));
 
         assertNotNull(result.instrument());
         assertNull(result.modality());

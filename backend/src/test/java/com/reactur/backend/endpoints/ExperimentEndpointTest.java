@@ -312,6 +312,19 @@ class ExperimentEndpointTest {
   }
 
   @Test
+  void archiveExperiment_whenServiceThrowsNotFound_returns404() throws Exception {
+    UUID experimentId = UUID.randomUUID();
+
+    Mockito.doThrow(new ResourceNotFoundException("Not found"))
+      .when(experimentService).archiveExperiment(Mockito.eq(experimentId), Mockito.anyString(), any(Role.class));
+
+    mockMvc.perform(delete("/api/experiment/" + experimentId)
+        .with(csrf())
+        .with(asUser("any-user-id")))
+      .andExpect(status().isNotFound());
+  }
+
+  @Test
   void restoreExperiment_whenAuthorized_returns200Ok() throws Exception {
     UUID experimentId = UUID.randomUUID();
     GetExperimentDto restoredExperiment = new GetExperimentDto(experimentId, List.of("10.1000/rxn123"), null, null, null, null, null, null, null);
@@ -339,6 +352,19 @@ class ExperimentEndpointTest {
         .with(csrf())
         .with(asUser("snooper-000")))
       .andExpect(status().isForbidden());
+  }
+
+  @Test
+  void restoreExperiment_whenServiceThrowsNotFound_returns404() throws Exception {
+    UUID experimentId = UUID.randomUUID();
+
+    Mockito.when(experimentService.restoreExperiment(Mockito.eq(experimentId), Mockito.anyString(), any(Role.class)))
+      .thenThrow(new ResourceNotFoundException("Not found"));
+
+    mockMvc.perform(put("/api/experiment/" + experimentId + "/restore")
+        .with(csrf())
+        .with(asUser("any-user-id")))
+      .andExpect(status().isNotFound());
   }
 
   @Test
@@ -467,6 +493,26 @@ class ExperimentEndpointTest {
         .contentType(MediaType.APPLICATION_JSON)
         .content(objectMapper.writeValueAsString(validRequestDto)))
       .andExpect(status().isForbidden());
+  }
+
+  @Test
+  void updateExperiment_whenServiceThrowsNotFound_returns404() throws Exception {
+    UUID experimentId = UUID.randomUUID();
+    SaveExperimentDto validRequestDto = createDummySaveExperimentDto();
+
+    Mockito.when(experimentService.updateExperiment(
+      Mockito.eq(experimentId),
+      any(SaveExperimentDto.class),
+      Mockito.anyString(),
+      any(Role.class)
+    )).thenThrow(new ResourceNotFoundException("Not found"));
+
+    mockMvc.perform(put("/api/experiment/" + experimentId)
+        .with(csrf())
+        .with(asUser("any-user-id"))
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(objectMapper.writeValueAsString(validRequestDto)))
+      .andExpect(status().isNotFound());
   }
 
   @Test

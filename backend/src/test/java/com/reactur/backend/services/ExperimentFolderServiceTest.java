@@ -6,6 +6,7 @@ import com.reactur.backend.entities.User;
 import com.reactur.backend.entities.experiment.Experiment;
 import com.reactur.backend.entities.experiment.ExperimentFolder;
 import com.reactur.backend.entities.experiment.Metadata;
+import com.reactur.backend.exeptions.ResourceNotFoundException;
 import com.reactur.backend.mappers.FolderMapper;
 import com.reactur.backend.repositories.ExperimentFolderRepository;
 import com.reactur.backend.repositories.ExperimentRepository;
@@ -198,6 +199,16 @@ class ExperimentFolderServiceTest {
   }
 
   @Test
+  void createFolder_whenUserNotFound_throwsIllegalStateException() {
+    SaveFolderDto inputDto = new SaveFolderDto("My Synthesis");
+    when(userRepository.findById(creatorUser.getId())).thenReturn(Optional.empty());
+
+    assertThrows(IllegalStateException.class, () -> folderService.createFolder(inputDto, creatorUser.getId()));
+
+    Mockito.verify(folderRepository, Mockito.never()).save(any());
+  }
+
+  @Test
   void getMyFolders_returnsOnlyOwnedFolders() {
     ExperimentFolder f1 = new ExperimentFolder(UUID.randomUUID(), "Folder 1", creatorUser, new ArrayList<>());
     ExperimentFolder f2 = new ExperimentFolder(UUID.randomUUID(), "Folder 2", creatorUser, new ArrayList<>());
@@ -226,6 +237,23 @@ class ExperimentFolderServiceTest {
   }
 
   @Test
+  void addExperimentToFolder_whenExperimentNotFound_throwsResourceNotFoundException() {
+    UUID folderId = UUID.randomUUID();
+    UUID missingExperimentId = UUID.randomUUID();
+    ExperimentFolder folder = new ExperimentFolder(folderId, "My Data", creatorUser, new ArrayList<>());
+
+    when(folderRepository.findById(folderId)).thenReturn(Optional.of(folder));
+    when(experimentRepository.findById(missingExperimentId)).thenReturn(Optional.empty());
+
+    assertThrows(
+      ResourceNotFoundException.class,
+      () -> folderService.addExperimentToFolder(folderId, missingExperimentId, creatorUser.getId())
+    );
+
+    Mockito.verify(folderRepository, Mockito.never()).save(any(ExperimentFolder.class));
+  }
+
+  @Test
   void removeExperimentFromFolder_removesAndSaves() {
     UUID folderId = UUID.randomUUID();
     List<Experiment> exps = new ArrayList<>();
@@ -241,6 +269,19 @@ class ExperimentFolderServiceTest {
   }
 
   @Test
+  void removeExperimentFromFolder_whenFolderNotFound_throwsResourceNotFoundException() {
+    UUID folderId = UUID.randomUUID();
+    when(folderRepository.findById(folderId)).thenReturn(Optional.empty());
+
+    assertThrows(
+      ResourceNotFoundException.class,
+      () -> folderService.removeExperimentFromFolder(folderId, sharedExperimentId, creatorUser.getId())
+    );
+
+    Mockito.verify(folderRepository, Mockito.never()).save(any());
+  }
+
+  @Test
   void deleteFolder_whenAuthorized_deletesFolder() {
     UUID folderId = UUID.randomUUID();
     ExperimentFolder folder = new ExperimentFolder(folderId, "To Delete", creatorUser, new ArrayList<>());
@@ -252,5 +293,20 @@ class ExperimentFolderServiceTest {
     ArgumentCaptor<ExperimentFolder> folderCaptor = ArgumentCaptor.forClass(ExperimentFolder.class);
     Mockito.verify(folderRepository).delete(folderCaptor.capture());
     assertEquals(folderId, folderCaptor.getValue().getId());
+  }
+
+  @Test
+  void deleteFolder_whenFolderNotOwned_throwsAccessDeniedException() {
+    UUID folderId = UUID.randomUUID();
+    ExperimentFolder folder = new ExperimentFolder(folderId, "Creator Data", creatorUser, new ArrayList<>());
+
+    when(folderRepository.findById(folderId)).thenReturn(Optional.of(folder));
+
+    assertThrows(
+      AccessDeniedException.class,
+      () -> folderService.deleteFolder(folderId, scientistUserId)
+    );
+
+    Mockito.verify(folderRepository, Mockito.never()).delete(any());
   }
 }

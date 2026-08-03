@@ -103,4 +103,13 @@ class ReactantMapperTest {
         assertEquals(reactant.getId(), dto.uuid());
         assertNull(dto.flag());
     }
+
+    @Test
+    void toDto_withExplicitNullFlag_shouldMapNullFlagDirectlyViaTwoArgOverload() {
+        ReactantDto dto = mapper.toDto(reactant, null);
+
+        assertEquals(reactant.getId(), dto.uuid());
+        assertEquals(reactant.getShortName(), dto.shortName());
+        assertNull(dto.flag());
+    }
 }

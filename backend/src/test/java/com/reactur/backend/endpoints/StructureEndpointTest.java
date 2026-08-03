@@ -2,6 +2,7 @@ package com.reactur.backend.endpoints;
 
 import com.reactur.backend.dtos.reactants.StructureDto;
 import com.reactur.backend.enums.StructureFlag;
+import com.reactur.backend.exeptions.ResourceNotFoundException;
 import com.reactur.backend.repositories.UserRepository;
 import com.reactur.backend.security.SecurityConfig;
 import com.reactur.backend.services.StructureService;
@@ -105,6 +106,26 @@ public class StructureEndpointTest {
     }
 
     @Test
+    void uploadStructure_whenAdmin_andReactantNotFound_returns404() throws Exception {
+        UUID reactantId = UUID.randomUUID();
+        MockMultipartFile file = new MockMultipartFile(
+                "file",
+                "test.xyz",
+                MediaType.TEXT_PLAIN_VALUE,
+                "XYZ content".getBytes()
+        );
+
+        when(structureService.uploadStructure(eq(reactantId), any()))
+                .thenThrow(new ResourceNotFoundException("Reactant not found"));
+
+        mockMvc.perform(multipart(HttpMethod.POST, "/api/structure/{reactantId}", reactantId)
+                        .file(file)
+                        .contentType(MediaType.MULTIPART_FORM_DATA)
+                        .with(jwt().authorities(new SimpleGrantedAuthority("ROLE_ADMIN"))))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
     void generateStructureFromAPI_whenAdmin_returns204NoContent() throws Exception {
         UUID reactantId = UUID.randomUUID();
 
@@ -139,6 +160,18 @@ public class StructureEndpointTest {
                 .andExpect(status().isForbidden());
 
         verify(structureService, never()).generateStructureFromAPI(any());
+    }
+
+    @Test
+    void generateStructureFromAPI_whenAdmin_andReactantNotFound_returns404() throws Exception {
+        UUID reactantId = UUID.randomUUID();
+
+        doThrow(new ResourceNotFoundException("Reactant not found"))
+                .when(structureService).generateStructureFromAPI(reactantId);
+
+        mockMvc.perform(post("/api/structure/{reactantId}/generate", reactantId)
+                        .with(jwt().authorities(new SimpleGrantedAuthority("ROLE_ADMIN"))))
+                .andExpect(status().isNotFound());
     }
 
     @Test
@@ -182,6 +215,18 @@ public class StructureEndpointTest {
                 .andExpect(status().isForbidden());
 
         verify(structureService, never()).selectStructure(any());
+    }
+
+    @Test
+    void selectStructure_whenAdmin_andStructureNotFound_returns404() throws Exception {
+        UUID structureId = UUID.randomUUID();
+
+        when(structureService.selectStructure(structureId))
+                .thenThrow(new ResourceNotFoundException("Structure not found"));
+
+        mockMvc.perform(post("/api/structure/{structureId}/select", structureId)
+                        .with(jwt().authorities(new SimpleGrantedAuthority("ROLE_ADMIN"))))
+                .andExpect(status().isNotFound());
     }
 
     @Test

@@ -148,6 +148,21 @@ class ReactantEndpointTest {
     }
 
     @Test
+    void updateReactant_WhenAdmin_AndReactantNotFound_ShouldReturn404() throws Exception {
+        UUID id = UUID.randomUUID();
+        UpdateReactantDto saveDto = new UpdateReactantDto("C=C", UUID.randomUUID(), "Ethene", null, "Ethene", "74-85-1", "VGGSQFCHJZSIN-UHFFFAOYSA-N", null, null);
+
+        when(reactantService.updateReactant(eq(id), any(UpdateReactantDto.class)))
+                .thenThrow(new ResourceNotFoundException("Reactant not found"));
+
+        mockMvc.perform(patch("/api/reactant/" + id)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(saveDto))
+                        .with(jwt().authorities(new SimpleGrantedAuthority("ROLE_ADMIN"))))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
     void updateReactant_WhenUser_ShouldReturn403() throws Exception {
         UUID id = UUID.randomUUID();
         UpdateReactantDto saveDto = new UpdateReactantDto("C=C", UUID.randomUUID(), "Ethene", null, "Ethene", "74-85-1", "VGGSQFCHJZSIN-UHFFFAOYSA-N", null, null);
@@ -239,6 +254,18 @@ class ReactantEndpointTest {
     }
 
     @Test
+    void archiveReactant_WhenAdmin_AndReactantNotFound_ShouldReturn404() throws Exception {
+        UUID id = UUID.randomUUID();
+
+        doThrow(new ResourceNotFoundException("Reactant not found"))
+                .when(reactantService).archiveReactant(id);
+
+        mockMvc.perform(delete("/api/reactant/" + id)
+                        .with(jwt().authorities(new SimpleGrantedAuthority("ROLE_ADMIN"))))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
     void archiveReactant_WhenSupervisor_ShouldReturn403() throws Exception {
         UUID id = UUID.randomUUID();
 
@@ -271,6 +298,17 @@ class ReactantEndpointTest {
                         .with(jwt().authorities(new SimpleGrantedAuthority("ROLE_ADMIN"))))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.shortName").value("Ethene"));
+    }
+
+    @Test
+    void restoreReactant_WhenAdmin_AndReactantNotFound_ShouldReturn404() throws Exception {
+        UUID id = UUID.randomUUID();
+
+        when(reactantService.restoreReactant(id)).thenThrow(new ResourceNotFoundException("Reactant not found"));
+
+        mockMvc.perform(put("/api/reactant/" + id + "/restore")
+                        .with(jwt().authorities(new SimpleGrantedAuthority("ROLE_ADMIN"))))
+                .andExpect(status().isNotFound());
     }
 
     // Confirmed by the team: restoring is archive-management, which stays ADMIN-only even though

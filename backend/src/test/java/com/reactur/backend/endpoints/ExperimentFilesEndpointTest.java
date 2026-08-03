@@ -190,6 +190,17 @@ class ExperimentFilesEndpointTest {
     }
 
     @Test
+    void getFileDetails_ShouldReturn403_WhenUserCannotViewExperiment() throws Exception {
+        UUID fileId = UUID.randomUUID();
+        when(fileService.getAttachmentDetail(eq(fileId), any(), any(Role.class)))
+                .thenThrow(new AccessDeniedException("You do not have permission to view this experiment."));
+
+        mockMvc.perform(get("/api/file/" + fileId + "/details")
+                        .with(approvedUser("non-owner-user-id")))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
     void archiveFile_ShouldReturn204_WhenSuccessful() throws Exception {
         UUID fileId = UUID.randomUUID();
 

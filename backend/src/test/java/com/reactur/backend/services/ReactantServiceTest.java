@@ -473,7 +473,7 @@ class ReactantServiceTest {
     class GetAllReactants {
 
         @Test
-        void getAllReactants_ShouldReturnOnlyActiveReactants() {
+        void getAllReactants_ShouldAggregateAsPending_WhenOnlyPendingStructureExists() {
             when(reactantRepository.findAllByArchivedAtIsNull()).thenReturn(List.of(mockReactant));
 
             StructureDto pendingStruct = new StructureDto(UUID.randomUUID(), VALID_UUID, "test", "data", StructureFlag.PENDING);

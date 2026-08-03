@@ -5,6 +5,7 @@ import com.reactur.backend.dtos.experiments.ExperimentAttachmentDto;
 import com.reactur.backend.entities.experiment.Experiment;
 import com.reactur.backend.entities.experiment.ExperimentAttachment;
 import com.reactur.backend.enums.Role;
+import com.reactur.backend.exeptions.FileStorageException;
 import com.reactur.backend.exeptions.ResourceConflictException;
 import com.reactur.backend.exeptions.ResourceNotFoundException;
 import com.reactur.backend.repositories.ExperimentAttachmentRepository;
@@ -152,6 +153,25 @@ class FileServiceTests {
     }
 
     @Test
+    void storeFile_ShouldThrowFileStorageException_WhenS3PutObjectFails() {
+        UUID experimentId = UUID.randomUUID();
+        Experiment experiment = new Experiment();
+
+        MockMultipartFile file = new MockMultipartFile(
+                "file", "test.pdf", "application/pdf", "Dummy Content".getBytes());
+
+        when(experimentRepository.findById(experimentId)).thenReturn(Optional.of(experiment));
+
+        when(s3Client.putObject(any(PutObjectRequest.class), any(RequestBody.class)))
+                .thenThrow(new RuntimeException("S3 unavailable"));
+
+        assertThrows(FileStorageException.class,
+                () -> fileService.storeFile(experimentId, file, REQUESTING_USER_ID, REQUESTING_USER_ROLE));
+
+        verify(attachmentRepository, never()).save(any());
+    }
+
+    @Test
     void loadFileAsResource_ShouldReturnResource() {
         UUID fileId = UUID.randomUUID();
         ExperimentAttachment attachment = new ExperimentAttachment();
@@ -167,6 +187,17 @@ class FileServiceTests {
 
         assertNotNull(result);
         verify(s3Client, times(1)).getObject(any(GetObjectRequest.class));
+    }
+
+    @Test
+    void loadFileAsResource_ShouldThrowNotFound_WhenFileDoesNotExist() {
+        UUID fileId = UUID.randomUUID();
+        when(attachmentRepository.findById(fileId)).thenReturn(Optional.empty());
+
+        assertThrows(ResourceNotFoundException.class,
+                () -> fileService.loadFileAsResource(fileId, REQUESTING_USER_ID, REQUESTING_USER_ROLE));
+
+        verify(s3Client, never()).getObject(any(GetObjectRequest.class));
     }
 
     @Test

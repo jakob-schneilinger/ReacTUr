@@ -176,6 +176,18 @@ class ReactantValidatorTest {
                 () -> reactantValidator.validateForCreate(buildCreateDto("Hydrochloric Acid", List.of("HCl", "hcl"), null), userId));
     }
 
+    @Test
+    void validateForCreate_shouldThrowValidationException_whenAdditionalShortNamesContainsBlankEntry() {
+        assertThrows(ValidationException.class,
+                () -> reactantValidator.validateForCreate(buildCreateDto("Hydrochloric Acid", List.of("HCl", ""), null), userId));
+    }
+
+    @Test
+    void validateForCreate_shouldThrowValidationException_whenShortNameIncludedInAdditionalShortNames() {
+        assertThrows(ValidationException.class,
+                () -> reactantValidator.validateForCreate(buildCreateDto("Ethanol", List.of("EtOH", "Ethanol"), null), userId));
+    }
+
     // --- validateForUpdate: happy paths ----------------------------------
 
     @Test
@@ -266,6 +278,26 @@ class ReactantValidatorTest {
     void validateForUpdate_shouldThrowValidationException_whenAdditionalShortNamesDifferOnlyByCase() {
         UpdateReactantDto patchDto = new UpdateReactantDto(
                 null, null, null, List.of("HCl", "hcl"), null, null, null, null, null
+        );
+
+        assertThrows(ValidationException.class,
+                () -> reactantValidator.validateForUpdate(reactantId, patchDto, existingReactant));
+    }
+
+    @Test
+    void validateForUpdate_shouldThrowValidationException_whenAdditionalShortNamesContainsBlankEntry() {
+        UpdateReactantDto patchDto = new UpdateReactantDto(
+                null, null, null, List.of("EtOH", ""), null, null, null, null, null
+        );
+
+        assertThrows(ValidationException.class,
+                () -> reactantValidator.validateForUpdate(reactantId, patchDto, existingReactant));
+    }
+
+    @Test
+    void validateForUpdate_shouldThrowValidationException_whenShortNameIncludedInAdditionalShortNames() {
+        UpdateReactantDto patchDto = new UpdateReactantDto(
+                null, null, "NewName", List.of("OtherName", "NewName"), null, null, null, null, null
         );
 
         assertThrows(ValidationException.class,
