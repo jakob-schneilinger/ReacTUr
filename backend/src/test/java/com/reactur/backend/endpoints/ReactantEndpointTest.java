@@ -6,6 +6,7 @@ import com.reactur.backend.dtos.reactants.ReactantDto;
 import com.reactur.backend.dtos.reactants.UpdateReactantDto;
 import com.reactur.backend.enums.StructureFlag;
 import com.reactur.backend.exeptions.GlobalExceptionHandler;
+import com.reactur.backend.exeptions.ResourceConflictException;
 import com.reactur.backend.exeptions.ResourceNotFoundException;
 import com.reactur.backend.repositories.UserRepository;
 import com.reactur.backend.security.SecurityConfig;
@@ -116,6 +117,20 @@ class ReactantEndpointTest {
     }
 
     @Test
+    void createReactant_WhenShortNameAlreadyTaken_ShouldReturn409() throws Exception {
+        CreateReactantDto saveDto = new CreateReactantDto("C=C", UUID.randomUUID(), "Ethene", null, "Ethene", "74-85-1", "VGGSQFCHJZSIN-UHFFFAOYSA-N", null, null);
+
+        when(reactantService.createReactant(any(CreateReactantDto.class), any()))
+                .thenThrow(new ResourceConflictException("Short name already taken"));
+
+        mockMvc.perform(post("/api/reactant")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(saveDto))
+                        .with(jwt().authorities(new SimpleGrantedAuthority("ROLE_ADMIN"))))
+                .andExpect(status().isConflict());
+    }
+
+    @Test
     void updateReactant_WhenAdmin_ShouldReturn200() throws Exception {
         UUID id = UUID.randomUUID();
         UpdateReactantDto saveDto = new UpdateReactantDto("C=C", UUID.randomUUID(), "Ethene", null, "Ethene", "74-85-1", "VGGSQFCHJZSIN-UHFFFAOYSA-N", null, null);
@@ -160,6 +175,21 @@ class ReactantEndpointTest {
                         .content(objectMapper.writeValueAsString(saveDto))
                         .with(jwt().authorities(new SimpleGrantedAuthority("ROLE_ADMIN"))))
                 .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void updateReactant_WhenAdmin_AndShortNameConflictsWithAnotherReactant_ShouldReturn409() throws Exception {
+        UUID id = UUID.randomUUID();
+        UpdateReactantDto saveDto = new UpdateReactantDto("C=C", UUID.randomUUID(), "Ethene", null, "Ethene", "74-85-1", "VGGSQFCHJZSIN-UHFFFAOYSA-N", null, null);
+
+        when(reactantService.updateReactant(eq(id), any(UpdateReactantDto.class)))
+                .thenThrow(new ResourceConflictException("Short name already used by another reactant"));
+
+        mockMvc.perform(patch("/api/reactant/" + id)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(saveDto))
+                        .with(jwt().authorities(new SimpleGrantedAuthority("ROLE_ADMIN"))))
+                .andExpect(status().isConflict());
     }
 
     @Test

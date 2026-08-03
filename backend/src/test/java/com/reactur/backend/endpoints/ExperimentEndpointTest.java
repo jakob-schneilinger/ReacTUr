@@ -7,7 +7,9 @@ import com.reactur.backend.dtos.experiments.SaveExperimentDto;
 import com.reactur.backend.dtos.experiments.SaveMetadataDto;
 import com.reactur.backend.dtos.experiments.SearchParametersDto;
 import com.reactur.backend.enums.Role;
+import com.reactur.backend.exeptions.ResourceConflictException;
 import com.reactur.backend.exeptions.ResourceNotFoundException;
+import com.reactur.backend.exeptions.UnprocessableEntityException;
 import com.reactur.backend.security.RoleExtractor;
 import com.reactur.backend.security.SecurityConfig;
 import com.reactur.backend.services.ExperimentHistoryService;
@@ -16,7 +18,6 @@ import com.reactur.backend.repositories.UserRepository;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
@@ -41,6 +42,7 @@ import java.util.Map;
 import java.util.UUID;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -109,7 +111,7 @@ class ExperimentEndpointTest {
     );
 
     // ## Mocking of the service layer to accept the DTO and return the expected answer
-    Mockito.when(experimentService.createExperiment(any(SaveExperimentDto.class), Mockito.anyString(), any(Role.class)))
+    when(experimentService.createExperiment(any(SaveExperimentDto.class), anyString(), any(Role.class)))
       .thenReturn(expectedResponseDto);
 
 
@@ -135,10 +137,10 @@ class ExperimentEndpointTest {
     // ## Extra check: Making sure that the service got the right DTO, that nothing got accidentally changed
     ArgumentCaptor<SaveExperimentDto> dtoCaptor = ArgumentCaptor.forClass(SaveExperimentDto.class);
 
-    Mockito.verify(experimentService).createExperiment(
+    verify(experimentService).createExperiment(
       dtoCaptor.capture(),
-      Mockito.eq("mock-keycloak-id-123"),
-      Mockito.eq(Role.USER)
+      eq("mock-keycloak-id-123"),
+      eq(Role.USER)
     );
     SaveExperimentDto capturedDto = dtoCaptor.getValue();
 
@@ -184,7 +186,22 @@ class ExperimentEndpointTest {
 
       .andExpect(status().isBadRequest());
 
-    Mockito.verifyNoInteractions(experimentService);
+    verifyNoInteractions(experimentService);
+  }
+
+  @Test
+  void createExperiment_whenServiceThrowsUnprocessableEntity_returns422() throws Exception {
+    SaveExperimentDto validRequestDto = createDummySaveExperimentDto();
+
+    when(experimentService.createExperiment(any(SaveExperimentDto.class), anyString(), any(Role.class)))
+      .thenThrow(new UnprocessableEntityException("Semantic validation failed"));
+
+    mockMvc.perform(post("/api/experiment")
+        .with(csrf())
+        .with(asUser("mock-keycloak-id-123"))
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(objectMapper.writeValueAsString(validRequestDto)))
+      .andExpect(status().isUnprocessableContent());
   }
 
   @Test
@@ -192,7 +209,7 @@ class ExperimentEndpointTest {
     UUID experimentId = UUID.randomUUID();
     GetExperimentDto activeExperiment = new GetExperimentDto(experimentId, List.of("10.1000/rxn123"), null, null, null, null, null, null, null);
 
-    Mockito.when(experimentService.getExperiment(Mockito.eq(experimentId), Mockito.anyString(), any(Role.class)))
+    when(experimentService.getExperiment(eq(experimentId), anyString(), any(Role.class)))
       .thenReturn(activeExperiment);
 
     mockMvc.perform(get("/api/experiment/" + experimentId)
@@ -205,7 +222,7 @@ class ExperimentEndpointTest {
   void getExperiment_whenServiceThrowsForbidden_returns403() throws Exception {
     UUID experimentId = UUID.randomUUID();
 
-    Mockito.when(experimentService.getExperiment(Mockito.eq(experimentId), Mockito.anyString(), any(Role.class)))
+    when(experimentService.getExperiment(eq(experimentId), anyString(), any(Role.class)))
       .thenThrow(new AccessDeniedException("Forbidden"));
 
     mockMvc.perform(get("/api/experiment/" + experimentId)
@@ -217,7 +234,7 @@ class ExperimentEndpointTest {
   void getExperiment_whenServiceThrowsNotFound_returns404() throws Exception {
     UUID experimentId = UUID.randomUUID();
 
-    Mockito.when(experimentService.getExperiment(Mockito.eq(experimentId), Mockito.anyString(), any(Role.class)))
+    when(experimentService.getExperiment(eq(experimentId), anyString(), any(Role.class)))
       .thenThrow(new ResourceNotFoundException("Not found"));
 
     mockMvc.perform(get("/api/experiment/" + experimentId)
@@ -233,7 +250,7 @@ class ExperimentEndpointTest {
       "author-123", Instant.parse("2024-01-01T00:00:00Z"), "UPDATE", Map.of("temperature", "20.0 -> 25.0")
     );
 
-    Mockito.when(experimentHistoryService.getExperimentHistory(Mockito.eq(experimentId), Mockito.anyString(), any(Role.class)))
+    when(experimentHistoryService.getExperimentHistory(eq(experimentId), anyString(), any(Role.class)))
       .thenReturn(List.of(historyEntry));
 
     mockMvc.perform(get("/api/experiment/" + experimentId + "/history")
@@ -248,7 +265,7 @@ class ExperimentEndpointTest {
   void getAuditLogs_whenServiceThrowsForbidden_returns403() throws Exception {
     UUID experimentId = UUID.randomUUID();
 
-    Mockito.when(experimentHistoryService.getExperimentHistory(Mockito.eq(experimentId), Mockito.anyString(), any(Role.class)))
+    when(experimentHistoryService.getExperimentHistory(eq(experimentId), anyString(), any(Role.class)))
       .thenThrow(new AccessDeniedException("Forbidden"));
 
     mockMvc.perform(get("/api/experiment/" + experimentId + "/history")
@@ -260,7 +277,7 @@ class ExperimentEndpointTest {
   void getAuditLogs_whenServiceThrowsNotFound_returns404() throws Exception {
     UUID experimentId = UUID.randomUUID();
 
-    Mockito.when(experimentHistoryService.getExperimentHistory(Mockito.eq(experimentId), Mockito.anyString(), any(Role.class)))
+    when(experimentHistoryService.getExperimentHistory(eq(experimentId), anyString(), any(Role.class)))
       .thenThrow(new ResourceNotFoundException("Not found"));
 
     mockMvc.perform(get("/api/experiment/" + experimentId + "/history")
@@ -273,7 +290,7 @@ class ExperimentEndpointTest {
     UUID experimentId = UUID.randomUUID();
     String adminId = "admin-user-777";
 
-    Mockito.when(experimentHistoryService.getExperimentHistory(experimentId, adminId, Role.ADMIN))
+    when(experimentHistoryService.getExperimentHistory(experimentId, adminId, Role.ADMIN))
       .thenReturn(List.of());
 
     mockMvc.perform(get("/api/experiment/" + experimentId + "/history")
@@ -281,7 +298,7 @@ class ExperimentEndpointTest {
       .andExpect(status().isOk())
       .andExpect(jsonPath("$.length()").value(0));
 
-    Mockito.verify(experimentHistoryService).getExperimentHistory(experimentId, adminId, Role.ADMIN);
+    verify(experimentHistoryService).getExperimentHistory(experimentId, adminId, Role.ADMIN);
   }
 
   @Test
@@ -294,7 +311,7 @@ class ExperimentEndpointTest {
         .with(asUser("creator-123")))
       .andExpect(status().isNoContent());
 
-    Mockito.verify(experimentService).archiveExperiment(experimentId, "creator-123", Role.USER);
+    verify(experimentService).archiveExperiment(experimentId, "creator-123", Role.USER);
   }
 
   @Test
@@ -302,8 +319,8 @@ class ExperimentEndpointTest {
     UUID experimentId = UUID.randomUUID();
 
     // Mock the void method to throw our exception
-    Mockito.doThrow(new AccessDeniedException("Forbidden"))
-      .when(experimentService).archiveExperiment(Mockito.eq(experimentId), Mockito.anyString(), any(Role.class));
+    doThrow(new AccessDeniedException("Forbidden"))
+      .when(experimentService).archiveExperiment(eq(experimentId), anyString(), any(Role.class));
 
     mockMvc.perform(delete("/api/experiment/" + experimentId)
         .with(csrf())
@@ -315,8 +332,8 @@ class ExperimentEndpointTest {
   void archiveExperiment_whenServiceThrowsNotFound_returns404() throws Exception {
     UUID experimentId = UUID.randomUUID();
 
-    Mockito.doThrow(new ResourceNotFoundException("Not found"))
-      .when(experimentService).archiveExperiment(Mockito.eq(experimentId), Mockito.anyString(), any(Role.class));
+    doThrow(new ResourceNotFoundException("Not found"))
+      .when(experimentService).archiveExperiment(eq(experimentId), anyString(), any(Role.class));
 
     mockMvc.perform(delete("/api/experiment/" + experimentId)
         .with(csrf())
@@ -329,7 +346,7 @@ class ExperimentEndpointTest {
     UUID experimentId = UUID.randomUUID();
     GetExperimentDto restoredExperiment = new GetExperimentDto(experimentId, List.of("10.1000/rxn123"), null, null, null, null, null, null, null);
 
-    Mockito.when(experimentService.restoreExperiment(Mockito.eq(experimentId), Mockito.anyString(), any(Role.class)))
+    when(experimentService.restoreExperiment(eq(experimentId), anyString(), any(Role.class)))
       .thenReturn(restoredExperiment);
 
     mockMvc.perform(put("/api/experiment/" + experimentId + "/restore")
@@ -338,14 +355,14 @@ class ExperimentEndpointTest {
       .andExpect(status().isOk())
       .andExpect(jsonPath("$.dois[0]").value("10.1000/rxn123"));
 
-    Mockito.verify(experimentService).restoreExperiment(experimentId, "scientist-456", Role.USER);
+    verify(experimentService).restoreExperiment(experimentId, "scientist-456", Role.USER);
   }
 
   @Test
   void restoreExperiment_whenServiceThrowsForbidden_returns403() throws Exception {
     UUID experimentId = UUID.randomUUID();
 
-    Mockito.when(experimentService.restoreExperiment(Mockito.eq(experimentId), Mockito.anyString(), any(Role.class)))
+    when(experimentService.restoreExperiment(eq(experimentId), anyString(), any(Role.class)))
       .thenThrow(new AccessDeniedException("Forbidden"));
 
     mockMvc.perform(put("/api/experiment/" + experimentId + "/restore")
@@ -358,7 +375,7 @@ class ExperimentEndpointTest {
   void restoreExperiment_whenServiceThrowsNotFound_returns404() throws Exception {
     UUID experimentId = UUID.randomUUID();
 
-    Mockito.when(experimentService.restoreExperiment(Mockito.eq(experimentId), Mockito.anyString(), any(Role.class)))
+    when(experimentService.restoreExperiment(eq(experimentId), anyString(), any(Role.class)))
       .thenThrow(new ResourceNotFoundException("Not found"));
 
     mockMvc.perform(put("/api/experiment/" + experimentId + "/restore")
@@ -374,7 +391,7 @@ class ExperimentEndpointTest {
     GetExperimentDto experiment2 = new GetExperimentDto(UUID.randomUUID(), List.of("10.1000/rxn002"), null, null, null, null, null, null, null);
     GetExperimentDto[] mockedResponse = { experiment1, experiment2 };
 
-    Mockito.when(experimentService.getArchivedExperiments(Mockito.eq(userId), Mockito.eq(Role.USER)))
+    when(experimentService.getArchivedExperiments(eq(userId), eq(Role.USER)))
       .thenReturn(mockedResponse);
 
     mockMvc.perform(get("/api/experiment/archived")
@@ -384,7 +401,7 @@ class ExperimentEndpointTest {
       .andExpect(jsonPath("$[0].dois[0]").value("10.1000/rxn001"))
       .andExpect(jsonPath("$[1].dois[0]").value("10.1000/rxn002"));
 
-    Mockito.verify(experimentService).getArchivedExperiments(userId, Role.USER);
+    verify(experimentService).getArchivedExperiments(userId, Role.USER);
   }
 
   @Test
@@ -394,7 +411,7 @@ class ExperimentEndpointTest {
       new GetExperimentDto(UUID.randomUUID(), List.of("10.1000/rxn999"), null, null, null, null, null, null, null)
     };
 
-    Mockito.when(experimentService.getArchivedExperiments(Mockito.eq(adminId), Mockito.eq(Role.ADMIN)))
+    when(experimentService.getArchivedExperiments(eq(adminId), eq(Role.ADMIN)))
       .thenReturn(mockedResponse);
 
     mockMvc.perform(get("/api/experiment/archived")
@@ -403,7 +420,7 @@ class ExperimentEndpointTest {
       .andExpect(jsonPath("$.length()").value(1))
       .andExpect(jsonPath("$[0].dois[0]").value("10.1000/rxn999"));
 
-    Mockito.verify(experimentService).getArchivedExperiments(adminId, Role.ADMIN);
+    verify(experimentService).getArchivedExperiments(adminId, Role.ADMIN);
   }
 
   @Test
@@ -411,7 +428,7 @@ class ExperimentEndpointTest {
     String userId = "lonely-user-000";
     GetExperimentDto[] mockedResponse = new GetExperimentDto[0];
 
-    Mockito.when(experimentService.getArchivedExperiments(Mockito.eq(userId), Mockito.eq(Role.USER)))
+    when(experimentService.getArchivedExperiments(eq(userId), eq(Role.USER)))
       .thenReturn(mockedResponse);
 
     mockMvc.perform(get("/api/experiment/archived")
@@ -419,7 +436,7 @@ class ExperimentEndpointTest {
       .andExpect(status().isOk())
       .andExpect(jsonPath("$.length()").value(0));
 
-    Mockito.verify(experimentService).getArchivedExperiments(userId, Role.USER);
+    verify(experimentService).getArchivedExperiments(userId, Role.USER);
   }
 
   @Test
@@ -451,10 +468,10 @@ class ExperimentEndpointTest {
       experimentId, List.of("10.1000/rxn-updated"), null, null, null, null, null, null, null
     );
 
-    Mockito.when(experimentService.updateExperiment(
-      Mockito.eq(experimentId),
+    when(experimentService.updateExperiment(
+      eq(experimentId),
       any(SaveExperimentDto.class),
-      Mockito.anyString(),
+      anyString(),
       any(Role.class)
     )).thenReturn(expectedResponseDto);
 
@@ -467,11 +484,11 @@ class ExperimentEndpointTest {
       .andExpect(jsonPath("$.uuid").value(experimentId.toString()))
       .andExpect(jsonPath("$.dois[0]").value("10.1000/rxn-updated"));
 
-    Mockito.verify(experimentService).updateExperiment(
-      Mockito.eq(experimentId),
+    verify(experimentService).updateExperiment(
+      eq(experimentId),
       any(SaveExperimentDto.class),
-      Mockito.eq("mock-keycloak-id-123"),
-      Mockito.eq(Role.USER)
+      eq("mock-keycloak-id-123"),
+      eq(Role.USER)
     );
   }
 
@@ -480,10 +497,10 @@ class ExperimentEndpointTest {
     UUID experimentId = UUID.randomUUID();
     SaveExperimentDto validRequestDto = createDummySaveExperimentDto();
 
-    Mockito.when(experimentService.updateExperiment(
-      Mockito.eq(experimentId),
+    when(experimentService.updateExperiment(
+      eq(experimentId),
       any(SaveExperimentDto.class),
-      Mockito.anyString(),
+      anyString(),
       any(Role.class)
     )).thenThrow(new AccessDeniedException("Forbidden"));
 
@@ -500,10 +517,10 @@ class ExperimentEndpointTest {
     UUID experimentId = UUID.randomUUID();
     SaveExperimentDto validRequestDto = createDummySaveExperimentDto();
 
-    Mockito.when(experimentService.updateExperiment(
-      Mockito.eq(experimentId),
+    when(experimentService.updateExperiment(
+      eq(experimentId),
       any(SaveExperimentDto.class),
-      Mockito.anyString(),
+      anyString(),
       any(Role.class)
     )).thenThrow(new ResourceNotFoundException("Not found"));
 
@@ -513,6 +530,26 @@ class ExperimentEndpointTest {
         .contentType(MediaType.APPLICATION_JSON)
         .content(objectMapper.writeValueAsString(validRequestDto)))
       .andExpect(status().isNotFound());
+  }
+
+  @Test
+  void updateExperiment_whenServiceThrowsConflict_returns409() throws Exception {
+    UUID experimentId = UUID.randomUUID();
+    SaveExperimentDto validRequestDto = createDummySaveExperimentDto();
+
+    when(experimentService.updateExperiment(
+      eq(experimentId),
+      any(SaveExperimentDto.class),
+      anyString(),
+      any(Role.class)
+    )).thenThrow(new ResourceConflictException("Cannot update an archived experiment"));
+
+    mockMvc.perform(put("/api/experiment/" + experimentId)
+        .with(csrf())
+        .with(asUser("any-user-id"))
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(objectMapper.writeValueAsString(validRequestDto)))
+      .andExpect(status().isConflict());
   }
 
   @Test
@@ -530,10 +567,10 @@ class ExperimentEndpointTest {
       );
 
     // service call
-    Mockito.when(experimentService.searchExperiments(
+    when(experimentService.searchExperiments(
         any(SearchParametersDto.class),
         any(Pageable.class),
-        Mockito.anyString(),
+        anyString(),
         any(Role.class)
       )) .thenReturn(mockPage);
 
@@ -556,11 +593,11 @@ class ExperimentEndpointTest {
     ArgumentCaptor<SearchParametersDto> dtoCaptor = ArgumentCaptor.forClass(SearchParametersDto.class);
     ArgumentCaptor<Pageable> pageableCaptor = ArgumentCaptor.forClass(Pageable.class);
 
-    Mockito.verify(experimentService).searchExperiments(
+    verify(experimentService).searchExperiments(
       dtoCaptor.capture(),
       pageableCaptor.capture(),
-      Mockito.eq("mock-keycloak-id-123"),
-      Mockito.eq(Role.USER)
+      eq("mock-keycloak-id-123"),
+      eq(Role.USER)
     );
 
     SearchParametersDto capturedDto = dtoCaptor.getValue();
@@ -582,7 +619,7 @@ class ExperimentEndpointTest {
         .with(asUser("mock-keycloak-id-123")))
       .andExpect(status().isBadRequest());
 
-    Mockito.verify(experimentService, Mockito.never()).searchExperiments(any(), any(), any(), any());
+    verify(experimentService, never()).searchExperiments(any(), any(), any(), any());
   }
 
   @Test

@@ -11,12 +11,12 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
- * Representative test for the {@code OptionRepository}-based option repositories
- * (ChemicalTypeRepository, InstrumentRepository, ModalityRepository, SolventRepository). All four
- * extend the {@code @NoRepositoryBean} generic {@code OptionRepository} identically, so this
- * single suite is enough to confirm {@code existsByNameIgnoreCase} works via that shared contract;
- * it's not repeated for each of the other three. Mirrors the same "one representative test for a
- * shared base" reasoning documented on {@code SolventMapperTest} for the analogous mappers.
+ * Direct test for {@code SolventRepository}, one of the {@code OptionRepository}-based option
+ * repositories (ChemicalTypeRepository, InstrumentRepository, ModalityRepository,
+ * SolventRepository). All four extend the {@code @NoRepositoryBean} generic
+ * {@code OptionRepository} identically, and each has its own direct test file exercising
+ * {@code existsByNameIgnoreCase} against its own concrete repository bean - this file no longer
+ * stands in as a single representative for the other three.
  * <p>
  * See {@code ReactantRepositoryTest} for why {@code @DataJpaTest} +
  * {@code @AutoConfigureTestDatabase(Replace.NONE)} + {@code @ActiveProfiles("test")} are all

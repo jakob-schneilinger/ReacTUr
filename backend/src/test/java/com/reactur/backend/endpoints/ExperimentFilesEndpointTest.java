@@ -3,6 +3,7 @@ package com.reactur.backend.endpoints;
 import com.reactur.backend.dtos.experiments.ExperimentAttachmentDetailsDto;
 import com.reactur.backend.enums.Role;
 import com.reactur.backend.exeptions.GlobalExceptionHandler;
+import com.reactur.backend.exeptions.ResourceConflictException;
 import com.reactur.backend.exeptions.ResourceNotFoundException;
 import com.reactur.backend.repositories.UserRepository;
 import com.reactur.backend.security.RoleExtractor;
@@ -83,6 +84,20 @@ class ExperimentFilesEndpointTest {
         mockMvc.perform(multipart("/api/file/" + experimentId).file(file)
                         .with(approvedUser("uploader-user-id")))
                 .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void uploadFile_ShouldReturn409_WhenExperimentIsArchived() throws Exception {
+        UUID experimentId = UUID.randomUUID();
+        MockMultipartFile file = new MockMultipartFile(
+                "file", "test.pdf", MediaType.APPLICATION_PDF_VALUE, "Dummy PDF Content".getBytes());
+
+        when(fileService.storeFile(eq(experimentId), any(), any(), any(Role.class)))
+                .thenThrow(new ResourceConflictException("Cannot upload a file to an archived experiment"));
+
+        mockMvc.perform(multipart("/api/file/" + experimentId).file(file)
+                        .with(approvedUser("uploader-user-id")))
+                .andExpect(status().isConflict());
     }
 
     @Test
@@ -221,6 +236,18 @@ class ExperimentFilesEndpointTest {
         mockMvc.perform(delete("/api/file/" + fileId)
                         .with(approvedUser("deleter-user-id")))
                 .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void archiveFile_ShouldReturn409_WhenExperimentIsArchived() throws Exception {
+        UUID fileId = UUID.randomUUID();
+
+        doThrow(new ResourceConflictException("Cannot archive a file of an archived experiment"))
+                .when(fileService).archiveFile(eq(fileId), any(), any(Role.class));
+
+        mockMvc.perform(delete("/api/file/" + fileId)
+                        .with(approvedUser("deleter-user-id")))
+                .andExpect(status().isConflict());
     }
 
     @Test
