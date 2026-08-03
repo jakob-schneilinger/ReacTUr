@@ -9,10 +9,12 @@ import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
 import org.springframework.boot.jdbc.test.autoconfigure.AutoConfigureTestDatabase;
 import org.springframework.test.context.ActiveProfiles;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -56,6 +58,36 @@ class ReactantRepositoryTest {
                 .shortName(shortName)
                 .smiles("C")
                 .additionalShortNames(additionalShortNames)
+                .createdBy(testUser)
+                .build();
+        return reactantRepository.saveAndFlush(reactant);
+    }
+
+    private Reactant persistReactantWithArchivedAt(String shortName, Instant archivedAt) {
+        Reactant reactant = Reactant.builder()
+                .shortName(shortName)
+                .smiles("C")
+                .archivedAt(archivedAt)
+                .createdBy(testUser)
+                .build();
+        return reactantRepository.saveAndFlush(reactant);
+    }
+
+    private Reactant persistReactantWithCasNumber(String shortName, String casNumber) {
+        Reactant reactant = Reactant.builder()
+                .shortName(shortName)
+                .smiles("C")
+                .casNumber(casNumber)
+                .createdBy(testUser)
+                .build();
+        return reactantRepository.saveAndFlush(reactant);
+    }
+
+    private Reactant persistReactantWithInChiKey(String shortName, String inChiKey) {
+        Reactant reactant = Reactant.builder()
+                .shortName(shortName)
+                .smiles("C")
+                .inChiKey(inChiKey)
                 .createdBy(testUser)
                 .build();
         return reactantRepository.saveAndFlush(reactant);
@@ -109,5 +141,85 @@ class ReactantRepositoryTest {
         Reactant reactant = persistReactant("Ethanol", List.of());
 
         assertFalse(reactantRepository.hasNameConflictExcludingId(Set.of("methanol"), reactant.getId()));
+    }
+
+    @Test
+    void findAllByArchivedAtIsNull_ShouldReturnOnlyUnarchivedReactants() {
+        Reactant active = persistReactantWithArchivedAt("Ethanol", null);
+        persistReactantWithArchivedAt("Methanol", Instant.now());
+
+        List<Reactant> result = reactantRepository.findAllByArchivedAtIsNull();
+
+        assertEquals(1, result.size());
+        assertEquals(active.getId(), result.get(0).getId());
+    }
+
+    @Test
+    void findAllByArchivedAtIsNotNull_ShouldReturnOnlyArchivedReactants() {
+        persistReactantWithArchivedAt("Ethanol", null);
+        Reactant archived = persistReactantWithArchivedAt("Methanol", Instant.now());
+
+        List<Reactant> result = reactantRepository.findAllByArchivedAtIsNotNull();
+
+        assertEquals(1, result.size());
+        assertEquals(archived.getId(), result.get(0).getId());
+    }
+
+    @Test
+    void existsByCasNumber_ShouldReturnTrue_WhenCasNumberMatches() {
+        persistReactantWithCasNumber("Ethanol", "64-17-5");
+
+        assertTrue(reactantRepository.existsByCasNumber("64-17-5"));
+    }
+
+    @Test
+    void existsByCasNumber_ShouldReturnFalse_WhenCasNumberDoesNotMatch() {
+        persistReactantWithCasNumber("Ethanol", "64-17-5");
+
+        assertFalse(reactantRepository.existsByCasNumber("7732-18-5"));
+    }
+
+    @Test
+    void existsByInChiKey_ShouldReturnTrue_WhenInChiKeyMatches() {
+        persistReactantWithInChiKey("Ethanol", "LFQSCWFLJHTTHZ-UHFFFAOYSA-N");
+
+        assertTrue(reactantRepository.existsByInChiKey("LFQSCWFLJHTTHZ-UHFFFAOYSA-N"));
+    }
+
+    @Test
+    void existsByInChiKey_ShouldReturnFalse_WhenInChiKeyDoesNotMatch() {
+        persistReactantWithInChiKey("Ethanol", "LFQSCWFLJHTTHZ-UHFFFAOYSA-N");
+
+        assertFalse(reactantRepository.existsByInChiKey("XLYOFNOQVPJJNP-UHFFFAOYSA-N"));
+    }
+
+    @Test
+    void existsByCasNumberAndIdNot_ShouldReturnTrue_WhenAnotherReactantHasSameCasNumber() {
+        persistReactantWithCasNumber("Ethanol", "64-17-5");
+        Reactant other = persistReactantWithCasNumber("Methanol", "67-56-1");
+
+        assertTrue(reactantRepository.existsByCasNumberAndIdNot("64-17-5", other.getId()));
+    }
+
+    @Test
+    void existsByCasNumberAndIdNot_ShouldReturnFalse_WhenOnlyMatchIsTheExcludedReactant() {
+        Reactant reactant = persistReactantWithCasNumber("Ethanol", "64-17-5");
+
+        assertFalse(reactantRepository.existsByCasNumberAndIdNot("64-17-5", reactant.getId()));
+    }
+
+    @Test
+    void existsByInChiKeyAndIdNot_ShouldReturnTrue_WhenAnotherReactantHasSameInChiKey() {
+        persistReactantWithInChiKey("Ethanol", "LFQSCWFLJHTTHZ-UHFFFAOYSA-N");
+        Reactant other = persistReactantWithInChiKey("Methanol", "OKKJLVBELUTLKV-UHFFFAOYSA-N");
+
+        assertTrue(reactantRepository.existsByInChiKeyAndIdNot("LFQSCWFLJHTTHZ-UHFFFAOYSA-N", other.getId()));
+    }
+
+    @Test
+    void existsByInChiKeyAndIdNot_ShouldReturnFalse_WhenOnlyMatchIsTheExcludedReactant() {
+        Reactant reactant = persistReactantWithInChiKey("Ethanol", "LFQSCWFLJHTTHZ-UHFFFAOYSA-N");
+
+        assertFalse(reactantRepository.existsByInChiKeyAndIdNot("LFQSCWFLJHTTHZ-UHFFFAOYSA-N", reactant.getId()));
     }
 }
