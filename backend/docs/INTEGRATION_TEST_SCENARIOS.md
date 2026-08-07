@@ -21,6 +21,15 @@ persistence + multi-step workflows — not re-derive validation branches already
 by the 410 unit tests. Scenarios below were chosen for that reason, not to exhaustively re-test
 every DTO field.
 
+**Living-document note:** this file is corrected as implementation rounds surface real mismatches
+between these scenarios' original assumptions and actual backend behavior — that's the point of
+writing the tests, not a failure of the planning process. Corrections are folded in directly
+(not just left as worker-thread deviation notes) so this stays the accurate source of truth.
+So far (Rounds 1-2), every such mismatch has turned out to be an inaccurate assumption in this
+doc, not a genuine backend bug — see the per-scenario notes below for exactly what was wrong and
+why. One genuinely new, previously-unaccounted-for business rule was also discovered while
+scoping Round 3 (Folders) — see INT-12/INT-13.
+
 ### Confirmed divergences from the original contract (resolved, not open questions)
 - **"Administrator permanently deletes X"** → the actual system never hard-deletes. Every deletion
   is a soft archive (`archivedAt` timestamp) — Experiments, Reactants, and the 4 Options types.
@@ -81,7 +90,10 @@ independent follow-up read proving real persistence, not an echoed response.
 - **Given** a real `USER` acting as creator+scientist, plus real `Reactant`(x2, each with an ACTIVE
   structure)/`Solvent`/`Instrument`/`Modality` rows.
 - **When** they POST a valid `SaveExperimentDto` to `/api/experiment`, and then POST a raw data file
-  (e.g. a CSV) to `/api/experiment/{uuid}/files` (`ExperimentFilesEndpoint`).
+  (e.g. a CSV) to `POST /api/file/{experimentId}` (`ExperimentFilesEndpoint`, mounted at `/api/file`
+  — **correction, confirmed Round 1**: this doc originally assumed `/api/experiment/{uuid}/files`,
+  which does not exist; verify the real path yourself against `ExperimentFilesEndpoint.java` rather
+  than trusting this doc's path literally for any endpoint you haven't touched yet).
 - **Then** both succeed (201), and an independent `GET /api/experiment/{uuid}` shows the metadata
   correctly persisted, separate from the attachment, and the attachment is independently
   retrievable/listed.
@@ -148,6 +160,17 @@ Chemical Structures".*
   additional short names, CAS number, comment, references).
 - **Then** both succeed and are independently retrievable with all submitted fields correctly
   persisted.
+- **Known limitation to account for when asserting the response (confirmed Round 2, pre-existing,
+  already tracked on the team TODO list — not a new bug)**: `ReactantMapper` has no wired-up
+  `ChemicalTypeMapper` for the nested `Reactant.type` → `ChemicalTypeDto` conversion (see the
+  `//TODO: Activate chemicalType when available` comment on `ReactantMapper.java` and the
+  "Known limitation" note already in `ReactantMapperTest.java`). This means `chemicalType.uuid` is
+  **always `null`** in every `GET`/`POST` response for a Reactant, even though the persisted entity
+  genuinely has one — only `chemicalType.name` round-trips. Assert on `.name`, not `.uuid`. Worth
+  noting: this integration round is the first place this gap has been confirmed to manifest at the
+  actual REST response level (previously only shown via a mapper-level unit test) — if the frontend
+  ever needs a reactant's chemical-type UUID from these endpoints (e.g. to pre-select it in an edit
+  form), it is silently unavailable today.
 
 **INT-08 — Options catalog creation: ADMIN succeeds, SUPERVISOR forbidden**
 *Adapted from: "Administrator adds new chemical types/options" + new authorization detail the
@@ -162,8 +185,8 @@ contract never anticipated (SUPERVISOR has no elevated rights on the options cat
 *Rewritten from: "Deleting a reactant" (hard delete → soft archive, per the confirmed divergence
 above), plus the SUPERVISOR asymmetry the contract never modeled.*
 - **Given** a real `Reactant` with no experiments referencing it.
-- **When** an `ADMIN` archives it (200/204, whichever the endpoint returns) and, separately, a
-  `SUPERVISOR` attempts the same.
+- **When** an `ADMIN` archives it via `DELETE /api/reactant/{uuid}` (204, confirmed
+  `ReactantEndpoint.java` L78-84) and, separately, a `SUPERVISOR` attempts the same.
 - **Then** `ADMIN` succeeds and a follow-up read shows `archivedAt` set; `SUPERVISOR` gets 403 and
   the entity remains unarchived.
 
@@ -185,22 +208,48 @@ mechanism, whose `Specification`-building logic is already thoroughly unit-teste
 *Adapted from: "Retrieving raw measurement data".*
 - **Given** a real experiment with a real attachment (mocked `S3Client.getObject` returns canned
   bytes).
-- **When** the creator downloads it via `ExperimentFilesEndpoint`.
-- **Then** the returned resource matches the canned bytes, and a non-creator/non-scientist/
-  non-privileged `USER` attempting the same download gets 403 (folds in the existing authorization
-  shape for Files, already covered at unit level, but not yet through a real end-to-end request in
-  this tier).
+- **When** the creator downloads it via `GET /api/file/{fileId}` (`ExperimentFilesEndpoint`).
+- **Then** the returned resource matches the canned bytes.
+- **Correction, confirmed Round 2 (this doc's original forbidden-case assumption was wrong, not a
+  backend bug)**: per `ExperimentAuthorization.canView`'s own Javadoc ("Any other approved user
+  (USER/ADMIN/SUPERVISOR) may view an active experiment, but not an archived one" —
+  `ExperimentAuthorization.java` L16-18), a non-creator/non-scientist/non-privileged `USER` CAN
+  view/download files from an **active** experiment — this only becomes forbidden once the
+  experiment is **archived**. So the genuine negative case is: the creator archives their own
+  experiment first (`DELETE /api/experiment/{uuid}`, allowed since `canModify` permits the
+  creator/scientist regardless of archived state), and only then does a second,
+  non-creator/non-scientist/non-privileged `USER` get a real 403 on the download.
 
 ### E. Folder Ownership (not in the original contract at all)
 
-**INT-12 — Owner CRUD succeeds**
-*New.*
+**INT-12 — Owner CRUD succeeds, including the one-folder-per-experiment auto-move rule**
+*New. Expanded after directly reading `ExperimentFolderServiceImpl.java` while scoping Round 3 —
+surfaced a real, previously-unaccounted-for business rule (not a bug, just missed in the original
+draft): `addExperimentToFolder` silently removes the experiment from any of the user's OTHER
+folders first ("One Folder Per User" per the code's own comment — really "one folder per
+experiment, per user") before adding it to the target folder. This is exactly the kind of
+regression-prone, easy-to-silently-break rule integration tests should protect.*
 - **Given** a real `USER` (`UserA`) and a real experiment they created.
-- **When** `UserA` creates a folder, adds their experiment to it, removes it, and deletes the folder.
+- **When** `UserA` creates a folder, adds their experiment to it, removes it, and deletes the
+  folder.
 - **Then** every step succeeds (real persistence confirmed at each step via a follow-up
   `GET /api/folders`).
+- **Additional sub-case**: `UserA` creates a SECOND folder and adds the SAME experiment to it.
+- **Then** the experiment is automatically removed from the first folder (verify via
+  `GET /api/folders` that it no longer appears there) and now appears only in the second.
 
-**INT-13 — Zero privileged bypass, even for ADMIN/SUPERVISOR**
+**INT-13 — Owner cannot add a non-owned/non-scientist experiment to their own folder**
+*New — a second, independent ownership check discovered while reading `addExperimentToFolder`
+directly: even inside your OWN folder, you can only add experiments you created or are the
+designated scientist for (`experimentAuthorization.isCreatorOrScientist` check at
+`ExperimentFolderServiceImpl.java` L75-78) — this is a genuinely distinct failure mode from folder
+ownership (INT-14 below), since the folder itself IS owned by the requester here.*
+- **Given** `UserA` owns a real folder, and a real experiment exists that was created by a
+  different user (`UserB`), with `UserA` neither its creator nor its designated scientist.
+- **When** `UserA` attempts to add `UserB`'s experiment to `UserA`'s own folder.
+- **Then** 403, even though `UserA` genuinely owns the target folder.
+
+**INT-14 — Zero privileged bypass, even for ADMIN/SUPERVISOR**
 *New — the headline Folder scenario, since this is the one place in the whole system where the
 usual privileged-bypass pattern deliberately does not apply.*
 - **Given** `UserA`'s real folder (containing a real experiment).
@@ -211,11 +260,11 @@ usual privileged-bypass pattern deliberately does not apply.*
 
 ### F. Authorization Matrix — Systematic Coverage
 
-**INT-14 — UNAUTHORIZED global gate**
+**INT-15 — UNAUTHORIZED global gate**
 *Already implemented in the Tier-1 pilot (`ExperimentLifecycleIntegrationTest.scenarioC_*`) —
 listed here for completeness/traceability only. Do not reimplement; reference the existing test.*
 
-**INT-15 — Privileged bypass, the allowed direction**
+**INT-16 — Privileged bypass, the allowed direction**
 *New — completes the pair with the existing pilot's Scenario B, which only proved the *forbidden*
 direction (a non-creator/non-scientist plain `USER`). This scenario proves the *allowed* direction.*
 - **Given** an experiment created by `UserA` (creator+scientist), and a real `SUPERVISOR` who is
@@ -229,10 +278,19 @@ direction (a non-creator/non-scientist plain `USER`). This scenario proves the *
 
 ## Summary
 
-15 scenarios (INT-01 through INT-15, with INT-14 pointing back to existing pilot coverage rather
+16 scenarios (INT-01 through INT-16, with INT-15 pointing back to existing pilot coverage rather
 than duplicating it), plus one explicitly-flagged future-work gap (experiment-repetition grouping)
 and several explicitly-excluded areas (frontend-only features, infra/ops concerns, unresolved
 product decisions).
+
+**Rounds 1-2 retrospective**: every mismatch found so far between this doc's original wording and
+actual backend behavior turned out to be an inaccurate assumption in this doc (endpoint paths,
+authorization-scope nuances), confirmed directly against source each time — not a genuine backend
+defect. The one real, substantive discovery (INT-12/13's folder auto-move + dual ownership check)
+was a previously-missed *feature* of existing, working code, not a bug either. This is a healthy
+sign for the underlying implementation, not a shortcoming of integration testing as a technique —
+the value has been in confirming real behavior precisely, including in places this doc guessed
+incorrectly.
 
 **Tiering note**: all scenarios above are scoped to Tier 1 (`@SpringBootTest`, real H2, mocked
 `JwtDecoder`/`StructureApiClient`/`S3Client`) since that tier already exercises the real security
