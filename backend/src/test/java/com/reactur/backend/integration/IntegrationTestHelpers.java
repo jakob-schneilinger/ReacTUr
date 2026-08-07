@@ -3,6 +3,7 @@ package com.reactur.backend.integration;
 import com.reactur.backend.entities.Reactant;
 import com.reactur.backend.entities.ReactantStructure;
 import com.reactur.backend.entities.User;
+import com.reactur.backend.entities.options.ChemicalType;
 import com.reactur.backend.entities.options.Instrument;
 import com.reactur.backend.entities.options.Modality;
 import com.reactur.backend.entities.options.Solvent;
@@ -11,6 +12,7 @@ import com.reactur.backend.enums.StructureFlag;
 import com.reactur.backend.repositories.ReactantRepository;
 import com.reactur.backend.repositories.ReactantStructureRepository;
 import com.reactur.backend.repositories.UserRepository;
+import com.reactur.backend.repositories.options.ChemicalTypeRepository;
 import com.reactur.backend.repositories.options.InstrumentRepository;
 import com.reactur.backend.repositories.options.ModalityRepository;
 import com.reactur.backend.repositories.options.SolventRepository;
@@ -124,5 +126,14 @@ final class IntegrationTestHelpers {
 
     static Modality persistModality(ModalityRepository modalityRepository, String name) {
         return modalityRepository.save(Modality.builder().name(name).build());
+    }
+
+    /**
+     * Persists a real {@link ChemicalType} option - needed by {@code CreateReactantDto#chemicalType}
+     * (see {@code ReactantValidator#validateForCreate}, which resolves it via a real
+     * {@code ChemicalTypeRepository.findById} lookup), for INT-07's reactant-creation scenarios.
+     */
+    static ChemicalType persistChemicalType(ChemicalTypeRepository chemicalTypeRepository, String name) {
+        return chemicalTypeRepository.save(ChemicalType.builder().name(name).build());
     }
 }
