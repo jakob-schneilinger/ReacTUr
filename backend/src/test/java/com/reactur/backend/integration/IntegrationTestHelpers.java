@@ -74,6 +74,46 @@ final class IntegrationTestHelpers {
         return reactant;
     }
 
+    /**
+     * Persists a bare {@link Reactant} with no associated {@link ReactantStructure} at all -
+     * needed for scenarios exercising the structure-generation lifecycle from a genuinely clean
+     * starting point (e.g. INT-05's "real Reactant with no existing structures").
+     */
+    static Reactant persistReactant(ReactantRepository reactantRepository, User createdBy, String shortName) {
+        Reactant reactant = Reactant.builder()
+                .shortName(shortName)
+                .smiles("C1=CC=CC=C1")
+                .createdBy(createdBy)
+                .build();
+        return reactantRepository.save(reactant);
+    }
+
+    /**
+     * Persists a {@link Reactant} plus a single {@link ReactantStructure} carrying the given
+     * {@link StructureFlag} - mirrors {@link #persistReactantWithActiveStructure} but for
+     * non-ACTIVE flags (e.g. PENDING/READY), needed for scenarios asserting that a reactant
+     * without an ACTIVE structure cannot yet be used in an experiment (INT-03).
+     */
+    static Reactant persistReactantWithStructure(
+            ReactantRepository reactantRepository,
+            ReactantStructureRepository structureRepository,
+            User createdBy,
+            String shortName,
+            StructureFlag flag
+    ) {
+        Reactant reactant = persistReactant(reactantRepository, createdBy, shortName);
+
+        ReactantStructure structure = ReactantStructure.builder()
+                .reactant(reactant)
+                .fileName(shortName + ".mol")
+                .structure("mock-structure-payload")
+                .flag(flag)
+                .build();
+        structureRepository.save(structure);
+
+        return reactant;
+    }
+
     static Solvent persistSolvent(SolventRepository solventRepository, String name) {
         return solventRepository.save(Solvent.builder().name(name).build());
     }
