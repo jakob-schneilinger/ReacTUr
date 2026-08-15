@@ -27,6 +27,7 @@ import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.RequestPostProcessor;
 import software.amazon.awssdk.services.s3.S3Client;
@@ -103,6 +104,13 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
         })
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
+// @Transactional wraps each test method in a real transaction that's rolled back at the end -
+// without this, every real MockMvc-driven write here would actually commit to the shared, named
+// H2 instance (jdbc:h2:mem:kineticsdb, see application-test.yml) and could leak into other test
+// classes (e.g. @DataJpaTest repository tests asserting on unscoped, whole-table counts) depending
+// on execution order/context lifecycle. Confirmed root cause of a real, order-dependent test
+// failure observed in IntelliJ's runner (though not under `./mvnw -o clean test`'s default order).
+@Transactional
 class ExperimentLifecycleIntegrationTest {
 
     @Autowired

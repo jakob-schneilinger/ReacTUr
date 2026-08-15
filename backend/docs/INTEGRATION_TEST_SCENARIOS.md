@@ -142,6 +142,11 @@ Chemical Structures".*
 - **Then** the structure becomes `ACTIVE`, and a subsequent experiment-creation request referencing
   that reactant succeeds (ties directly into INT-03's negative case — this is its positive
   counterpart).
+- **Note**: the `FAILED`-job branch and the "selecting one candidate auto-rejects every sibling"
+  behavior (multiple `READY` candidates from one job) are both real, distinct branches of this same
+  lifecycle, but are already thoroughly covered at the unit level (`StructureServiceTest.java`) —
+  deliberately not re-derived here as separate integration scenarios, consistent with this doc's
+  filtering principle. See `backend/docs/THESIS_CONTEXT.md` §5 for the full lifecycle writeup.
 
 **INT-06 — Structure endpoints are ADMIN/SUPERVISOR-only**
 *New — systematic authorization-shape coverage (pure role gate, shape 1).*
