@@ -1,4 +1,3 @@
-version: '3.8'
 
 services:
   postgres:
@@ -26,14 +25,14 @@ services:
       - ./keycloak-config:/opt/keycloak/data/import
 
   seaweedfs-master:
-    image: chrislusf/seaweedfs
+    image: chrislusf/seaweedfs:4.44
     container_name: kinetics-seaweed-master
     command: master -ip=seaweedfs-master -port=9333
     ports:
       - "9333:9333"
 
   seaweedfs-volume:
-    image: chrislusf/seaweedfs
+    image: chrislusf/seaweedfs:4.44
     container_name: kinetics-seaweed-volume
     command: volume -mserver=seaweedfs-master:9333 -port=8080
     ports:
@@ -42,7 +41,7 @@ services:
       - seaweedfs-master
 
   seaweedfs-filer:
-    image: chrislusf/seaweedfs
+    image: chrislusf/seaweedfs:4.44
     container_name: kinetics-seaweed-filer
     command: filer -master=seaweedfs-master:9333
     ports:
@@ -52,7 +51,7 @@ services:
       - seaweedfs-volume
 
   seaweedfs-s3:
-    image: chrislusf/seaweedfs
+    image: chrislusf/seaweedfs:4.44
     container_name: kinetics-seaweed-s3
     entrypoint:
       - /bin/sh
