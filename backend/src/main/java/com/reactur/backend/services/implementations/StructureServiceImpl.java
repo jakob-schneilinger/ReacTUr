@@ -36,6 +36,22 @@ public class StructureServiceImpl implements StructureService {
     private final StructureMapper structureMapper;
     private final StructureApiClient structureApiClient;
 
+    /**
+     * Basic upper bound on the size of a single structure payload accepted from the external
+     * structure-generation API before persisting it (A08 - response content validation).
+     * <p>
+     * {@link com.reactur.backend.entities.ReactantStructure#getStructure()} is backed by a
+     * Postgres {@code TEXT} column, which has no meaningful size limit of its own (~1GB hard
+     * ceiling), so this is purely an application-level sanity guard rather than a mirror of a DB
+     * constraint. Legitimate payloads here are XYZ/MOL-format 3D structures for the small organic
+     * reactants this system deals with (roughly tens to a few thousand atoms); even a generous
+     * ~10,000-atom XYZ file (at ~50-60 chars/atom line) is still well under 1MB. 1,000,000
+     * characters gives about two orders of magnitude of headroom over any realistic legitimate
+     * structure, while still catching obviously-wrong responses (HTML error pages, truncated or
+     * corrupted payloads, runaway/garbage data, etc.) before they ever reach the database.
+     */
+    private static final int MAX_STRUCTURE_LENGTH = 1_000_000;
+
     @Override
     @Transactional
     public StructureDto uploadStructure(UUID reactantId, MultipartFile file) {
@@ -171,15 +187,29 @@ public class StructureServiceImpl implements StructureService {
                     if (generatedStructures != null && !generatedStructures.isEmpty()) {
                         log.info("Job {} succeeded. Received {} structures.", jobId, generatedStructures.size());
 
-                        pending.setStructure(generatedStructures.getFirst());
-                        pending.setFlag(StructureFlag.READY);
-                        structureRepository.save(pending);
+                        String primaryStructure = generatedStructures.getFirst();
+                        if (isValidStructure(primaryStructure)) {
+                            pending.setStructure(primaryStructure);
+                            pending.setFlag(StructureFlag.READY);
+                            structureRepository.save(pending);
+                        } else {
+                            log.warn("Job {} returned an invalid primary structure (null, blank, or longer than {} characters). Marking as FAILED.",
+                                    jobId, MAX_STRUCTURE_LENGTH);
+                            pending.setFlag(StructureFlag.FAILED);
+                            structureRepository.save(pending);
+                        }
 
                         for (int i = 1; i < generatedStructures.size(); i++) {
+                            String candidateStructure = generatedStructures.get(i);
+                            if (!isValidStructure(candidateStructure)) {
+                                log.warn("Job {} returned an invalid structure at index {} (null, blank, or longer than {} characters). Skipping it.",
+                                        jobId, i, MAX_STRUCTURE_LENGTH);
+                                continue;
+                            }
                             ReactantStructure additionalStructure = ReactantStructure.builder()
                                     .reactant(pending.getReactant())
                                     .externalJobId(jobId)
-                                    .structure(generatedStructures.get(i))
+                                    .structure(candidateStructure)
                                     .flag(StructureFlag.READY)
                                     .build();
                             structureRepository.save(additionalStructure);
@@ -200,5 +230,14 @@ public class StructureServiceImpl implements StructureService {
                 log.error("Failed to check status for pending Job ID: {}", jobId, e);
             }
         }
+    }
+
+    /**
+     * Basic (deliberately non-chemistry-aware) content check for a structure string returned by
+     * the external API: rejects {@code null}, blank/whitespace-only content, and anything beyond
+     * {@link #MAX_STRUCTURE_LENGTH}. This does not attempt to parse or validate XYZ/MOL syntax.
+     */
+    private boolean isValidStructure(String structure) {
+        return structure != null && !structure.isBlank() && structure.length() <= MAX_STRUCTURE_LENGTH;
     }
 }

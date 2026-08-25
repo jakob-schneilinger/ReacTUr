@@ -41,12 +41,15 @@ public class StructureApiClientImpl implements StructureApiClient {
             return response.job_id();
 
         } catch (RestClientResponseException e) {
-            log.error("Failed to trigger job for smiles {}. HTTP Status: {}. Body: {}",
-                    smiles, e.getStatusCode(), e.getResponseBodyAsString());
-            throw new ExternalApiException("Structure API is currently unavailable or returned an error.", e);
+            throw new ExternalApiException(
+                    "Structure API is currently unavailable or returned an error. Failed to trigger job for smiles '%s'. HTTP Status: %s. Body: %s"
+                            .formatted(smiles, e.getStatusCode(), e.getResponseBodyAsString()),
+                    e);
         } catch (Exception e) {
-            log.error("Network or parsing error while contacting Structure API", e);
-            throw new ExternalApiException("Could not reach the Structure API.", e);
+            throw new ExternalApiException(
+                    "Could not reach the Structure API. Network or parsing error while triggering job for smiles '%s'."
+                            .formatted(smiles),
+                    e);
         }
     }
 
@@ -72,11 +75,15 @@ public class StructureApiClientImpl implements StructureApiClient {
             return new JobStatusResult(parsedStatus, structures, response.error());
 
         } catch (RestClientResponseException e) {
-            log.error("Failed to check status for job {}. HTTP Status: {}", jobId, e.getStatusCode());
-            throw new ExternalApiException("Error while checking job status from external API.", e);
+            throw new ExternalApiException(
+                    "Error while checking job status from external API. Job ID: '%s'. HTTP Status: %s."
+                            .formatted(jobId, e.getStatusCode()),
+                    e);
         } catch (Exception e) {
-            log.error("Network error while checking job status for {}", jobId, e);
-            throw new ExternalApiException("Could not reach the Structure API.", e);
+            throw new ExternalApiException(
+                    "Could not reach the Structure API. Network error while checking job status for job ID '%s'."
+                            .formatted(jobId),
+                    e);
         }
     }
 

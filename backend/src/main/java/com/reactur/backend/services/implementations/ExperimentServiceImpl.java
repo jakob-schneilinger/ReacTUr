@@ -151,13 +151,13 @@ public class ExperimentServiceImpl implements ExperimentService {
     // 2. Authorize (Security)
     experimentAuthorization.assertCanModify(experiment, requestingUserId, requestingUserRole);
 
-    // TODO: How should we do if the experiment was already archived? I just don't change anything but still
-    //  return the 201 succeeded code.
-    //  Maybe it would be useful to log.warn that a user is trying to archive something already archived...
     // 3. Act (Execution) - Only update if not already archived (Idempotent)
     if (experiment.getArchivedAt() == null) {
       experiment.setArchivedAt(Instant.now());
       experimentRepository.save(experiment);
+    } else {
+      log.warn("Experiment {} was already archived; ignoring redundant archive request from user {}",
+        experimentId, requestingUserId);
     }
   }
 

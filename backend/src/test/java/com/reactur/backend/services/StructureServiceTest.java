@@ -378,6 +378,62 @@ class StructureServiceTest {
     }
 
     @Test
+    void fetchPendingStructuresFromAPI_whenPrimaryStructureIsBlank_shouldMarkFailedInsteadOfPersistingBlankContent() {
+        when(structureRepository.findByFlag(StructureFlag.PENDING)).thenReturn(List.of(mockPendingStructure));
+        JobStatusResult result = new JobStatusResult(JobStatus.SUCCEEDED, List.of("   "), null);
+        when(structureApiClient.checkJobStatus("job_123")).thenReturn(result);
+
+        structureService.fetchPendingStructuresFromAPI();
+
+        verify(structureRepository, times(1)).save(structureCaptor.capture());
+        ReactantStructure savedEntity = structureCaptor.getValue();
+        assertThat(savedEntity).isSameAs(mockPendingStructure);
+        assertThat(savedEntity.getFlag()).isEqualTo(StructureFlag.FAILED);
+        assertThat(savedEntity.getStructure()).isNull();
+    }
+
+    @Test
+    void fetchPendingStructuresFromAPI_whenPrimaryStructureExceedsMaxLength_shouldMarkFailed() {
+        when(structureRepository.findByFlag(StructureFlag.PENDING)).thenReturn(List.of(mockPendingStructure));
+        String oversizedStructure = "A".repeat(1_000_001);
+        JobStatusResult result = new JobStatusResult(JobStatus.SUCCEEDED, List.of(oversizedStructure), null);
+        when(structureApiClient.checkJobStatus("job_123")).thenReturn(result);
+
+        structureService.fetchPendingStructuresFromAPI();
+
+        verify(structureRepository, times(1)).save(structureCaptor.capture());
+        ReactantStructure savedEntity = structureCaptor.getValue();
+        assertThat(savedEntity).isSameAs(mockPendingStructure);
+        assertThat(savedEntity.getFlag()).isEqualTo(StructureFlag.FAILED);
+        assertThat(savedEntity.getStructure()).isNull();
+    }
+
+    @Test
+    void fetchPendingStructuresFromAPI_whenAnAdditionalStructureIsBlank_shouldSkipItButKeepValidOnes() {
+        when(structureRepository.findByFlag(StructureFlag.PENDING)).thenReturn(List.of(mockPendingStructure));
+        JobStatusResult result = new JobStatusResult(JobStatus.SUCCEEDED, List.of("struct_A", "   ", "struct_C"), null);
+        when(structureApiClient.checkJobStatus("job_123")).thenReturn(result);
+        when(structureRepository.save(any(ReactantStructure.class))).thenAnswer(i -> i.getArgument(0));
+
+        structureService.fetchPendingStructuresFromAPI();
+
+        // Only the valid primary structure and the one valid additional structure are saved;
+        // the blank one in the middle is skipped entirely.
+        verify(structureRepository, times(2)).save(structureCaptor.capture());
+        List<ReactantStructure> savedEntities = structureCaptor.getAllValues();
+
+        ReactantStructure firstSaved = savedEntities.get(0);
+        assertThat(firstSaved).isSameAs(mockPendingStructure);
+        assertThat(firstSaved.getStructure()).isEqualTo("struct_A");
+        assertThat(firstSaved.getFlag()).isEqualTo(StructureFlag.READY);
+
+        ReactantStructure secondSaved = savedEntities.get(1);
+        assertThat(secondSaved).isNotSameAs(mockPendingStructure);
+        assertThat(secondSaved.getStructure()).isEqualTo("struct_C");
+        assertThat(secondSaved.getFlag()).isEqualTo(StructureFlag.READY);
+    }
+
+    @Test
     void fetchPendingStructuresFromAPI_whenJobFinishedWithEmptyStructuresList_shouldMarkFailed() {
         when(structureRepository.findByFlag(StructureFlag.PENDING)).thenReturn(List.of(mockPendingStructure));
         JobStatusResult result = new JobStatusResult(JobStatus.SUCCEEDED, List.of(), null);

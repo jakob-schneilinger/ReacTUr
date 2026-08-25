@@ -72,8 +72,8 @@ public class FileServiceImpl implements FileService {
                 .contentType(file.getContentType())
                 .build();
 
-        try {
-            s3Client.putObject(putOb, RequestBody.fromInputStream(file.getInputStream(), file.getSize()));
+        try (InputStream is = file.getInputStream()) {
+            s3Client.putObject(putOb, RequestBody.fromInputStream(is, file.getSize()));
         } catch (Exception e) {
             throw new FileStorageException("Failed to upload file to S3", e);
         }
