@@ -6,6 +6,7 @@ import com.reactur.backend.dtos.reactants.StructureDto;
 import com.reactur.backend.entities.Reactant;
 import com.reactur.backend.entities.ReactantStructure;
 import com.reactur.backend.enums.StructureFlag;
+import com.reactur.backend.exeptions.FileStorageException;
 import com.reactur.backend.exeptions.ResourceConflictException;
 import com.reactur.backend.exeptions.ResourceNotFoundException;
 import com.reactur.backend.mappers.StructureMapper;
@@ -85,7 +86,7 @@ public class StructureServiceImpl implements StructureService {
 
         } catch (IOException e) {
             log.error("Failed to read structure file for reactant: {}", reactantId, e);
-            throw new RuntimeException("Failed to process the uploaded file", e);
+            throw new FileStorageException("Failed to process the uploaded file", e);
         }
     }
 

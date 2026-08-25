@@ -7,6 +7,7 @@ import com.reactur.backend.entities.Reactant;
 import com.reactur.backend.entities.ReactantStructure;
 import com.reactur.backend.enums.JobStatus;
 import com.reactur.backend.enums.StructureFlag;
+import com.reactur.backend.exeptions.FileStorageException;
 import com.reactur.backend.exeptions.ResourceConflictException;
 import com.reactur.backend.exeptions.ResourceNotFoundException;
 import com.reactur.backend.mappers.StructureMapper;
@@ -24,7 +25,9 @@ import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -127,6 +130,24 @@ class StructureServiceTest {
 
         assertThat(exception.getMessage()).containsIgnoringCase("empty");
         verify(reactantRepository, never()).findById(any());
+        verify(structureRepository, never()).save(any());
+    }
+
+    @Test
+    void uploadStructure_whenReadingFileThrowsIOException_shouldThrowFileStorageException() throws IOException {
+        MultipartFile file = mock(MultipartFile.class);
+        when(file.isEmpty()).thenReturn(false);
+        IOException ioException = new IOException("simulated read failure");
+        when(file.getBytes()).thenThrow(ioException);
+
+        when(reactantRepository.findById(REACTANT_ID)).thenReturn(Optional.of(mockReactant));
+
+        FileStorageException exception = assertThrows(
+                FileStorageException.class,
+                () -> structureService.uploadStructure(REACTANT_ID, file)
+        );
+
+        assertThat(exception.getCause()).isSameAs(ioException);
         verify(structureRepository, never()).save(any());
     }
 
