@@ -30,7 +30,18 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .headers(headers -> headers.frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin))
+                .headers(headers -> headers
+                        .frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin)
+                        // Baseline CSP for a pure JSON API (no server-rendered HTML views anywhere in this
+                        // backend): default-src 'none' means nothing is allowed to load/execute at all,
+                        // which is exactly appropriate here and needs no tuning as frontend origins change
+                        // later. frame-ancestors 'self' intentionally matches (not tightens beyond) the
+                        // frameOptions setting above, rather than introducing an inconsistent stricter rule.
+                        // Known caveat: this also applies to the H2 console (dev/test profiles only), whose
+                        // own UI relies on inline scripts/styles this policy will block - acceptable since
+                        // it's internal dev tooling, not customer-facing, and not used in production.
+                        .contentSecurityPolicy(csp -> csp.policyDirectives(
+                                "default-src 'none'; frame-ancestors 'self'")))
                 .authorizeHttpRequests(auth -> auth
                         // TODO: Remove these Claude clarifying comments, or keep them simplified
                         //  as documentation
