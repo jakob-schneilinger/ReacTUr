@@ -15,7 +15,7 @@ public class JaversConfig {
     public AuthorProvider provideJaversAuthor() {
         return () -> {
             Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-            // Holt die Keycloak String ID aus dem JWT Token
+            // Extracts the Keycloak subject (string user ID) from the JWT token
             if (auth != null && auth.getPrincipal() instanceof Jwt jwt) {
                 return jwt.getSubject();
             }

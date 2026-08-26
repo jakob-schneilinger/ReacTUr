@@ -19,6 +19,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.javers.core.Javers;
 import org.javers.core.commit.CommitMetadata;
 import org.javers.core.diff.Change;
+import org.javers.core.diff.changetype.NewObject;
+import org.javers.core.diff.changetype.PropertyChange;
+import org.javers.core.diff.changetype.ReferenceChange;
+import org.javers.core.diff.changetype.ValueChange;
 import org.javers.core.metamodel.object.InstanceId;
 import org.javers.repository.jql.QueryBuilder;
 import org.springframework.stereotype.Service;
@@ -103,7 +107,7 @@ public class ExperimentHistoryServiceImpl implements ExperimentHistoryService {
                 .forEach(userIds::add);
 
         for (Change change : allChanges) {
-            if (change instanceof org.javers.core.diff.changetype.ReferenceChange refChange) {
+            if (change instanceof ReferenceChange refChange) {
                 String propName = refChange.getPropertyName();
 
                 Object leftId = refChange.getLeft() instanceof InstanceId id ? id.getCdoId() : null;
@@ -137,7 +141,7 @@ public class ExperimentHistoryServiceImpl implements ExperimentHistoryService {
                 case "scientist", "createdBy" -> userIds.add((String) idObj);
             }
         } catch (ClassCastException e) {
-            log.warn("JaVers Reference-ID für Property {} could not be casted", propName, e);
+            log.warn("JaVers reference ID for property {} could not be cast", propName, e);
         }
     }
 
@@ -153,29 +157,29 @@ public class ExperimentHistoryServiceImpl implements ExperimentHistoryService {
             String commitType = "UPDATE";
 
             for (Change change : entry.getValue()) {
-                if (change instanceof org.javers.core.diff.changetype.NewObject) {
+                if (change instanceof NewObject) {
                     commitType = "CREATE";
                 }
 
                 String propName = "";
-                if (change instanceof org.javers.core.diff.changetype.PropertyChange propChange) {
+                if (change instanceof PropertyChange propChange) {
                     propName = propChange.getPropertyName();
                 }
 
                 if (IGNORED_PROPERTIES.contains(propName)) {
-                    // Wir müssen nur checken, ob es archivedAt ist, um den Status auf ARCHIVE/RESTORE zu setzen
-                    if ("archivedAt".equals(propName) && change instanceof org.javers.core.diff.changetype.ValueChange valChange) {
+                    // Only need to check for archivedAt here, to set the status to ARCHIVE/RESTORE.
+                    if ("archivedAt".equals(propName) && change instanceof ValueChange valChange) {
                         if (valChange.getLeft() == null && valChange.getRight() != null) commitType = "ARCHIVE";
                         else if (valChange.getLeft() != null && valChange.getRight() == null) commitType = "RESTORE";
                     }
-                    continue; // "continue" springt sofort zum nächsten Element in der Schleife, ohne es in diffMap zu schreiben!
+                    continue; // Skips straight to the next change, without writing this property into diffMap.
                 }
 
-                // 3. Wenn es keine ignorierte Eigenschaft ist, wie gewohnt mappen:
-                if (change instanceof org.javers.core.diff.changetype.ValueChange valChange) {
+                // Not an ignored property - map it normally:
+                if (change instanceof ValueChange valChange) {
                     diffMap.put(propName, valChange.getLeft() + " -> " + valChange.getRight());
 
-                } else if (change instanceof org.javers.core.diff.changetype.ReferenceChange refChange) {
+                } else if (change instanceof ReferenceChange refChange) {
                     Object leftIdObj = refChange.getLeft() instanceof InstanceId instanceId ? instanceId.getCdoId() : null;
                     Object rightIdObj = refChange.getRight() instanceof InstanceId instanceId ? instanceId.getCdoId() : null;
 
@@ -189,11 +193,12 @@ public class ExperimentHistoryServiceImpl implements ExperimentHistoryService {
                 }
             }
 
-            // 4. NEU: Den Namen des Autors über die Lookup-Map auflösen
+            // Resolve the author's display name via the lookup map, falling back to the raw author ID
+            // (e.g. a Keycloak subject UUID) if no matching User was found.
             String resolvedAuthor = entityLookupMap.getOrDefault(commit.getAuthor(), commit.getAuthor());
 
             historyList.add(new ExperimentHistoryDto(
-                    resolvedAuthor, // <-- Hier landet jetzt "asd asd" statt der UUID!
+                    resolvedAuthor,
                     commit.getCommitDateInstant(),
                     commitType,
                     diffMap
