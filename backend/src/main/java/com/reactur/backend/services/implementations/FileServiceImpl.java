@@ -45,12 +45,32 @@ public class FileServiceImpl implements FileService {
     @Value("${seaweedfs.s3.bucket:experiment-files}")
     private String bucketName;
 
+    /**
+     * Provisional per-attachment size cap in bytes (default 10MB), matching the limit the frontend's
+     * FileUploadComponent already enforces for experiment attachments (see
+     * experiment-details-page.component.html's {@code [maxFileSizeMB]="10"}). This is NOT a finalized
+     * product decision - see Software_todo.md item 14 - just a stop-gap so the backend enforces
+     * something instead of relying solely on the frontend and Spring's blanket
+     * {@code spring.servlet.multipart.max-file-size}. Deployers can override via
+     * {@code app.upload.experiment-attachment.max-size-bytes} without a code change.
+     * TODO: replace with a properly decided, tested limit (and matching file-type restrictions) once
+     * product/Dennis decide the real policy - see Software_todo.md item 14.
+     */
+    @Value("${app.upload.experiment-attachment.max-size-bytes:10485760}")
+    private long maxAttachmentSizeBytes = 10_485_760L;
+
     @Override
     @Transactional
     public ExperimentAttachmentDetailsDto storeFile(UUID experimentId, MultipartFile file, String requestingUserId, Role requestingUserRole) {
         if (file == null || file.isEmpty()) {
             log.warn("Upload failed: Attempted to upload an empty file for experiment ID: {}", experimentId);
             throw new IllegalArgumentException("Cannot upload an empty file.");
+        }
+
+        if (file.getSize() > maxAttachmentSizeBytes) {
+            log.warn("Upload rejected: file size {} bytes exceeds the configured limit of {} bytes for experiment ID: {}",
+                    file.getSize(), maxAttachmentSizeBytes, experimentId);
+            throw new IllegalArgumentException("Uploaded file exceeds the maximum allowed size of " + maxAttachmentSizeBytes + " bytes.");
         }
 
         Experiment experiment = experimentRepository.findById(experimentId)

@@ -15,6 +15,7 @@ import com.reactur.backend.repositories.ReactantStructureRepository;
 import com.reactur.backend.services.StructureService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -53,11 +54,28 @@ public class StructureServiceImpl implements StructureService {
      */
     private static final int MAX_STRUCTURE_LENGTH = 1_000_000;
 
+    /**
+     * Provisional per-file size cap in bytes (default 1MB) for manually-uploaded structure files,
+     * matching the limit the frontend's FileUploadComponent already enforces for reactant structure
+     * uploads (see reactant-details-page.component.html's {@code [maxFileSizeMB]="1"}). This is NOT a
+     * finalized product decision - see Software_todo.md item 14 - just a stop-gap so the backend
+     * enforces something instead of relying solely on the frontend. Deployers can override via
+     * {@code app.upload.structure-file.max-size-bytes} without a code change.
+     * TODO: replace with a properly decided, tested limit (and matching file-type restrictions) once
+     * product/Dennis decide the real policy - see Software_todo.md item 14.
+     */
+    @Value("${app.upload.structure-file.max-size-bytes:1048576}")
+    private long maxStructureFileSizeBytes = 1_048_576L;
+
     @Override
     @Transactional
     public StructureDto uploadStructure(UUID reactantId, MultipartFile file) {
         if (file == null || file.isEmpty()) {
             throw new IllegalArgumentException("Uploaded file cannot be empty");
+        }
+
+        if (file.getSize() > maxStructureFileSizeBytes) {
+            throw new IllegalArgumentException("Uploaded file exceeds the maximum allowed size of " + maxStructureFileSizeBytes + " bytes.");
         }
 
         Reactant reactant = reactantRepository.findById(reactantId)
