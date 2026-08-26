@@ -257,6 +257,20 @@
                     </execution>
                 </executions>
             </plugin>
+
+            <!-- OWASP Dependency-Check: scans all resolved dependencies against known-vulnerability
+                 databases (NVD, etc.). Deliberately NOT bound to any lifecycle phase/execution, so it
+                 never runs as part of a normal `./mvnw -o clean test` - it needs real internet access
+                 to update its vulnerability database, which is incompatible with this project's offline
+                 build habit. Run it explicitly and manually when needed:
+                     ./mvnw org.owasp:dependency-check-maven:check
+                 (omit -o; this goal needs network access). Report is written to
+                 target/dependency-check-report.html. -->
+            <plugin>
+                <groupId>org.owasp</groupId>
+                <artifactId>dependency-check-maven</artifactId>
+                <version>12.1.3</version>
+            </plugin>
         </plugins>
     </build>
 
