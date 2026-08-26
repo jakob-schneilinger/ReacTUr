@@ -5,7 +5,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>4.0.6</version>
+        <version>4.0.8</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>com.reactur</groupId>
@@ -28,7 +28,8 @@
     </scm>
     <properties>
         <java.version>21</java.version>
-        <postgresql.version>42.7.3</postgresql.version>
+        <postgresql.version>42.7.13</postgresql.version>
+        <tomcat.version>11.0.25</tomcat.version>
         <bouncycastle.version>1.78.1</bouncycastle.version>
         <mapstruct.version>1.6.3</mapstruct.version>
         <lombok-mapstruct-binding.version>0.2.0</lombok-mapstruct-binding.version>
@@ -265,11 +266,25 @@
                  build habit. Run it explicitly and manually when needed:
                      ./mvnw org.owasp:dependency-check-maven:check
                  (omit -o; this goal needs network access). Report is written to
-                 target/dependency-check-report.html. -->
+                 target/dependency-check-report.html.
+                 assemblyAnalyzerEnabled is off because this is a pure JVM/Maven project - there are no
+                 .NET assemblies to analyze, and that analyzer errors out trying to initialize anyway.
+                 ossindexAnalyzerEnabled is off because Sonatype's OSS Index now returns a hard 401
+                 Unauthorized for every single unauthenticated request (confirmed via a real run - see
+                 Software_todo.md item 7), not just a rate limit - ossIndexWarnOnlyOnRemoteErrors (meant
+                 for transient errors like 429/502/503) was tried first and does NOT cover this case, so
+                 the analyzer is disabled outright rather than left to fail the build every run. The
+                 NVD/CPE-based analysis below needs no account and is this tool's main signal; OSS Index
+                 would only add a second, optional data source, and would need a free account
+                 (ossIndexServerId in settings.xml) to ever work again. -->
             <plugin>
                 <groupId>org.owasp</groupId>
                 <artifactId>dependency-check-maven</artifactId>
                 <version>12.1.3</version>
+                <configuration>
+                    <assemblyAnalyzerEnabled>false</assemblyAnalyzerEnabled>
+                    <ossindexAnalyzerEnabled>false</ossindexAnalyzerEnabled>
+                </configuration>
             </plugin>
         </plugins>
     </build>
