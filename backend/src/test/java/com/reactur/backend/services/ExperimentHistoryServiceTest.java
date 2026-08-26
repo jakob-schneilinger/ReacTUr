@@ -255,6 +255,46 @@ class ExperimentHistoryServiceTest {
   }
 
   @Test
+  void getExperimentHistory_withGenuineListChange_includesDoisChangeInDiffMap() {
+    UUID experimentId = randomUUID();
+    User creator = User.builder().id("creator-1").build();
+
+    Experiment experimentV1 = Experiment.builder()
+      .id(experimentId)
+      .createdBy(creator)
+      .dois(List.of("10.1000/old-doi"))
+      .build();
+    Experiment experimentV2 = Experiment.builder()
+      .id(experimentId)
+      .createdBy(creator)
+      .dois(List.of("10.1000/new-doi"))
+      .build();
+
+    Javers realJavers = JaversBuilder.javers().build();
+    realJavers.commit("author-1", experimentV1);
+    realJavers.commit("author-1", experimentV2);
+
+    when(experimentRepository.findById(experimentId)).thenReturn(Optional.of(experimentV2));
+    delegateToRealJavers(realJavers);
+    when(userRepository.findAllById(any())).thenReturn(List.of());
+
+    List<ExperimentHistoryDto> result =
+      experimentHistoryService.getExperimentHistory(experimentId, "any-user", Role.USER);
+
+    ExperimentHistoryDto updateEntry = result.stream()
+      .filter(dto -> "UPDATE".equals(dto.commitType()))
+      .findFirst()
+      .orElseThrow(() -> new AssertionError("Expected an UPDATE entry"));
+
+    // Regression test: a previous version of ExperimentHistoryServiceImpl silently dropped
+    // list-typed property changes (Javers' ListChange) from the diff map entirely, because its
+    // instanceof-chain only handled ValueChange/ReferenceChange explicitly. Confirmed empirically
+    // before the rewrite - the changes map came back completely empty for this exact scenario.
+    assertTrue(updateEntry.changes().containsKey("dois"), "Expected 'dois' to appear in the diff map");
+    assertEquals("[10.1000/old-doi] -> [10.1000/new-doi]", updateEntry.changes().get("dois"));
+  }
+
+  @Test
   void getExperimentHistory_whenArchivedAtGoesFromNullToSet_producesArchiveCommitTypeAndOmitsProperty() {
     UUID experimentId = randomUUID();
     UUID metadataId = randomUUID();

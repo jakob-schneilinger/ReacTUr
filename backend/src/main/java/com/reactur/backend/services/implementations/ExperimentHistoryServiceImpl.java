@@ -3,6 +3,8 @@ package com.reactur.backend.services.implementations;
 import com.reactur.backend.dtos.experiments.ExperimentHistoryDto;
 import com.reactur.backend.entities.experiment.Experiment;
 import com.reactur.backend.entities.experiment.ExperimentResult;
+import com.reactur.backend.entities.experiment.Metadata;
+import com.reactur.backend.enums.Role;
 import com.reactur.backend.exeptions.ResourceNotFoundException;
 import com.reactur.backend.repositories.ExperimentRepository;
 import com.reactur.backend.repositories.ReactantRepository;
@@ -10,10 +12,8 @@ import com.reactur.backend.repositories.UserRepository;
 import com.reactur.backend.repositories.options.InstrumentRepository;
 import com.reactur.backend.repositories.options.ModalityRepository;
 import com.reactur.backend.repositories.options.SolventRepository;
-import com.reactur.backend.enums.Role;
 import com.reactur.backend.services.ExperimentHistoryService;
 import com.reactur.backend.services.authorization.ExperimentAuthorization;
-import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.javers.core.Javers;
@@ -26,17 +26,30 @@ import org.javers.core.diff.changetype.ValueChange;
 import org.javers.core.metamodel.object.InstanceId;
 import org.javers.repository.jql.QueryBuilder;
 import org.springframework.stereotype.Service;
-import com.reactur.backend.entities.experiment.Metadata;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+/**
+ * Builds the human-readable audit trail for a single experiment, combining Javers' raw change log
+ * for the experiment itself with the change logs of its {@link Metadata} and {@link
+ * ExperimentResult} sub-entities into one chronological list.
+ * <p>
+ * Javers reports changes as a flat list of {@link Change} objects grouped only by commit. This
+ * class is responsible for: (1) classifying each commit as CREATE/UPDATE/ARCHIVE/RESTORE, (2)
+ * rendering each changed property as a "before -&gt; after" display string, and (3) resolving
+ * reference IDs (instrument/modality/solvent/reactant/user UUIDs, and commit author IDs) to
+ * human-readable names instead of raw UUIDs - batching those lookups instead of querying once per
+ * individual change.
+ */
 @Slf4j
 @RequiredArgsConstructor
 @Service
@@ -44,7 +57,6 @@ public class ExperimentHistoryServiceImpl implements ExperimentHistoryService {
 
     private final Javers javers;
     private final ExperimentRepository experimentRepository;
-
     private final InstrumentRepository instrumentRepository;
     private final ModalityRepository modalityRepository;
     private final SolventRepository solventRepository;
@@ -52,9 +64,14 @@ public class ExperimentHistoryServiceImpl implements ExperimentHistoryService {
     private final UserRepository userRepository;
     private final ExperimentAuthorization experimentAuthorization;
 
-    private static final Set<String> IGNORED_PROPERTIES = Set.of(
-            "id", "metadata", "result", "archivedAt"
-    );
+    /**
+     * Properties excluded from the rendered diff: {@code id} never changes, {@code metadata}/
+     * {@code result} are references to sub-entities whose own field changes are already reported
+     * as separate commits on those sub-entities (not useful to also show as a raw ID swap here),
+     * and {@code archivedAt} is consumed separately by {@link #classifyCommitType} to derive the
+     * ARCHIVE/RESTORE commit type, rather than shown as a plain property change.
+     */
+    private static final Set<String> IGNORED_PROPERTIES = Set.of("id", "metadata", "result", "archivedAt");
 
     @Override
     public List<ExperimentHistoryDto> getExperimentHistory(UUID experimentUuid, String requestingUserId, Role requestingUserRole) {
@@ -65,8 +82,23 @@ public class ExperimentHistoryServiceImpl implements ExperimentHistoryService {
 
         experimentAuthorization.assertCanView(experiment, requestingUserId, requestingUserRole);
 
+        List<Change> allChanges = fetchAllChanges(experiment);
+        Map<String, String> entityLookupMap = buildEntityLookupMap(allChanges);
+
+        Map<CommitMetadata, List<Change>> changesByCommit = allChanges.stream()
+                .filter(change -> change.getCommitMetadata().isPresent())
+                .collect(Collectors.groupingBy(change -> change.getCommitMetadata().get()));
+
+        return changesByCommit.entrySet().stream()
+                .map(entry -> toHistoryDto(entry.getKey(), entry.getValue(), entityLookupMap))
+                .sorted(Comparator.comparing(ExperimentHistoryDto::commitDate).reversed())
+                .toList();
+    }
+
+    /** Gathers every Javers change recorded against the experiment itself and its Metadata/ExperimentResult sub-entities. */
+    private List<Change> fetchAllChanges(Experiment experiment) {
         List<Change> allChanges = new ArrayList<>(javers.findChanges(
-                QueryBuilder.byInstanceId(experimentUuid, Experiment.class).build()
+                QueryBuilder.byInstanceId(experiment.getId(), Experiment.class).build()
         ));
 
         if (experiment.getMetadata() != null) {
@@ -81,129 +113,171 @@ public class ExperimentHistoryServiceImpl implements ExperimentHistoryService {
             ));
         }
 
-        Map<String, String> entityLookupMap = buildEntityLookupMap(allChanges);
-
-        Map<CommitMetadata, List<Change>> changesByCommit = allChanges.stream()
-                .filter(change -> change.getCommitMetadata().isPresent())
-                .collect(Collectors.groupingBy(change -> change.getCommitMetadata().get()));
-
-        List<ExperimentHistoryDto> historyList = getExperimentHistoryDtos(changesByCommit, entityLookupMap);
-
-        historyList.sort((a, b) -> b.commitDate().compareTo(a.commitDate()));
-
-        return historyList;
+        return allChanges;
     }
 
-    private Map<String, String> buildEntityLookupMap(List<Change> allChanges) {
-        Set<UUID> instrumentIds = new HashSet<>();
-        Set<UUID> modalityIds = new HashSet<>();
-        Set<UUID> solventIds = new HashSet<>();
-        Set<UUID> reactantIds = new HashSet<>();
-        Set<String> userIds = new HashSet<>();
+    private ExperimentHistoryDto toHistoryDto(CommitMetadata commit, List<Change> changesInCommit, Map<String, String> entityLookupMap) {
+        String commitType = classifyCommitType(changesInCommit);
+        Map<String, String> diffMap = buildDiffMap(changesInCommit, entityLookupMap);
+        String resolvedAuthor = entityLookupMap.getOrDefault(commit.getAuthor(), commit.getAuthor());
 
-        allChanges.stream()
-                .filter(change -> change.getCommitMetadata().isPresent())
-                .map(change -> change.getCommitMetadata().get().getAuthor())
-                .forEach(userIds::add);
+        return new ExperimentHistoryDto(resolvedAuthor, commit.getCommitDateInstant(), commitType, diffMap);
+    }
 
-        for (Change change : allChanges) {
-            if (change instanceof ReferenceChange refChange) {
-                String propName = refChange.getPropertyName();
+    /**
+     * A commit is CREATE if it contains Javers' {@link NewObject} marker, ARCHIVE/RESTORE if the
+     * {@code archivedAt} property transitioned null&lt;-&gt;non-null, and UPDATE otherwise.
+     */
+    private String classifyCommitType(List<Change> changesInCommit) {
+        boolean isNewObject = changesInCommit.stream().anyMatch(NewObject.class::isInstance);
+        if (isNewObject) {
+            return "CREATE";
+        }
 
-                Object leftId = refChange.getLeft() instanceof InstanceId id ? id.getCdoId() : null;
-                Object rightId = refChange.getRight() instanceof InstanceId id ? id.getCdoId() : null;
-
-                extractId(propName, leftId, instrumentIds, modalityIds, solventIds, reactantIds, userIds);
-                extractId(propName, rightId, instrumentIds, modalityIds, solventIds, reactantIds, userIds);
+        for (Change change : changesInCommit) {
+            if (change instanceof ValueChange valueChange && "archivedAt".equals(propertyNameOf(change))) {
+                if (valueChange.getLeft() == null && valueChange.getRight() != null) {
+                    return "ARCHIVE";
+                }
+                if (valueChange.getLeft() != null && valueChange.getRight() == null) {
+                    return "RESTORE";
+                }
             }
         }
 
-        Map<String, String> lookupMap = new HashMap<>();
+        return "UPDATE";
+    }
 
-        if (!instrumentIds.isEmpty()) instrumentRepository.findAllById(instrumentIds).forEach(i -> lookupMap.put(i.getId().toString(), i.getName()));
-        if (!modalityIds.isEmpty()) modalityRepository.findAllById(modalityIds).forEach(m -> lookupMap.put(m.getId().toString(), m.getName()));
-        if (!solventIds.isEmpty()) solventRepository.findAllById(solventIds).forEach(s -> lookupMap.put(s.getId().toString(), s.getName()));
-        if (!reactantIds.isEmpty()) reactantRepository.findAllById(reactantIds).forEach(r -> lookupMap.put(r.getId().toString(), r.getShortName()));
-        if (!userIds.isEmpty()) userRepository.findAllById(userIds).forEach(u -> lookupMap.put(u.getId(), u.getFirstName() + " " + u.getLastName()));
+    /** Renders every non-ignored property change in a commit as a "before -> after" display string. */
+    private Map<String, String> buildDiffMap(List<Change> changesInCommit, Map<String, String> entityLookupMap) {
+        Map<String, String> diffMap = new HashMap<>();
+
+        for (Change change : changesInCommit) {
+            String propertyName = propertyNameOf(change);
+            if (propertyName == null || IGNORED_PROPERTIES.contains(propertyName)) {
+                continue;
+            }
+
+            String rendered = renderChange(change, entityLookupMap);
+            if (rendered != null) {
+                diffMap.put(propertyName, rendered);
+            }
+        }
+
+        return diffMap;
+    }
+
+    private String propertyNameOf(Change change) {
+        return change instanceof PropertyChange<?> propertyChange ? propertyChange.getPropertyName() : null;
+    }
+
+    /**
+     * Renders a single property change. {@link ReferenceChange} gets special handling to resolve
+     * IDs to display names; every other {@link PropertyChange} - values, lists, sets, maps, and
+     * any future Javers change type - is rendered generically via its own left/right values.
+     * <p>
+     * This is deliberate: the previous version of this class enumerated ValueChange/ReferenceChange
+     * explicitly and silently dropped list-typed property changes (e.g. {@code Experiment.dois})
+     * from the audit trail entirely, because Javers' {@code ListChange} matched neither case -
+     * confirmed with a real Javers instance in a throwaway test before this rewrite. Falling back
+     * to the shared {@link PropertyChange} contract instead of an exhaustive type list means no
+     * future property type (list, set, map, or otherwise) can go silently unhandled again.
+     */
+    private String renderChange(Change change, Map<String, String> entityLookupMap) {
+        return switch (change) {
+            case ReferenceChange refChange -> renderReferenceChange(refChange, entityLookupMap);
+            case PropertyChange<?> propertyChange -> propertyChange.getLeft() + " -> " + propertyChange.getRight();
+            default -> null; // NewObject/ObjectRemoved carry no single property value of their own.
+        };
+    }
+
+    private String renderReferenceChange(ReferenceChange refChange, Map<String, String> entityLookupMap) {
+        Object leftId = idOf(refChange.getLeft());
+        Object rightId = idOf(refChange.getRight());
+
+        String leftDisplay = leftId != null ? entityLookupMap.getOrDefault(leftId.toString(), leftId.toString()) : "null";
+        String rightDisplay = rightId != null ? entityLookupMap.getOrDefault(rightId.toString(), rightId.toString()) : "null";
+
+        return leftDisplay + " -> " + rightDisplay;
+    }
+
+    /** Extracts the raw concrete-domain-object ID (a UUID or a String, depending on the referenced entity) from one side of a ReferenceChange. */
+    private Object idOf(Object referenceEndpoint) {
+        return referenceEndpoint instanceof InstanceId instanceId ? instanceId.getCdoId() : null;
+    }
+
+    // --- Resolving reference IDs (instrument/modality/solvent/reactant/user) to display names ---
+
+    /** Groups the reference IDs collected from a batch of changes by which repository each one belongs to. */
+    private record ReferencedIds(
+            Set<UUID> instrumentIds,
+            Set<UUID> modalityIds,
+            Set<UUID> solventIds,
+            Set<UUID> reactantIds,
+            Set<String> userIds) {
+
+        static ReferencedIds empty() {
+            return new ReferencedIds(new HashSet<>(), new HashSet<>(), new HashSet<>(), new HashSet<>(), new HashSet<>());
+        }
+    }
+
+    private Map<String, String> buildEntityLookupMap(List<Change> allChanges) {
+        ReferencedIds ids = collectReferencedIds(allChanges);
+
+        Map<String, String> lookupMap = new HashMap<>();
+        if (!ids.instrumentIds().isEmpty()) {
+            instrumentRepository.findAllById(ids.instrumentIds()).forEach(i -> lookupMap.put(i.getId().toString(), i.getName()));
+        }
+        if (!ids.modalityIds().isEmpty()) {
+            modalityRepository.findAllById(ids.modalityIds()).forEach(m -> lookupMap.put(m.getId().toString(), m.getName()));
+        }
+        if (!ids.solventIds().isEmpty()) {
+            solventRepository.findAllById(ids.solventIds()).forEach(s -> lookupMap.put(s.getId().toString(), s.getName()));
+        }
+        if (!ids.reactantIds().isEmpty()) {
+            reactantRepository.findAllById(ids.reactantIds()).forEach(r -> lookupMap.put(r.getId().toString(), r.getShortName()));
+        }
+        if (!ids.userIds().isEmpty()) {
+            userRepository.findAllById(ids.userIds()).forEach(u -> lookupMap.put(u.getId(), u.getFirstName() + " " + u.getLastName()));
+        }
 
         return lookupMap;
     }
 
-    private void extractId(String propName, Object idObj, Set<UUID> instrumentIds, Set<UUID> modalityIds,
-                           Set<UUID> solventIds, Set<UUID> reactantIds, Set<String> userIds) {
-        if (idObj == null) return;
-        try {
-            switch (propName) {
-                case "instrument" -> instrumentIds.add((UUID) idObj);
-                case "modality" -> modalityIds.add((UUID) idObj);
-                case "solvent" -> solventIds.add((UUID) idObj);
-                case "reactantA", "reactantB" -> reactantIds.add((UUID) idObj);
-                case "scientist", "createdBy" -> userIds.add((String) idObj);
+    private ReferencedIds collectReferencedIds(List<Change> allChanges) {
+        ReferencedIds ids = ReferencedIds.empty();
+
+        allChanges.stream()
+                .map(Change::getCommitMetadata)
+                .flatMap(Optional::stream)
+                .map(CommitMetadata::getAuthor)
+                .forEach(ids.userIds()::add);
+
+        for (Change change : allChanges) {
+            if (change instanceof ReferenceChange refChange) {
+                addReferencedId(refChange.getPropertyName(), idOf(refChange.getLeft()), ids);
+                addReferencedId(refChange.getPropertyName(), idOf(refChange.getRight()), ids);
             }
-        } catch (ClassCastException e) {
-            log.warn("JaVers reference ID for property {} could not be cast", propName, e);
         }
+
+        return ids;
     }
 
-    private @NonNull List<ExperimentHistoryDto> getExperimentHistoryDtos(
-            Map<CommitMetadata, List<Change>> changesByCommit,
-            Map<String, String> entityLookupMap) {
-
-        List<ExperimentHistoryDto> historyList = new ArrayList<>();
-
-        for (Map.Entry<CommitMetadata, List<Change>> entry : changesByCommit.entrySet()) {
-            CommitMetadata commit = entry.getKey();
-            Map<String, String> diffMap = new HashMap<>();
-            String commitType = "UPDATE";
-
-            for (Change change : entry.getValue()) {
-                if (change instanceof NewObject) {
-                    commitType = "CREATE";
-                }
-
-                String propName = "";
-                if (change instanceof PropertyChange propChange) {
-                    propName = propChange.getPropertyName();
-                }
-
-                if (IGNORED_PROPERTIES.contains(propName)) {
-                    // Only need to check for archivedAt here, to set the status to ARCHIVE/RESTORE.
-                    if ("archivedAt".equals(propName) && change instanceof ValueChange valChange) {
-                        if (valChange.getLeft() == null && valChange.getRight() != null) commitType = "ARCHIVE";
-                        else if (valChange.getLeft() != null && valChange.getRight() == null) commitType = "RESTORE";
-                    }
-                    continue; // Skips straight to the next change, without writing this property into diffMap.
-                }
-
-                // Not an ignored property - map it normally:
-                if (change instanceof ValueChange valChange) {
-                    diffMap.put(propName, valChange.getLeft() + " -> " + valChange.getRight());
-
-                } else if (change instanceof ReferenceChange refChange) {
-                    Object leftIdObj = refChange.getLeft() instanceof InstanceId instanceId ? instanceId.getCdoId() : null;
-                    Object rightIdObj = refChange.getRight() instanceof InstanceId instanceId ? instanceId.getCdoId() : null;
-
-                    String leftId = leftIdObj != null ? leftIdObj.toString() : null;
-                    String rightId = rightIdObj != null ? rightIdObj.toString() : null;
-
-                    String leftDisplay = leftId != null ? entityLookupMap.getOrDefault(leftId, leftId) : "null";
-                    String rightDisplay = rightId != null ? entityLookupMap.getOrDefault(rightId, rightId) : "null";
-
-                    diffMap.put(propName, leftDisplay + " -> " + rightDisplay);
-                }
-            }
-
-            // Resolve the author's display name via the lookup map, falling back to the raw author ID
-            // (e.g. a Keycloak subject UUID) if no matching User was found.
-            String resolvedAuthor = entityLookupMap.getOrDefault(commit.getAuthor(), commit.getAuthor());
-
-            historyList.add(new ExperimentHistoryDto(
-                    resolvedAuthor,
-                    commit.getCommitDateInstant(),
-                    commitType,
-                    diffMap
-            ));
+    private void addReferencedId(String propertyName, Object id, ReferencedIds ids) {
+        if (id == null) {
+            return;
         }
-        return historyList;
+        try {
+            switch (propertyName) {
+                case "instrument" -> ids.instrumentIds().add((UUID) id);
+                case "modality" -> ids.modalityIds().add((UUID) id);
+                case "solvent" -> ids.solventIds().add((UUID) id);
+                case "reactantA", "reactantB" -> ids.reactantIds().add((UUID) id);
+                case "scientist", "createdBy" -> ids.userIds().add((String) id);
+                default -> { } // Not a reference property this audit trail resolves a display name for.
+            }
+        } catch (ClassCastException e) {
+            log.warn("JaVers reference ID for property {} could not be cast", propertyName, e);
+        }
     }
 }
