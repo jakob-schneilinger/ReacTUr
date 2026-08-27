@@ -4,6 +4,7 @@ import com.reactur.backend.dtos.GetUserDto;
 import com.reactur.backend.dtos.RoleDto;
 import com.reactur.backend.entities.User;
 import com.reactur.backend.enums.Role;
+import com.reactur.backend.exeptions.ResourceConflictException;
 import com.reactur.backend.exeptions.ResourceNotFoundException;
 import com.reactur.backend.mappers.UserMapper;
 import com.reactur.backend.repositories.UserRepository;
@@ -112,6 +113,43 @@ public class UserServiceTest {
 
         assertThrows(ResourceNotFoundException.class,
                 () -> userService.setRole(STRING_ID, new RoleDto(Role.ADMIN)));
+    }
+
+    @Test
+    void setRole_ShouldThrowConflict_WhenDemotingTheLastAdmin() {
+        mockUser.setRole(Role.ADMIN);
+        when(userRepository.findById(STRING_ID)).thenReturn(Optional.of(mockUser));
+        when(userRepository.countByRole(Role.ADMIN)).thenReturn(1L);
+
+        assertThrows(ResourceConflictException.class,
+                () -> userService.setRole(STRING_ID, new RoleDto(Role.USER)));
+
+        assertEquals(Role.ADMIN, mockUser.getRole()); // Unchanged
+        verify(userRepository, never()).save(any());
+    }
+
+    @Test
+    void setRole_ShouldAllowDemotingAnAdmin_WhenAnotherAdminExists() {
+        mockUser.setRole(Role.ADMIN);
+        when(userRepository.findById(STRING_ID)).thenReturn(Optional.of(mockUser));
+        when(userRepository.countByRole(Role.ADMIN)).thenReturn(2L);
+
+        userService.setRole(STRING_ID, new RoleDto(Role.USER));
+
+        assertEquals(Role.USER, mockUser.getRole());
+        verify(userRepository, times(1)).save(mockUser);
+    }
+
+    @Test
+    void setRole_ShouldNotCheckAdminCount_WhenPromotingToAdmin() {
+        // user starts as Role.USER (see setUp) - promoting them to ADMIN can never reduce the
+        // admin count, so countByRole must not even be consulted.
+        when(userRepository.findById(STRING_ID)).thenReturn(Optional.of(mockUser));
+
+        userService.setRole(STRING_ID, new RoleDto(Role.ADMIN));
+
+        assertEquals(Role.ADMIN, mockUser.getRole());
+        verify(userRepository, never()).countByRole(any());
     }
 
     // --- GET ROLE ---
