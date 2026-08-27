@@ -37,8 +37,21 @@ public class CustomJwtAuthenticationConverter implements Converter<Jwt, Abstract
             return userRepository.save(newUser);
         });
 
+        // Deactivated accounts (User.deactivatedAt != null, set via UserService.archiveUser) keep
+        // their stored role in the DB - archiving is reversible and shouldn't discard it - but must
+        // not keep acting on it. Since roles are read fresh from the DB on every request (see the
+        // comment on User.role), granting UNAUTHORIZED here takes effect on the very next request
+        // after deactivation, reusing the exact same "not yet approved" authorization path already
+        // enforced everywhere else, without needing any token/session revocation machinery.
+        Role effectiveRole = user.getRole();
+        if (user.getDeactivatedAt() != null) {
+            log.warn("Deactivated user {} attempted to authenticate; granting UNAUTHORIZED instead of stored role {}.",
+                    keycloakId, user.getRole());
+            effectiveRole = Role.UNAUTHORIZED;
+        }
+
         List<GrantedAuthority> authorities = List.of(
-                new SimpleGrantedAuthority("ROLE_" + user.getRole().name())
+                new SimpleGrantedAuthority("ROLE_" + effectiveRole.name())
         );
 
         return new JwtAuthenticationToken(jwt, authorities);
