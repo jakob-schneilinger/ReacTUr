@@ -109,6 +109,14 @@ public class ExperimentValidator {
      * @param label A label (e.g., "A" or "B") for clearer error messages.
      */
     private void validateReactantHasActiveStructure(Reactant reactant, String label) {
+        // TODO-CLAUDE (race condition inventory, Family 1 - fixable without migration tooling, see
+        // docs/Software_todo.md "Race condition inventory" under the ReactantRepository.hasNameConflict item): this check
+        // targets one specific, already-existing Reactant row (by id), so it's cheaply fixable in principle - but note
+        // it's a genuine cross-service race: StructureServiceImpl.uploadStructure can delete/replace this exact
+        // reactant's structures (including its ACTIVE one) between this check passing and the caller's Experiment save
+        // committing. Closing it would mean taking a @Lock(LockModeType.PESSIMISTIC_WRITE) on the Reactant row here AND
+        // having StructureServiceImpl.uploadStructure take the same lock before its deleteAll - a lock that needs to be
+        // coordinated across two different service classes, not just added locally in one place.
         List<ReactantStructure> structures = structureRepository.findByReactant_Id(reactant.getId());
 
         boolean hasActiveStructure = structures.stream()

@@ -52,6 +52,12 @@ public class UserServiceImpl implements UserService {
                     "Cannot change this user's role: they are the last remaining ADMIN. Promote another user to ADMIN first.");
         }
 
+        // TODO-CLAUDE (race condition inventory, Family 1 - fixable without migration tooling, see
+        // docs/Software_todo.md "Race condition inventory" under the ReactantRepository.hasNameConflict item): plain
+        // read-modify-write on one specific, already-persisted User row (by id) - a normal lost-update race if two
+        // concurrent setRole calls target the same user with different roles, independent of the last-admin check above.
+        // Fix: @Version on User (the losing save then throws ObjectOptimisticLockingFailureException instead of silently
+        // overwriting), or @Lock(LockModeType.PESSIMISTIC_WRITE) on findUserOrThrow's lookup at the top of this method.
         user.setRole(roleDto.role());
         userRepository.save(user);
         log.info("Successfully updated role for user ID: {} to {}", id, roleDto.role());
@@ -97,6 +103,16 @@ public class UserServiceImpl implements UserService {
 
     // --- Private Helper Methods ---
 
+    // TODO-CLAUDE (race condition inventory, Family 2 - NEW finding, serious enough to flag on its own, see
+    // docs/Software_todo.md "Race condition inventory" under the ReactantRepository.hasNameConflict item): this guard
+    // is a table-wide aggregate query (countByRole), not a lookup of one specific known row - a different Family 2
+    // shape than the name/casNumber/inChiKey uniqueness checks (this is a COUNT invariant, not a UNIQUENESS
+    // invariant, so a unique index wouldn't help even once migration tooling exists). With exactly 2 admins, two
+    // concurrent setRole calls each demoting the OTHER admin both observe count == 2 (since the check is `<= 1`, not
+    // `< 2`), both pass, and both proceed - leaving ZERO admins with no in-app recovery path. Not fixable with simple
+    // Java-side row locking (there's no single row representing "the current admin count" to lock); would need either
+    // a locking aggregate read (e.g. SELECT ... FOR UPDATE over all ADMIN rows before counting) or SERIALIZABLE
+    // isolation + retry logic.
     /**
      * True if {@code user} currently holds the ADMIN role, the requested {@code newRole} would
      * take it away, and no other ADMIN account exists to fall back on - which would otherwise

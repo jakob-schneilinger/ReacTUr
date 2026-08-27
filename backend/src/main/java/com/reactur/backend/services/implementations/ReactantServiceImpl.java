@@ -66,6 +66,14 @@ public class ReactantServiceImpl implements ReactantService {
     @Override
     @Transactional
     public ReactantDetailDto updateReactant(UUID uuid, UpdateReactantDto patchDto) {
+        // TODO-CLAUDE (race condition inventory, Family 1 - fixable without migration tooling, see
+        // docs/Software_todo.md "Race condition inventory" under the ReactantRepository.hasNameConflict item): this is a
+        // plain read-modify-write on one specific, already-persisted row (this reactant, by id). Two concurrent
+        // updateReactant calls on the same reactant (e.g. one edits `comment`, another edits `smiles`) can silently lose
+        // one edit - both read the same row, both later write their own full in-memory snapshot back via save(), and
+        // whichever transaction commits last wins, discarding the other's changes to the fields it didn't touch. Fix: add
+        // @Version to Reactant (the losing save then throws ObjectOptimisticLockingFailureException instead of silently
+        // overwriting), or @Lock(LockModeType.PESSIMISTIC_WRITE) on this findById read.
         Reactant reactant = reactantRepository.findById(uuid)
                 .orElseThrow(() -> new ResourceNotFoundException("Reactant with ID " + uuid + " not found"));
 

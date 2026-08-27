@@ -241,6 +241,17 @@ public class ExperimentServiceImpl implements ExperimentService {
 
     log.debug("All chemical and lookup entities successfully validated for update.");
 
+    // TODO-CLAUDE (race condition inventory, Family 1 - fixable without migration tooling, see
+    // docs/Software_todo.md "Race condition inventory" under the ReactantRepository.hasNameConflict item): VERIFIED,
+    // a real bug, not just theoretical. This method never touches `archivedAt` (see the comment below), but no entity
+    // in this project uses @DynamicUpdate (checked - zero matches project-wide), so Hibernate's default full-column
+    // UPDATE writes every mapped column from this managed entity's in-memory snapshot on flush - including the stale
+    // `archivedAt` value read at the top of this method (whatever it was via findById above, which had to be null for
+    // this method to have gotten past the archived-state check earlier). If a concurrent archiveExperiment() commits
+    // in the window between this method's findById and its own save() below, this method's save silently reverts that
+    // archive back to NULL, because Hibernate writes this entity's stale in-memory value, not a DB-fresh one. Fix:
+    // add @Version to Experiment (then this save() throws ObjectOptimisticLockingFailureException instead of silently
+    // overwriting the concurrent archive).
     // 5. Apply Updates (Full Replacement via PUT)
     // Note: We intentionally DO NOT update `createdBy` or `archivedAt` to enforce immutability.
     existingExperiment.setDois(experimentDto.dois());

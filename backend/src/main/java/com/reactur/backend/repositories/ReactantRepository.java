@@ -27,6 +27,10 @@ public interface ReactantRepository extends JpaRepository<Reactant, UUID> {
      functional unique index risks fighting Hibernate's automatic schema management. Adding one
      needs its own deliberate discussion, possibly bundled with "should this project adopt a
      migration tool at all".
+     The same check-then-act race applies to the casNumber/inChiKey uniqueness checks in
+     ReactantValidator (existsByCasNumber/existsByInChiKey and their *AndIdNot variants), which
+     have the same non-atomic check-then-save shape and need the same DB-level constraint once a
+     migration-tooling decision is made.
      */
     // Comment to the todo: Wouldn't a @transaction at the service layer suffice to make sure
     //  we are validating no duplicates before adding it?

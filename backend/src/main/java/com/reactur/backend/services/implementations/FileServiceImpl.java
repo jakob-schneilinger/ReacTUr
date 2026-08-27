@@ -80,6 +80,13 @@ public class FileServiceImpl implements FileService {
 
         experimentAuthorization.assertCanModify(experiment, requestingUserId, requestingUserRole);
 
+        // TODO-CLAUDE (race condition inventory, Family 1 - fixable without migration tooling, see
+        // docs/Software_todo.md "Race condition inventory" under the ReactantRepository.hasNameConflict item): targets
+        // one specific, already-existing Experiment row (by experimentId). A concurrent archiveExperiment() commit
+        // between this check and the attachmentRepository.save() below could let a new file attach to an experiment that
+        // is (or becomes) archived, violating the "archived experiments are frozen" invariant. Fix:
+        // @Lock(LockModeType.PESSIMISTIC_WRITE) on the experiment lookup here, or @Version on Experiment (checked via a
+        // fresh re-read immediately before the attachment save).
         if (experiment.getArchivedAt() != null) {
             throw new ResourceConflictException("Cannot upload a file to an archived experiment. Please restore it first.");
         }
@@ -193,6 +200,11 @@ public class FileServiceImpl implements FileService {
 
         experimentAuthorization.assertCanModify(attachment.getExperiment(), requestingUserId, requestingUserRole);
 
+        // TODO-CLAUDE (race condition inventory, Family 1 - fixable without migration tooling, see
+        // docs/Software_todo.md "Race condition inventory" under the ReactantRepository.hasNameConflict item): same
+        // shape/target as the check in storeFile - a concurrent archiveExperiment() commit on this attachment's parent
+        // experiment, landing between this check and the save below, isn't caught. Fix: @Lock(PESSIMISTIC_WRITE) on the
+        // parent experiment's lookup, or @Version on Experiment.
         if (attachment.getExperiment().getArchivedAt() != null) {
             throw new ResourceConflictException("Cannot delete a file from an archived experiment. Please restore it first.");
         }

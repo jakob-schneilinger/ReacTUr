@@ -77,6 +77,16 @@ public class ExperimentFolderServiceImpl implements ExperimentFolderService {
       throw new AccessDeniedException("User not authorized to add a not-owned experiment to a folder");
     }
 
+    // TODO-CLAUDE (race condition inventory, Family 1 - fixable without migration tooling, see
+    // docs/Software_todo.md "Race condition inventory" under the ReactantRepository.hasNameConflict item): this
+    // dedup pass is scoped to one user's folders (not a whole-table scan), and the invariant it protects is anchored
+    // to one specific, already-existing row: the Experiment being added (by experimentId). Two concurrent
+    // addExperimentToFolder calls for the SAME experiment but TWO DIFFERENT folders of the SAME user can each observe
+    // "not currently in any other folder of mine" and both add it, leaving the experiment in two folders for that
+    // user simultaneously - violating the "one folder per user" invariant this loop exists to enforce. Fix: lock the
+    // Experiment row (e.g. @Lock(LockModeType.PESSIMISTIC_WRITE) on its lookup) so a second concurrent call re-reads
+    // fresh folder membership before acting - there's no dedicated join-table entity to lock directly since
+    // `experiments` is a plain @ManyToMany @JoinTable.
     // One Folder Per User: Find all user's folders and remove this experiment
     List<ExperimentFolder> allUserFolders = folderRepository.findAllByOwner_Id(requestingUserId);
     for (ExperimentFolder oldFolder : allUserFolders) {
@@ -90,6 +100,14 @@ public class ExperimentFolderServiceImpl implements ExperimentFolderService {
     }
 
 
+    // TODO-CLAUDE (race condition inventory, Family 1 - fixable without migration tooling, see
+    // docs/Software_todo.md "Race condition inventory" under the ReactantRepository.hasNameConflict item): targets
+    // one specific, already-fetched ExperimentFolder row (this folder, by id). Two concurrent adds of the same
+    // experiment to the same folder could both pass this check and both add it - whether that actually corrupts data
+    // depends on whether the folder_experiments join table has a composite unique constraint on
+    // (folder_id, experiment_id); if it does, the losing save() just fails loudly at flush time instead of silently
+    // duplicating, which is an acceptable if slightly ungraceful outcome. Fix if needed: @Lock(PESSIMISTIC_WRITE) on
+    // this folder's lookup, or @Version on ExperimentFolder.
     // Prevent duplicates in the same folder
     boolean alreadyExists = folder.getExperiments().stream()
       .anyMatch(exp -> exp.getId().equals(experimentId));
@@ -127,6 +145,15 @@ public class ExperimentFolderServiceImpl implements ExperimentFolderService {
   public void deleteFolder(UUID folderId, String requestingUserId) {
     log.trace("Deleting folder {}", folderId);
 
+    // TODO-CLAUDE (race condition inventory, Family 1 - fixable without migration tooling, see
+    // docs/Software_todo.md "Race condition inventory" under the ReactantRepository.hasNameConflict item): targets
+    // one specific, already-existing ExperimentFolder row (by id). If addExperimentToFolder or
+    // removeExperimentFromFolder fetches this exact folder, then this method deletes it, then that other method's
+    // own save() commits afterward, JPA's save()/merge() on an entity with a pre-assigned id that no longer exists in
+    // the DB re-inserts it - i.e. this delete can be silently undone by a resurrection from a concurrent
+    // add/remove-experiment call that read the folder just before the delete. Fix: @Lock(LockModeType.PESSIMISTIC_WRITE)
+    // on the folder lookup in this method (and ideally in addExperimentToFolder/removeExperimentFromFolder too, so
+    // they serialize against each other).
     ExperimentFolder folder = getFolderAndValidateOwnership(folderId, requestingUserId);
 
     folderRepository.delete(folder);
