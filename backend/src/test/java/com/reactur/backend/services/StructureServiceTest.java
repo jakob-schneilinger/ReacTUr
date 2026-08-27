@@ -83,7 +83,7 @@ class StructureServiceTest {
                 "file", "test.xyz", "text/plain", "XYZ content".getBytes()
         );
 
-        when(reactantRepository.findById(REACTANT_ID)).thenReturn(Optional.of(mockReactant));
+        when(reactantRepository.findByIdForUpdate(REACTANT_ID)).thenReturn(Optional.of(mockReactant));
         when(structureRepository.save(any(ReactantStructure.class))).thenAnswer(i -> {
             ReactantStructure saved = i.getArgument(0);
             saved.setId(UUID.randomUUID());
@@ -108,7 +108,7 @@ class StructureServiceTest {
     void uploadStructure_whenReactantNotFound_shouldThrowResourceNotFoundException() {
         MockMultipartFile file = new MockMultipartFile("file", "test.xyz", "text/plain", "XYZ".getBytes());
 
-        when(reactantRepository.findById(REACTANT_ID)).thenReturn(Optional.empty());
+        when(reactantRepository.findByIdForUpdate(REACTANT_ID)).thenReturn(Optional.empty());
 
         ResourceNotFoundException exception = assertThrows(
                 ResourceNotFoundException.class,
@@ -140,7 +140,7 @@ class StructureServiceTest {
         IOException ioException = new IOException("simulated read failure");
         when(file.getBytes()).thenThrow(ioException);
 
-        when(reactantRepository.findById(REACTANT_ID)).thenReturn(Optional.of(mockReactant));
+        when(reactantRepository.findByIdForUpdate(REACTANT_ID)).thenReturn(Optional.of(mockReactant));
 
         FileStorageException exception = assertThrows(
                 FileStorageException.class,
@@ -156,7 +156,7 @@ class StructureServiceTest {
         MockMultipartFile file = new MockMultipartFile("file", "test.xyz", "text/plain", "XYZ".getBytes());
         ReactantStructure oldStructure = ReactantStructure.builder().flag(StructureFlag.REJECTED).build();
 
-        when(reactantRepository.findById(REACTANT_ID)).thenReturn(Optional.of(mockReactant));
+        when(reactantRepository.findByIdForUpdate(REACTANT_ID)).thenReturn(Optional.of(mockReactant));
         when(structureRepository.findByReactant_Id(REACTANT_ID)).thenReturn(List.of(oldStructure));
         when(structureRepository.save(any(ReactantStructure.class))).thenAnswer(i -> i.getArgument(0));
 
@@ -267,6 +267,7 @@ class StructureServiceTest {
                 .build();
 
         when(structureRepository.findById(STRUCTURE_ID)).thenReturn(Optional.of(mockPendingStructure));
+        when(reactantRepository.findByIdForUpdate(REACTANT_ID)).thenReturn(Optional.of(mockReactant));
         when(structureRepository.findByReactant_Id(REACTANT_ID)).thenReturn(List.of(mockPendingStructure, otherStructure));
 
         when(structureRepository.saveAll(anyIterable())).thenAnswer(i -> i.getArgument(0));
@@ -346,6 +347,7 @@ class StructureServiceTest {
         ReactantStructure currentlyActive = ReactantStructure.builder().id(UUID.randomUUID()).reactant(mockReactant).flag(StructureFlag.ACTIVE).build();
 
         when(structureRepository.findById(STRUCTURE_ID)).thenReturn(Optional.of(targetToActivate));
+        when(reactantRepository.findByIdForUpdate(REACTANT_ID)).thenReturn(Optional.of(mockReactant));
         when(structureRepository.findByReactant_Id(REACTANT_ID)).thenReturn(List.of(targetToActivate, currentlyActive));
 
         StructureDto result = structureService.selectStructure(STRUCTURE_ID);

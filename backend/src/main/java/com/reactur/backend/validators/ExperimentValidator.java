@@ -70,10 +70,16 @@ public class ExperimentValidator {
                         "Scientist with ID " + experimentDto.metadata().scientist() + " not found."
                 ));
 
-        Reactant reactantA = reactantRepository.findById(experimentDto.reactantA())
+        // FIXED (race condition inventory, see Software_todo.md's Race condition inventory item): these used to be
+        // plain findById calls. Now they take a pessimistic write lock on each reactant row, held until the
+        // caller's transaction (ExperimentServiceImpl.createExperiment/updateExperiment) commits, so a concurrent
+        // StructureServiceImpl.uploadStructure call for the SAME reactant (which takes the same lock before its own
+        // deleteAll) blocks until this transaction finishes, instead of being able to delete/replace this
+        // reactant's ACTIVE structure in the window between this validation and the experiment being saved.
+        Reactant reactantA = reactantRepository.findByIdForUpdate(experimentDto.reactantA())
                 .orElseThrow(() -> new UnprocessableEntityException("Reactant A does not exist."));
 
-        Reactant reactantB = reactantRepository.findById(experimentDto.reactantB())
+        Reactant reactantB = reactantRepository.findByIdForUpdate(experimentDto.reactantB())
                 .orElseThrow(() -> new UnprocessableEntityException("Reactant B does not exist."));
 
         if (reactantA.getId().equals(reactantB.getId())) {
@@ -109,14 +115,9 @@ public class ExperimentValidator {
      * @param label A label (e.g., "A" or "B") for clearer error messages.
      */
     private void validateReactantHasActiveStructure(Reactant reactant, String label) {
-        // TODO-CLAUDE (race condition inventory, Family 1 - fixable without migration tooling, see
-        // docs/Software_todo.md "Race condition inventory" under the ReactantRepository.hasNameConflict item): this check
-        // targets one specific, already-existing Reactant row (by id), so it's cheaply fixable in principle - but note
-        // it's a genuine cross-service race: StructureServiceImpl.uploadStructure can delete/replace this exact
-        // reactant's structures (including its ACTIVE one) between this check passing and the caller's Experiment save
-        // committing. Closing it would mean taking a @Lock(LockModeType.PESSIMISTIC_WRITE) on the Reactant row here AND
-        // having StructureServiceImpl.uploadStructure take the same lock before its deleteAll - a lock that needs to be
-        // coordinated across two different service classes, not just added locally in one place.
+        // FIXED (race condition inventory, see Software_todo.md's Race condition inventory item): the reactant
+        // passed in here was already fetched via findByIdForUpdate above, so the pessimistic write lock on its row
+        // is already held for the rest of this transaction by the time this method runs.
         List<ReactantStructure> structures = structureRepository.findByReactant_Id(reactant.getId());
 
         boolean hasActiveStructure = structures.stream()

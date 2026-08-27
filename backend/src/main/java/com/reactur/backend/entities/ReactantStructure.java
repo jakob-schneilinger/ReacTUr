@@ -12,6 +12,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import jakarta.persistence.Version;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -49,4 +50,11 @@ public class ReactantStructure {
     @Enumerated(EnumType.STRING)
     @Column(name = "flag")
     private StructureFlag flag;
+
+    // Optimistic locking: see StructureServiceImpl.selectStructure and fetchPendingStructuresFromAPI, and
+    // Software_todo.md's Race condition inventory item. Protects against a stale save() overwriting a row that a
+    // concurrent call already deleted or changed (e.g. uploadStructure's deleteAll, or another selectStructure
+    // call), turning a silent overwrite into a loud ObjectOptimisticLockingFailureException instead.
+    @Version
+    private Long version;
 }

@@ -2,6 +2,7 @@ package com.reactur.backend.entities;
 
 import com.reactur.backend.enums.Role;
 import jakarta.persistence.*;
+import jakarta.persistence.Version;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -50,4 +51,11 @@ public class User {
 
     @Column(name = "deactivated_at")
     private Instant deactivatedAt;
+
+    // Optimistic locking: see UserServiceImpl.setRole and Software_todo.md's Race condition inventory item.
+    // Protects against a plain lost-update race if two concurrent setRole calls target the same user with
+    // different roles - the losing save() now fails loudly with ObjectOptimisticLockingFailureException instead
+    // of silently overwriting the other request's role change.
+    @Version
+    private Long version;
 }

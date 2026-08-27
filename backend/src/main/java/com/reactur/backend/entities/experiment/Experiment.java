@@ -16,11 +16,13 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
+import jakarta.persistence.Version;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.javers.core.metamodel.annotation.DiffIgnore;
 
 import java.time.Instant;
 import java.util.ArrayList;
@@ -74,4 +76,16 @@ public class Experiment {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "created_by", referencedColumnName = "id", nullable = false)
     private User createdBy;
+
+    // Optimistic locking: see ExperimentServiceImpl.updateExperiment and Software_todo.md's Race condition
+    // inventory item. This entity has no DynamicUpdate, so Hibernate's default full-column UPDATE writes every
+    // mapped field from this managed entity's in-memory snapshot on flush - previously, updateExperiment (which
+    // never touches archivedAt itself) could silently revert a concurrent archiveExperiment/restoreExperiment
+    // commit back to its own stale snapshot value. With Version, that stale save() now fails loudly with
+    // ObjectOptimisticLockingFailureException (mapped to HTTP 409 by GlobalExceptionHandler) instead.
+    // DiffIgnore keeps this technical field out of the Javers audit trail (it would otherwise show a spurious
+    // version-changed entry on every single edit, cluttering ExperimentHistoryServiceImpl's history view).
+    @Version
+    @DiffIgnore
+    private Long version;
 }

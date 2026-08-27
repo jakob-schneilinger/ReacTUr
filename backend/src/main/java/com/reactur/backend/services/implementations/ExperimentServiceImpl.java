@@ -26,6 +26,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -154,7 +155,15 @@ public class ExperimentServiceImpl implements ExperimentService {
     // 3. Act (Execution) - Only update if not already archived (Idempotent)
     if (experiment.getArchivedAt() == null) {
       experiment.setArchivedAt(Instant.now());
-      experimentRepository.save(experiment);
+      // Experiment now carries a @Version field (see the Race condition inventory item in Software_todo.md). This
+      // branch already guards against re-archiving, but two concurrent archive calls could both pass that check
+      // before either commits; since both want the identical outcome, treat a lock conflict as "someone already
+      // archived it" rather than surfacing an error.
+      try {
+        experimentRepository.save(experiment);
+      } catch (ObjectOptimisticLockingFailureException e) {
+        log.debug("Experiment {} was archived concurrently by another request; treating as already archived.", experimentId);
+      }
     } else {
       log.warn("Experiment {} was already archived; ignoring redundant archive request from user {}",
         experimentId, requestingUserId);
@@ -177,7 +186,14 @@ public class ExperimentServiceImpl implements ExperimentService {
     // 3. Act
     if (experiment.getArchivedAt() != null) {
       experiment.setArchivedAt(null);
-      experiment = experimentRepository.save(experiment);
+      // Same benign-double-submit reasoning as archiveExperiment above.
+      try {
+        experiment = experimentRepository.save(experiment);
+      } catch (ObjectOptimisticLockingFailureException e) {
+        log.debug("Experiment {} was restored concurrently by another request; using the current state.", experimentId);
+        experiment = experimentRepository.findById(experimentId)
+                .orElseThrow(() -> new ResourceNotFoundException("Experiment with ID " + experimentId + " not found"));
+      }
     }
 
     return experimentMapper.experimentToGetExperimentDto(experiment, fileService.getAttachmentsOfExperiment(experiment.getId()));

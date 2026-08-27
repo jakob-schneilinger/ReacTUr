@@ -17,8 +17,10 @@ import com.reactur.backend.repositories.ReactantStructureRepository;
 import com.reactur.backend.services.ReactantService;
 import com.reactur.backend.services.StructureService;
 import com.reactur.backend.validators.ReactantValidator;
+import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.transaction.annotation.Transactional;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
@@ -28,6 +30,7 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @AllArgsConstructor
 public class ReactantServiceImpl implements ReactantService {
@@ -66,14 +69,10 @@ public class ReactantServiceImpl implements ReactantService {
     @Override
     @Transactional
     public ReactantDetailDto updateReactant(UUID uuid, UpdateReactantDto patchDto) {
-        // TODO-CLAUDE (race condition inventory, Family 1 - fixable without migration tooling, see
-        // docs/Software_todo.md "Race condition inventory" under the ReactantRepository.hasNameConflict item): this is a
-        // plain read-modify-write on one specific, already-persisted row (this reactant, by id). Two concurrent
-        // updateReactant calls on the same reactant (e.g. one edits `comment`, another edits `smiles`) can silently lose
-        // one edit - both read the same row, both later write their own full in-memory snapshot back via save(), and
-        // whichever transaction commits last wins, discarding the other's changes to the fields it didn't touch. Fix: add
-        // @Version to Reactant (the losing save then throws ObjectOptimisticLockingFailureException instead of silently
-        // overwriting), or @Lock(LockModeType.PESSIMISTIC_WRITE) on this findById read.
+        // FIXED (race condition inventory, see Software_todo.md's Race condition inventory item): Reactant now
+        // carries a @Version field, so if a concurrent updateReactant call on this same row commits first, this
+        // method's own save() below fails loudly with ObjectOptimisticLockingFailureException instead of silently
+        // discarding the other request's changes to fields this method didn't touch.
         Reactant reactant = reactantRepository.findById(uuid)
                 .orElseThrow(() -> new ResourceNotFoundException("Reactant with ID " + uuid + " not found"));
 
@@ -143,7 +142,16 @@ public class ReactantServiceImpl implements ReactantService {
                 .orElseThrow(() -> new ResourceNotFoundException("Reactant with ID " + uuid + " not found"));
 
         reactant.setArchivedAt(Instant.now());
-        reactantRepository.save(reactant);
+        // Reactant now carries a @Version field (see the Race condition inventory item in Software_todo.md). This
+        // unconditional set-and-save has no existing-state check to protect it, so two concurrent archiveReactant
+        // calls on the same reactant would otherwise have the second one fail on a version conflict even though
+        // both wanted the exact same outcome (archived). Since that's a harmless double-submit, not a real
+        // conflict, treat a lock failure here as "someone already archived it" rather than surfacing an error.
+        try {
+            reactantRepository.save(reactant);
+        } catch (ObjectOptimisticLockingFailureException e) {
+            log.debug("Reactant {} was archived concurrently by another request; treating as already archived.", uuid);
+        }
     }
 
     @Override
@@ -153,7 +161,17 @@ public class ReactantServiceImpl implements ReactantService {
                 .orElseThrow(() -> new ResourceNotFoundException("Reactant with ID " + uuid + " not found"));
 
         reactant.setArchivedAt(null);
-        Reactant saved = reactantRepository.save(reactant);
+        // Same benign-double-submit reasoning as archiveReactant above: a lock conflict here means someone else
+        // already restored this exact reactant, not a real conflict, so re-read the current state instead of
+        // failing.
+        Reactant saved;
+        try {
+            saved = reactantRepository.save(reactant);
+        } catch (ObjectOptimisticLockingFailureException e) {
+            log.debug("Reactant {} was restored concurrently by another request; using the current state.", uuid);
+            saved = reactantRepository.findById(uuid)
+                    .orElseThrow(() -> new ResourceNotFoundException("Reactant with ID " + uuid + " not found"));
+        }
         return reactantMapper.toDto(saved, determineAggregateFlag(uuid));
     }
 

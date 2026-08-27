@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authorization.AuthorizationDeniedException;
 import org.springframework.security.core.Authentication;
@@ -77,6 +78,17 @@ public class GlobalExceptionHandler {
     public ResponseEntity<String> handleResourceConflictException(ResourceConflictException ex) {
         log.warn("Resource conflict: {}", ex.getMessage());
         return ResponseEntity.status(HttpStatus.CONFLICT).body(ex.getMessage());
+    }
+
+    // Thrown by Hibernate (via a @Version field) when a save/delete finds that the row was already changed by a
+    // concurrent transaction since it was read - see the entities' @Version fields and the "Race condition
+    // inventory" item in Software_todo.md. Mapped to 409, same as ResourceConflictException, since it's the same
+    // kind of problem from the client's point of view: retry with fresh data.
+    @ExceptionHandler(ObjectOptimisticLockingFailureException.class)
+    public ResponseEntity<String> handleObjectOptimisticLockingFailureException(ObjectOptimisticLockingFailureException ex) {
+        log.warn("Optimistic locking conflict: {}", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body("This resource was modified by someone else in the meantime. Please reload and try again.");
     }
 
     @ExceptionHandler(UnprocessableEntityException.class)

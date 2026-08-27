@@ -180,11 +180,11 @@ class ExperimentServiceTest {
 
     Reactant reactantA = new Reactant();
     reactantA.setId(dto.reactantA());
-    when(reactantRepository.findById(dto.reactantA())).thenReturn(Optional.of(reactantA));
+    when(reactantRepository.findByIdForUpdate(dto.reactantA())).thenReturn(Optional.of(reactantA));
 
     Reactant reactantB = new Reactant();
     reactantB.setId(dto.reactantB());
-    when(reactantRepository.findById(dto.reactantB())).thenReturn(Optional.of(reactantB));
+    when(reactantRepository.findByIdForUpdate(dto.reactantB())).thenReturn(Optional.of(reactantB));
 
     ReactantStructure activeStructure = new ReactantStructure();
     activeStructure.setFlag(StructureFlag.ACTIVE);
@@ -279,7 +279,7 @@ class ExperimentServiceTest {
       // Reactant does not exist
       when(userRepository.findById(validUserId)).thenReturn(Optional.of(new User()));
       when(userRepository.findById(validDto.metadata().scientist())).thenReturn(Optional.of(new User()));
-      when(reactantRepository.findById(validDto.reactantA())).thenReturn(Optional.empty());
+      when(reactantRepository.findByIdForUpdate(validDto.reactantA())).thenReturn(Optional.empty());
 
       UnprocessableEntityException exception = assertThrows(
         UnprocessableEntityException.class,
@@ -760,7 +760,7 @@ class ExperimentServiceTest {
       when(userRepository.findById(updateDto.metadata().scientist())).thenReturn(Optional.of(newScientist));
 
       // Mock Reactant A returning empty (simulating it does not exist in the DB)
-      when(reactantRepository.findById(updateDto.reactantA())).thenReturn(Optional.empty());
+      when(reactantRepository.findByIdForUpdate(updateDto.reactantA())).thenReturn(Optional.empty());
 
       // 3. Execute and Assert
       UnprocessableEntityException exception = assertThrows(UnprocessableEntityException.class, () ->

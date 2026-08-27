@@ -80,13 +80,6 @@ public class FileServiceImpl implements FileService {
 
         experimentAuthorization.assertCanModify(experiment, requestingUserId, requestingUserRole);
 
-        // TODO-CLAUDE (race condition inventory, Family 1 - fixable without migration tooling, see
-        // docs/Software_todo.md "Race condition inventory" under the ReactantRepository.hasNameConflict item): targets
-        // one specific, already-existing Experiment row (by experimentId). A concurrent archiveExperiment() commit
-        // between this check and the attachmentRepository.save() below could let a new file attach to an experiment that
-        // is (or becomes) archived, violating the "archived experiments are frozen" invariant. Fix:
-        // @Lock(LockModeType.PESSIMISTIC_WRITE) on the experiment lookup here, or @Version on Experiment (checked via a
-        // fresh re-read immediately before the attachment save).
         if (experiment.getArchivedAt() != null) {
             throw new ResourceConflictException("Cannot upload a file to an archived experiment. Please restore it first.");
         }
@@ -105,6 +98,32 @@ public class FileServiceImpl implements FileService {
             s3Client.putObject(putOb, RequestBody.fromInputStream(is, file.getSize()));
         } catch (Exception e) {
             throw new FileStorageException("Failed to upload file to S3", e);
+        }
+
+        // FIXED (race condition inventory, see Software_todo.md's Race condition inventory item): the archived-state
+        // check above and this method's eventual attachment save straddle a real S3 network call, which can take
+        // seconds - too long to hold a DB row lock across (that would block every other request touching this
+        // experiment for the duration of the upload). Instead, re-check the experiment's CURRENT archived state with
+        // a fresh, unlocked read immediately after the S3 upload completes and before persisting the attachment. If
+        // a concurrent archiveExperiment() landed in between, delete the just-uploaded S3 object (same compensating
+        // pattern as the DB-save-failure case below) and reject, instead of silently attaching a file to what is now
+        // an archived experiment.
+        boolean archivedDuringUpload = experimentRepository.findById(experimentId)
+                .map(fresh -> fresh.getArchivedAt() != null)
+                .orElse(true);
+        if (archivedDuringUpload) {
+            log.warn("Experiment {} was archived (or deleted) while file '{}' was being uploaded to S3; deleting the orphaned object '{}'.",
+                    experimentId, file.getOriginalFilename(), storageReferenceId);
+            try {
+                s3Client.deleteObject(DeleteObjectRequest.builder()
+                        .bucket(bucketName)
+                        .key(storageReferenceId)
+                        .build());
+            } catch (Exception deleteException) {
+                log.error("Failed to delete orphaned S3 object '{}' from bucket '{}' after a concurrent archive. Manual cleanup required.",
+                        storageReferenceId, bucketName, deleteException);
+            }
+            throw new ResourceConflictException("Cannot upload a file to an archived experiment. Please restore it first.");
         }
 
         ExperimentAttachment attachment = ExperimentAttachment.builder()
@@ -200,11 +219,6 @@ public class FileServiceImpl implements FileService {
 
         experimentAuthorization.assertCanModify(attachment.getExperiment(), requestingUserId, requestingUserRole);
 
-        // TODO-CLAUDE (race condition inventory, Family 1 - fixable without migration tooling, see
-        // docs/Software_todo.md "Race condition inventory" under the ReactantRepository.hasNameConflict item): same
-        // shape/target as the check in storeFile - a concurrent archiveExperiment() commit on this attachment's parent
-        // experiment, landing between this check and the save below, isn't caught. Fix: @Lock(PESSIMISTIC_WRITE) on the
-        // parent experiment's lookup, or @Version on Experiment.
         if (attachment.getExperiment().getArchivedAt() != null) {
             throw new ResourceConflictException("Cannot delete a file from an archived experiment. Please restore it first.");
         }
@@ -212,6 +226,20 @@ public class FileServiceImpl implements FileService {
         if (attachment.getArchivedAt() != null) {
             log.info("File ID {} is already archived.", fileId);
             return;
+        }
+
+        // FIXED (race condition inventory, see Software_todo.md's Race condition inventory item): the check above
+        // reads the experiment's archived state from the already-loaded attachment.getExperiment() object, which
+        // would not reflect a concurrent archiveExperiment() commit that happened after this method's own read. This
+        // second check issues a genuinely fresh, unlocked query for the parent experiment immediately before this
+        // method's save, closing that window without needing a pessimistic lock (there is no external I/O between
+        // here and the save to justify one).
+        UUID parentExperimentId = attachment.getExperiment().getId();
+        boolean archivedConcurrently = experimentRepository.findById(parentExperimentId)
+                .map(fresh -> fresh.getArchivedAt() != null)
+                .orElse(true);
+        if (archivedConcurrently) {
+            throw new ResourceConflictException("Cannot delete a file from an archived experiment. Please restore it first.");
         }
 
         attachment.setArchivedAt(Instant.now());

@@ -91,13 +91,13 @@ class ExperimentFolderServiceTest {
     // Old folder contains the experiment
     List<Experiment> oldFolderExperiments = new ArrayList<>();
     oldFolderExperiments.add(sharedExperiment);
-    ExperimentFolder oldFolder = new ExperimentFolder(oldFolderId, "Old Folder", creatorUser, oldFolderExperiments);
+    ExperimentFolder oldFolder = ExperimentFolder.builder().id(oldFolderId).name("Old Folder").owner(creatorUser).experiments(oldFolderExperiments).build();
 
-    ExperimentFolder newFolder = new ExperimentFolder(newFolderId, "New Folder", creatorUser, new ArrayList<>());
+    ExperimentFolder newFolder = ExperimentFolder.builder().id(newFolderId).name("New Folder").owner(creatorUser).experiments(new ArrayList<>()).build();
 
     when(folderRepository.findById(newFolderId)).thenReturn(Optional.of(newFolder));
     when(folderRepository.findAllByOwner_Id(creatorUser.getId())).thenReturn(List.of(oldFolder, newFolder));
-    when(experimentRepository.findById(sharedExperiment.getId())).thenReturn(Optional.of(sharedExperiment));
+    when(experimentRepository.findByIdForUpdate(sharedExperiment.getId())).thenReturn(Optional.of(sharedExperiment));
 
     GetFolderDto result = folderService.addExperimentToFolder(newFolderId, sharedExperiment.getId(), creatorUser.getId());
 
@@ -118,10 +118,10 @@ class ExperimentFolderServiceTest {
     snooperUser.setId(snooperUserId);
 
     List<Experiment> folderExperiments = new ArrayList<>();
-    ExperimentFolder folder = new ExperimentFolder(folderId, "Folder", snooperUser, folderExperiments);
+    ExperimentFolder folder = ExperimentFolder.builder().id(folderId).name("Folder").owner(snooperUser).experiments(folderExperiments).build();
 
     when(folderRepository.findById(folderId)).thenReturn(Optional.of(folder));
-    when(experimentRepository.findById(sharedExperiment.getId())).thenReturn(Optional.of(sharedExperiment));
+    when(experimentRepository.findByIdForUpdate(sharedExperiment.getId())).thenReturn(Optional.of(sharedExperiment));
 
     assertThrows(
       AccessDeniedException.class,
@@ -141,7 +141,7 @@ class ExperimentFolderServiceTest {
 
     List<Experiment> folderExperiments = new ArrayList<>();
     folderExperiments.add(sharedExperiment);
-    ExperimentFolder folder = new ExperimentFolder(folderId, "Folder", scientistUser, folderExperiments);
+    ExperimentFolder folder = ExperimentFolder.builder().id(folderId).name("Folder").owner(scientistUser).experiments(folderExperiments).build();
 
     when(folderRepository.findById(folderId)).thenReturn(Optional.of(folder));
 
@@ -158,11 +158,11 @@ class ExperimentFolderServiceTest {
   void addExperimentToFolder_whenDifferentUsersAddSameExperiment_doesNotInterfere() {
     // Setup Creator's Folder
     UUID creatorFolderId = UUID.randomUUID();
-    ExperimentFolder creatorFolder = new ExperimentFolder(creatorFolderId, "Creator Data", creatorUser, new ArrayList<>(List.of(sharedExperiment)));
+    ExperimentFolder creatorFolder = ExperimentFolder.builder().id(creatorFolderId).name("Creator Data").owner(creatorUser).experiments(new ArrayList<>(List.of(sharedExperiment))).build();
 
     // Setup Scientist's Folder (Empty initially)
     UUID scientistFolderId = UUID.randomUUID();
-    ExperimentFolder scientistFolder = new ExperimentFolder(scientistFolderId, "Scientist Data", scientistUser, new ArrayList<>());
+    ExperimentFolder scientistFolder = ExperimentFolder.builder().id(scientistFolderId).name("Scientist Data").owner(scientistUser).experiments(new ArrayList<>()).build();
 
     // Mock Scientist adding the experiment to their folder
     when(folderRepository.findById(scientistFolderId)).thenReturn(Optional.of(scientistFolder));
@@ -170,7 +170,7 @@ class ExperimentFolderServiceTest {
     // The repository only returns the SCIENTIST'S folders.
     // It never sees the Creator's folder, so it cannot accidentally remove the experiment from it!
     when(folderRepository.findAllByOwner_Id(scientistUser.getId())).thenReturn(List.of(scientistFolder));
-    when(experimentRepository.findById(sharedExperiment.getId())).thenReturn(Optional.of(sharedExperiment));
+    when(experimentRepository.findByIdForUpdate(sharedExperiment.getId())).thenReturn(Optional.of(sharedExperiment));
 
     GetFolderDto result = folderService.addExperimentToFolder(scientistFolderId, sharedExperiment.getId(), scientistUser.getId());
 
@@ -210,8 +210,8 @@ class ExperimentFolderServiceTest {
 
   @Test
   void getMyFolders_returnsOnlyOwnedFolders() {
-    ExperimentFolder f1 = new ExperimentFolder(UUID.randomUUID(), "Folder 1", creatorUser, new ArrayList<>());
-    ExperimentFolder f2 = new ExperimentFolder(UUID.randomUUID(), "Folder 2", creatorUser, new ArrayList<>());
+    ExperimentFolder f1 = ExperimentFolder.builder().id(UUID.randomUUID()).name("Folder 1").owner(creatorUser).experiments(new ArrayList<>()).build();
+    ExperimentFolder f2 = ExperimentFolder.builder().id(UUID.randomUUID()).name("Folder 2").owner(creatorUser).experiments(new ArrayList<>()).build();
 
     when(folderRepository.findAllByOwner_Id(creatorUser.getId())).thenReturn(List.of(f1, f2));
 
@@ -224,7 +224,7 @@ class ExperimentFolderServiceTest {
   @Test
   void addExperimentToFolder_whenUserDoesNotOwnFolder_throwsAccessDeniedException() {
     UUID folderId = UUID.randomUUID();
-    ExperimentFolder creatorFolder = new ExperimentFolder(folderId, "Creator Data", creatorUser, new ArrayList<>());
+    ExperimentFolder creatorFolder = ExperimentFolder.builder().id(folderId).name("Creator Data").owner(creatorUser).experiments(new ArrayList<>()).build();
 
     when(folderRepository.findById(folderId)).thenReturn(Optional.of(creatorFolder));
 
@@ -240,10 +240,10 @@ class ExperimentFolderServiceTest {
   void addExperimentToFolder_whenExperimentNotFound_throwsResourceNotFoundException() {
     UUID folderId = UUID.randomUUID();
     UUID missingExperimentId = UUID.randomUUID();
-    ExperimentFolder folder = new ExperimentFolder(folderId, "My Data", creatorUser, new ArrayList<>());
+    ExperimentFolder folder = ExperimentFolder.builder().id(folderId).name("My Data").owner(creatorUser).experiments(new ArrayList<>()).build();
 
     when(folderRepository.findById(folderId)).thenReturn(Optional.of(folder));
-    when(experimentRepository.findById(missingExperimentId)).thenReturn(Optional.empty());
+    when(experimentRepository.findByIdForUpdate(missingExperimentId)).thenReturn(Optional.empty());
 
     assertThrows(
       ResourceNotFoundException.class,
@@ -258,7 +258,7 @@ class ExperimentFolderServiceTest {
     UUID folderId = UUID.randomUUID();
     List<Experiment> exps = new ArrayList<>();
     exps.add(sharedExperiment);
-    ExperimentFolder folder = new ExperimentFolder(folderId, "My Data", creatorUser, exps);
+    ExperimentFolder folder = ExperimentFolder.builder().id(folderId).name("My Data").owner(creatorUser).experiments(exps).build();
 
     when(folderRepository.findById(folderId)).thenReturn(Optional.of(folder));
 
@@ -284,7 +284,7 @@ class ExperimentFolderServiceTest {
   @Test
   void deleteFolder_whenAuthorized_deletesFolder() {
     UUID folderId = UUID.randomUUID();
-    ExperimentFolder folder = new ExperimentFolder(folderId, "To Delete", creatorUser, new ArrayList<>());
+    ExperimentFolder folder = ExperimentFolder.builder().id(folderId).name("To Delete").owner(creatorUser).experiments(new ArrayList<>()).build();
 
     when(folderRepository.findById(folderId)).thenReturn(Optional.of(folder));
 
@@ -298,7 +298,7 @@ class ExperimentFolderServiceTest {
   @Test
   void deleteFolder_whenFolderNotOwned_throwsAccessDeniedException() {
     UUID folderId = UUID.randomUUID();
-    ExperimentFolder folder = new ExperimentFolder(folderId, "Creator Data", creatorUser, new ArrayList<>());
+    ExperimentFolder folder = ExperimentFolder.builder().id(folderId).name("Creator Data").owner(creatorUser).experiments(new ArrayList<>()).build();
 
     when(folderRepository.findById(folderId)).thenReturn(Optional.of(folder));
 

@@ -116,8 +116,8 @@ class ExperimentValidatorTest {
     /** Stubs all repositories with valid, matching entities for the "happy path". */
     private void stubAllValid() {
         when(userRepository.findById(scientistId)).thenReturn(Optional.of(scientist));
-        when(reactantRepository.findById(reactantAId)).thenReturn(Optional.of(reactantA));
-        when(reactantRepository.findById(reactantBId)).thenReturn(Optional.of(reactantB));
+        when(reactantRepository.findByIdForUpdate(reactantAId)).thenReturn(Optional.of(reactantA));
+        when(reactantRepository.findByIdForUpdate(reactantBId)).thenReturn(Optional.of(reactantB));
 
         ReactantStructure activeStructure = new ReactantStructure();
         activeStructure.setFlag(StructureFlag.ACTIVE);
@@ -163,8 +163,8 @@ class ExperimentValidatorTest {
     @Test
     void validateForCreate_shouldReturnNullInstrumentAndModality_whenNotProvided() {
         when(userRepository.findById(scientistId)).thenReturn(Optional.of(scientist));
-        when(reactantRepository.findById(reactantAId)).thenReturn(Optional.of(reactantA));
-        when(reactantRepository.findById(reactantBId)).thenReturn(Optional.of(reactantB));
+        when(reactantRepository.findByIdForUpdate(reactantAId)).thenReturn(Optional.of(reactantA));
+        when(reactantRepository.findByIdForUpdate(reactantBId)).thenReturn(Optional.of(reactantB));
 
         ReactantStructure activeStructure = new ReactantStructure();
         activeStructure.setFlag(StructureFlag.ACTIVE);
@@ -206,7 +206,7 @@ class ExperimentValidatorTest {
     @Test
     void validateForCreate_shouldThrowUnprocessableEntity_whenReactantAMissing() {
         when(userRepository.findById(scientistId)).thenReturn(Optional.of(scientist));
-        when(reactantRepository.findById(reactantAId)).thenReturn(Optional.empty());
+        when(reactantRepository.findByIdForUpdate(reactantAId)).thenReturn(Optional.empty());
 
         UnprocessableEntityException exception = assertThrows(UnprocessableEntityException.class,
                 () -> experimentValidator.validateForCreate(buildDto(reactantAId, reactantBId, instrumentId, modalityId)));
@@ -217,7 +217,7 @@ class ExperimentValidatorTest {
     @Test
     void validateForUpdate_shouldThrowUnprocessableEntity_whenReactantAMissing() {
         when(userRepository.findById(scientistId)).thenReturn(Optional.of(scientist));
-        when(reactantRepository.findById(reactantAId)).thenReturn(Optional.empty());
+        when(reactantRepository.findByIdForUpdate(reactantAId)).thenReturn(Optional.empty());
 
         UnprocessableEntityException exception = assertThrows(UnprocessableEntityException.class,
                 () -> experimentValidator.validateForUpdate(buildDto(reactantAId, reactantBId, instrumentId, modalityId)));
@@ -228,8 +228,8 @@ class ExperimentValidatorTest {
     @Test
     void validateForCreate_shouldThrowUnprocessableEntity_whenReactantBMissing() {
         when(userRepository.findById(scientistId)).thenReturn(Optional.of(scientist));
-        when(reactantRepository.findById(reactantAId)).thenReturn(Optional.of(reactantA));
-        when(reactantRepository.findById(reactantBId)).thenReturn(Optional.empty());
+        when(reactantRepository.findByIdForUpdate(reactantAId)).thenReturn(Optional.of(reactantA));
+        when(reactantRepository.findByIdForUpdate(reactantBId)).thenReturn(Optional.empty());
 
         UnprocessableEntityException exception = assertThrows(UnprocessableEntityException.class,
                 () -> experimentValidator.validateForCreate(buildDto(reactantAId, reactantBId, instrumentId, modalityId)));
@@ -240,8 +240,8 @@ class ExperimentValidatorTest {
     @Test
     void validateForUpdate_shouldThrowUnprocessableEntity_whenReactantBMissing() {
         when(userRepository.findById(scientistId)).thenReturn(Optional.of(scientist));
-        when(reactantRepository.findById(reactantAId)).thenReturn(Optional.of(reactantA));
-        when(reactantRepository.findById(reactantBId)).thenReturn(Optional.empty());
+        when(reactantRepository.findByIdForUpdate(reactantAId)).thenReturn(Optional.of(reactantA));
+        when(reactantRepository.findByIdForUpdate(reactantBId)).thenReturn(Optional.empty());
 
         UnprocessableEntityException exception = assertThrows(UnprocessableEntityException.class,
                 () -> experimentValidator.validateForUpdate(buildDto(reactantAId, reactantBId, instrumentId, modalityId)));
@@ -254,7 +254,7 @@ class ExperimentValidatorTest {
     @Test
     void validateForCreate_shouldThrowValidationException_whenReactantsAreTheSame() {
         when(userRepository.findById(scientistId)).thenReturn(Optional.of(scientist));
-        when(reactantRepository.findById(reactantAId)).thenReturn(Optional.of(reactantA));
+        when(reactantRepository.findByIdForUpdate(reactantAId)).thenReturn(Optional.of(reactantA));
 
         ValidationException exception = assertThrows(ValidationException.class,
                 () -> experimentValidator.validateForCreate(buildDto(reactantAId, reactantAId, instrumentId, modalityId)));
@@ -265,7 +265,7 @@ class ExperimentValidatorTest {
     @Test
     void validateForUpdate_shouldThrowValidationException_whenReactantsAreTheSame() {
         when(userRepository.findById(scientistId)).thenReturn(Optional.of(scientist));
-        when(reactantRepository.findById(reactantAId)).thenReturn(Optional.of(reactantA));
+        when(reactantRepository.findByIdForUpdate(reactantAId)).thenReturn(Optional.of(reactantA));
 
         ValidationException exception = assertThrows(ValidationException.class,
                 () -> experimentValidator.validateForUpdate(buildDto(reactantAId, reactantAId, instrumentId, modalityId)));
@@ -278,8 +278,8 @@ class ExperimentValidatorTest {
     @Test
     void validateForCreate_shouldThrowUnprocessableEntity_whenReactantAHasNoActiveStructure() {
         when(userRepository.findById(scientistId)).thenReturn(Optional.of(scientist));
-        when(reactantRepository.findById(reactantAId)).thenReturn(Optional.of(reactantA));
-        when(reactantRepository.findById(reactantBId)).thenReturn(Optional.of(reactantB));
+        when(reactantRepository.findByIdForUpdate(reactantAId)).thenReturn(Optional.of(reactantA));
+        when(reactantRepository.findByIdForUpdate(reactantBId)).thenReturn(Optional.of(reactantB));
         when(structureRepository.findByReactant_Id(reactantAId)).thenReturn(List.of());
 
         UnprocessableEntityException exception = assertThrows(UnprocessableEntityException.class,
@@ -292,8 +292,8 @@ class ExperimentValidatorTest {
     @Test
     void validateForCreate_shouldThrowUnprocessableEntity_whenReactantBHasNoActiveStructure() {
         when(userRepository.findById(scientistId)).thenReturn(Optional.of(scientist));
-        when(reactantRepository.findById(reactantAId)).thenReturn(Optional.of(reactantA));
-        when(reactantRepository.findById(reactantBId)).thenReturn(Optional.of(reactantB));
+        when(reactantRepository.findByIdForUpdate(reactantAId)).thenReturn(Optional.of(reactantA));
+        when(reactantRepository.findByIdForUpdate(reactantBId)).thenReturn(Optional.of(reactantB));
 
         ReactantStructure activeStructure = new ReactantStructure();
         activeStructure.setFlag(StructureFlag.ACTIVE);
@@ -310,8 +310,8 @@ class ExperimentValidatorTest {
     @Test
     void validateForUpdate_shouldThrowUnprocessableEntity_whenReactantAHasNoActiveStructure() {
         when(userRepository.findById(scientistId)).thenReturn(Optional.of(scientist));
-        when(reactantRepository.findById(reactantAId)).thenReturn(Optional.of(reactantA));
-        when(reactantRepository.findById(reactantBId)).thenReturn(Optional.of(reactantB));
+        when(reactantRepository.findByIdForUpdate(reactantAId)).thenReturn(Optional.of(reactantA));
+        when(reactantRepository.findByIdForUpdate(reactantBId)).thenReturn(Optional.of(reactantB));
         when(structureRepository.findByReactant_Id(reactantAId)).thenReturn(List.of());
 
         UnprocessableEntityException exception = assertThrows(UnprocessableEntityException.class,
@@ -324,8 +324,8 @@ class ExperimentValidatorTest {
     @Test
     void validateForUpdate_shouldThrowUnprocessableEntity_whenReactantBHasNoActiveStructure() {
         when(userRepository.findById(scientistId)).thenReturn(Optional.of(scientist));
-        when(reactantRepository.findById(reactantAId)).thenReturn(Optional.of(reactantA));
-        when(reactantRepository.findById(reactantBId)).thenReturn(Optional.of(reactantB));
+        when(reactantRepository.findByIdForUpdate(reactantAId)).thenReturn(Optional.of(reactantA));
+        when(reactantRepository.findByIdForUpdate(reactantBId)).thenReturn(Optional.of(reactantB));
 
         ReactantStructure activeStructure = new ReactantStructure();
         activeStructure.setFlag(StructureFlag.ACTIVE);
@@ -342,8 +342,8 @@ class ExperimentValidatorTest {
     @Test
     void validateForCreate_shouldThrowUnprocessableEntity_whenReactantStructureIsNotActive() {
         when(userRepository.findById(scientistId)).thenReturn(Optional.of(scientist));
-        when(reactantRepository.findById(reactantAId)).thenReturn(Optional.of(reactantA));
-        when(reactantRepository.findById(reactantBId)).thenReturn(Optional.of(reactantB));
+        when(reactantRepository.findByIdForUpdate(reactantAId)).thenReturn(Optional.of(reactantA));
+        when(reactantRepository.findByIdForUpdate(reactantBId)).thenReturn(Optional.of(reactantB));
 
         ReactantStructure inactiveStructure = new ReactantStructure();
         inactiveStructure.setFlag(StructureFlag.REJECTED);
@@ -356,8 +356,8 @@ class ExperimentValidatorTest {
     @Test
     void validateForUpdate_shouldThrowUnprocessableEntity_whenReactantStructureIsNotActive() {
         when(userRepository.findById(scientistId)).thenReturn(Optional.of(scientist));
-        when(reactantRepository.findById(reactantAId)).thenReturn(Optional.of(reactantA));
-        when(reactantRepository.findById(reactantBId)).thenReturn(Optional.of(reactantB));
+        when(reactantRepository.findByIdForUpdate(reactantAId)).thenReturn(Optional.of(reactantA));
+        when(reactantRepository.findByIdForUpdate(reactantBId)).thenReturn(Optional.of(reactantB));
 
         ReactantStructure inactiveStructure = new ReactantStructure();
         inactiveStructure.setFlag(StructureFlag.REJECTED);
@@ -372,8 +372,8 @@ class ExperimentValidatorTest {
     @Test
     void validateForCreate_shouldThrowUnprocessableEntity_whenSolventNotFound() {
         when(userRepository.findById(scientistId)).thenReturn(Optional.of(scientist));
-        when(reactantRepository.findById(reactantAId)).thenReturn(Optional.of(reactantA));
-        when(reactantRepository.findById(reactantBId)).thenReturn(Optional.of(reactantB));
+        when(reactantRepository.findByIdForUpdate(reactantAId)).thenReturn(Optional.of(reactantA));
+        when(reactantRepository.findByIdForUpdate(reactantBId)).thenReturn(Optional.of(reactantB));
 
         ReactantStructure activeStructure = new ReactantStructure();
         activeStructure.setFlag(StructureFlag.ACTIVE);
@@ -390,8 +390,8 @@ class ExperimentValidatorTest {
     @Test
     void validateForUpdate_shouldThrowUnprocessableEntity_whenSolventNotFound() {
         when(userRepository.findById(scientistId)).thenReturn(Optional.of(scientist));
-        when(reactantRepository.findById(reactantAId)).thenReturn(Optional.of(reactantA));
-        when(reactantRepository.findById(reactantBId)).thenReturn(Optional.of(reactantB));
+        when(reactantRepository.findByIdForUpdate(reactantAId)).thenReturn(Optional.of(reactantA));
+        when(reactantRepository.findByIdForUpdate(reactantBId)).thenReturn(Optional.of(reactantB));
 
         ReactantStructure activeStructure = new ReactantStructure();
         activeStructure.setFlag(StructureFlag.ACTIVE);
@@ -410,8 +410,8 @@ class ExperimentValidatorTest {
     @Test
     void validateForCreate_shouldThrowUnprocessableEntity_whenInstrumentProvidedButNotFound() {
         when(userRepository.findById(scientistId)).thenReturn(Optional.of(scientist));
-        when(reactantRepository.findById(reactantAId)).thenReturn(Optional.of(reactantA));
-        when(reactantRepository.findById(reactantBId)).thenReturn(Optional.of(reactantB));
+        when(reactantRepository.findByIdForUpdate(reactantAId)).thenReturn(Optional.of(reactantA));
+        when(reactantRepository.findByIdForUpdate(reactantBId)).thenReturn(Optional.of(reactantB));
 
         ReactantStructure activeStructure = new ReactantStructure();
         activeStructure.setFlag(StructureFlag.ACTIVE);
@@ -429,8 +429,8 @@ class ExperimentValidatorTest {
     @Test
     void validateForUpdate_shouldThrowUnprocessableEntity_whenInstrumentProvidedButNotFound() {
         when(userRepository.findById(scientistId)).thenReturn(Optional.of(scientist));
-        when(reactantRepository.findById(reactantAId)).thenReturn(Optional.of(reactantA));
-        when(reactantRepository.findById(reactantBId)).thenReturn(Optional.of(reactantB));
+        when(reactantRepository.findByIdForUpdate(reactantAId)).thenReturn(Optional.of(reactantA));
+        when(reactantRepository.findByIdForUpdate(reactantBId)).thenReturn(Optional.of(reactantB));
 
         ReactantStructure activeStructure = new ReactantStructure();
         activeStructure.setFlag(StructureFlag.ACTIVE);
@@ -448,8 +448,8 @@ class ExperimentValidatorTest {
     @Test
     void validateForCreate_shouldSkipInstrumentLookup_whenInstrumentNotProvided() {
         when(userRepository.findById(scientistId)).thenReturn(Optional.of(scientist));
-        when(reactantRepository.findById(reactantAId)).thenReturn(Optional.of(reactantA));
-        when(reactantRepository.findById(reactantBId)).thenReturn(Optional.of(reactantB));
+        when(reactantRepository.findByIdForUpdate(reactantAId)).thenReturn(Optional.of(reactantA));
+        when(reactantRepository.findByIdForUpdate(reactantBId)).thenReturn(Optional.of(reactantB));
 
         ReactantStructure activeStructure = new ReactantStructure();
         activeStructure.setFlag(StructureFlag.ACTIVE);
@@ -468,8 +468,8 @@ class ExperimentValidatorTest {
     @Test
     void validateForUpdate_shouldSkipInstrumentLookup_whenInstrumentNotProvided() {
         when(userRepository.findById(scientistId)).thenReturn(Optional.of(scientist));
-        when(reactantRepository.findById(reactantAId)).thenReturn(Optional.of(reactantA));
-        when(reactantRepository.findById(reactantBId)).thenReturn(Optional.of(reactantB));
+        when(reactantRepository.findByIdForUpdate(reactantAId)).thenReturn(Optional.of(reactantA));
+        when(reactantRepository.findByIdForUpdate(reactantBId)).thenReturn(Optional.of(reactantB));
 
         ReactantStructure activeStructure = new ReactantStructure();
         activeStructure.setFlag(StructureFlag.ACTIVE);
@@ -490,8 +490,8 @@ class ExperimentValidatorTest {
     @Test
     void validateForCreate_shouldThrowUnprocessableEntity_whenModalityProvidedButNotFound() {
         when(userRepository.findById(scientistId)).thenReturn(Optional.of(scientist));
-        when(reactantRepository.findById(reactantAId)).thenReturn(Optional.of(reactantA));
-        when(reactantRepository.findById(reactantBId)).thenReturn(Optional.of(reactantB));
+        when(reactantRepository.findByIdForUpdate(reactantAId)).thenReturn(Optional.of(reactantA));
+        when(reactantRepository.findByIdForUpdate(reactantBId)).thenReturn(Optional.of(reactantB));
 
         ReactantStructure activeStructure = new ReactantStructure();
         activeStructure.setFlag(StructureFlag.ACTIVE);
@@ -510,8 +510,8 @@ class ExperimentValidatorTest {
     @Test
     void validateForUpdate_shouldThrowUnprocessableEntity_whenModalityProvidedButNotFound() {
         when(userRepository.findById(scientistId)).thenReturn(Optional.of(scientist));
-        when(reactantRepository.findById(reactantAId)).thenReturn(Optional.of(reactantA));
-        when(reactantRepository.findById(reactantBId)).thenReturn(Optional.of(reactantB));
+        when(reactantRepository.findByIdForUpdate(reactantAId)).thenReturn(Optional.of(reactantA));
+        when(reactantRepository.findByIdForUpdate(reactantBId)).thenReturn(Optional.of(reactantB));
 
         ReactantStructure activeStructure = new ReactantStructure();
         activeStructure.setFlag(StructureFlag.ACTIVE);
@@ -530,8 +530,8 @@ class ExperimentValidatorTest {
     @Test
     void validateForCreate_shouldSkipModalityLookup_whenModalityNotProvided() {
         when(userRepository.findById(scientistId)).thenReturn(Optional.of(scientist));
-        when(reactantRepository.findById(reactantAId)).thenReturn(Optional.of(reactantA));
-        when(reactantRepository.findById(reactantBId)).thenReturn(Optional.of(reactantB));
+        when(reactantRepository.findByIdForUpdate(reactantAId)).thenReturn(Optional.of(reactantA));
+        when(reactantRepository.findByIdForUpdate(reactantBId)).thenReturn(Optional.of(reactantB));
 
         ReactantStructure activeStructure = new ReactantStructure();
         activeStructure.setFlag(StructureFlag.ACTIVE);
@@ -550,8 +550,8 @@ class ExperimentValidatorTest {
     @Test
     void validateForUpdate_shouldSkipModalityLookup_whenModalityNotProvided() {
         when(userRepository.findById(scientistId)).thenReturn(Optional.of(scientist));
-        when(reactantRepository.findById(reactantAId)).thenReturn(Optional.of(reactantA));
-        when(reactantRepository.findById(reactantBId)).thenReturn(Optional.of(reactantB));
+        when(reactantRepository.findByIdForUpdate(reactantAId)).thenReturn(Optional.of(reactantA));
+        when(reactantRepository.findByIdForUpdate(reactantBId)).thenReturn(Optional.of(reactantB));
 
         ReactantStructure activeStructure = new ReactantStructure();
         activeStructure.setFlag(StructureFlag.ACTIVE);

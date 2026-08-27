@@ -1,13 +1,16 @@
 package com.reactur.backend.repositories;
 
 import com.reactur.backend.entities.Reactant;
+import jakarta.persistence.LockModeType;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Repository
@@ -16,6 +19,19 @@ public interface ReactantRepository extends JpaRepository<Reactant, UUID> {
     List<Reactant> findAllByArchivedAtIsNull();
 
     List<Reactant> findAllByArchivedAtIsNotNull();
+
+    /**
+     * Same as findById, but takes a DB-level pessimistic write lock on the row (a SQL SELECT FOR UPDATE) held for
+     * the rest of the enclosing transaction. Used wherever a multi-row invariant tied to this reactant (e.g. exactly
+     * one ACTIVE structure, or has an ACTIVE structure at all) needs to be read-then-written atomically against
+     * other transactions touching the same reactant's structures - see StructureServiceImpl uploadStructure and
+     * selectStructure, and ExperimentValidator validateReactantHasActiveStructure, plus the Race condition
+     * inventory item in Software_todo.md. Only safe inside a transaction whose critical section does no slow
+     * external I/O (network calls) while the lock is held - do not use this around S3/HTTP calls.
+     */
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("SELECT r FROM Reactant r WHERE r.id = :id")
+    Optional<Reactant> findByIdForUpdate(@Param("id") UUID id);
 
     /*
      TODO-CLAUDE (future thread, needs a migration-tooling decision first): this check-then-save

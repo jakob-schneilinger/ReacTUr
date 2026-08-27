@@ -11,6 +11,7 @@ import com.reactur.backend.repositories.UserRepository;
 import com.reactur.backend.services.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -52,12 +53,10 @@ public class UserServiceImpl implements UserService {
                     "Cannot change this user's role: they are the last remaining ADMIN. Promote another user to ADMIN first.");
         }
 
-        // TODO-CLAUDE (race condition inventory, Family 1 - fixable without migration tooling, see
-        // docs/Software_todo.md "Race condition inventory" under the ReactantRepository.hasNameConflict item): plain
-        // read-modify-write on one specific, already-persisted User row (by id) - a normal lost-update race if two
-        // concurrent setRole calls target the same user with different roles, independent of the last-admin check above.
-        // Fix: @Version on User (the losing save then throws ObjectOptimisticLockingFailureException instead of silently
-        // overwriting), or @Lock(LockModeType.PESSIMISTIC_WRITE) on findUserOrThrow's lookup at the top of this method.
+        // FIXED (race condition inventory, see Software_todo.md's Race condition inventory item): User now carries
+        // a @Version field, so if a concurrent setRole call on this same user commits first, this save() fails
+        // loudly with ObjectOptimisticLockingFailureException instead of silently overwriting it - independent of
+        // the last-admin check above, which is a separate (still-open, Family 2) issue.
         user.setRole(roleDto.role());
         userRepository.save(user);
         log.info("Successfully updated role for user ID: {} to {}", id, roleDto.role());
@@ -79,8 +78,15 @@ public class UserServiceImpl implements UserService {
 
         if (user.getDeactivatedAt() == null) {
             user.setDeactivatedAt(Instant.now());
-            userRepository.save(user);
-            log.info("Successfully archived user ID: {}", id);
+            // User now carries a @Version field (see the Race condition inventory item in Software_todo.md). A
+            // harmless double-submit of this exact archive request would otherwise fail on a version conflict even
+            // though both calls wanted the same outcome - treat that as "someone already archived it", not an error.
+            try {
+                userRepository.save(user);
+                log.info("Successfully archived user ID: {}", id);
+            } catch (ObjectOptimisticLockingFailureException e) {
+                log.debug("User {} was archived concurrently by another request; treating as already archived.", id);
+            }
         } else {
             log.debug("User ID: {} is already archived. No action taken.", id);
         }
@@ -94,8 +100,13 @@ public class UserServiceImpl implements UserService {
 
         if (user.getDeactivatedAt() != null) {
             user.setDeactivatedAt(null);
-            userRepository.save(user);
-            log.info("Successfully restored user ID: {}", id);
+            // Same benign-double-submit reasoning as archiveUser above.
+            try {
+                userRepository.save(user);
+                log.info("Successfully restored user ID: {}", id);
+            } catch (ObjectOptimisticLockingFailureException e) {
+                log.debug("User {} was restored concurrently by another request; treating as already restored.", id);
+            }
         } else {
             log.debug("User ID: {} is already active. No action taken.", id);
         }

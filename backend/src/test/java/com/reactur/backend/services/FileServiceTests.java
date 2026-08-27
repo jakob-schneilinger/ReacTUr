@@ -118,6 +118,34 @@ class FileServiceTests {
     }
 
     @Test
+    void storeFile_ShouldDeleteOrphanedS3ObjectAndThrowConflict_WhenExperimentArchivedDuringUpload() {
+        // Covers the race condition fix documented in Software_todo.md's Race condition inventory item: the
+        // archived-state check and the attachment save straddle a real S3 call, so storeFile re-checks the
+        // experiment's current state via a second, fresh findById immediately after the S3 upload completes.
+        UUID experimentId = UUID.randomUUID();
+        Experiment notYetArchived = new Experiment();
+        Experiment archivedDuringUpload = new Experiment();
+        archivedDuringUpload.setArchivedAt(Instant.now());
+
+        MockMultipartFile file = new MockMultipartFile(
+                "file", "test.pdf", "application/pdf", "Dummy Content".getBytes());
+
+        when(experimentRepository.findById(experimentId))
+                .thenReturn(Optional.of(notYetArchived))
+                .thenReturn(Optional.of(archivedDuringUpload));
+
+        when(s3Client.putObject(any(PutObjectRequest.class), any(RequestBody.class)))
+                .thenReturn(PutObjectResponse.builder().build());
+
+        assertThrows(ResourceConflictException.class,
+                () -> fileService.storeFile(experimentId, file, REQUESTING_USER_ID, REQUESTING_USER_ROLE));
+
+        verify(experimentRepository, times(2)).findById(experimentId);
+        verify(s3Client, times(1)).deleteObject(any(DeleteObjectRequest.class));
+        verify(attachmentRepository, never()).save(any());
+    }
+
+    @Test
     void storeFile_ShouldThrowResourceConflict_WhenExperimentIsArchived() {
         UUID experimentId = UUID.randomUUID();
         Experiment experiment = new Experiment();
@@ -325,15 +353,43 @@ class FileServiceTests {
     @Test
     void archiveFile_ShouldArchiveSuccessfully_WhenFileIsActive() {
         UUID fileId = UUID.randomUUID();
+        Experiment experiment = new Experiment();
         ExperimentAttachment attachment = new ExperimentAttachment();
         attachment.setArchivedAt(null);
-        attachment.setExperiment(new Experiment());
+        attachment.setExperiment(experiment);
 
         when(attachmentRepository.findById(fileId)).thenReturn(Optional.of(attachment));
+        // FileServiceImpl.archiveFile re-checks the parent experiment's current archived state with a fresh
+        // repository read immediately before saving (see the Race condition inventory item in Software_todo.md).
+        when(experimentRepository.findById(any())).thenReturn(Optional.of(experiment));
 
         fileService.archiveFile(fileId, REQUESTING_USER_ID, REQUESTING_USER_ROLE);
 
         verify(attachmentRepository, times(1)).save(attachment);
+    }
+
+    @Test
+    void archiveFile_ShouldThrowResourceConflict_WhenExperimentArchivedConcurrently() {
+        // Covers the fresh-recheck fix (see Race condition inventory item in Software_todo.md): the FIRST check
+        // (against attachment.getExperiment(), a snapshot loaded at the top of the method) still sees the
+        // experiment as active, but the second, fresh experimentRepository.findById() read - issued right before
+        // the save - sees that it was archived by a concurrent request in the meantime.
+        UUID fileId = UUID.randomUUID();
+        Experiment staleSnapshot = new Experiment();
+        Experiment currentlyArchived = new Experiment();
+        currentlyArchived.setArchivedAt(Instant.now());
+
+        ExperimentAttachment attachment = new ExperimentAttachment();
+        attachment.setArchivedAt(null);
+        attachment.setExperiment(staleSnapshot);
+
+        when(attachmentRepository.findById(fileId)).thenReturn(Optional.of(attachment));
+        when(experimentRepository.findById(any())).thenReturn(Optional.of(currentlyArchived));
+
+        assertThrows(ResourceConflictException.class,
+                () -> fileService.archiveFile(fileId, REQUESTING_USER_ID, REQUESTING_USER_ROLE));
+
+        verify(attachmentRepository, never()).save(any());
     }
 
     @Test

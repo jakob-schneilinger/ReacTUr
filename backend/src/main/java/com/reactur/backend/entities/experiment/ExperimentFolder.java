@@ -12,6 +12,7 @@ import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import jakarta.persistence.Version;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -53,4 +54,11 @@ public class ExperimentFolder {
   )
   @Builder.Default
   private List<Experiment> experiments = new ArrayList<>();
+
+  // Optimistic locking: see ExperimentFolderServiceImpl (addExperimentToFolder's duplicate-in-folder check,
+  // deleteFolder vs. add/removeExperimentFromFolder) and Software_todo.md's Race condition inventory item.
+  // Protects a folder row from being silently resurrected or double-modified by a stale save() racing against a
+  // concurrent delete or another add/remove call on the same folder.
+  @Version
+  private Long version;
 }
