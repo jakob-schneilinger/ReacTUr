@@ -257,6 +257,9 @@ class StructureServiceTest {
 
     @Test
     void selectStructure_shouldSetActiveAndRejectOthers() {
+        // Selection is only valid from READY (the normal case handled here), or idempotently
+        // from ACTIVE/REJECTED (covered by dedicated tests below).
+        mockPendingStructure.setFlag(StructureFlag.READY);
         ReactantStructure otherStructure = ReactantStructure.builder()
                 .id(UUID.randomUUID())
                 .reactant(mockReactant)
@@ -301,6 +304,40 @@ class StructureServiceTest {
         verify(structureRepository, never()).save(any());
 
         assertThat(result.flag()).isEqualTo(StructureFlag.ACTIVE);
+    }
+
+    @Test
+    void selectStructure_whenStructureIsPending_shouldThrowResourceConflictException() {
+        // mockPendingStructure keeps its default PENDING flag from setUp(): PENDING rows never
+        // have real structure data, so promoting one to ACTIVE must be rejected.
+        when(structureRepository.findById(STRUCTURE_ID)).thenReturn(Optional.of(mockPendingStructure));
+
+        assertThrows(
+                ResourceConflictException.class,
+                () -> structureService.selectStructure(STRUCTURE_ID)
+        );
+
+        assertThat(mockPendingStructure.getFlag()).isEqualTo(StructureFlag.PENDING);
+        verify(structureRepository, never()).findByReactant_Id(any());
+        verify(structureRepository, never()).save(any());
+        verify(structureRepository, never()).saveAll(any());
+    }
+
+    @Test
+    void selectStructure_whenStructureIsFailed_shouldThrowResourceConflictException() {
+        // FAILED rows, like PENDING ones, never have real structure data.
+        mockPendingStructure.setFlag(StructureFlag.FAILED);
+        when(structureRepository.findById(STRUCTURE_ID)).thenReturn(Optional.of(mockPendingStructure));
+
+        assertThrows(
+                ResourceConflictException.class,
+                () -> structureService.selectStructure(STRUCTURE_ID)
+        );
+
+        assertThat(mockPendingStructure.getFlag()).isEqualTo(StructureFlag.FAILED);
+        verify(structureRepository, never()).findByReactant_Id(any());
+        verify(structureRepository, never()).save(any());
+        verify(structureRepository, never()).saveAll(any());
     }
 
     @Test
@@ -500,6 +537,17 @@ class StructureServiceTest {
     void fetchPendingStructuresFromAPI_whenJobStillRunning_shouldNotSave() {
         when(structureRepository.findByFlag(StructureFlag.PENDING)).thenReturn(List.of(mockPendingStructure));
         JobStatusResult result = new JobStatusResult(JobStatus.RUNNING, null, null);
+        when(structureApiClient.checkJobStatus("job_123")).thenReturn(result);
+
+        structureService.fetchPendingStructuresFromAPI();
+
+        verify(structureRepository, never()).save(any());
+    }
+
+    @Test
+    void fetchPendingStructuresFromAPI_whenJobStatusUnknown_shouldNotSave() {
+        when(structureRepository.findByFlag(StructureFlag.PENDING)).thenReturn(List.of(mockPendingStructure));
+        JobStatusResult result = new JobStatusResult(JobStatus.UNKNOWN, null, null);
         when(structureApiClient.checkJobStatus("job_123")).thenReturn(result);
 
         structureService.fetchPendingStructuresFromAPI();

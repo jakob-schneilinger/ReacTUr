@@ -18,15 +18,13 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 import org.springframework.transaction.annotation.Transactional;
-
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -67,6 +65,11 @@ public class StructureServiceImpl implements StructureService {
     @Value("${app.upload.structure-file.max-size-bytes:1048576}")
     private long maxStructureFileSizeBytes = 1_048_576L;
 
+    /**
+     * Poll interval, in milliseconds, between successive runs of {@link #fetchPendingStructuresFromAPI()}.
+     */
+    private static final long PENDING_STRUCTURE_POLL_INTERVAL_MS = 60_000;
+
     @Override
     @Transactional
     public StructureDto uploadStructure(UUID reactantId, MultipartFile file) {
@@ -103,8 +106,7 @@ public class StructureServiceImpl implements StructureService {
             return structureMapper.toDto(savedStructure);
 
         } catch (IOException e) {
-            log.error("Failed to read structure file for reactant: {}", reactantId, e);
-            throw new FileStorageException("Failed to process the uploaded file", e);
+            throw new FileStorageException("Failed to read the uploaded structure file for reactant: " + reactantId, e);
         }
     }
 
@@ -153,6 +155,12 @@ public class StructureServiceImpl implements StructureService {
             return structureMapper.toDto(selectedStructure);
         }
 
+        if (selectedStructure.getFlag() == StructureFlag.PENDING || selectedStructure.getFlag() == StructureFlag.FAILED) {
+            throw new ResourceConflictException(
+                    "Cannot select structure " + structureId + ": it is " + selectedStructure.getFlag()
+                            + " and has no structure data available for selection.");
+        }
+
         UUID reactantId = selectedStructure.getReactant().getId();
         List<ReactantStructure> allStructures = structureRepository.findByReactant_Id(reactantId);
 
@@ -180,11 +188,11 @@ public class StructureServiceImpl implements StructureService {
 
         return structures.stream()
                 .map(structureMapper::toDto)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     @Override
-    @Scheduled(fixedDelay = 60000)
+    @Scheduled(fixedDelay = PENDING_STRUCTURE_POLL_INTERVAL_MS)
     public void fetchPendingStructuresFromAPI() {
         List<ReactantStructure> pendingStructures = structureRepository.findByFlag(StructureFlag.PENDING);
 
@@ -243,6 +251,13 @@ public class StructureServiceImpl implements StructureService {
                     log.error("External Job {} failed. Error: {}", jobId, result.errorMessage());
                     pending.setFlag(StructureFlag.FAILED);
                     structureRepository.save(pending);
+                } else {
+                    var status = result.status();
+                    if (status != null && status.isPending()) {
+                        log.debug("Job {} is still in progress (status: {}). Will check again on the next poll.", jobId, status);
+                    } else {
+                        log.warn("Job {} returned an unrecognized status: {}. Leaving it PENDING; will retry on the next poll.", jobId, status);
+                    }
                 }
 
             } catch (Exception e) {

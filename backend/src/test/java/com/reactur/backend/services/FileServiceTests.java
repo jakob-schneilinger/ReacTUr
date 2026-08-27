@@ -24,6 +24,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 import software.amazon.awssdk.core.ResponseInputStream;
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.model.DeleteObjectRequest;
 import software.amazon.awssdk.services.s3.model.GetObjectRequest;
 import software.amazon.awssdk.services.s3.model.GetObjectResponse;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
@@ -79,7 +80,7 @@ class FileServiceTests {
     void storeFile_ShouldStoreSuccessfully() {
 
         UUID experimentId = UUID.randomUUID();
-        Experiment experiment = new Experiment(); // Gegebenenfalls Pflichtfelder setzen
+        Experiment experiment = new Experiment(); // Set required fields if needed
 
         MockMultipartFile file = new MockMultipartFile(
                 "file", "test.pdf", "application/pdf", "Dummy Content".getBytes());
@@ -172,6 +173,51 @@ class FileServiceTests {
     }
 
     @Test
+    void storeFile_ShouldDeleteOrphanedS3Object_WhenDatabaseSaveFails() {
+        UUID experimentId = UUID.randomUUID();
+        Experiment experiment = new Experiment();
+
+        MockMultipartFile file = new MockMultipartFile(
+                "file", "test.pdf", "application/pdf", "Dummy Content".getBytes());
+
+        when(experimentRepository.findById(experimentId)).thenReturn(Optional.of(experiment));
+
+        when(s3Client.putObject(any(PutObjectRequest.class), any(RequestBody.class)))
+                .thenReturn(PutObjectResponse.builder().build());
+
+        when(attachmentRepository.save(any(ExperimentAttachment.class)))
+                .thenThrow(new RuntimeException("DB unavailable"));
+
+        assertThrows(FileStorageException.class,
+                () -> fileService.storeFile(experimentId, file, REQUESTING_USER_ID, REQUESTING_USER_ROLE));
+
+        verify(s3Client, times(1)).deleteObject(any(DeleteObjectRequest.class));
+    }
+
+    @Test
+    void storeFile_ShouldStillThrowOriginalFailure_WhenCompensatingS3DeleteAlsoFails() {
+        UUID experimentId = UUID.randomUUID();
+        Experiment experiment = new Experiment();
+
+        MockMultipartFile file = new MockMultipartFile(
+                "file", "test.pdf", "application/pdf", "Dummy Content".getBytes());
+
+        when(experimentRepository.findById(experimentId)).thenReturn(Optional.of(experiment));
+
+        when(s3Client.putObject(any(PutObjectRequest.class), any(RequestBody.class)))
+                .thenReturn(PutObjectResponse.builder().build());
+
+        when(attachmentRepository.save(any(ExperimentAttachment.class)))
+                .thenThrow(new RuntimeException("DB unavailable"));
+
+        when(s3Client.deleteObject(any(DeleteObjectRequest.class)))
+                .thenThrow(new RuntimeException("S3 delete also failed"));
+
+        assertThrows(FileStorageException.class,
+                () -> fileService.storeFile(experimentId, file, REQUESTING_USER_ID, REQUESTING_USER_ROLE));
+    }
+
+    @Test
     void loadFileAsResource_ShouldReturnResource() {
         UUID fileId = UUID.randomUUID();
         ExperimentAttachment attachment = new ExperimentAttachment();
@@ -198,6 +244,22 @@ class FileServiceTests {
                 () -> fileService.loadFileAsResource(fileId, REQUESTING_USER_ID, REQUESTING_USER_ROLE));
 
         verify(s3Client, never()).getObject(any(GetObjectRequest.class));
+    }
+
+    @Test
+    void loadFileAsResource_ShouldThrowFileStorageException_WhenS3GetObjectFails() {
+        UUID fileId = UUID.randomUUID();
+        ExperimentAttachment attachment = new ExperimentAttachment();
+        attachment.setStorageReferenceId("s3-key-123");
+        attachment.setExperiment(new Experiment());
+
+        when(attachmentRepository.findById(fileId)).thenReturn(Optional.of(attachment));
+
+        when(s3Client.getObject(any(GetObjectRequest.class)))
+                .thenThrow(new RuntimeException("S3 unavailable"));
+
+        assertThrows(FileStorageException.class,
+                () -> fileService.loadFileAsResource(fileId, REQUESTING_USER_ID, REQUESTING_USER_ROLE));
     }
 
     @Test

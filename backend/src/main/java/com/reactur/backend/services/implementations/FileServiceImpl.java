@@ -22,12 +22,14 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.model.DeleteObjectRequest;
 import software.amazon.awssdk.services.s3.model.GetObjectRequest;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 
 import java.io.InputStream;
 import java.security.MessageDigest;
 import java.time.Instant;
+import java.util.HexFormat;
 import java.util.List;
 import java.util.UUID;
 
@@ -107,7 +109,26 @@ public class FileServiceImpl implements FileService {
                 .fileSizeBytes(file.getSize())
                 .build();
 
-        ExperimentAttachment saved = attachmentRepository.save(attachment);
+        ExperimentAttachment saved;
+        try {
+            saved = attachmentRepository.save(attachment);
+        } catch (Exception e) {
+            log.error("Failed to save attachment metadata for file '{}' after it was already uploaded to S3. Attempting to delete orphaned object '{}' from bucket '{}'.",
+                    file.getOriginalFilename(), storageReferenceId, bucketName, e);
+            try {
+                s3Client.deleteObject(DeleteObjectRequest.builder()
+                        .bucket(bucketName)
+                        .key(storageReferenceId)
+                        .build());
+            } catch (Exception deleteException) {
+                log.error("Failed to delete orphaned S3 object '{}' from bucket '{}' after database save failure. Manual cleanup required.",
+                        storageReferenceId, bucketName, deleteException);
+            }
+            if (e instanceof FileStorageException fileStorageException) {
+                throw fileStorageException;
+            }
+            throw new FileStorageException("Failed to save file metadata to database", e);
+        }
         log.info("Successfully stored file metadata in database with attachment ID: {}", saved.getId());
 
         return mapToDetailsDto(saved);
@@ -116,7 +137,7 @@ public class FileServiceImpl implements FileService {
     @Override
     @Transactional(readOnly = true)
     public Resource loadFileAsResource(UUID fileId, String requestingUserId, Role requestingUserRole) {
-        log.info("Starting download for file ID: {}", fileId);
+        log.trace("Starting download for file ID: {}", fileId);
         ExperimentAttachment attachment = attachmentRepository.findById(fileId)
                 .orElseThrow(() -> new ResourceNotFoundException("File ID " + fileId + " not found"));
 
@@ -127,7 +148,11 @@ public class FileServiceImpl implements FileService {
                 .key(attachment.getStorageReferenceId())
                 .build();
 
-        return new InputStreamResource(s3Client.getObject(getRequest));
+        try {
+            return new InputStreamResource(s3Client.getObject(getRequest));
+        } catch (Exception e) {
+            throw new FileStorageException("Failed to retrieve file from S3", e);
+        }
     }
 
     @Override
@@ -142,15 +167,16 @@ public class FileServiceImpl implements FileService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<ExperimentAttachmentDto> getAttachmentsOfExperiment(UUID experimentId) {
-        log.info("Fetching all active attachments for experiment ID: {}", experimentId);
+        log.trace("Fetching all active attachments for experiment ID: {}", experimentId);
 
         if (!experimentRepository.existsById(experimentId)) {
             throw new ResourceNotFoundException("Experiment with ID " + experimentId + " not found");
         }
 
         List<ExperimentAttachment> attachments = attachmentRepository.findByExperimentIdAndArchivedAtIsNull(experimentId);
-        log.info("Found {} active attachments for experiment ID: {}", attachments.size(), experimentId);
+        log.trace("Found {} active attachments for experiment ID: {}", attachments.size(), experimentId);
 
         return attachments.stream()
                 .map(this::mapToDto)
@@ -216,11 +242,7 @@ public class FileServiceImpl implements FileService {
                 digest.update(byteArray, 0, bytesCount);
             }
             byte[] bytes = digest.digest();
-            StringBuilder sb = new StringBuilder();
-            for (byte b : bytes) {
-                sb.append(String.format("%02x", b));
-            }
-            return sb.toString();
+            return HexFormat.of().formatHex(bytes);
         } catch (Exception e) {
             throw new FileStorageException("Failed to calculate file checksum", e);
         }

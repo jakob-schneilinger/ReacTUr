@@ -6,12 +6,14 @@ import com.reactur.backend.dtos.reactants.ReactantDto;
 import com.reactur.backend.dtos.reactants.StructureDto;
 import com.reactur.backend.dtos.reactants.UpdateReactantDto;
 import com.reactur.backend.entities.Reactant;
+import com.reactur.backend.entities.ReactantStructure;
 import com.reactur.backend.entities.User;
 import com.reactur.backend.entities.options.ChemicalType;
 import com.reactur.backend.enums.StructureFlag;
 import com.reactur.backend.exeptions.ResourceNotFoundException;
 import com.reactur.backend.mappers.ReactantMapper;
 import com.reactur.backend.repositories.ReactantRepository;
+import com.reactur.backend.repositories.ReactantStructureRepository;
 import com.reactur.backend.services.ReactantService;
 import com.reactur.backend.services.StructureService;
 import com.reactur.backend.validators.ReactantValidator;
@@ -22,6 +24,7 @@ import org.springframework.stereotype.Service;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -33,6 +36,7 @@ public class ReactantServiceImpl implements ReactantService {
     private final ReactantValidator reactantValidator;
     private final ReactantMapper reactantMapper;
     private final StructureService structureService;
+    private final ReactantStructureRepository reactantStructureRepository;
 
     @Override
     @Transactional
@@ -105,16 +109,23 @@ public class ReactantServiceImpl implements ReactantService {
     @Override
     @Transactional(readOnly = true)
     public List<ReactantDto> getAllReactants() {
-        return reactantRepository.findAllByArchivedAtIsNull().stream()
-                .map(r -> reactantMapper.toDto(r, determineAggregateFlag(r.getId())))
-                .collect(Collectors.toList());    }
+        List<Reactant> reactants = reactantRepository.findAllByArchivedAtIsNull();
+        Map<UUID, List<ReactantStructure>> structuresByReactantId = groupStructuresByReactantId(reactants);
+
+        return reactants.stream()
+                .map(r -> reactantMapper.toDto(r, determineAggregateFlag(structuresByReactantId.get(r.getId()))))
+                .toList();
+    }
 
     @Override
     @Transactional(readOnly = true)
     public List<ReactantDto> getArchivedReactants() {
-        return reactantRepository.findAllByArchivedAtIsNotNull().stream()
-                .map(r -> reactantMapper.toDto(r, determineAggregateFlag(r.getId())))
-                .collect(Collectors.toList());
+        List<Reactant> reactants = reactantRepository.findAllByArchivedAtIsNotNull();
+        Map<UUID, List<ReactantStructure>> structuresByReactantId = groupStructuresByReactantId(reactants);
+
+        return reactants.stream()
+                .map(r -> reactantMapper.toDto(r, determineAggregateFlag(structuresByReactantId.get(r.getId()))))
+                .toList();
     }
 
     @Override
@@ -140,13 +151,50 @@ public class ReactantServiceImpl implements ReactantService {
 
     private StructureFlag determineAggregateFlag(UUID reactantId) {
         List<StructureDto> structures = structureService.getStructuresByReactant(reactantId);
-        if (structures == null || structures.isEmpty()) return null;
+        if (structures == null) return null;
+        return determineAggregateFlagFromFlags(structures.stream().map(StructureDto::flag).toList());
+    }
 
-        if (structures.stream().anyMatch(s -> s.flag() == StructureFlag.ACTIVE)) return StructureFlag.ACTIVE;
-        if (structures.stream().anyMatch(s -> s.flag() == StructureFlag.READY)) return StructureFlag.READY;
-        if (structures.stream().anyMatch(s -> s.flag() == StructureFlag.PENDING)) return StructureFlag.PENDING;
-        if (structures.stream().allMatch(s -> s.flag() == StructureFlag.FAILED)) return StructureFlag.FAILED;
+    /**
+     * Batch-oriented counterpart of {@link #determineAggregateFlag(UUID)} used by
+     * {@link #getAllReactants()} and {@link #getArchivedReactants()}: computes the aggregate flag
+     * from a reactant's own pre-fetched sublist of {@link ReactantStructure}s (see
+     * {@link #groupStructuresByReactantId(List)}) instead of issuing a per-reactant query.
+     */
+    private StructureFlag determineAggregateFlag(List<ReactantStructure> structures) {
+        if (structures == null) return null;
+        return determineAggregateFlagFromFlags(structures.stream().map(ReactantStructure::getFlag).toList());
+    }
+
+    /**
+     * Priority logic shared by both {@link #determineAggregateFlag(UUID)} and
+     * {@link #determineAggregateFlag(List)}: ACTIVE &gt; READY &gt; PENDING &gt; all-FAILED &gt;
+     * REJECTED.
+     */
+    private StructureFlag determineAggregateFlagFromFlags(List<StructureFlag> flags) {
+        if (flags == null || flags.isEmpty()) return null;
+
+        if (flags.stream().anyMatch(f -> f == StructureFlag.ACTIVE)) return StructureFlag.ACTIVE;
+        if (flags.stream().anyMatch(f -> f == StructureFlag.READY)) return StructureFlag.READY;
+        if (flags.stream().anyMatch(f -> f == StructureFlag.PENDING)) return StructureFlag.PENDING;
+        if (flags.stream().allMatch(f -> f == StructureFlag.FAILED)) return StructureFlag.FAILED;
 
         return StructureFlag.REJECTED;
+    }
+
+    /**
+     * Batch-fetches all {@link ReactantStructure}s for the given reactants in a single query and
+     * groups them by reactant ID, avoiding the N+1 pattern of calling
+     * {@code structureService.getStructuresByReactant} once per reactant (which itself repeats a
+     * now-redundant reactant-existence check for every call).
+     */
+    private Map<UUID, List<ReactantStructure>> groupStructuresByReactantId(List<Reactant> reactants) {
+        List<UUID> reactantIds = reactants.stream().map(Reactant::getId).toList();
+        if (reactantIds.isEmpty()) {
+            return Map.of();
+        }
+
+        return reactantStructureRepository.findByReactant_IdIn(reactantIds).stream()
+                .collect(Collectors.groupingBy(s -> s.getReactant().getId()));
     }
 }

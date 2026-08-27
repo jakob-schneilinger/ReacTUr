@@ -11,6 +11,7 @@ import com.reactur.backend.dtos.reactants.ReactantDetailDto;
 import com.reactur.backend.dtos.reactants.ReactantDto;
 import com.reactur.backend.dtos.reactants.UpdateReactantDto;
 import com.reactur.backend.entities.Reactant;
+import com.reactur.backend.entities.ReactantStructure;
 import com.reactur.backend.entities.User;
 import com.reactur.backend.exeptions.ResourceConflictException;
 import com.reactur.backend.exeptions.ResourceNotFoundException;
@@ -18,6 +19,7 @@ import com.reactur.backend.exeptions.UnprocessableEntityException;
 import com.reactur.backend.exeptions.ValidationException;
 import com.reactur.backend.mappers.ReactantMapper;
 import com.reactur.backend.repositories.ReactantRepository;
+import com.reactur.backend.repositories.ReactantStructureRepository;
 import com.reactur.backend.services.implementations.ReactantServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
@@ -53,6 +55,9 @@ class ReactantServiceTest {
 
     @Mock
     private ReactantRepository reactantRepository;
+
+    @Mock
+    private ReactantStructureRepository reactantStructureRepository;
 
     @Mock
     private UserRepository userRepository;
@@ -476,8 +481,8 @@ class ReactantServiceTest {
         void getAllReactants_ShouldAggregateAsPending_WhenOnlyPendingStructureExists() {
             when(reactantRepository.findAllByArchivedAtIsNull()).thenReturn(List.of(mockReactant));
 
-            StructureDto pendingStruct = new StructureDto(UUID.randomUUID(), VALID_UUID, "test", "data", StructureFlag.PENDING);
-            when(structureService.getStructuresByReactant(VALID_UUID)).thenReturn(List.of(pendingStruct));
+            ReactantStructure pendingStruct = ReactantStructure.builder().reactant(mockReactant).flag(StructureFlag.PENDING).build();
+            when(reactantStructureRepository.findByReactant_IdIn(List.of(VALID_UUID))).thenReturn(List.of(pendingStruct));
 
             List<ReactantDto> result = reactantService.getAllReactants();
 
@@ -491,9 +496,9 @@ class ReactantServiceTest {
         void getAllReactants_ShouldAggregateAsActive_WhenAnyStructureIsActive() {
             when(reactantRepository.findAllByArchivedAtIsNull()).thenReturn(List.of(mockReactant));
 
-            StructureDto rejectedStruct = new StructureDto(UUID.randomUUID(), VALID_UUID, "test", "data", StructureFlag.REJECTED);
-            StructureDto activeStruct = new StructureDto(UUID.randomUUID(), VALID_UUID, "test", "data", StructureFlag.ACTIVE);
-            when(structureService.getStructuresByReactant(VALID_UUID)).thenReturn(List.of(rejectedStruct, activeStruct));
+            ReactantStructure rejectedStruct = ReactantStructure.builder().reactant(mockReactant).flag(StructureFlag.REJECTED).build();
+            ReactantStructure activeStruct = ReactantStructure.builder().reactant(mockReactant).flag(StructureFlag.ACTIVE).build();
+            when(reactantStructureRepository.findByReactant_IdIn(List.of(VALID_UUID))).thenReturn(List.of(rejectedStruct, activeStruct));
 
             List<ReactantDto> result = reactantService.getAllReactants();
 
@@ -505,9 +510,9 @@ class ReactantServiceTest {
         void getAllReactants_ShouldAggregateAsReady_WhenAnyStructureIsReadyAndNoneActive() {
             when(reactantRepository.findAllByArchivedAtIsNull()).thenReturn(List.of(mockReactant));
 
-            StructureDto rejectedStruct = new StructureDto(UUID.randomUUID(), VALID_UUID, "test", "data", StructureFlag.REJECTED);
-            StructureDto readyStruct = new StructureDto(UUID.randomUUID(), VALID_UUID, "test", "data", StructureFlag.READY);
-            when(structureService.getStructuresByReactant(VALID_UUID)).thenReturn(List.of(rejectedStruct, readyStruct));
+            ReactantStructure rejectedStruct = ReactantStructure.builder().reactant(mockReactant).flag(StructureFlag.REJECTED).build();
+            ReactantStructure readyStruct = ReactantStructure.builder().reactant(mockReactant).flag(StructureFlag.READY).build();
+            when(reactantStructureRepository.findByReactant_IdIn(List.of(VALID_UUID))).thenReturn(List.of(rejectedStruct, readyStruct));
 
             List<ReactantDto> result = reactantService.getAllReactants();
 
@@ -519,9 +524,9 @@ class ReactantServiceTest {
         void getAllReactants_ShouldAggregateAsFailed_WhenAllStructuresAreFailed() {
             when(reactantRepository.findAllByArchivedAtIsNull()).thenReturn(List.of(mockReactant));
 
-            StructureDto failedStruct1 = new StructureDto(UUID.randomUUID(), VALID_UUID, "test", "data", StructureFlag.FAILED);
-            StructureDto failedStruct2 = new StructureDto(UUID.randomUUID(), VALID_UUID, "test", "data", StructureFlag.FAILED);
-            when(structureService.getStructuresByReactant(VALID_UUID)).thenReturn(List.of(failedStruct1, failedStruct2));
+            ReactantStructure failedStruct1 = ReactantStructure.builder().reactant(mockReactant).flag(StructureFlag.FAILED).build();
+            ReactantStructure failedStruct2 = ReactantStructure.builder().reactant(mockReactant).flag(StructureFlag.FAILED).build();
+            when(reactantStructureRepository.findByReactant_IdIn(List.of(VALID_UUID))).thenReturn(List.of(failedStruct1, failedStruct2));
 
             List<ReactantDto> result = reactantService.getAllReactants();
 
@@ -533,14 +538,47 @@ class ReactantServiceTest {
         void getAllReactants_ShouldAggregateAsRejected_WhenStructuresAreMixOfFailedAndRejected() {
             when(reactantRepository.findAllByArchivedAtIsNull()).thenReturn(List.of(mockReactant));
 
-            StructureDto failedStruct = new StructureDto(UUID.randomUUID(), VALID_UUID, "test", "data", StructureFlag.FAILED);
-            StructureDto rejectedStruct = new StructureDto(UUID.randomUUID(), VALID_UUID, "test", "data", StructureFlag.REJECTED);
-            when(structureService.getStructuresByReactant(VALID_UUID)).thenReturn(List.of(failedStruct, rejectedStruct));
+            ReactantStructure failedStruct = ReactantStructure.builder().reactant(mockReactant).flag(StructureFlag.FAILED).build();
+            ReactantStructure rejectedStruct = ReactantStructure.builder().reactant(mockReactant).flag(StructureFlag.REJECTED).build();
+            when(reactantStructureRepository.findByReactant_IdIn(List.of(VALID_UUID))).thenReturn(List.of(failedStruct, rejectedStruct));
 
             List<ReactantDto> result = reactantService.getAllReactants();
 
             assertEquals(1, result.size());
             assertEquals(StructureFlag.REJECTED, result.getFirst().flag());
+        }
+
+        @Test
+        void getAllReactants_ShouldComputeAggregateFlagPerReactant_WhenMultipleReactantsHaveDifferentStructureStates() {
+            Reactant activeReactant = Reactant.builder().id(UUID.randomUUID()).shortName("Active One").smiles("C").build();
+            Reactant pendingReactant = Reactant.builder().id(UUID.randomUUID()).shortName("Pending One").smiles("C").build();
+            Reactant noStructureReactant = Reactant.builder().id(UUID.randomUUID()).shortName("No Structure One").smiles("C").build();
+
+            when(reactantRepository.findAllByArchivedAtIsNull())
+                    .thenReturn(List.of(activeReactant, pendingReactant, noStructureReactant));
+
+            // Deliberately interleaved and including a REJECTED sibling for activeReactant, so a
+            // naive "flatten everything together" implementation would incorrectly leak ACTIVE
+            // (the highest-priority flag in the whole batch) onto pendingReactant/noStructureReactant.
+            ReactantStructure activeStructure = ReactantStructure.builder().reactant(activeReactant).flag(StructureFlag.ACTIVE).build();
+            ReactantStructure rejectedSiblingOfActive = ReactantStructure.builder().reactant(activeReactant).flag(StructureFlag.REJECTED).build();
+            ReactantStructure pendingStructure = ReactantStructure.builder().reactant(pendingReactant).flag(StructureFlag.PENDING).build();
+
+            when(reactantStructureRepository.findByReactant_IdIn(
+                    List.of(activeReactant.getId(), pendingReactant.getId(), noStructureReactant.getId())))
+                    .thenReturn(List.of(rejectedSiblingOfActive, pendingStructure, activeStructure));
+
+            List<ReactantDto> result = reactantService.getAllReactants();
+
+            assertEquals(3, result.size());
+
+            ReactantDto activeDto = result.stream().filter(r -> r.uuid().equals(activeReactant.getId())).findFirst().orElseThrow();
+            ReactantDto pendingDto = result.stream().filter(r -> r.uuid().equals(pendingReactant.getId())).findFirst().orElseThrow();
+            ReactantDto noStructureDto = result.stream().filter(r -> r.uuid().equals(noStructureReactant.getId())).findFirst().orElseThrow();
+
+            assertEquals(StructureFlag.ACTIVE, activeDto.flag());
+            assertEquals(StructureFlag.PENDING, pendingDto.flag());
+            assertNull(noStructureDto.flag());
         }
     }
 
@@ -557,7 +595,7 @@ class ReactantServiceTest {
                     .build();
 
             when(reactantRepository.findAllByArchivedAtIsNotNull()).thenReturn(List.of(archivedReactant));
-            when(structureService.getStructuresByReactant(any())).thenReturn(List.of());
+            when(reactantStructureRepository.findByReactant_IdIn(List.of(archivedReactant.getId()))).thenReturn(List.of());
 
             List<ReactantDto> result = reactantService.getArchivedReactants();
 
