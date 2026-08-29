@@ -19,8 +19,10 @@ import com.reactur.backend.repositories.UserRepository;
 import com.reactur.backend.services.ExperimentService;
 import com.reactur.backend.services.FileService;
 import com.reactur.backend.validators.ExperimentValidator;
+import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Root;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -116,8 +118,6 @@ public class ExperimentServiceImpl implements ExperimentService {
     Experiment savedExperiment = experimentRepository.save(experimentToSave);
 
     log.info("Successfully saved Experiment with internal ID: {}", savedExperiment.getId());
-
-    // TODO: Should be moved to AuditService (later)
 
     // ...finally returning the saved element
 
@@ -325,7 +325,6 @@ public class ExperimentServiceImpl implements ExperimentService {
     ));
   }
 
-  // Dynamic Query Builder
   private Specification<Experiment> buildSearchSpecification(SearchParametersDto params) {
     return (root, query, cb) -> {
       List<Predicate> predicates = new ArrayList<>();
@@ -337,85 +336,99 @@ public class ExperimentServiceImpl implements ExperimentService {
         return cb.and(predicates.toArray(new Predicate[0]));
       }
 
-      // Reactant commutativity rule
-      boolean hasA = params.reactantA() != null && !params.reactantA().isEmpty();
-      boolean hasB = params.reactantB() != null && !params.reactantB().isEmpty();
-
-      if (hasA && hasB) {
-        // (A in listA AND B in listB) OR (A in listB AND B in listA)
-        Predicate directMatch = cb.and(
-          root.get("reactantA").get("id").in(params.reactantA()),
-          root.get("reactantB").get("id").in(params.reactantB())
-        );
-        Predicate crossMatch = cb.and(
-          root.get("reactantA").get("id").in(params.reactantB()),
-          root.get("reactantB").get("id").in(params.reactantA())
-        );
-        predicates.add(cb.or(directMatch, crossMatch));
-      } else if (hasA) {
-        // Look for ListA in EITHER Reactant A or Reactant B column
-        predicates.add(cb.or(
-          root.get("reactantA").get("id").in(params.reactantA()),
-          root.get("reactantB").get("id").in(params.reactantA())
-        ));
-      } else if (hasB) {
-        // Look for ListB in EITHER Reactant A or Reactant B column
-        predicates.add(cb.or(
-          root.get("reactantA").get("id").in(params.reactantB()),
-          root.get("reactantB").get("id").in(params.reactantB())
-        ));
-      }
+      addReactantPredicates(predicates, root, cb, params);
 
       // METADATA JOINS (We only join if we need to filter on metadata fields)
       Join<Experiment, Metadata> metadataJoin = root.join("metadata");
+      addMetadataPredicates(predicates, metadataJoin, cb, params);
 
-      if (params.dateMin() != null) predicates.add(cb.greaterThanOrEqualTo(metadataJoin.get("date"), params.dateMin()));
-      if (params.dateMax() != null) predicates.add(cb.lessThanOrEqualTo(metadataJoin.get("date"), params.dateMax()));
-
-      if (params.temperatureMin() != null) predicates.add(cb.greaterThanOrEqualTo(metadataJoin.get("temperature"), params.temperatureMin()));
-      if (params.temperatureMax() != null) predicates.add(cb.lessThanOrEqualTo(metadataJoin.get("temperature"), params.temperatureMax()));
-
-      if (params.concentrationA_Min() != null) predicates.add(cb.greaterThanOrEqualTo(metadataJoin.get("concentrationA"), params.concentrationA_Min()));
-      if (params.concentrationA_Max() != null) predicates.add(cb.lessThanOrEqualTo(metadataJoin.get("concentrationA"), params.concentrationA_Max()));
-
-      if (params.concentrationB_Min() != null) predicates.add(cb.greaterThanOrEqualTo(metadataJoin.get("concentrationB"), params.concentrationB_Min()));
-      if (params.concentrationB_Max() != null) predicates.add(cb.lessThanOrEqualTo(metadataJoin.get("concentrationB"), params.concentrationB_Max()));
-
-      if (params.wavelengthMin() != null) predicates.add(cb.greaterThanOrEqualTo(metadataJoin.get("wavelength"), params.wavelengthMin()));
-      if (params.wavelengthMax() != null) predicates.add(cb.lessThanOrEqualTo(metadataJoin.get("wavelength"), params.wavelengthMax()));
-
-      if (params.comment() != null && !params.comment().isBlank()) {
-        // case-insensitive search
-        predicates.add(cb.like(cb.lower(metadataJoin.get("comment")), "%" + params.comment().toLowerCase() + "%"));
-      }
-
-      // METADATA LISTS (OR Logic via IN clauses)
-      if (params.scientist() != null && !params.scientist().isEmpty()) {
-        predicates.add(metadataJoin.get("scientist").get("id").in(params.scientist()));
-      }
-      if (params.solvent() != null) {
-        predicates.add(cb.equal(metadataJoin.get("solvent").get("id"), params.solvent()));
-      }
-      if (params.instrument() != null) {
-        predicates.add(cb.equal(metadataJoin.get("instrument").get("id"), params.instrument()));
-      }
-      if (params.modality() != null) {
-        predicates.add(cb.equal(metadataJoin.get("modality").get("id"), params.modality()));
-      }
-
-      // RESULT JOINS (For MeasurementSearchDto)
-      if (params.measurementSearch() != null) {
-        jakarta.persistence.criteria.Join<Experiment, ExperimentResult> resultJoin = root.join("result");
-        var mSearch = params.measurementSearch();
-
-        if (mSearch.rateConstantMin() != null) predicates.add(cb.greaterThanOrEqualTo(resultJoin.get("rateConstant"), mSearch.rateConstantMin()));
-        if (mSearch.rateConstantMax() != null) predicates.add(cb.lessThanOrEqualTo(resultJoin.get("rateConstant"), mSearch.rateConstantMax()));
-
-        if (mSearch.pFO_rateConstantMin() != null) predicates.add(cb.greaterThanOrEqualTo(resultJoin.get("pfoRateConstant"), mSearch.pFO_rateConstantMin()));
-        if (mSearch.pFO_rateConstantMax() != null) predicates.add(cb.lessThanOrEqualTo(resultJoin.get("pfoRateConstant"), mSearch.pFO_rateConstantMax()));
-      }
+      addMeasurementPredicates(predicates, root, cb, params);
 
       return cb.and(predicates.toArray(new Predicate[0]));
     };
+  }
+
+  // Reactant commutativity rule: an experiment's reactantA/reactantB are an unordered pair, so a
+  // search for "A and B" must also match experiments where they're stored the other way around.
+  private void addReactantPredicates(List<Predicate> predicates, Root<Experiment> root, CriteriaBuilder cb, SearchParametersDto params) {
+    boolean hasA = params.reactantA() != null && !params.reactantA().isEmpty();
+    boolean hasB = params.reactantB() != null && !params.reactantB().isEmpty();
+
+    if (hasA && hasB) {
+      // (A in listA AND B in listB) OR (A in listB AND B in listA)
+      Predicate directMatch = cb.and(
+        root.get("reactantA").get("id").in(params.reactantA()),
+        root.get("reactantB").get("id").in(params.reactantB())
+      );
+      Predicate crossMatch = cb.and(
+        root.get("reactantA").get("id").in(params.reactantB()),
+        root.get("reactantB").get("id").in(params.reactantA())
+      );
+      predicates.add(cb.or(directMatch, crossMatch));
+    } else if (hasA) {
+      // Look for ListA in EITHER Reactant A or Reactant B column
+      predicates.add(cb.or(
+        root.get("reactantA").get("id").in(params.reactantA()),
+        root.get("reactantB").get("id").in(params.reactantA())
+      ));
+    } else if (hasB) {
+      // Look for ListB in EITHER Reactant A or Reactant B column
+      predicates.add(cb.or(
+        root.get("reactantA").get("id").in(params.reactantB()),
+        root.get("reactantB").get("id").in(params.reactantB())
+      ));
+    }
+  }
+
+  private void addMetadataPredicates(List<Predicate> predicates, Join<Experiment, Metadata> metadataJoin, CriteriaBuilder cb, SearchParametersDto params) {
+    if (params.dateMin() != null) predicates.add(cb.greaterThanOrEqualTo(metadataJoin.get("date"), params.dateMin()));
+    if (params.dateMax() != null) predicates.add(cb.lessThanOrEqualTo(metadataJoin.get("date"), params.dateMax()));
+
+    if (params.temperatureMin() != null) predicates.add(cb.greaterThanOrEqualTo(metadataJoin.get("temperature"), params.temperatureMin()));
+    if (params.temperatureMax() != null) predicates.add(cb.lessThanOrEqualTo(metadataJoin.get("temperature"), params.temperatureMax()));
+
+    if (params.concentrationA_Min() != null) predicates.add(cb.greaterThanOrEqualTo(metadataJoin.get("concentrationA"), params.concentrationA_Min()));
+    if (params.concentrationA_Max() != null) predicates.add(cb.lessThanOrEqualTo(metadataJoin.get("concentrationA"), params.concentrationA_Max()));
+
+    if (params.concentrationB_Min() != null) predicates.add(cb.greaterThanOrEqualTo(metadataJoin.get("concentrationB"), params.concentrationB_Min()));
+    if (params.concentrationB_Max() != null) predicates.add(cb.lessThanOrEqualTo(metadataJoin.get("concentrationB"), params.concentrationB_Max()));
+
+    if (params.wavelengthMin() != null) predicates.add(cb.greaterThanOrEqualTo(metadataJoin.get("wavelength"), params.wavelengthMin()));
+    if (params.wavelengthMax() != null) predicates.add(cb.lessThanOrEqualTo(metadataJoin.get("wavelength"), params.wavelengthMax()));
+
+    if (params.comment() != null && !params.comment().isBlank()) {
+      // case-insensitive search
+      predicates.add(cb.like(cb.lower(metadataJoin.get("comment")), "%" + params.comment().toLowerCase() + "%"));
+    }
+
+    // METADATA LISTS (OR Logic via IN clauses)
+    if (params.scientist() != null && !params.scientist().isEmpty()) {
+      predicates.add(metadataJoin.get("scientist").get("id").in(params.scientist()));
+    }
+    if (params.solvent() != null) {
+      predicates.add(cb.equal(metadataJoin.get("solvent").get("id"), params.solvent()));
+    }
+    if (params.instrument() != null) {
+      predicates.add(cb.equal(metadataJoin.get("instrument").get("id"), params.instrument()));
+    }
+    if (params.modality() != null) {
+      predicates.add(cb.equal(metadataJoin.get("modality").get("id"), params.modality()));
+    }
+  }
+
+  // RESULT JOIN (for MeasurementSearchDto) - only joins the result table if measurement filters were provided.
+  private void addMeasurementPredicates(List<Predicate> predicates, Root<Experiment> root, CriteriaBuilder cb, SearchParametersDto params) {
+    if (params.measurementSearch() == null) {
+      return;
+    }
+
+    Join<Experiment, ExperimentResult> resultJoin = root.join("result");
+    var mSearch = params.measurementSearch();
+
+    if (mSearch.rateConstantMin() != null) predicates.add(cb.greaterThanOrEqualTo(resultJoin.get("rateConstant"), mSearch.rateConstantMin()));
+    if (mSearch.rateConstantMax() != null) predicates.add(cb.lessThanOrEqualTo(resultJoin.get("rateConstant"), mSearch.rateConstantMax()));
+
+    if (mSearch.pFO_rateConstantMin() != null) predicates.add(cb.greaterThanOrEqualTo(resultJoin.get("pfoRateConstant"), mSearch.pFO_rateConstantMin()));
+    if (mSearch.pFO_rateConstantMax() != null) predicates.add(cb.lessThanOrEqualTo(resultJoin.get("pfoRateConstant"), mSearch.pFO_rateConstantMax()));
   }
 }

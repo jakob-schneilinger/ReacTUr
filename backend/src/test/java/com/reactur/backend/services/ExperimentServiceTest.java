@@ -43,6 +43,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mapstruct.factory.Mappers;
 import org.mockito.ArgumentCaptor;
+import org.mockito.ArgumentMatchers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -792,8 +793,12 @@ class ExperimentServiceTest {
       Page<Experiment> mockEntityPage =
         new PageImpl<>(List.of(mockExperiment));
 
-      // When the repository executes ANY Specification with ANY Pageable, return our mock page
-      when(experimentRepository.findAll(any(Specification.class), any(Pageable.class)))
+      // When the repository executes ANY Specification with ANY Pageable, return our mock page.
+      // Uses the explicitly-typed any() (via ArgumentMatchers.<Specification<Experiment>>any()) instead of
+      // any(Specification.class), which required an unchecked conversion from the raw Specification type. A plain
+      // parameterless any() doesn't compile here because ExperimentRepository has more than one overloaded
+      // findAll(..., Pageable), making the target type ambiguous without an explicit type witness.
+      when(experimentRepository.findAll(ArgumentMatchers.<Specification<Experiment>>any(), any(Pageable.class)))
         .thenReturn(mockEntityPage);
 
       // 3. Execute
@@ -805,7 +810,7 @@ class ExperimentServiceTest {
       assertEquals(1, resultPage.getTotalElements(), "Page should contain exactly 1 mapped DTO");
 
       // Verify the repository was actually called with a Specification and the Pageable
-      verify(experimentRepository).findAll(any(Specification.class), Mockito.eq(pageable));
+      verify(experimentRepository).findAll(ArgumentMatchers.<Specification<Experiment>>any(), Mockito.eq(pageable));
     }
   }
 }
