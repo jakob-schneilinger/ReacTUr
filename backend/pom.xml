@@ -259,24 +259,12 @@
                 </executions>
             </plugin>
 
-            <!-- OWASP Dependency-Check: scans all resolved dependencies against known-vulnerability
-                 databases (NVD, etc.). Deliberately NOT bound to any lifecycle phase/execution, so it
-                 never runs as part of a normal `./mvnw -o clean test` - it needs real internet access
-                 to update its vulnerability database, which is incompatible with this project's offline
-                 build habit. Run it explicitly and manually when needed:
+            <!-- OWASP Dependency-Check: scans all dependencies in Backend against known-vulnerability
+                 databases (NVD, etc.). It is on purpose NOT bound to any lifecycle phase or execution, so it
+                 never runs as part of a normal `./mvnw -o clean test`.
+                 It is to be run explicitly and manually when needed (internet connection needed):
                      ./mvnw org.owasp:dependency-check-maven:check
-                 (omit -o; this goal needs network access). Report is written to
-                 target/dependency-check-report.html.
-                 assemblyAnalyzerEnabled is off because this is a pure JVM/Maven project - there are no
-                 .NET assemblies to analyze, and that analyzer errors out trying to initialize anyway.
-                 ossindexAnalyzerEnabled is off because Sonatype's OSS Index now returns a hard 401
-                 Unauthorized for every single unauthenticated request (confirmed via a real run - see
-                 Software_todo.md item 7), not just a rate limit - ossIndexWarnOnlyOnRemoteErrors (meant
-                 for transient errors like 429/502/503) was tried first and does NOT cover this case, so
-                 the analyzer is disabled outright rather than left to fail the build every run. The
-                 NVD/CPE-based analysis below needs no account and is this tool's main signal; OSS Index
-                 would only add a second, optional data source, and would need a free account
-                 (ossIndexServerId in settings.xml) to ever work again. -->
+                 Report is written to target/dependency-check-report.html. -->
             <plugin>
                 <groupId>org.owasp</groupId>
                 <artifactId>dependency-check-maven</artifactId>
