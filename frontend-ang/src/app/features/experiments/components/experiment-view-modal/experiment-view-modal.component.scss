@@ -15,14 +15,4 @@
   }
 }
 
-.reactant {
-
-  transition: border-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
-
-  &:hover {
-    border-color: $primary !important;
-    box-shadow: 0 1px 10px rgba(31, 119, 205, 0.6) !important;
-    cursor: pointer;
-  }
-}
 

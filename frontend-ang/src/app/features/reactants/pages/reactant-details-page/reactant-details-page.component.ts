@@ -2,7 +2,7 @@ import { CommonModule } from '@angular/common';
 import { LayoutComponent } from '../../../../core/layout/layout.component';
 import { ReactantFormComponent } from '../../components/reactant-form/reactant-form.component';
 import { ReactantStructureComponent } from '../../components/reactant-structure/reactant-structure.component';
-import { ChangeDetectorRef, Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { NotificationService } from '../../../../core/layout/notification/notification.service';
 import { ReactantService } from '../../reactant.service';
@@ -136,12 +136,14 @@ export class ReactantDetailsPageComponent implements OnInit, OnDestroy {
 
   get showUpload(): boolean {
     return !(
-      this.currentFlag === StructureFlag.PENDING || this.currentFlag === StructureFlag.READY || this.currentFlag === StructureFlag.ACTIVE
+      this.currentFlag === StructureFlag.PENDING ||
+      this.currentFlag === StructureFlag.READY ||
+      this.currentFlag === StructureFlag.ACTIVE
     );
   }
 
   get showUploadedFile(): boolean {
-    return this.currentFlag === StructureFlag.ACTIVE
+    return this.currentFlag === StructureFlag.ACTIVE;
   }
 
   updateSmiles(smiles: string) {
@@ -151,7 +153,7 @@ export class ReactantDetailsPageComponent implements OnInit, OnDestroy {
     }
   }
 
-  saveReactantForm(payload: { data: SaveReactantDto, onSuccess: () => void }) {
+  saveReactantForm(payload: { data: SaveReactantDto; onSuccess: () => void }) {
     const { data, onSuccess } = payload;
     if (!this.isEditMode) {
       this.reactantService.createReactant(data).subscribe({
@@ -225,7 +227,9 @@ export class ReactantDetailsPageComponent implements OnInit, OnDestroy {
         error: (err) => {
           this.notification.error(
             this.transloco.translate('reactants.details.notifications.uploadErrorTitle'),
-            this.transloco.translate('reactants.details.notifications.uploadErrorMessage', {error: err.error || err.message || err}),
+            this.transloco.translate('reactants.details.notifications.uploadErrorMessage', {
+              error: err.error || err.message || err,
+            }),
           );
         },
       });
@@ -240,7 +244,7 @@ export class ReactantDetailsPageComponent implements OnInit, OnDestroy {
     this.structureService.generateStructureFromApi(this.reactant.uuid).subscribe({
       next: (value) => {
         this.notification.success(
-          this.transloco.translate('reactants.details.notifications.generateTitle')
+          this.transloco.translate('reactants.details.notifications.generateTitle'),
         );
         this.refreshStatus();
       },
@@ -284,8 +288,9 @@ export class ReactantDetailsPageComponent implements OnInit, OnDestroy {
         }
         this.loadingStructures = false;
         this.notification.success(
-          this.transloco.translate('reactants.details.notifications.pageRefreshTitle'), "",
-          1000
+          this.transloco.translate('reactants.details.notifications.pageRefreshTitle'),
+          '',
+          1000,
         );
         this.cd.markForCheck();
       },
@@ -299,13 +304,17 @@ export class ReactantDetailsPageComponent implements OnInit, OnDestroy {
   handleStructureSelection(selectedStructure: StructureDto | null) {
     this.isStructureSelectionModalOpen = false;
 
-    //TODO: overthink structure rejection. if reject selectedStructure = null
+    if (selectedStructure == null) {
+      this.structureFiles = [];
+      this.currentFlag = StructureFlag.REJECTED;
+      return;
+    }
 
     if (selectedStructure && selectedStructure.id) {
       this.structureService.selectStructure(selectedStructure.id).subscribe({
         next: () => {
           this.notification.success(
-            this.transloco.translate('reactants.details.notifications.structureSelectTitle')
+            this.transloco.translate('reactants.details.notifications.structureSelectTitle'),
           );
           this.refreshStatus();
         },

@@ -78,6 +78,20 @@
             }
           }
 
+          @case (StructureFlag.REJECTED) {
+            <app-reactant-structure
+              [smiles]="smiles || ''">
+            </app-reactant-structure>
+            @if (isEditMode) {
+              <div class="action-banner align-self-center mt-4 d-flex flex-column align-items-center">
+                <p>{{ 'reactants.details.structure.generateComplete' | transloco }}</p>
+                <button type="button" (click)="openStructureSelectionModal()">
+                  {{ 'reactants.details.structure.selectStructureButton' | transloco }}
+                </button>
+              </div>
+            }
+          }
+
           @default {
             <app-reactant-structure
               [smiles]="smiles || ''">

@@ -86,7 +86,7 @@ class ExperimentFileService {
               if (match) {
                 const wavelength = parseFloat(match[1]);
                 if (wavelength == 280) {
-                  metadata.wavelength = 535; //TODO: check with chemists for LED wavelength
+                  metadata.wavelength = 535;
                 } else {
                   metadata.wavelength = parseFloat(match[1]);
                 }
