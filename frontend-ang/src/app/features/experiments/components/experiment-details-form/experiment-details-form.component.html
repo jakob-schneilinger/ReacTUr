@@ -153,6 +153,7 @@
     <label>{{ 'experiments.details.form.labels.rateConstant' | transloco }}</label>
     <div class="search-field" [class.has-value]="experimentForm.get('rateConstant')?.value">
       <input type="number" formControlName="rateConstant" (keydown)="preventComma($event)" [class.is-invalid]="isInvalid('rateConstant')" [placeholder]="'experiments.details.form.placeholders.value' | transloco" />
+      <span class="icon unit-label text-dark">M-1s-1</span>
       @if (experimentForm.get('rateConstant')?.value) {
         <span class="icon bi bi-x text-black clear-btn" (click)="clearControl('rateConstant')"></span>
       }

@@ -27,7 +27,7 @@ import { TRANSLOCO_IMPORTS } from '../../../../core/global/transloco-imports';
     AdvancedSearchComponent,
     SearchResultsComponent,
     ExportModalComponent,
-    TRANSLOCO_IMPORTS
+    TRANSLOCO_IMPORTS,
   ],
 })
 export class SearchPageComponent implements OnInit {
@@ -84,6 +84,8 @@ export class SearchPageComponent implements OnInit {
 
   handleAdvancedSearch(terms: SearchParametersDto) {
     this.metadata = terms;
+    this.metadata.reactantA = this.reactantA;
+    this.metadata.reactantB = this.reactantB;
     // this.executeSearch();
   }
 
