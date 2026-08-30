@@ -33,6 +33,9 @@
   transition: color 0.2s ease-in-out;
   position: relative;
 
+  text-decoration: none;
+  color: $light_black;
+
   &:hover {
     color: $primary;
   }
@@ -247,4 +250,46 @@
 .navitem:focus-visible, .navitem *:focus-visible, [ngbDropdownToggle]:focus-visible {
   outline: none !important;
   box-shadow: none !important;
+}
+
+
+
+
+a[data-tooltip] {
+  position: relative;
+  cursor: pointer;
+}
+
+a[data-tooltip]::before {
+  content: attr(data-tooltip);
+  position: absolute;
+
+  top: -80%;
+  left: 100%;
+  transform: translateX(-50%);
+
+  background-color: white !important;
+  color: $primary !important;
+  border: 1px solid $primary_hover !important;
+  padding: 1px 3px;
+  border-radius: 2px;
+  font-size: 12px;
+  font-weight: normal;
+  box-shadow: 1px 1px 3px rgba(0, 0, 0, 0.2);
+
+  white-space: nowrap;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0s, visibility 0s;
+  z-index: 100;
+}
+
+a.logo[data-tooltip]::before {
+  top: -15%;
+  left: 100%;
+}
+
+a[data-tooltip]:hover::before {
+  opacity: 1;
+  visibility: visible;
 }

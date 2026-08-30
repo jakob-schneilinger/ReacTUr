@@ -35,6 +35,8 @@ export class HeaderComponent implements OnInit {
 
   loggedInUser: GetUserDto | null = null;
 
+  showTooltip: boolean = true;
+
   ngOnInit(): void {
     this.authService.initialLoginSequence.then(() => {
       this.authService.getLoggedInUser().subscribe((user) => {
@@ -42,6 +44,10 @@ export class HeaderComponent implements OnInit {
         this.cdr.markForCheck();
       });
     });
+  }
+
+  toggleTooltips() {
+    this.showTooltip = !this.showTooltip;
   }
 
   getLangId(lang: any): string {

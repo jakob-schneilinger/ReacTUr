@@ -2,18 +2,18 @@
 
   <div id="items">
     <div class="layout"></div>
-    <div class="navitem logo" routerLink="/search">
+    <a class="navitem logo" [attr.data-tooltip]="showTooltip ? 'Alt + M' : null" [title]="'header.myExperiments' | transloco" routerLink="/my-experiments">
       <div class="shadow-container">
         <div class="img-shadow"></div>
       </div>
       <img [alt]="'header.logoAlt' | transloco" ngSrc="images/enzyme.png" width="50" height="50" priority>
       <span>{{ 'header.title' | transloco }}</span>
-    </div>
-    <div class="navitem" routerLink="/search" routerLinkActive="active-link">{{ 'header.search' | transloco }}</div>
-    <div class="navitem" routerLink="/experiments/create" routerLinkActive="active-link">{{ 'header.createExperiment' | transloco }}</div>
-    <div class="navitem" routerLink="/experiment-planning" routerLinkActive="active-link">
+    </a>
+    <a class="navitem" [attr.data-tooltip]="showTooltip ? 'Alt + S' : null" [title]="'header.search' | transloco" routerLink="/search" routerLinkActive="active-link">{{ 'header.search' | transloco }}</a>
+    <a class="navitem" [attr.data-tooltip]="showTooltip ? 'Alt + E' : null" [title]="'header.createExperiment' | transloco" routerLink="/experiments/create" routerLinkActive="active-link">{{ 'header.createExperiment' | transloco }}</a>
+    <a class="navitem" [attr.data-tooltip]="showTooltip ? 'Alt + P' : null" [title]="'header.experimentPlanning' | transloco" routerLink="/experiment-planning" routerLinkActive="active-link">
       {{ 'header.experimentPlanning' | transloco }}
-    </div>
+    </a>
     <!--
     <div class="navitem"
          ngbDropdown
@@ -39,8 +39,8 @@
       </div>
     </div>
     -->
-    <div class="navitem" routerLink="/reactants" routerLinkActive="active-link">{{ 'header.reactants' | transloco }}</div>
-    <div class="navitem" routerLink="/admin" routerLinkActive="active-link" *appHasRole="['ADMIN']">{{ 'header.admin' | transloco }}</div>
+    <a class="navitem" [attr.data-tooltip]="showTooltip ? 'Alt + R -> Alt + C' : null" [title]="'header.reactants' | transloco" routerLink="/reactants" routerLinkActive="active-link">{{ 'header.reactants' | transloco }}</a>
+    <a class="navitem" [attr.data-tooltip]="showTooltip ? 'Alt + A' : null" [title]="'header.admin' | transloco" routerLink="/admin" routerLinkActive="active-link" *appHasRole="['ADMIN']">{{ 'header.admin' | transloco }}</a>
   </div>
 
   <div class="profile-container">
@@ -52,10 +52,10 @@
           <button ngbDropdownItem disabled>{{'header.greetings' | transloco}}, {{ user?.firstName }}</button>
           <div class="dropdown-divider"></div>
 
-          <button ngbDropdownItem routerLink="/my-experiments" class="d-flex align-items-center justify-content-between">
+          <a ngbDropdownItem routerLink="/my-experiments" class="d-flex align-items-center justify-content-between">
             {{ 'header.myExperiments' | transloco }}
             <i class="bi bi-journal-text ms-2"></i>
-          </button>
+          </a>
           <div class="dropdown-divider"></div>
         } @else {
           <button ngbDropdownItem routerLink="/login" class="d-flex align-items-center justify-content-between">
@@ -64,6 +64,16 @@
           </button>
           <div class="dropdown-divider"></div>
         }
+
+        <button ngbDropdownItem
+                (click)="toggleTooltips()"
+                class="d-flex align-items-center justify-content-between">
+          {{ 'header.showTooltips' | transloco }}
+          @if (showTooltip) {
+            <i class="bi bi-check ms-2"></i>
+          }
+        </button>
+        <div class="dropdown-divider"></div>
 
         <h6 class="dropdown-header text-muted">{{ 'header.language' | transloco }}</h6>
         @for (lang of availableLanguages; track getLangId(lang)) {
