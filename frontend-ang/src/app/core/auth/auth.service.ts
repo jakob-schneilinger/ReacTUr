@@ -20,6 +20,9 @@ export class AuthService {
     private userService: UserService,
     private router: Router,
   ) {
+    // save to local storage to share through different tabs
+    this.oauthService.setStorage(localStorage);
+
     this.oauthService.configure(authConfig);
     this.oauthService.setupAutomaticSilentRefresh();
 
@@ -121,7 +124,7 @@ export class AuthService {
           return false;
         }
         return allowedRoles.includes(user.role);
-      })
+      }),
     );
   }
 }

@@ -41,7 +41,7 @@ export class SubstructureSearchComponent {
     type: 'GROUP',
     operator: 'AND',
     isNot: false,
-    format: 'SMARTS',
+    format: 'SMILES',
     children: [],
   };
 
@@ -79,7 +79,7 @@ export class SubstructureSearchComponent {
       type: 'GROUP',
       operator: 'AND',
       isNot: false,
-      format: 'SMARTS',
+      format: 'SMILES',
       children: [{ id: Date.now() + 1, type: 'RULE', isNot: false, query: '' }], // Start group with one rule
     });
   }

@@ -83,7 +83,7 @@
             <div class="text-muted small">{{ 'experiments.view.noReactants' | transloco }}</div>
           } @else {
             <div class="list-group">
-              <div class="reactant list-group-item d-flex flex-row justify-content-between align-items-center mb-2 border rounded" [routerLink]="['/reactants', selectedExperiment.reactantA.uuid]">
+              <div class="list-group-item d-flex flex-row justify-content-between align-items-center mb-2 border rounded">
                 <div class="d-flex flex-column justify-content-between">
                   <h6 class="mb-1 text-primary">{{ selectedExperiment.reactantA.shortName }}</h6>
                   <p class="mb-1 small text-truncate" title="{{ selectedExperiment.reactantA.smiles }}">
@@ -95,7 +95,7 @@
                 </div>
                 <span class="badge bg-secondary">{{ selectedExperiment.reactantA.chemicalType.name }}</span>
               </div>
-              <div class="reactant list-group-item d-flex flex-row justify-content-between align-items-center mb-2 border rounded"  [routerLink]="['/reactants', selectedExperiment.reactantB.uuid]">
+              <div class="list-group-item d-flex flex-row justify-content-between align-items-center mb-2 border rounded">
                 <div class="d-flex flex-column justify-content-between">
                   <h6 class="mb-1 text-primary">{{ selectedExperiment.reactantB.shortName }}</h6>
                   <p class="mb-1 small text-truncate" title="{{ selectedExperiment.reactantB.smiles }}">
