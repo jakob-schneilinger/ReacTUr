@@ -46,6 +46,7 @@ class ExperimentMapperTest {
         SolventMapper solventMapper = Mappers.getMapper(SolventMapper.class);
         InstrumentMapper instrumentMapper = Mappers.getMapper(InstrumentMapper.class);
         ModalityMapper modalityMapper = Mappers.getMapper(ModalityMapper.class);
+        ExperimentAttachmentMapper experimentAttachmentMapper = Mappers.getMapper(ExperimentAttachmentMapper.class);
 
         ReflectionTestUtils.setField(metadataMapper, "userMapper", userMapper);
         ReflectionTestUtils.setField(metadataMapper, "solventMapper", solventMapper);
@@ -56,6 +57,7 @@ class ExperimentMapperTest {
         ReflectionTestUtils.setField(mapper, "measurementDataMapper", measurementDataMapper);
         ReflectionTestUtils.setField(mapper, "reactantMapper", reactantMapper);
         ReflectionTestUtils.setField(mapper, "userMapper", userMapper);
+        ReflectionTestUtils.setField(mapper, "experimentAttachmentMapper", experimentAttachmentMapper);
 
         User createdBy = User.builder().id("creator-1").firstName("Grace").lastName("Hopper").role(Role.USER).build();
         Reactant reactantA = Reactant.builder().id(UUID.randomUUID()).shortName("A").smiles("C").build();

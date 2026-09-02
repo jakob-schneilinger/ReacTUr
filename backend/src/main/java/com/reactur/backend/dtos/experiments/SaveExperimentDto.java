@@ -2,6 +2,7 @@ package com.reactur.backend.dtos.experiments;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
 
 import java.util.Collections;
 import java.util.List;
@@ -36,9 +37,9 @@ public record SaveExperimentDto(
   @NotNull(message = "Measurement data is required")
   MeasurementDataDto measurementData,
 
-  // TODO (Syntactic - DTO): Ask if DOIs follow a strict format,
-  //  add a @Pattern(regexp = "^10\\.\\d{4,9}/[-._;()/:A-Z0-9]+$") here.
-  List<String> dois
+  // DOI syntax (ISO 26324): "10." + a 4-9 digit registrant code + "/" + a suffix defined by the
+  // registrant.
+  List<@Pattern(regexp = "^10\\.\\d{4,9}/[-._;()/:A-Za-z0-9]+$", message = "Each DOI must match the standard format (e.g. 10.1000/182)") String> dois
 ) {
   // Guarantees that dois is never null, but rather an empty list
   public SaveExperimentDto {

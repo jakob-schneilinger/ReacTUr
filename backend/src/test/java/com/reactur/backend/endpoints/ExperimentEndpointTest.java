@@ -186,6 +186,42 @@ class ExperimentEndpointTest {
 
       .andExpect(status().isBadRequest());
 
+  }
+
+  @Test
+  void createExperiment_whenDoiIsMalformed_returns400BadRequest() throws Exception {
+    SaveMetadataDto validMetadata = new SaveMetadataDto(
+      LocalDate.now(),
+      "mock-scientist-id-456",
+      25.0,
+      UUID.randomUUID(),
+      1.5,
+      2.0,
+      UUID.randomUUID(),
+      UUID.randomUUID(),
+      450.0,
+      "Test"
+    );
+    MeasurementDataDto validMeasurement = new MeasurementDataDto(
+      1.2, 5.5, 0.1, false
+    );
+
+    SaveExperimentDto invalidRequestDto = new SaveExperimentDto(
+      UUID.randomUUID(),
+      UUID.randomUUID(),
+      validMetadata,
+      validMeasurement,
+      List.of("not-a-real-doi") // <--- missing the mandatory "10.<digits>/" prefix
+    );
+
+    mockMvc.perform(post("/api/experiment")
+        .with(csrf())
+        .with(asUser("mock-keycloak-id-123"))
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(objectMapper.writeValueAsString(invalidRequestDto)))
+
+      .andExpect(status().isBadRequest());
+
     verifyNoInteractions(experimentService);
   }
 

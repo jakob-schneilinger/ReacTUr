@@ -12,6 +12,7 @@ import com.reactur.backend.dtos.experiments.ExperimentAttachmentDetailsDto;
 import com.reactur.backend.dtos.experiments.ExperimentAttachmentDto;
 import com.reactur.backend.entities.experiment.Experiment;
 import com.reactur.backend.entities.experiment.ExperimentAttachment;
+import com.reactur.backend.mappers.ExperimentAttachmentMapper;
 import com.reactur.backend.repositories.ExperimentAttachmentRepository;
 import com.reactur.backend.repositories.ExperimentRepository;
 import lombok.RequiredArgsConstructor;
@@ -41,6 +42,7 @@ public class FileServiceImpl implements FileService {
     private final ExperimentAttachmentRepository attachmentRepository;
     private final ExperimentRepository experimentRepository;
     private final ExperimentAuthorization experimentAuthorization;
+    private final ExperimentAttachmentMapper attachmentMapper;
 
     private final S3Client s3Client;
 
@@ -157,7 +159,7 @@ public class FileServiceImpl implements FileService {
         }
         log.info("Successfully stored file metadata in database with attachment ID: {}", saved.getId());
 
-        return mapToDetailsDto(saved);
+        return attachmentMapper.toDetailsDto(saved);
     }
 
     @Override
@@ -189,7 +191,7 @@ public class FileServiceImpl implements FileService {
 
         experimentAuthorization.assertCanView(attachment.getExperiment(), requestingUserId, requestingUserRole);
 
-        return mapToDetailsDto(attachment);
+        return attachmentMapper.toDetailsDto(attachment);
     }
 
     @Override
@@ -205,7 +207,7 @@ public class FileServiceImpl implements FileService {
         log.trace("Found {} active attachments for experiment ID: {}", attachments.size(), experimentId);
 
         return attachments.stream()
-                .map(this::mapToDto)
+                .map(attachmentMapper::toDto)
                 .toList();
     }
 
@@ -248,30 +250,6 @@ public class FileServiceImpl implements FileService {
         log.info("Successfully soft-archived file ID: {}", fileId);
     }
 
-    private String getDownloadUrl(ExperimentAttachment entity) {
-        return String.format("/api/file/%s", entity.getId());
-    }
-
-    private ExperimentAttachmentDto mapToDto(ExperimentAttachment entity) {
-        return new ExperimentAttachmentDto(
-                entity.getId(),
-                entity.getFileName(),
-                entity.getFileType(),
-                entity.getFileSizeBytes(),
-                getDownloadUrl(entity)
-        );
-    }
-
-    private ExperimentAttachmentDetailsDto mapToDetailsDto(ExperimentAttachment entity) {
-        return new ExperimentAttachmentDetailsDto(
-                entity.getId(),
-                entity.getFileName(),
-                entity.getFileType(),
-                entity.getFileSizeBytes(),
-                entity.getChecksumSha256(),
-                getDownloadUrl(entity)
-        );
-    }
 
     private String calculateSha256(MultipartFile file) {
         try (InputStream is = file.getInputStream()) {

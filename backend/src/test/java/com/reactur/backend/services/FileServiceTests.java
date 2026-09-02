@@ -8,6 +8,7 @@ import com.reactur.backend.enums.Role;
 import com.reactur.backend.exeptions.FileStorageException;
 import com.reactur.backend.exeptions.ResourceConflictException;
 import com.reactur.backend.exeptions.ResourceNotFoundException;
+import com.reactur.backend.mappers.ExperimentAttachmentMapper;
 import com.reactur.backend.repositories.ExperimentAttachmentRepository;
 import com.reactur.backend.repositories.ExperimentRepository;
 import com.reactur.backend.services.authorization.ExperimentAuthorization;
@@ -15,8 +16,10 @@ import com.reactur.backend.services.implementations.FileServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mapstruct.factory.Mappers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.core.io.Resource;
 import org.springframework.mock.web.MockMultipartFile;
@@ -59,6 +62,9 @@ class FileServiceTests {
 
     @Mock
     private ExperimentAuthorization experimentAuthorization;
+
+    @Spy
+    private ExperimentAttachmentMapper attachmentMapper = Mappers.getMapper(ExperimentAttachmentMapper.class);
 
     @InjectMocks
     private FileServiceImpl fileService;

@@ -34,12 +34,12 @@ public interface ReactantRepository extends JpaRepository<Reactant, UUID> {
     Optional<Reactant> findByIdForUpdate(@Param("id") UUID id);
 
     /*
-     TODO-CLAUDE (future thread, needs a migration-tooling decision first): this check-then-save
+     TODO (Needs a migration-tooling decision first): this check-then-save
      is not atomic. Two concurrent create requests could both call this method, both observe
-     {@code false}, and both proceed to save, resulting in a duplicate short name. Closing that
+     "false", and both proceed to save, resulting in a duplicate short name. Closing that
      race properly needs a DB-level (case-insensitive) unique constraint/index, which this
      project cannot safely bolt on today: there is no migration tool (no Flyway/Liquibase), only
-     Hibernate {@code ddl-auto: update} in prod / {@code create-drop} in tests, and hand-writing a
+     Hibernate "ddl-auto: update" in prod / "create-drop" in tests, and hand-writing a
      functional unique index risks fighting Hibernate's automatic schema management. Adding one
      needs its own deliberate discussion, possibly bundled with "should this project adopt a
      migration tool at all".
@@ -48,8 +48,6 @@ public interface ReactantRepository extends JpaRepository<Reactant, UUID> {
      have the same non-atomic check-then-save shape and need the same DB-level constraint once a
      migration-tooling decision is made.
      */
-    // Comment to the todo: Wouldn't a @transaction at the service layer suffice to make sure
-    //  we are validating no duplicates before adding it?
     /**
      * Checks whether any existing reactant already uses one of the given names, either as its
      * primary {@code shortName} or as one of its {@code additionalShortNames}.

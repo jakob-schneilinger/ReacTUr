@@ -17,6 +17,7 @@ import com.reactur.backend.enums.StructureFlag;
 import com.reactur.backend.exeptions.ResourceConflictException;
 import com.reactur.backend.exeptions.ResourceNotFoundException;
 import com.reactur.backend.exeptions.UnprocessableEntityException;
+import com.reactur.backend.mappers.ExperimentAttachmentMapper;
 import com.reactur.backend.mappers.ExperimentMapper;
 import com.reactur.backend.mappers.MeasurementDataMapper;
 import com.reactur.backend.mappers.MetadataMapper;
@@ -98,6 +99,7 @@ class ExperimentServiceTest {
   @Spy private SolventMapper solventMapper = Mappers.getMapper(SolventMapper.class);
   @Spy private InstrumentMapper instrumentMapper = Mappers.getMapper(InstrumentMapper.class);
   @Spy private ModalityMapper modalityMapper = Mappers.getMapper(ModalityMapper.class);
+  @Spy private ExperimentAttachmentMapper experimentAttachmentMapper = Mappers.getMapper(ExperimentAttachmentMapper.class);
 
   @Spy private ExperimentAuthorization experimentAuthorization = new ExperimentAuthorization();
 
@@ -126,6 +128,7 @@ class ExperimentServiceTest {
     ReflectionTestUtils.setField(experimentMapper, "measurementDataMapper", measurementDataMapper);
     ReflectionTestUtils.setField(experimentMapper, "reactantMapper", reactantMapper);
     ReflectionTestUtils.setField(experimentMapper, "userMapper", userMapper);
+    ReflectionTestUtils.setField(experimentMapper, "experimentAttachmentMapper", experimentAttachmentMapper);
   }
 
   // --- Shared fixture helpers, used across multiple @Nested groups below ---

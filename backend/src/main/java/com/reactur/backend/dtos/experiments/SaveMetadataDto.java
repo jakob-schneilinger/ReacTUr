@@ -30,14 +30,12 @@ public record SaveMetadataDto(
   LocalDate date,
 
   @NotBlank(message = "Scientist ID is required")
-  // TODO (Frontend): Ensure Angular sends the Keycloak String ID of the scientist here, NOT their full name (e.g., "f:528a..." not "Marie Curie").
   String scientist,  // (Semantic - Service Layer): Verify Scientist's exists in the database.
 
   @NotNull(message = "Temperature is required")
   @Min(value = -273, message = "Temperature cannot be below absolute zero") // Syntactic chemistry check
   Double temperature,
 
-  // TODO (Frontend): Ensure Angular sends the Solvent's UUID from the DB, not the string "Water".
   @NotNull(message = "Solvent is required")
   UUID solvent, // (Semantic - Service Layer): Verify Solvent UUID exists in the database.
 
@@ -49,16 +47,14 @@ public record SaveMetadataDto(
   @PositiveOrZero(message = "Concentration cannot be negative")
   Double concentrationB,
 
-  // TODO (Architecture): Resolve contradiction - Frontend UI says Optional, TS says Required.
   UUID instrument, // (Semantic - Service Layer): Verify Instrument UUID exists in the database.
 
-  // TODO (Architecture): Resolve contradiction - Frontend UI says Optional, TS says Required.
   UUID modality, // (Semantic - Service Layer): Verify Modality UUID exists in the database.
 
   @Positive(message = "Wavelength must be positive")
   Double wavelength,
 
   @Size(max = 1023, message = "Comment is too long") // Syntactic check to prevent massive text payloads
-  String comment                                     // TODO: Set max-size constraint in DB
+  String comment
 ) {
 }

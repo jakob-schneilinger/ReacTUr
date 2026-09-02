@@ -14,8 +14,8 @@ import java.util.List;
     ReactantMapper.class,
     UserMapper.class,
     MetadataMapper.class,
-    MeasurementDataMapper.class
-    /* TODO: ExperimentAttachmentMapper ? */
+    MeasurementDataMapper.class,
+    ExperimentAttachmentMapper.class
   }
 )
 public interface ExperimentMapper {
