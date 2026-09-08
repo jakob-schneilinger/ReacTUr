@@ -1,7 +1,7 @@
 package com.reactur.backend.services.implementations;
 
-import com.reactur.backend.dtos.GetUserDto;
-import com.reactur.backend.dtos.RoleDto;
+import com.reactur.backend.dtos.users.GetUserDto;
+import com.reactur.backend.dtos.users.RoleDto;
 import com.reactur.backend.entities.User;
 import com.reactur.backend.enums.Role;
 import com.reactur.backend.exceptions.ResourceConflictException;

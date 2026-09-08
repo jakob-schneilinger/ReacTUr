@@ -1,4 +1,4 @@
-package com.reactur.backend.dtos;
+package com.reactur.backend.dtos.users;
 
 import com.reactur.backend.enums.Role;
 

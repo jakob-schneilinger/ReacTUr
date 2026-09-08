@@ -1,4 +1,4 @@
-package com.reactur.backend.services;
+package com.reactur.backend.services.options;
 
 import com.reactur.backend.dtos.options.ChemicalTypeDto;
 import com.reactur.backend.entities.options.ChemicalType;

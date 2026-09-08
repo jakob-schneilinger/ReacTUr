@@ -1,7 +1,7 @@
 package com.reactur.backend.endpoints;
 
-import com.reactur.backend.dtos.GetUserDto;
-import com.reactur.backend.dtos.RoleDto;
+import com.reactur.backend.dtos.users.GetUserDto;
+import com.reactur.backend.dtos.users.RoleDto;
 import com.reactur.backend.services.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;

@@ -1,7 +1,7 @@
 package com.reactur.backend.dtos.experiments;
 
 import com.reactur.backend.dtos.DetailsDto;
-import com.reactur.backend.dtos.GetUserDto;
+import com.reactur.backend.dtos.users.GetUserDto;
 import com.reactur.backend.dtos.reactants.ReactantDto;
 
 import java.time.Instant;

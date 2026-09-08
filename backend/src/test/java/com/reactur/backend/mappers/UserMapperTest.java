@@ -1,6 +1,6 @@
 package com.reactur.backend.mappers;
 
-import com.reactur.backend.dtos.GetUserDto;
+import com.reactur.backend.dtos.users.GetUserDto;
 import com.reactur.backend.entities.User;
 import com.reactur.backend.enums.Role;
 import org.junit.jupiter.api.Test;
