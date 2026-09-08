@@ -7,7 +7,7 @@ import com.reactur.backend.entities.experiment.ExperimentResult;
 import com.reactur.backend.entities.experiment.Metadata;
 import com.reactur.backend.entities.options.Solvent;
 import com.reactur.backend.enums.Role;
-import com.reactur.backend.exeptions.ResourceNotFoundException;
+import com.reactur.backend.exceptions.ResourceNotFoundException;
 import com.reactur.backend.repositories.ExperimentRepository;
 import com.reactur.backend.repositories.ReactantRepository;
 import com.reactur.backend.repositories.UserRepository;

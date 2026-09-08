@@ -2,7 +2,7 @@ package com.reactur.backend.services;
 
 import com.reactur.backend.dtos.GetUserDto;
 import com.reactur.backend.dtos.RoleDto;
-import com.reactur.backend.exeptions.ResourceNotFoundException;
+import com.reactur.backend.exceptions.ResourceNotFoundException;
 
 import java.util.List;
 

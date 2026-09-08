@@ -10,7 +10,7 @@ import com.reactur.backend.entities.ReactantStructure;
 import com.reactur.backend.entities.User;
 import com.reactur.backend.entities.options.ChemicalType;
 import com.reactur.backend.enums.StructureFlag;
-import com.reactur.backend.exeptions.ResourceNotFoundException;
+import com.reactur.backend.exceptions.ResourceNotFoundException;
 import com.reactur.backend.mappers.ReactantMapper;
 import com.reactur.backend.repositories.ReactantRepository;
 import com.reactur.backend.repositories.ReactantStructureRepository;

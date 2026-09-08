@@ -1,4 +1,4 @@
-package com.reactur.backend.exeptions;
+package com.reactur.backend.exceptions;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolationException;

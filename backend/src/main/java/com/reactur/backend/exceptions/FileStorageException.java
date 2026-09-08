@@ -1,4 +1,4 @@
-package com.reactur.backend.exeptions;
+package com.reactur.backend.exceptions;
 
 /**
  * Thrown when an error occurs during file storage, retrieval, or processing operations.

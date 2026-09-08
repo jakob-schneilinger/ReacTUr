@@ -2,7 +2,7 @@ package com.reactur.backend.endpoints;
 
 import com.reactur.backend.dtos.reactants.StructureDto;
 import com.reactur.backend.enums.StructureFlag;
-import com.reactur.backend.exeptions.ResourceNotFoundException;
+import com.reactur.backend.exceptions.ResourceNotFoundException;
 import com.reactur.backend.repositories.UserRepository;
 import com.reactur.backend.security.SecurityConfig;
 import com.reactur.backend.services.StructureService;

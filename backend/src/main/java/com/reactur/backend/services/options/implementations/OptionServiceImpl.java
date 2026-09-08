@@ -1,9 +1,9 @@
-package com.reactur.backend.services.options.impementations;
+package com.reactur.backend.services.options.implementations;
 
 import com.reactur.backend.dtos.options.OptionDto;
 import com.reactur.backend.entities.options.BaseOption;
-import com.reactur.backend.exeptions.ResourceConflictException;
-import com.reactur.backend.exeptions.ResourceNotFoundException;
+import com.reactur.backend.exceptions.ResourceConflictException;
+import com.reactur.backend.exceptions.ResourceNotFoundException;
 import com.reactur.backend.mappers.BaseMapper;
 import com.reactur.backend.repositories.options.OptionRepository;
 import com.reactur.backend.services.options.OptionService;

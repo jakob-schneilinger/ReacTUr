@@ -4,8 +4,8 @@ import com.reactur.backend.dtos.reactants.ReactantDetailDto;
 import com.reactur.backend.dtos.reactants.ReactantDto;
 import com.reactur.backend.dtos.reactants.CreateReactantDto;
 import com.reactur.backend.dtos.reactants.UpdateReactantDto;
-import com.reactur.backend.exeptions.ResourceConflictException;
-import com.reactur.backend.exeptions.ResourceNotFoundException;
+import com.reactur.backend.exceptions.ResourceConflictException;
+import com.reactur.backend.exceptions.ResourceNotFoundException;
 
 import java.util.List;
 import java.util.UUID;

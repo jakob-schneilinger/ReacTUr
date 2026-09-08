@@ -1,8 +1,8 @@
 package com.reactur.backend.services.options;
 
 import com.reactur.backend.dtos.options.OptionDto;
-import com.reactur.backend.exeptions.ResourceConflictException;
-import com.reactur.backend.exeptions.ResourceNotFoundException;
+import com.reactur.backend.exceptions.ResourceConflictException;
+import com.reactur.backend.exceptions.ResourceNotFoundException;
 
 import java.util.List;
 import java.util.UUID;

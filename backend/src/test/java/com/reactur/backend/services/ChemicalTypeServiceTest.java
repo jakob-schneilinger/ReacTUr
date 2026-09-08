@@ -2,11 +2,11 @@ package com.reactur.backend.services;
 
 import com.reactur.backend.dtos.options.ChemicalTypeDto;
 import com.reactur.backend.entities.options.ChemicalType;
-import com.reactur.backend.exeptions.ResourceConflictException;
-import com.reactur.backend.exeptions.ResourceNotFoundException;
+import com.reactur.backend.exceptions.ResourceConflictException;
+import com.reactur.backend.exceptions.ResourceNotFoundException;
 import com.reactur.backend.mappers.options.ChemicalTypeMapper;
 import com.reactur.backend.repositories.options.ChemicalTypeRepository;
-import com.reactur.backend.services.options.impementations.ChemicalTypeServiceImpl;
+import com.reactur.backend.services.options.implementations.ChemicalTypeServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

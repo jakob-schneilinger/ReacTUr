@@ -2,9 +2,9 @@ package com.reactur.backend.endpoints;
 
 import com.reactur.backend.dtos.experiments.ExperimentAttachmentDetailsDto;
 import com.reactur.backend.enums.Role;
-import com.reactur.backend.exeptions.GlobalExceptionHandler;
-import com.reactur.backend.exeptions.ResourceConflictException;
-import com.reactur.backend.exeptions.ResourceNotFoundException;
+import com.reactur.backend.exceptions.GlobalExceptionHandler;
+import com.reactur.backend.exceptions.ResourceConflictException;
+import com.reactur.backend.exceptions.ResourceNotFoundException;
 import com.reactur.backend.repositories.UserRepository;
 import com.reactur.backend.security.RoleExtractor;
 import com.reactur.backend.security.SecurityConfig;

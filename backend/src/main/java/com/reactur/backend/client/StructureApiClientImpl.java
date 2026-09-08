@@ -1,7 +1,7 @@
 package com.reactur.backend.client;
 
 import com.reactur.backend.enums.JobStatus;
-import com.reactur.backend.exeptions.ExternalApiException;
+import com.reactur.backend.exceptions.ExternalApiException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;

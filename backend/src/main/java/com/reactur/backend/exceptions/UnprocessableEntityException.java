@@ -1,4 +1,4 @@
-package com.reactur.backend.exeptions;
+package com.reactur.backend.exceptions;
 
 /**
  * Thrown when a request payload is syntactically correct but semantically invalid

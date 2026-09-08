@@ -1,4 +1,4 @@
-package com.reactur.backend.exeptions;
+package com.reactur.backend.exceptions;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;

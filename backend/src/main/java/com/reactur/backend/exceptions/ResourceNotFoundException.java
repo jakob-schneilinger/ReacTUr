@@ -1,4 +1,4 @@
-package com.reactur.backend.exeptions;
+package com.reactur.backend.exceptions;
 
 /**
  * Thrown when a requested database entity or API resource cannot be found.

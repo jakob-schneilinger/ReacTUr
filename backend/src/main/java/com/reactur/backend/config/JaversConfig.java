@@ -1,4 +1,4 @@
-package com.reactur.backend.security;
+package com.reactur.backend.config;
 
 import org.javers.spring.auditable.AuthorProvider;
 import org.springframework.context.annotation.Bean;

@@ -1,7 +1,7 @@
 package com.reactur.backend.endpoints;
 
 import com.reactur.backend.endpoints.options.ChemicalTypeEndpoint;
-import com.reactur.backend.exeptions.GlobalExceptionHandler;
+import com.reactur.backend.exceptions.GlobalExceptionHandler;
 import com.reactur.backend.repositories.UserRepository;
 import com.reactur.backend.security.SecurityConfig;
 import com.reactur.backend.services.options.ChemicalTypeService;

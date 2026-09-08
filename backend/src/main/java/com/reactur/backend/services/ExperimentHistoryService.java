@@ -2,7 +2,7 @@ package com.reactur.backend.services;
 
 import com.reactur.backend.dtos.experiments.ExperimentHistoryDto;
 import com.reactur.backend.enums.Role;
-import com.reactur.backend.exeptions.ResourceNotFoundException;
+import com.reactur.backend.exceptions.ResourceNotFoundException;
 import org.springframework.security.access.AccessDeniedException;
 
 import java.util.List;

@@ -1,4 +1,4 @@
-package com.reactur.backend.exeptions;
+package com.reactur.backend.exceptions;
 
 /**
  * Thrown when an error occurs while communicating with an external third-party service.

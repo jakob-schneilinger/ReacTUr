@@ -6,7 +6,7 @@ import com.reactur.backend.entities.User;
 import com.reactur.backend.entities.experiment.Experiment;
 import com.reactur.backend.entities.experiment.ExperimentFolder;
 import com.reactur.backend.entities.experiment.Metadata;
-import com.reactur.backend.exeptions.ResourceNotFoundException;
+import com.reactur.backend.exceptions.ResourceNotFoundException;
 import com.reactur.backend.mappers.FolderMapper;
 import com.reactur.backend.repositories.ExperimentFolderRepository;
 import com.reactur.backend.repositories.ExperimentRepository;

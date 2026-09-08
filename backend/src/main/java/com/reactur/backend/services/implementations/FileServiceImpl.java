@@ -1,9 +1,9 @@
 package com.reactur.backend.services.implementations;
 
 import com.reactur.backend.enums.Role;
-import com.reactur.backend.exeptions.FileStorageException;
-import com.reactur.backend.exeptions.ResourceConflictException;
-import com.reactur.backend.exeptions.ResourceNotFoundException;
+import com.reactur.backend.exceptions.FileStorageException;
+import com.reactur.backend.exceptions.ResourceConflictException;
+import com.reactur.backend.exceptions.ResourceNotFoundException;
 import com.reactur.backend.services.FileService;
 import com.reactur.backend.services.authorization.ExperimentAuthorization;
 import org.springframework.core.io.InputStreamResource;
