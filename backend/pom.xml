@@ -175,6 +175,13 @@
             <artifactId>javers-spring-boot-starter-sql</artifactId>
             <version>7.11.4</version>
         </dependency>
+
+        <!-- OpenAPI 3 description + Swagger UI, auto-generated from the actual controller/DTO code at runtime -->
+        <dependency>
+            <groupId>org.springdoc</groupId>
+            <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+            <version>3.1.1</version>
+        </dependency>
     </dependencies>
 
     <build>
@@ -262,8 +269,10 @@
             <!-- OWASP Dependency-Check: scans all dependencies in Backend against known-vulnerability
                  databases (NVD, etc.). It is on purpose NOT bound to any lifecycle phase or execution, so it
                  never runs as part of a normal `./mvnw -o clean test`.
+
                  It is to be run explicitly and manually when needed (internet connection needed):
                      ./mvnw org.owasp:dependency-check-maven:check
+
                  Report is written to target/dependency-check-report.html. -->
             <plugin>
                 <groupId>org.owasp</groupId>

@@ -31,29 +31,32 @@ public class SecurityConfig {
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .headers(headers -> headers
-                        .frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin)
-                        // Baseline CSP for a pure JSON API (no server-rendered HTML views anywhere in this
-                        // backend): default-src 'none' means nothing is allowed to load/execute at all,
-                        // which is exactly appropriate here and needs no tuning as frontend origins change
-                        // later. frame-ancestors 'self' intentionally matches (not tightens beyond) the
-                        // frameOptions setting above, rather than introducing an inconsistent stricter rule.
-                        // Known caveat: this also applies to the H2 console (dev/test profiles only), whose
-                        // own UI relies on inline scripts/styles this policy will block - acceptable since
-                        // it's internal dev tooling, not customer-facing, and not used in production.
-                        .contentSecurityPolicy(csp -> csp.policyDirectives(
-                                "default-src 'none'; frame-ancestors 'self'")))
+                  .frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin)
+                  // Baseline CSP for a pure JSON API (no server-rendered HTML views anywhere in this
+                  // backend): default-src 'none' means nothing is allowed to load/execute at all,
+                  // which is exactly appropriate here and needs no tuning as frontend origins change
+                  // later. frame-ancestors 'self' intentionally matches (not tightens beyond) the
+                  // frameOptions setting above, rather than introducing an inconsistent stricter rule.
+                  // Known caveat: this also applies to the H2 console (dev/test profiles only), whose
+                  // own UI relies on inline scripts/styles this policy will block - acceptable since
+                  // it's internal dev tooling, not customer-facing, and not used in production.
+                  .contentSecurityPolicy(csp -> csp.policyDirectives(
+                    "default-src 'none'; frame-ancestors 'self'")))
                 .authorizeHttpRequests(auth -> auth
-                        // TODO: Remove these Claude clarifying comments, or keep them simplified
-                        //  as documentation
-                        // Self-lookup must stay available to ANY authenticated principal (including
-                        // not-yet-approved UNAUTHORIZED users) - this is how the frontend determines a
-                        // user's own role, including detecting "pending approval" (see the Angular
-                        // AuthService.getLoggedInUser(), which calls this to build the current user).
-                        .requestMatchers(HttpMethod.GET, "/api/users/*/role").authenticated()
-                        // Everyone else must have been approved: UNAUTHORIZED users (freshly synced,
-                        // pending approval) are blocked from reading or writing anything else until a
-                        // Supervisor/Admin assigns them a real role.
-                        .anyRequest().hasAnyRole("USER", "ADMIN", "SUPERVISOR")
+
+                  // In order to be able to see the API Spec, and even test sending requests, these endpoints
+                  // remain open (TODO-Deploy: Decide if to still keep them open after Development for actual Deployment)
+                  .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
+
+                  // Self-lookup stays available to ANY authenticated principal, including
+                  // not-yet-approved UNAUTHORIZED users: this way, the frontend determines a
+                  // user's own role, including detecting "pending approval".
+                  .requestMatchers(HttpMethod.GET, "/api/users/*/role").authenticated()
+
+                  // ...everyone else must have been approved: UNAUTHORIZED users (freshly synced,
+                  // pending approval) are blocked from reading or writing anything else until a
+                  // Supervisor/Admin assigns them a real role.
+                  .anyRequest().hasAnyRole("USER", "ADMIN", "SUPERVISOR")
                 )
                 .oauth2ResourceServer(oauth2 -> oauth2.jwt(jwt ->
                         jwt.jwtAuthenticationConverter(customJwtAuthenticationConverter)
