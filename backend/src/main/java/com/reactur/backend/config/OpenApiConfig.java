@@ -24,7 +24,7 @@ import org.springframework.context.annotation.Configuration;
     title = "ReacTUr Backend API",
     description = "Backend REST API for the ReacTUr database " +
       "(reactants, structures, experiments, and their metadata/attachments)",
-    version = "v1"
+    version = "v1"  // TODO-Deploy: Decide mechanism (instead of hard-coding) to track version number
   ),
   security = @SecurityRequirement(name = "bearerAuth")
 )

@@ -46,7 +46,7 @@ public class SecurityConfig {
 
                   // In order to be able to see the API Spec, and even test sending requests, these endpoints
                   // remain open (TODO-Deploy: Decide if to still keep them open after Development for actual Deployment)
-                  .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
+                  .requestMatchers("/v3/api-docs/**", "/v3/api-docs.yaml", "/swagger-ui/**", "/swagger-ui.html").permitAll()
 
                   // Self-lookup stays available to ANY authenticated principal, including
                   // not-yet-approved UNAUTHORIZED users: this way, the frontend determines a
@@ -56,8 +56,7 @@ public class SecurityConfig {
                   // ...everyone else must have been approved: UNAUTHORIZED users (freshly synced,
                   // pending approval) are blocked from reading or writing anything else until a
                   // Supervisor/Admin assigns them a real role.
-                  .anyRequest().hasAnyRole("USER", "ADMIN", "SUPERVISOR")
-                )
+                  .anyRequest().hasAnyRole("USER", "ADMIN", "SUPERVISOR"))
                 .oauth2ResourceServer(oauth2 -> oauth2.jwt(jwt ->
                         jwt.jwtAuthenticationConverter(customJwtAuthenticationConverter)
                 ));
