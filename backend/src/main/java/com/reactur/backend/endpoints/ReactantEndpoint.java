@@ -37,7 +37,7 @@ public class ReactantEndpoint {
     @PostMapping
     @PreAuthorize("hasAnyRole('ADMIN','SUPERVISOR')")
     public ResponseEntity<ReactantDetailDto> createReactant(@Valid @RequestBody CreateReactantDto saveReactant, @AuthenticationPrincipal Jwt jwt) {
-        log.info("User {} is attempting to create a new Reactant: {}", jwt.getSubject(), saveReactant.shortName());
+        log.info("POST /api/reactant called by user {}. ShortName: {}", jwt.getSubject(), saveReactant.shortName());
         ReactantDetailDto created = reactantService.createReactant(saveReactant, jwt.getSubject());
         return ResponseEntity.status(HttpStatus.CREATED).body(created);
     }
@@ -48,13 +48,14 @@ public class ReactantEndpoint {
             @PathVariable UUID uuid,
             @Valid @RequestBody UpdateReactantDto saveReactant,
             @AuthenticationPrincipal Jwt jwt) {
-        log.info("User {} is attempting to update Reactant with UUID: {}", jwt.getSubject(), uuid);
+        log.info("PATCH /api/reactant/{} called by user {}", uuid, jwt.getSubject());
         ReactantDetailDto updated = reactantService.updateReactant(uuid, saveReactant);
         return ResponseEntity.ok(updated);
     }
 
     @GetMapping("/{uuid}")
-    public ResponseEntity<ReactantDetailDto> getReactantDetail(@PathVariable UUID uuid) {
+    public ResponseEntity<ReactantDetailDto> getReactantDetail(@PathVariable UUID uuid, @AuthenticationPrincipal Jwt jwt) {
+        log.info("GET /api/reactant/{} called by user {}", uuid, jwt.getSubject());
         ReactantDetailDto detail = reactantService.getReactantDetail(uuid);
         return ResponseEntity.ok(detail);
     }
@@ -63,14 +64,16 @@ public class ReactantEndpoint {
     //  as Reactants Amount grows in time, to avoid FrontEnd / Browser overload
 
     @GetMapping
-    public ResponseEntity<List<ReactantDto>> getAllReactants() {
+    public ResponseEntity<List<ReactantDto>> getAllReactants(@AuthenticationPrincipal Jwt jwt) {
+        log.info("GET /api/reactant called by user {}", jwt.getSubject());
         List<ReactantDto> reactants = reactantService.getAllReactants();
         return ResponseEntity.ok(reactants);
     }
 
     @GetMapping("/archived")
     @PreAuthorize("hasAnyRole('ADMIN','SUPERVISOR')")
-    public ResponseEntity<List<ReactantDto>> getArchivedReactants() {
+    public ResponseEntity<List<ReactantDto>> getArchivedReactants(@AuthenticationPrincipal Jwt jwt) {
+        log.info("GET /api/reactant/archived called by user {}", jwt.getSubject());
         List<ReactantDto> archived = reactantService.getArchivedReactants();
         return ResponseEntity.ok(archived);
     }
@@ -78,7 +81,7 @@ public class ReactantEndpoint {
     @DeleteMapping("/{uuid}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> archiveReactant(@PathVariable UUID uuid, @AuthenticationPrincipal Jwt jwt) {
-        log.info("User {} is attempting to archive Reactant with UUID: {}", jwt.getSubject(), uuid);
+        log.info("DELETE /api/reactant/{} called by user {}", uuid, jwt.getSubject());
         reactantService.archiveReactant(uuid);
         return ResponseEntity.noContent().build();
     }
@@ -88,7 +91,7 @@ public class ReactantEndpoint {
     @PutMapping("/{uuid}/restore")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ReactantDto> restoreReactant(@PathVariable UUID uuid, @AuthenticationPrincipal Jwt jwt) {
-        log.info("User {} is attempting to restore Reactant with UUID: {}", jwt.getSubject(), uuid);
+        log.info("PUT /api/reactant/{}/restore called by user {}", uuid, jwt.getSubject());
         ReactantDto restored = reactantService.restoreReactant(uuid);
         return ResponseEntity.ok(restored);
     }

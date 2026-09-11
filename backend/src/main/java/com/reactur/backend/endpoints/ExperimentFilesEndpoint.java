@@ -43,6 +43,8 @@ public class ExperimentFilesEndpoint {
             Authentication authentication,
             @AuthenticationPrincipal Jwt jwt) {
 
+        log.info("POST /api/file/{} called by user {}. FileName: {}", experimentId, jwt.getSubject(), file.getOriginalFilename());
+
         Role userRole = roleExtractor.extractRole(authentication);
         ExperimentAttachmentDetailsDto stored = fileService.storeFile(experimentId, file, jwt.getSubject(), userRole);
         return ResponseEntity.status(HttpStatus.CREATED).body(stored);
@@ -53,6 +55,8 @@ public class ExperimentFilesEndpoint {
             @PathVariable UUID fileId,
             Authentication authentication,
             @AuthenticationPrincipal Jwt jwt) {
+
+        log.info("GET /api/file/{} called by user {}", fileId, jwt.getSubject());
 
         Role userRole = roleExtractor.extractRole(authentication);
         ExperimentAttachmentDetailsDto details = fileService.getAttachmentDetail(fileId, jwt.getSubject(), userRole);
@@ -74,6 +78,8 @@ public class ExperimentFilesEndpoint {
             Authentication authentication,
             @AuthenticationPrincipal Jwt jwt) {
 
+        log.info("GET /api/file/{}/details called by user {}", fileId, jwt.getSubject());
+
         Role userRole = roleExtractor.extractRole(authentication);
         return ResponseEntity.ok(fileService.getAttachmentDetail(fileId, jwt.getSubject(), userRole));
     }
@@ -83,6 +89,8 @@ public class ExperimentFilesEndpoint {
             @PathVariable UUID fileId,
             Authentication authentication,
             @AuthenticationPrincipal Jwt jwt) {
+
+        log.info("DELETE /api/file/{} called by user {}", fileId, jwt.getSubject());
 
         Role userRole = roleExtractor.extractRole(authentication);
         fileService.archiveFile(fileId, jwt.getSubject(), userRole);
