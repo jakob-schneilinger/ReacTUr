@@ -165,7 +165,6 @@ public class FileServiceImpl implements FileService {
     @Override
     @Transactional(readOnly = true)
     public Resource loadFileAsResource(UUID fileId, String requestingUserId, Role requestingUserRole) {
-        log.trace("Starting download for file ID: {}", fileId);
         ExperimentAttachment attachment = attachmentRepository.findById(fileId)
                 .orElseThrow(() -> new ResourceNotFoundException("File ID " + fileId + " not found"));
 
@@ -197,14 +196,12 @@ public class FileServiceImpl implements FileService {
     @Override
     @Transactional(readOnly = true)
     public List<ExperimentAttachmentDto> getAttachmentsOfExperiment(UUID experimentId) {
-        log.trace("Fetching all active attachments for experiment ID: {}", experimentId);
-
         if (!experimentRepository.existsById(experimentId)) {
             throw new ResourceNotFoundException("Experiment with ID " + experimentId + " not found");
         }
 
         List<ExperimentAttachment> attachments = attachmentRepository.findByExperimentIdAndArchivedAtIsNull(experimentId);
-        log.trace("Found {} active attachments for experiment ID: {}", attachments.size(), experimentId);
+        log.debug("Found {} active attachments for experiment ID: {}", attachments.size(), experimentId);
 
         return attachments.stream()
                 .map(attachmentMapper::toDto)

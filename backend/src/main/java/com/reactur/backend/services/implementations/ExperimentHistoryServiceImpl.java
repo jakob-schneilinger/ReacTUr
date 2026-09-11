@@ -75,8 +75,6 @@ public class ExperimentHistoryServiceImpl implements ExperimentHistoryService {
 
     @Override
     public List<ExperimentHistoryDto> getExperimentHistory(UUID experimentUuid, String requestingUserId, Role requestingUserRole) {
-        log.trace("Fetching history for experiment ID: {}", experimentUuid);
-
         Experiment experiment = experimentRepository.findById(experimentUuid)
                 .orElseThrow(() -> new ResourceNotFoundException("Experiment not found"));
 

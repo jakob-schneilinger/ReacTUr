@@ -55,8 +55,6 @@ public class ExperimentServiceImpl implements ExperimentService {
   @Override
   @Transactional
   public GetExperimentDto createExperiment(SaveExperimentDto experimentDto, String requestingUserId, Role requestingUserRole) {
-    log.trace("Attempting to create new experiment with DOI: {} for user ID: {}", experimentDto.dois(), requestingUserId);
-
     // First, semantic Validation
 
     // Who physically clicks 'Save': (Extracted from Keycloak Token)
@@ -127,8 +125,6 @@ public class ExperimentServiceImpl implements ExperimentService {
 
   @Override
   public GetExperimentDto getExperiment(UUID experimentId, String requestingUserId, Role requestingUserRole) {
-    log.trace("Fetching experiment with ID: {}", experimentId);
-
     Experiment experiment = experimentRepository.findById(experimentId)
       .orElseThrow(() -> new ResourceNotFoundException(
         "Experiment with ID " + experimentId + " not found"
@@ -143,8 +139,6 @@ public class ExperimentServiceImpl implements ExperimentService {
   @Override
   @Transactional
   public void archiveExperiment(UUID experimentId, String requestingUserId, Role requestingUserRole) {
-    log.trace("Attempting to archive experiment with ID: {}", experimentId);
-
     // 1. Fetch (Validation)
     Experiment experiment = experimentRepository.findById(experimentId)
       .orElseThrow(() -> new ResourceNotFoundException("Experiment with ID " + experimentId + " not found"));
@@ -170,8 +164,6 @@ public class ExperimentServiceImpl implements ExperimentService {
   @Override
   @Transactional
   public GetExperimentDto restoreExperiment(UUID experimentId, String requestingUserId, Role requestingUserRole) {
-    log.trace("Attempting to restore experiment with ID: {}", experimentId);
-
     // 1. Fetch
     Experiment experiment = experimentRepository.findById(experimentId)
       .orElseThrow(() -> new ResourceNotFoundException("Experiment with ID " + experimentId + " not found"));
@@ -197,8 +189,6 @@ public class ExperimentServiceImpl implements ExperimentService {
 
   @Override
   public GetExperimentDto[] getArchivedExperiments(String requestingUserId, Role requestingUserRole) {
-    log.trace("Fetching archived experiments for user: {} with role: {}", requestingUserId, requestingUserRole);
-
     List<Experiment> archivedExperiments;
 
     if (experimentAuthorization.isPrivileged(requestingUserRole)) {
@@ -225,8 +215,6 @@ public class ExperimentServiceImpl implements ExperimentService {
     String requestingUserId,
     Role requestingUserRole
   ) {
-    log.trace("Attempting to update experiment with ID: {}", experimentId);
-
     // 1. Fetch Existing (Validation)
     Experiment existingExperiment = experimentRepository.findById(experimentId)
       .orElseThrow(() -> new ResourceNotFoundException("Experiment with ID " + experimentId + " not found"));

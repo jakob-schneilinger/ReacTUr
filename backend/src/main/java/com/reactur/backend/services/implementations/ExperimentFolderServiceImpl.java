@@ -36,8 +36,6 @@ public class ExperimentFolderServiceImpl implements ExperimentFolderService {
   @Override
   @Transactional
   public GetFolderDto createFolder(SaveFolderDto folderDto, String requestingUserId) {
-    log.trace("Creating new folder for user: {}", requestingUserId);
-
     User owner = userRepository.findById(requestingUserId)
       .orElseThrow(() -> new IllegalStateException("Authenticated user lacks internal profile."));
 
@@ -52,8 +50,6 @@ public class ExperimentFolderServiceImpl implements ExperimentFolderService {
 
   @Override
   public List<GetFolderDto> getMyFolders(String requestingUserId) {
-    log.trace("Fetching folders for user: {}", requestingUserId);
-
     return folderRepository.findAllByOwner_Id(requestingUserId)
       .stream()
       .map(folderMapper::folderToGetFolderDto)
@@ -63,8 +59,6 @@ public class ExperimentFolderServiceImpl implements ExperimentFolderService {
   @Override
   @Transactional
   public GetFolderDto addExperimentToFolder(UUID folderId, UUID experimentId, String requestingUserId) {
-    log.trace("Adding experiment {} to folder {}", experimentId, folderId);
-
     ExperimentFolder folder = getFolderAndValidateOwnership(folderId, requestingUserId);
 
     // FIXED (race condition inventory, see Software_todo.md's Race condition inventory item): this used to be a
@@ -115,8 +109,6 @@ public class ExperimentFolderServiceImpl implements ExperimentFolderService {
   @Override
   @Transactional
   public GetFolderDto removeExperimentFromFolder(UUID folderId, UUID experimentId, String requestingUserId) {
-    log.trace("Removing experiment {} from folder {}", experimentId, folderId);
-
     ExperimentFolder folder = getFolderAndValidateOwnership(folderId, requestingUserId);
 
     // I omit to check if the experiment is owned by the Person: If it's in its personal folder, is it to be
@@ -149,8 +141,6 @@ public class ExperimentFolderServiceImpl implements ExperimentFolderService {
   @Override
   @Transactional
   public void deleteFolder(UUID folderId, String requestingUserId) {
-    log.trace("Deleting folder {}", folderId);
-
     // FIXED (race condition inventory, see Software_todo.md's Race condition inventory item): ExperimentFolder now
     // carries a @Version field. Hibernate includes the version in the DELETE statement's WHERE clause too, so if
     // addExperimentToFolder or removeExperimentFromFolder already modified this exact folder (bumping its version)

@@ -70,8 +70,8 @@ public class ExperimentEndpoint {
       Authentication authentication,
       @AuthenticationPrincipal Jwt jwt
     ) {
-        log.info("POST /api/experiment called by User ID: {}. ReactantA: {}, ReactantB: {}",
-          jwt.getSubject(), experimentDto.reactantA(), experimentDto.reactantB());
+        log.info("POST /api/experiment called by User ID: {}. ReactantA: {}, ReactantB: {}, DOIs: {}",
+          jwt.getSubject(), experimentDto.reactantA(), experimentDto.reactantB(), experimentDto.dois());
 
         Role userRole = extractUserRole(authentication);
         GetExperimentDto createdExperiment = experimentService.createExperiment(experimentDto, jwt.getSubject(), userRole);
