@@ -138,7 +138,7 @@ The build artifacts will be stored in the `dist/` directory.
 ## Future Outlook / Missing Features
 
 - **Experiment Folder Structure**: Create experiment folder management system in frontend. Backend connection is already available.
-- **Substructure Search**: Add substructure search functionality to the reactant list and to the experiment creation page.
+- **Substructure Search on Reactant Page**: Add substructure search functionality to the reactant list and to the experiment creation page.
 - **Additional Short Names Search**: Add search for additional short names of reactants.
 - **Frontend Testing**: Add unit and integration tests for the frontend components.
 - **Enhanced Metadata Extraction**: Expand the parser to support more proprietary laboratory file formats.
