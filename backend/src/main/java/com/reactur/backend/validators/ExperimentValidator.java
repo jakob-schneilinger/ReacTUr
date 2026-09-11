@@ -17,6 +17,7 @@ import com.reactur.backend.repositories.options.InstrumentRepository;
 import com.reactur.backend.repositories.options.ModalityRepository;
 import com.reactur.backend.repositories.options.SolventRepository;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -31,6 +32,7 @@ import java.util.List;
  * to validate its existence, returning them lets the service reuse them directly instead of
  * issuing the same {@code findById} queries a second time.
  */
+@Slf4j
 @Component
 @AllArgsConstructor
 public class ExperimentValidator {
@@ -57,14 +59,14 @@ public class ExperimentValidator {
     }
 
     public ValidatedReferences validateForCreate(SaveExperimentDto experimentDto) {
-        return validate(experimentDto, "Reactants A and B cannot be the same.");
+        return validate(experimentDto, "create", "Reactants A and B cannot be the same.");
     }
 
     public ValidatedReferences validateForUpdate(SaveExperimentDto experimentDto) {
-        return validate(experimentDto, "Reactant A and B cannot be the same in an update.");
+        return validate(experimentDto, "update", "Reactant A and B cannot be the same in an update.");
     }
 
-    private ValidatedReferences validate(SaveExperimentDto experimentDto, String sameReactantMessage) {
+    private ValidatedReferences validate(SaveExperimentDto experimentDto, String operation, String sameReactantMessage) {
         User scientist = userRepository.findById(experimentDto.metadata().scientist())
                 .orElseThrow(() -> new UnprocessableEntityException(
                         "Scientist with ID " + experimentDto.metadata().scientist() + " not found."
@@ -83,6 +85,8 @@ public class ExperimentValidator {
                 .orElseThrow(() -> new UnprocessableEntityException("Reactant B does not exist."));
 
         if (reactantA.getId().equals(reactantB.getId())) {
+            log.warn("Rejected experiment {} attempt: reactant A and B are the same reactant (ID: {}).",
+                    operation, reactantA.getId());
             throw new ValidationException(sameReactantMessage);
         }
 

@@ -41,7 +41,7 @@ public class CustomJwtAuthenticationConverter implements Converter<Jwt, Abstract
             newUser.setFirstName(jwt.getClaimAsString("given_name"));
             newUser.setLastName(jwt.getClaimAsString("family_name"));
             newUser.setRole(Role.UNAUTHORIZED);
-            log.info("New user synchronized from Keycloak: {}", newUser.getEmail());
+            log.info("New user synchronized from Keycloak: {}", keycloakId);
             return userRepository.save(newUser);
         });
 

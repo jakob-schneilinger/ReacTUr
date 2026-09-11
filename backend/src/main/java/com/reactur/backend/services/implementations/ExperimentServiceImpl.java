@@ -155,10 +155,6 @@ public class ExperimentServiceImpl implements ExperimentService {
     // 3. Act (Execution) - Only update if not already archived (Idempotent)
     if (experiment.getArchivedAt() == null) {
       experiment.setArchivedAt(Instant.now());
-      // Experiment now carries a @Version field (see the Race condition inventory item in Software_todo.md). This
-      // branch already guards against re-archiving, but two concurrent archive calls could both pass that check
-      // before either commits; since both want the identical outcome, treat a lock conflict as "someone already
-      // archived it" rather than surfacing an error.
       try {
         experimentRepository.save(experiment);
       } catch (ObjectOptimisticLockingFailureException e) {
@@ -310,7 +306,7 @@ public class ExperimentServiceImpl implements ExperimentService {
     String requestingUserId,
     Role requestingUserRole
   ) {
-    log.trace("Executing dynamic search for experiments by user: {}", requestingUserId);
+    log.debug("Building experiment search with criteria: {}", searchParams);
 
     // Dynamic SQL WHERE clause
     Specification<Experiment> spec = buildSearchSpecification(searchParams);
