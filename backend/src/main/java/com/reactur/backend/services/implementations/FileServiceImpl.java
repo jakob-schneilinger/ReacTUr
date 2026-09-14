@@ -141,8 +141,6 @@ public class FileServiceImpl implements FileService {
         try {
             saved = attachmentRepository.save(attachment);
         } catch (Exception e) {
-            log.error("Failed to save attachment metadata for file '{}' after it was already uploaded to S3. Attempting to delete orphaned object '{}' from bucket '{}'.",
-                    file.getOriginalFilename(), storageReferenceId, bucketName, e);
             try {
                 s3Client.deleteObject(DeleteObjectRequest.builder()
                         .bucket(bucketName)
