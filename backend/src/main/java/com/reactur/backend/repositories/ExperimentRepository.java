@@ -31,8 +31,10 @@ public interface ExperimentRepository extends JpaRepository<Experiment, UUID>, J
   @Query("SELECT e FROM Experiment e WHERE e.id = :id")
   Optional<Experiment> findByIdForUpdate(@Param("id") java.util.UUID id);
 
-  // Searches for all the experiments of user "userId" where the user is either the scientist associated with the
-  // experiment, or the user that added the experiment to the DB
+  /**
+   * Searches for all the experiments of user "userId" where the user is either the scientist associated with the
+   * experiment, or the user that added the experiment to the DB
+   */
   @Query("SELECT e FROM Experiment e WHERE e.archivedAt IS NOT NULL AND (e.createdBy.id = :userId OR e.metadata.scientist.id = :userId)")
   List<Experiment> findArchivedExperimentsForUser(@Param("userId") String userId);
 }

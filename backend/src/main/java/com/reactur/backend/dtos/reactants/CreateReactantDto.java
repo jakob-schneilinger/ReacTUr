@@ -28,7 +28,6 @@ public record CreateReactantDto(
         @NotNull(message = "Chemical type must not be null.")
         UUID chemicalType,
         // (Semantic - Service Layer): Verify ChemicalType UUID exists in the database
-        // (ReactantValidator#validateForCreate).
 
         @NotBlank(message = "Short name is a required field.")
         @Size(max = 100, message = "Short name must not exceed 100 characters.")
@@ -38,7 +37,6 @@ public record CreateReactantDto(
 
         // (Semantic - Service Layer): Verify no blank/duplicate (case-insensitive) entries, no overlap
         //  with shortName, and no conflict with any existing reactant's shortName/additionalShortNames
-        //  (same check as shortName above, see ReactantValidator#validateForCreate/#validateAdditionalShortNames).
         List<String> additionalShortNames,
         String chemicalName,
 

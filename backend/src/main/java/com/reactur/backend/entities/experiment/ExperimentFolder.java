@@ -55,10 +55,8 @@ public class ExperimentFolder {
   @Builder.Default
   private List<Experiment> experiments = new ArrayList<>();
 
-  // Optimistic locking: see ExperimentFolderServiceImpl (addExperimentToFolder's duplicate-in-folder check,
-  // deleteFolder vs. add/removeExperimentFromFolder) and Software_todo.md's Race condition inventory item.
-  // Protects a folder row from being silently resurrected or double-modified by a stale save() racing against a
-  // concurrent delete or another add/remove call on the same folder.
+  // Optimistic locking prevents a stale save from resurrecting or double-modifying a concurrently
+  // deleted/changed folder.
   @Version
   private Long version;
 }

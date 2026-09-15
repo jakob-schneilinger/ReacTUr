@@ -40,10 +40,9 @@ public class User {
     @Builder.Default
     private Role role = Role.UNAUTHORIZED;
 
-    // Roles are always read fresh from this column on every request, via
-    // CustomJwtAuthenticationConverter (wired into SecurityConfig as the JWT-to-Authentication
-    // converter) - the Keycloak JWT itself carries no role claim, it's only used to identify which
-    // user's DB row to look up. Intentional design, not an open question.
+    // Roles are always read fresh from this column on every request, never trusted from a token
+    // claim. The Keycloak JWT itself carries no role claim; it's only used to identify which
+    // user's DB row to look up.
 
     @Column(name = "created_at", updatable = false)
     @Builder.Default
@@ -52,10 +51,7 @@ public class User {
     @Column(name = "deactivated_at")
     private Instant deactivatedAt;
 
-    // Optimistic locking: see UserServiceImpl.setRole and Software_todo.md's Race condition inventory item.
-    // Protects against a plain lost-update race if two concurrent setRole calls target the same user with
-    // different roles - the losing save() now fails loudly with ObjectOptimisticLockingFailureException instead
-    // of silently overwriting the other request's role change.
+    // Optimistic locking prevents two concurrent role changes from silently overwriting each other.
     @Version
     private Long version;
 }

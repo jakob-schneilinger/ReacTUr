@@ -51,10 +51,7 @@ public class ReactantStructure {
     @Column(name = "flag")
     private StructureFlag flag;
 
-    // Optimistic locking: see StructureServiceImpl.selectStructure and fetchPendingStructuresFromAPI, and
-    // Software_todo.md's Race condition inventory item. Protects against a stale save() overwriting a row that a
-    // concurrent call already deleted or changed (e.g. uploadStructure's deleteAll, or another selectStructure
-    // call), turning a silent overwrite into a loud ObjectOptimisticLockingFailureException instead.
+    // Optimistic locking prevents a stale save from overwriting a concurrently deleted/changed row.
     @Version
     private Long version;
 }

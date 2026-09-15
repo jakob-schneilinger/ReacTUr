@@ -53,10 +53,9 @@ public class UserServiceImpl implements UserService {
                     "Cannot change this user's role: they are the last remaining ADMIN. Promote another user to ADMIN first.");
         }
 
-        // FIXED (race condition inventory, see Software_todo.md's Race condition inventory item): User now carries
-        // a @Version field, so if a concurrent setRole call on this same user commits first, this save() fails
-        // loudly with ObjectOptimisticLockingFailureException instead of silently overwriting it - independent of
-        // the last-admin check above, which is a separate (still-open, Family 2) issue.
+        // If someone else changes this same user's role first, this save fails loudly instead of silently
+        // overwriting it. That's a different (and separate) problem from the last-admin check above, which
+        // has its own still-open gap.
         user.setRole(roleDto.role());
         userRepository.save(user);
         log.info("Successfully updated role for user ID: {} to {}", id, roleDto.role());
@@ -78,9 +77,8 @@ public class UserServiceImpl implements UserService {
 
         if (user.getDeactivatedAt() == null) {
             user.setDeactivatedAt(Instant.now());
-            // User now carries a @Version field (see the Race condition inventory item in Software_todo.md). A
-            // harmless double-submit of this exact archive request would otherwise fail on a version conflict even
-            // though both calls wanted the same outcome - treat that as "someone already archived it", not an error.
+            // Two archive requests at the same time would normally conflict even though they both want the
+            // same outcome. Treat that as "someone already archived it" instead of an error.
             try {
                 userRepository.save(user);
                 log.info("Successfully archived user ID: {}", id);
@@ -100,7 +98,7 @@ public class UserServiceImpl implements UserService {
 
         if (user.getDeactivatedAt() != null) {
             user.setDeactivatedAt(null);
-            // Same benign-double-submit reasoning as archiveUser above.
+            // Same idea as archiveUser above.
             try {
                 userRepository.save(user);
                 log.info("Successfully restored user ID: {}", id);
@@ -114,16 +112,10 @@ public class UserServiceImpl implements UserService {
 
     // --- Private Helper Methods ---
 
-    // TODO-CLAUDE (race condition inventory, Family 2 - NEW finding, serious enough to flag on its own, see
-    // docs/Software_todo.md "Race condition inventory" under the ReactantRepository.hasNameConflict item): this guard
-    // is a table-wide aggregate query (countByRole), not a lookup of one specific known row - a different Family 2
-    // shape than the name/casNumber/inChiKey uniqueness checks (this is a COUNT invariant, not a UNIQUENESS
-    // invariant, so a unique index wouldn't help even once migration tooling exists). With exactly 2 admins, two
-    // concurrent setRole calls each demoting the OTHER admin both observe count == 2 (since the check is `<= 1`, not
-    // `< 2`), both pass, and both proceed - leaving ZERO admins with no in-app recovery path. Not fixable with simple
-    // Java-side row locking (there's no single row representing "the current admin count" to lock); would need either
-    // a locking aggregate read (e.g. SELECT ... FOR UPDATE over all ADMIN rows before counting) or SERIALIZABLE
-    // isolation + retry logic.
+    // TODO known gap, not fixed: this check counts admins across the whole table instead of locking one
+    // specific row. With exactly 2 admins, two people could each demote the OTHER admin at the same
+    // time, both see "2 admins" as they check, and both proceed. That leaves zero admins with no way
+    // to recover in the app.
     /**
      * True if {@code user} currently holds the ADMIN role, the requested {@code newRole} would
      * take it away, and no other ADMIN account exists to fall back on - which would otherwise

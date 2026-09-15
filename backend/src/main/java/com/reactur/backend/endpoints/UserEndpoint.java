@@ -48,10 +48,9 @@ public class UserEndpoint {
         return ResponseEntity.ok().build();
     }
 
-    // Anyone can check their OWN role (this is how the frontend detects "pending approval",
-    // AuthService.getLoggedInUser) so it must keep working even for UNAUTHORIZED users, which is
-    // why this path is also exempted from the role-based gate in SecurityConfig). Checking someone
-    // ELSE's role requires ADMIN.
+    // Anyone can check their own role. The frontend needs this to detect a still-pending account
+    // approval, so it must keep working even for unauthenticated/unapproved callers. Checking
+    // someone else's role requires ADMIN.
     @GetMapping("/{id}/role")
     @PreAuthorize("#id == authentication.name or hasRole('ADMIN')")
     public ResponseEntity<RoleDto> getRole(@PathVariable String id, @AuthenticationPrincipal Jwt jwt) {

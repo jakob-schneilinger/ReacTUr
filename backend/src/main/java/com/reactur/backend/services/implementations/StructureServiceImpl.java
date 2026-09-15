@@ -81,12 +81,9 @@ public class StructureServiceImpl implements StructureService {
             throw new IllegalArgumentException("Uploaded file exceeds the maximum allowed size of " + maxStructureFileSizeBytes + " bytes.");
         }
 
-        // FIXED (race condition inventory, see Software_todo.md's Race condition inventory item): this used to be
-        // a plain findById. Now it takes a pessimistic write lock on the reactant row, held until this method's
-        // transaction commits, so a concurrent uploadStructure/generateStructureFromAPI/selectStructure call for
-        // the SAME reactant blocks here until this one finishes, instead of racing against the findByReactant_Id +
-        // deleteAll below. Safe to hold across this method's critical section: it does local file-content parsing
-        // only (MultipartFile.getBytes(), no network I/O), no S3/HTTP call in between.
+        // Locks the reactant row until this transaction finishes, so another upload/generate/select call
+        // for the same reactant has to wait its turn instead of racing with the delete below. Safe to
+        // hold: this method only reads the file locally, no network calls.
         Reactant reactant = reactantRepository.findByIdForUpdate(reactantId)
                 .orElseThrow(() -> new ResourceNotFoundException("Reactant not found with id: " + reactantId));
 
@@ -124,13 +121,9 @@ public class StructureServiceImpl implements StructureService {
 
         List<ReactantStructure> existing = structureRepository.findByReactant_Id(reactantId);
 
-        // TODO-CLAUDE (race condition inventory, Family 2, see docs/Software_todo.md "Race condition inventory" under the
-        // ReactantRepository.hasNameConflict item): this "no PENDING/READY job already exists for this reactant" check is
-        // a table-wide query, not a lookup of one specific known row - the conflicting row (a PENDING job inserted by a
-        // concurrent call) doesn't exist yet at check time. Two concurrent calls can both observe "no pending job" and
-        // both insert a PENDING row plus trigger duplicate external generation jobs for the same reactant. Not fixable
-        // via Java-side row locking alone; needs a DB constraint or SERIALIZABLE isolation + retry. Already accepted as an
-        // explicitly-not-fixed gap (see docs/Software_todo.md's "Explicitly NOT fixed, on purpose" item).
+        // TODO, known gap, not fixed: two requests for the same reactant at the exact same moment could both
+        // pass this check and each start a duplicate generation job. A real fix needs a database
+        // constraint, not just a check here in code.
         boolean hasPending = existing.stream().anyMatch(s -> s.getFlag() == StructureFlag.PENDING);
         boolean hasReady = existing.stream().anyMatch(s -> s.getFlag() == StructureFlag.READY);
         boolean hasActive = existing.stream().anyMatch(s -> s.getFlag() == StructureFlag.ACTIVE);
@@ -160,10 +153,6 @@ public class StructureServiceImpl implements StructureService {
     @Override
     @Transactional
     public StructureDto selectStructure(UUID structureId) {
-        // FIXED (race condition inventory, see Software_todo.md's Race condition inventory item): ReactantStructure
-        // now carries a @Version field, so if this exact row gets changed concurrently between this read and this
-        // method's own save below, the save fails loudly with ObjectOptimisticLockingFailureException instead of
-        // silently overwriting stale data.
         ReactantStructure selectedStructure = structureRepository.findById(structureId)
                 .orElseThrow(() -> new ResourceNotFoundException("Structure not found with id: " + structureId));
 
@@ -180,13 +169,10 @@ public class StructureServiceImpl implements StructureService {
 
         UUID reactantId = selectedStructure.getReactant().getId();
 
-        // FIXED (race condition inventory, see Software_todo.md's Race condition inventory item): the sibling
-        // ACTIVE/REJECTED reassignment below spans multiple ReactantStructure rows for this reactant, so a @Version
-        // on any single row wouldn't stop two concurrent selectStructure calls (choosing different structures of
-        // the same reactant) from each independently marking their own choice ACTIVE. Taking a pessimistic write
-        // lock on the parent Reactant row here forces the second concurrent call to block until the first commits,
-        // then re-read (via findByReactant_Id below) the now-up-to-date sibling flags before acting. Safe to hold:
-        // the rest of this method is pure local DB reads/writes, no external I/O.
+        // This method changes several structure rows at once (marking one ACTIVE, the rest REJECTED), so
+        // locking just one row wouldn't stop two people from picking different structures for the same
+        // reactant at the same time. Locking the reactant itself makes the second call wait, then it
+        // re-reads the up-to-date flags before acting.
         reactantRepository.findByIdForUpdate(reactantId)
                 .orElseThrow(() -> new ResourceNotFoundException("Reactant not found with id: " + reactantId));
 
@@ -200,6 +186,8 @@ public class StructureServiceImpl implements StructureService {
             }
         }
 
+        // If someone changed this structure's row since it was first read above, this save fails
+        // loudly instead of silently overwriting their change.
         structureRepository.saveAll(allStructures);
 
         log.info("Structure {} selected as ACTIVE for reactant: {}", structureId, reactantId);
@@ -233,14 +221,10 @@ public class StructureServiceImpl implements StructureService {
         for (ReactantStructure pending : pendingStructures) {
             String jobId = pending.getExternalJobId();
 
-            // FIXED (race condition inventory, see Software_todo.md's Race condition inventory item): this `pending`
-            // row is held in memory across the slow checkJobStatus call below, then saved back further down - a wide
-            // staleness window. ReactantStructure now carries @Version, so if a concurrent write (uploadStructure's
-            // deleteAll, or selectStructure) removed or changed this exact row in between, the save() below throws
-            // ObjectOptimisticLockingFailureException instead of silently resurrecting/overwriting stale data. The
-            // surrounding catch(Exception) logs that as a per-job error without crashing the whole poll run, which is
-            // the right behavior for a background poller - deliberately not narrowed to catch that exception
-            // specifically, so it's handled the same as any other per-job failure.
+            // This row is held in memory across the slow checkJobStatus call, then saved back further down.
+            // If someone deletes or changes it in the meantime (e.g. a new upload), the save below throws
+            // instead of silently overwriting their change. The catch below just logs that as a per-job
+            // failure so one bad job doesn't stop the whole poll run.
             try {
                 JobStatusResult result = structureApiClient.checkJobStatus(jobId);
 

@@ -20,14 +20,13 @@ import java.util.UUID;
  */
 public record UpdateReactantDto(
 
-        // (Semantic - Service Layer): If provided (non-null), must not be blank/whitespace-only - rejected
-        //  with a ValidationException in ReactantValidator#validateForUpdate. Deliberately not a Jakarta
-        //  @NotBlank, since that would also reject omitting this field entirely, breaking the PATCH
-        //  null-means-preserve convention (see docs/API_UPDATE_SEMANTICS.md).
+        // (Semantic - Service Layer): If provided (non-null), must not be blank/whitespace-only. Rejected
+        //  with a ValidationException.
+        //  Deliberately not a Jakarta
+        //  @NotBlank, since that would also reject omitting this field entirely, breaking the PATCH.
         String smiles,
 
         // (Semantic - Service Layer): If provided (non-null), verify ChemicalType UUID exists in the database
-        //  (ReactantValidator#validateForUpdate).
         UUID chemicalType,
 
         // (Semantic - Service Layer): If provided (non-null), must not be blank/whitespace-only (same
@@ -38,16 +37,16 @@ public record UpdateReactantDto(
 
         // (Semantic - Service Layer): If provided (non-null), verify no blank/duplicate (case-insensitive)
         //  entries, no overlap with the effective shortName, and no conflict with any other reactant's
-        //  shortName/additionalShortNames (ReactantValidator#validateForUpdate/#validateAdditionalShortNames).
+        //  shortName/additionalShortNames.
         List<String> additionalShortNames,
         String chemicalName,
 
         // (Semantic - Service Layer): If provided (non-null), changed, and non-blank, verify no other
-        //  reactant already uses this CAS number (ReactantValidator#validateForUpdate).
+        //  reactant already uses this CAS number.
         String casNumber,
 
         // (Semantic - Service Layer): If provided (non-null), changed, and non-blank, verify no other
-        //  reactant already uses this InChIKey (ReactantValidator#validateForUpdate).
+        //  reactant already uses this InChIKey.
         String inChiKey,
         String comment,
         List<String> references

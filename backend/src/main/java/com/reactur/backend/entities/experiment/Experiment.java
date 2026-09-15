@@ -42,7 +42,7 @@ public class Experiment {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
-    @ManyToOne(fetch = FetchType.LAZY)  // ToDo: Review LAZY load
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "reactant_a_id", nullable = false)
     private Reactant reactantA;
 
@@ -77,14 +77,8 @@ public class Experiment {
     @JoinColumn(name = "created_by", referencedColumnName = "id", nullable = false)
     private User createdBy;
 
-    // Optimistic locking: see ExperimentServiceImpl.updateExperiment and Software_todo.md's Race condition
-    // inventory item. This entity has no DynamicUpdate, so Hibernate's default full-column UPDATE writes every
-    // mapped field from this managed entity's in-memory snapshot on flush - previously, updateExperiment (which
-    // never touches archivedAt itself) could silently revert a concurrent archiveExperiment/restoreExperiment
-    // commit back to its own stale snapshot value. With Version, that stale save() now fails loudly with
-    // ObjectOptimisticLockingFailureException (mapped to HTTP 409 by GlobalExceptionHandler) instead.
-    // DiffIgnore keeps this technical field out of the Javers audit trail (it would otherwise show a spurious
-    // version-changed entry on every single edit, cluttering ExperimentHistoryServiceImpl's history view).
+    // Optimistic locking prevents concurrent updates from silently overwriting each other.
+    // DiffIgnore keeps this technical field out of the Javers audit trail.
     @Version
     @DiffIgnore
     private Long version;

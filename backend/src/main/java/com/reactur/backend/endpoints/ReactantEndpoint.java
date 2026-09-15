@@ -60,9 +60,6 @@ public class ReactantEndpoint {
         return ResponseEntity.ok(detail);
     }
 
-    // TODO-Future: For future versions, consider adding a BackEnd Reactant substructure search
-    //  as Reactants Amount grows in time, to avoid FrontEnd / Browser overload
-
     @GetMapping
     public ResponseEntity<List<ReactantDto>> getAllReactants(@AuthenticationPrincipal Jwt jwt) {
         log.info("GET /api/reactant called by user {}", jwt.getSubject());
@@ -86,7 +83,7 @@ public class ReactantEndpoint {
         return ResponseEntity.noContent().build();
     }
 
-    // Restoring a reactant is treated as archive-management, which stays ADMIN-only -
+    // Restoring a reactant is treated as archive-management, which stays ADMIN-only.
     // SUPERVISOR may create reactants but not undo an ADMIN's archive decision.
     @PutMapping("/{uuid}/restore")
     @PreAuthorize("hasRole('ADMIN')")

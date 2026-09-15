@@ -69,10 +69,6 @@ public class ReactantServiceImpl implements ReactantService {
     @Override
     @Transactional
     public ReactantDetailDto updateReactant(UUID uuid, UpdateReactantDto patchDto) {
-        // FIXED (race condition inventory, see Software_todo.md's Race condition inventory item): Reactant now
-        // carries a @Version field, so if a concurrent updateReactant call on this same row commits first, this
-        // method's own save() below fails loudly with ObjectOptimisticLockingFailureException instead of silently
-        // discarding the other request's changes to fields this method didn't touch.
         Reactant reactant = reactantRepository.findById(uuid)
                 .orElseThrow(() -> new ResourceNotFoundException("Reactant with ID " + uuid + " not found"));
 
@@ -97,6 +93,8 @@ public class ReactantServiceImpl implements ReactantService {
             reactant.setReferences(new ArrayList<>(patchDto.references()));
         }
 
+        // If someone else updates this same reactant first, this save fails loudly instead of silently
+        // throwing away their changes to fields this method didn't touch.
         Reactant saved = reactantRepository.save(reactant);
         List<StructureDto> structures = structureService.getStructuresByReactant(uuid);
 
@@ -142,11 +140,9 @@ public class ReactantServiceImpl implements ReactantService {
                 .orElseThrow(() -> new ResourceNotFoundException("Reactant with ID " + uuid + " not found"));
 
         reactant.setArchivedAt(Instant.now());
-        // Reactant now carries a @Version field (see the Race condition inventory item in Software_todo.md). This
-        // unconditional set-and-save has no existing-state check to protect it, so two concurrent archiveReactant
-        // calls on the same reactant would otherwise have the second one fail on a version conflict even though
-        // both wanted the exact same outcome (archived). Since that's a harmless double-submit, not a real
-        // conflict, treat a lock failure here as "someone already archived it" rather than surfacing an error.
+        // This method doesn't check whether the reactant is already archived first, so two archive
+        // requests at the same time would normally conflict even though they both want the same outcome.
+        // Treat that as "someone already archived it" instead of an error.
         try {
             reactantRepository.save(reactant);
         } catch (ObjectOptimisticLockingFailureException e) {
@@ -161,9 +157,8 @@ public class ReactantServiceImpl implements ReactantService {
                 .orElseThrow(() -> new ResourceNotFoundException("Reactant with ID " + uuid + " not found"));
 
         reactant.setArchivedAt(null);
-        // Same benign-double-submit reasoning as archiveReactant above: a lock conflict here means someone else
-        // already restored this exact reactant, not a real conflict, so re-read the current state instead of
-        // failing.
+        // Same idea as archiveReactant above: a lock conflict here just means someone else already
+        // restored it, so re-read the current state instead of failing.
         Reactant saved;
         try {
             saved = reactantRepository.save(reactant);

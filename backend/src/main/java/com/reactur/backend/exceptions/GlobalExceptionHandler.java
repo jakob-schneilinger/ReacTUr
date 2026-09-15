@@ -80,10 +80,9 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.CONFLICT).body(ex.getMessage());
     }
 
-    // Thrown by Hibernate (via a @Version field) when a save/delete finds that the row was already changed by a
-    // concurrent transaction since it was read - see the entities' @Version fields and the "Race condition
-    // inventory" item in Software_todo.md. Mapped to 409, same as ResourceConflictException, since it's the same
-    // kind of problem from the client's point of view: retry with fresh data.
+    // Thrown by Hibernate when a save/delete finds that the row was already changed by a concurrent
+    // transaction since it was read. Mapped to 409, same as ResourceConflictException, since it's the
+    // same kind of problem from the client's point of view: retry with fresh data.
     @ExceptionHandler(ObjectOptimisticLockingFailureException.class)
     public ResponseEntity<String> handleObjectOptimisticLockingFailureException(ObjectOptimisticLockingFailureException ex) {
         log.warn("Optimistic locking conflict: {}", ex.getMessage());

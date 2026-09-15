@@ -22,12 +22,12 @@ public record SaveExperimentDto(
   @NotNull(message = "Reactant A is required")
   UUID reactantA,
   // (Semantic - Service Layer): Verify this UUID exists in the Reactant DB table, differs from reactantB,
-  // and has an ACTIVE 3D structure (see ExperimentValidator#validate).
+  // and has an ACTIVE 3D structure.
 
   @NotNull(message = "Reactant B is required")
   UUID reactantB,
   // (Semantic - Service Layer): Verify this UUID exists in the Reactant DB table, differs from reactantA,
-  // and has an ACTIVE 3D structure (see ExperimentValidator#validate).
+  // and has an ACTIVE 3D structure.
 
   @Valid
   @NotNull(message = "Metadata is required")

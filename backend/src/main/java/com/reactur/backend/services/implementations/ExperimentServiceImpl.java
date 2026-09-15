@@ -19,6 +19,7 @@ import com.reactur.backend.repositories.UserRepository;
 import com.reactur.backend.services.ExperimentService;
 import com.reactur.backend.services.FileService;
 import com.reactur.backend.validators.ExperimentValidator;
+import com.reactur.backend.validators.ExperimentValidator.ValidatedReferences;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.Predicate;
@@ -55,8 +56,6 @@ public class ExperimentServiceImpl implements ExperimentService {
   @Override
   @Transactional
   public GetExperimentDto createExperiment(SaveExperimentDto experimentDto, String requestingUserId, Role requestingUserRole) {
-    // First, semantic Validation
-
     // Who physically clicks 'Save': (Extracted from Keycloak Token)
     User creator = userRepository.findById(requestingUserId)
       .orElseThrow(() -> {
@@ -70,7 +69,7 @@ public class ExperimentServiceImpl implements ExperimentService {
     // Who actually performed the experiment, plus every other referenced entity (reactants,
     // solvent, instrument, modality): validated and resolved via ExperimentValidator, which
     // returns them so we don't have to re-fetch them here.
-    ExperimentValidator.ValidatedReferences validated = experimentValidator.validateForCreate(experimentDto);
+    ValidatedReferences validated = experimentValidator.validateForCreate(experimentDto);
     User scientist = validated.scientist();
     Reactant reactantA = validated.reactantA();
     Reactant reactantB = validated.reactantB();
@@ -79,8 +78,6 @@ public class ExperimentServiceImpl implements ExperimentService {
     Modality modality = validated.modality();
 
     log.debug("All chemical and lookup entities successfully validated and fetched.");
-
-    // Then creating the entities...
 
     Metadata metadata = Metadata.builder()
       .date(experimentDto.metadata().date())
@@ -111,13 +108,9 @@ public class ExperimentServiceImpl implements ExperimentService {
       .createdBy(creator)
       .build();
 
-    // ...saving the entities + the loggers
-
     Experiment savedExperiment = experimentRepository.save(experimentToSave);
 
     log.info("Successfully saved Experiment with internal ID: {}", savedExperiment.getId());
-
-    // ...finally returning the saved element
 
     return experimentMapper.experimentToGetExperimentDto(savedExperiment, fileService.getAttachmentsOfExperiment(savedExperiment.getId()));
   }
@@ -146,7 +139,7 @@ public class ExperimentServiceImpl implements ExperimentService {
     // 2. Authorize (Security)
     experimentAuthorization.assertCanModify(experiment, requestingUserId, requestingUserRole);
 
-    // 3. Act (Execution) - Only update if not already archived (Idempotent)
+    // 3. Act (Execution). Only updates if not already archived (idempotent).
     if (experiment.getArchivedAt() == null) {
       experiment.setArchivedAt(Instant.now());
       try {
@@ -219,7 +212,7 @@ public class ExperimentServiceImpl implements ExperimentService {
     Experiment existingExperiment = experimentRepository.findById(experimentId)
       .orElseThrow(() -> new ResourceNotFoundException("Experiment with ID " + experimentId + " not found"));
 
-    // 2. Authorize (Security) - runs before state checks below, so that an unauthorized
+    // 2. Authorize (Security). Runs before the state checks below, so that an unauthorized
     // caller always gets a 403 rather than learning the experiment's archived state via a 409.
     experimentAuthorization.assertCanModify(existingExperiment, requestingUserId, requestingUserRole);
 
@@ -229,9 +222,9 @@ public class ExperimentServiceImpl implements ExperimentService {
       throw new ResourceConflictException("Cannot update an archived experiment. Please restore it first.");
     }
 
-    // 4. Semantic Validation (Lookups for new DTO data) - validated and resolved via
+    // 4. Semantic Validation (Lookups for new DTO data), validated and resolved via
     // ExperimentValidator, which returns the entities so we don't have to re-fetch them here.
-    ExperimentValidator.ValidatedReferences validated = experimentValidator.validateForUpdate(experimentDto);
+    ValidatedReferences validated = experimentValidator.validateForUpdate(experimentDto);
     User scientist = validated.scientist();
     Reactant reactantA = validated.reactantA();
     Reactant reactantB = validated.reactantB();
@@ -241,19 +234,8 @@ public class ExperimentServiceImpl implements ExperimentService {
 
     log.debug("All chemical and lookup entities successfully validated for update.");
 
-    // TODO-CLAUDE (race condition inventory, Family 1 - fixable without migration tooling, see
-    // docs/Software_todo.md "Race condition inventory" under the ReactantRepository.hasNameConflict item): VERIFIED,
-    // a real bug, not just theoretical. This method never touches `archivedAt` (see the comment below), but no entity
-    // in this project uses @DynamicUpdate (checked - zero matches project-wide), so Hibernate's default full-column
-    // UPDATE writes every mapped column from this managed entity's in-memory snapshot on flush - including the stale
-    // `archivedAt` value read at the top of this method (whatever it was via findById above, which had to be null for
-    // this method to have gotten past the archived-state check earlier). If a concurrent archiveExperiment() commits
-    // in the window between this method's findById and its own save() below, this method's save silently reverts that
-    // archive back to NULL, because Hibernate writes this entity's stale in-memory value, not a DB-fresh one. Fix:
-    // add @Version to Experiment (then this save() throws ObjectOptimisticLockingFailureException instead of silently
-    // overwriting the concurrent archive).
-    // 5. Apply Updates (Full Replacement via PUT)
-    // Note: We intentionally DO NOT update `createdBy` or `archivedAt` to enforce immutability.
+    // 5. Apply Updates (Full Replacement via PUT).
+    // Note: Intentionally DO NOT update `createdBy` or `archivedAt` to enforce immutability.
     existingExperiment.setDois(experimentDto.dois());
     existingExperiment.setReactantA(reactantA);
     existingExperiment.setReactantB(reactantB);
@@ -296,10 +278,7 @@ public class ExperimentServiceImpl implements ExperimentService {
   ) {
     log.debug("Building experiment search with criteria: {}", searchParams);
 
-    // Dynamic SQL WHERE clause
     Specification<Experiment> spec = buildSearchSpecification(searchParams);
-
-    // Execute the paginated query
     Page<Experiment> experimentPage = experimentRepository.findAll(spec, pageable);
 
     // Map entities to DTOs while preserving the Page structure
@@ -381,7 +360,6 @@ public class ExperimentServiceImpl implements ExperimentService {
     if (params.wavelengthMax() != null) predicates.add(cb.lessThanOrEqualTo(metadataJoin.get("wavelength"), params.wavelengthMax()));
 
     if (params.comment() != null && !params.comment().isBlank()) {
-      // case-insensitive search
       predicates.add(cb.like(cb.lower(metadataJoin.get("comment")), "%" + params.comment().toLowerCase() + "%"));
     }
 
@@ -400,7 +378,7 @@ public class ExperimentServiceImpl implements ExperimentService {
     }
   }
 
-  // RESULT JOIN (for MeasurementSearchDto) - only joins the result table if measurement filters were provided.
+  // RESULT JOIN (for MeasurementSearchDto): only joins the result table if measurement filters were provided.
   private void addMeasurementPredicates(List<Predicate> predicates, Root<Experiment> root, CriteriaBuilder cb, SearchParametersDto params) {
     if (params.measurementSearch() == null) {
       return;

@@ -102,13 +102,13 @@ public class FileServiceImpl implements FileService {
             throw new FileStorageException("Failed to upload file to S3", e);
         }
 
-        // FIXED (race condition inventory, see Software_todo.md's Race condition inventory item): the archived-state
-        // check above and this method's eventual attachment save straddle a real S3 network call, which can take
-        // seconds - too long to hold a DB row lock across (that would block every other request touching this
-        // experiment for the duration of the upload). Instead, re-check the experiment's CURRENT archived state with
-        // a fresh, unlocked read immediately after the S3 upload completes and before persisting the attachment. If
-        // a concurrent archiveExperiment() landed in between, delete the just-uploaded S3 object (same compensating
-        // pattern as the DB-save-failure case below) and reject, instead of silently attaching a file to what is now
+        // The archived-state check above and this method's eventual attachment save straddle a real S3
+        // network call, which can take seconds: too long to hold a DB row lock across (that would block
+        // every other request touching this experiment for the duration of the upload). Instead,
+        // re-check the experiment's current archived state with a fresh, unlocked read immediately
+        // after the S3 upload completes and before persisting the attachment. If a concurrent archive
+        // landed in between, delete the just-uploaded S3 object (same compensating pattern as the
+        // DB-save-failure case below) and reject, instead of silently attaching a file to what is now
         // an archived experiment.
         boolean archivedDuringUpload = experimentRepository.findById(experimentId)
                 .map(fresh -> fresh.getArchivedAt() != null)
@@ -225,12 +225,12 @@ public class FileServiceImpl implements FileService {
             return;
         }
 
-        // FIXED (race condition inventory, see Software_todo.md's Race condition inventory item): the check above
-        // reads the experiment's archived state from the already-loaded attachment.getExperiment() object, which
-        // would not reflect a concurrent archiveExperiment() commit that happened after this method's own read. This
-        // second check issues a genuinely fresh, unlocked query for the parent experiment immediately before this
-        // method's save, closing that window without needing a pessimistic lock (there is no external I/O between
-        // here and the save to justify one).
+        // The check above reads the experiment's archived state from the already-loaded
+        // attachment.getExperiment() object, which would not reflect a concurrent archive commit that
+        // happened after this method's own read. This second check issues a genuinely fresh, unlocked
+        // query for the parent experiment immediately before this method's save, closing that window
+        // without needing a pessimistic lock (there is no external I/O between here and the save to
+        // justify one).
         UUID parentExperimentId = attachment.getExperiment().getId();
         boolean archivedConcurrently = experimentRepository.findById(parentExperimentId)
                 .map(fresh -> fresh.getArchivedAt() != null)

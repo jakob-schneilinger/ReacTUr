@@ -13,16 +13,15 @@ import java.util.UUID;
  * @param archivedAt The timestamp when the option was archived.
  */
 public record SolventDto(
-  // Present for the response shape (getKnownOptions()); ignored on create — see BaseMapper#toEntity.
+  // Present for the response shape (getKnownOptions()).
   UUID uuid,
 
   @NotBlank(message = "Name must not be empty")
   String name,
   // (Semantic - Service Layer): Verify no existing option shares this name (case-insensitive)
-  // - OptionServiceImpl#createOptions -> repository.existsByNameIgnoreCase.
 
   // Present for the response shape (getKnownOptions()); ignored on create — a newly created option
-  // always starts non-archived regardless of what the client sends. See BaseMapper#toEntity.
+  // always starts non-archived regardless of what the client sends.
   Instant archivedAt
 ) implements OptionDto {
 }

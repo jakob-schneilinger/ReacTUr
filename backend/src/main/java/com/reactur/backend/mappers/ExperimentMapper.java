@@ -20,7 +20,6 @@ import java.util.List;
 )
 public interface ExperimentMapper {
 
-  // Main Experiment Mapping
   @Mapping(target = "uuid", source = "experiment.id")
   @Mapping(target = "measurementData", source = "experiment.result")
   @Mapping(target = "dois", source = "experiment.dois")
@@ -29,7 +28,7 @@ public interface ExperimentMapper {
 
   @Mapping(target = "uuid", source = "id")
   @Mapping(target = "measurementData", source = "result")
-  @Mapping(target = "attachments", source = "files") // Maps the internal List<ExperimentAttachment> files
+  @Mapping(target = "attachments", source = "files")
   GetExperimentDto experimentToGetExperimentDto(Experiment experiment);
 
 }

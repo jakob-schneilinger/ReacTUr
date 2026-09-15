@@ -72,12 +72,8 @@ public class ExperimentValidator {
                         "Scientist with ID " + experimentDto.metadata().scientist() + " not found."
                 ));
 
-        // FIXED (race condition inventory, see Software_todo.md's Race condition inventory item): these used to be
-        // plain findById calls. Now they take a pessimistic write lock on each reactant row, held until the
-        // caller's transaction (ExperimentServiceImpl.createExperiment/updateExperiment) commits, so a concurrent
-        // StructureServiceImpl.uploadStructure call for the SAME reactant (which takes the same lock before its own
-        // deleteAll) blocks until this transaction finishes, instead of being able to delete/replace this
-        // reactant's ACTIVE structure in the window between this validation and the experiment being saved.
+        // Pessimistic write lock, held until this transaction commits. Blocks a concurrent request
+        // from deleting or replacing this reactant's active structure while validation is in progress.
         Reactant reactantA = reactantRepository.findByIdForUpdate(experimentDto.reactantA())
                 .orElseThrow(() -> new UnprocessableEntityException("Reactant A does not exist."));
 
@@ -119,9 +115,7 @@ public class ExperimentValidator {
      * @param label A label (e.g., "A" or "B") for clearer error messages.
      */
     private void validateReactantHasActiveStructure(Reactant reactant, String label) {
-        // FIXED (race condition inventory, see Software_todo.md's Race condition inventory item): the reactant
-        // passed in here was already fetched via findByIdForUpdate above, so the pessimistic write lock on its row
-        // is already held for the rest of this transaction by the time this method runs.
+        // The write lock taken when this reactant was fetched above is still held here.
         List<ReactantStructure> structures = structureRepository.findByReactant_Id(reactant.getId());
 
         boolean hasActiveStructure = structures.stream()

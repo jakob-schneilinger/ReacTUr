@@ -33,21 +33,6 @@ public interface ReactantRepository extends JpaRepository<Reactant, UUID> {
     @Query("SELECT r FROM Reactant r WHERE r.id = :id")
     Optional<Reactant> findByIdForUpdate(@Param("id") UUID id);
 
-    /*
-     TODO (Needs a migration-tooling decision first): this check-then-save
-     is not atomic. Two concurrent create requests could both call this method, both observe
-     "false", and both proceed to save, resulting in a duplicate short name. Closing that
-     race properly needs a DB-level (case-insensitive) unique constraint/index, which this
-     project cannot safely bolt on today: there is no migration tool (no Flyway/Liquibase), only
-     Hibernate "ddl-auto: update" in prod / "create-drop" in tests, and hand-writing a
-     functional unique index risks fighting Hibernate's automatic schema management. Adding one
-     needs its own deliberate discussion, possibly bundled with "should this project adopt a
-     migration tool at all".
-     The same check-then-act race applies to the casNumber/inChiKey uniqueness checks in
-     ReactantValidator (existsByCasNumber/existsByInChiKey and their *AndIdNot variants), which
-     have the same non-atomic check-then-save shape and need the same DB-level constraint once a
-     migration-tooling decision is made.
-     */
     /**
      * Checks whether any existing reactant already uses one of the given names, either as its
      * primary {@code shortName} or as one of its {@code additionalShortNames}.
@@ -58,6 +43,8 @@ public interface ReactantRepository extends JpaRepository<Reactant, UUID> {
      * being passed in (see {@code ReactantValidator.collectNames}); this method does not do it for
      * you.
      * <p>
+     * TODO: check-then-save race - not atomic without a DB-level unique constraint (needs a
+     * migration-tooling decision first). To review in the JavaDoc pass.
      *
      * @param names candidate short names to check for conflicts; MUST already be lowercased
      */

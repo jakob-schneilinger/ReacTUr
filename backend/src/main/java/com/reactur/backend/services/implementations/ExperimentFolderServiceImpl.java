@@ -61,12 +61,8 @@ public class ExperimentFolderServiceImpl implements ExperimentFolderService {
   public GetFolderDto addExperimentToFolder(UUID folderId, UUID experimentId, String requestingUserId) {
     ExperimentFolder folder = getFolderAndValidateOwnership(folderId, requestingUserId);
 
-    // FIXED (race condition inventory, see Software_todo.md's Race condition inventory item): this used to be a
-    // plain findById. Now it takes a pessimistic write lock on the experiment row, held until this method's
-    // transaction commits, so a second concurrent addExperimentToFolder call for the SAME experiment (adding it to
-    // a different folder of the same user) blocks here until this one finishes, then re-reads fresh folder
-    // membership below instead of racing on stale data. Safe to hold: the rest of this method is pure local DB
-    // reads/writes, no external I/O.
+    // Pessimistic write lock, held until this transaction commits. Prevents a second concurrent
+    // addExperimentToFolder call for the same experiment from racing on stale folder membership.
     Experiment experiment = experimentRepository.findByIdForUpdate(experimentId)
       .orElseThrow(() -> new ResourceNotFoundException("Experiment not found."));
 
@@ -84,22 +80,21 @@ public class ExperimentFolderServiceImpl implements ExperimentFolderService {
       if (!oldFolder.getId().equals(folderId)) {
         boolean removed = oldFolder.getExperiments().removeIf(exp -> exp.getId().equals(experimentId));
         if (removed) {
-          folderRepository.save(oldFolder); // Update DB to drop old relationship
+          folderRepository.save(oldFolder);
           log.debug("Removed experiment {} from previous folder {}", experimentId, oldFolder.getId());
         }
       }
     }
 
 
-    // FIXED (race condition inventory, see Software_todo.md's Race condition inventory item): ExperimentFolder now
-    // carries a @Version field, so a stale concurrent save() on this exact folder row fails loudly instead of
-    // silently duplicating or losing data.
     // Prevent duplicates in the same folder
     boolean alreadyExists = folder.getExperiments().stream()
       .anyMatch(exp -> exp.getId().equals(experimentId));
 
     if (!alreadyExists) {
       folder.getExperiments().add(experiment);
+      // Optimistic locking (@Version) on ExperimentFolder makes a stale concurrent save() here fail
+      // loudly instead of silently duplicating or losing data.
       folderRepository.save(folder);
     }
 
@@ -111,21 +106,18 @@ public class ExperimentFolderServiceImpl implements ExperimentFolderService {
   public GetFolderDto removeExperimentFromFolder(UUID folderId, UUID experimentId, String requestingUserId) {
     ExperimentFolder folder = getFolderAndValidateOwnership(folderId, requestingUserId);
 
-    // I omit to check if the experiment is owned by the Person: If it's in its personal folder, is it to be
-    // assumed that:
-    // A) The ownership check was already performed to add it to the folder
-    // B) In any case, folders are a personal thing. If for some modifications of any kind the person lost
-    //    access to the experiment, it doesn't change anything that the personal folder of that user still
-    //    contains the experiment
+    // Deliberately does not re-check that the experiment is owned by this person. The ownership check
+    // already happened when it was added to the folder, and folders are a personal thing regardless:
+    // even if the person later lost access to the experiment some other way, that doesn't change
+    // anything about their own personal folder still containing it.
 
     folder.getExperiments().removeIf(exp -> exp.getId().equals(experimentId));
 
-    // ExperimentFolder now carries a @Version field (see the Race condition inventory item in Software_todo.md),
-    // so a genuine concurrent modification of this exact folder (e.g. addExperimentToFolder, or this same method
-    // called again with a different experimentId) now makes this save() fail loudly instead of silently losing
-    // data - which is the desired behavior for those cases. The one case that should NOT fail loudly is a harmless
-    // double-submit of this exact same removal (e.g. a network retry): both calls compute the identical resulting
-    // state (the experiment removed), so treat a lock conflict here as "someone already did this", not an error.
+    // Optimistic locking (@Version) makes a genuine concurrent modification of this exact folder fail
+    // loudly instead of silently losing data, which is the desired behavior. The one case that should
+    // NOT fail loudly is a harmless double-submit of this exact same removal (for example a network retry):
+    // both calls compute the identical resulting state, so treat a lock conflict here as "someone
+    // already did this", not an error.
     try {
       folderRepository.save(folder);
     } catch (ObjectOptimisticLockingFailureException e) {
@@ -141,15 +133,13 @@ public class ExperimentFolderServiceImpl implements ExperimentFolderService {
   @Override
   @Transactional
   public void deleteFolder(UUID folderId, String requestingUserId) {
-    // FIXED (race condition inventory, see Software_todo.md's Race condition inventory item): ExperimentFolder now
-    // carries a @Version field. Hibernate includes the version in the DELETE statement's WHERE clause too, so if
-    // addExperimentToFolder or removeExperimentFromFolder already modified this exact folder (bumping its version)
-    // after it was fetched here, this delete affects zero rows and Hibernate throws
-    // ObjectOptimisticLockingFailureException instead of silently deleting stale data or being silently undone by
-    // the other call's later save(). Deliberately NOT caught here (unlike the benign double-remove case above) -
-    // "someone just modified the folder you're trying to delete" is a genuine conflict worth surfacing as a 409.
     ExperimentFolder folder = getFolderAndValidateOwnership(folderId, requestingUserId);
 
+    // Optimistic locking (@Version): Hibernate includes the version in the DELETE statement's WHERE
+    // clause too, so a concurrent modification to this folder after it was fetched here makes this
+    // delete throw ObjectOptimisticLockingFailureException instead of silently deleting stale data.
+    // Deliberately NOT caught here, unlike the benign double-remove case above: "someone just modified
+    // the folder you're trying to delete" is a genuine conflict worth surfacing as a 409.
     folderRepository.delete(folder);
   }
 

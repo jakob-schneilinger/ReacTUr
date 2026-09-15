@@ -78,12 +78,7 @@ public class Reactant {
     @JoinColumn(name = "created_by", referencedColumnName = "id", nullable = false)
     private User createdBy;
 
-    // Optimistic locking: see ReactantServiceImpl.updateReactant and docs/Software_todo.md's "Race condition
-    // inventory" item. Without this, two concurrent updateReactant calls on the same reactant (editing different
-    // fields) could silently lose one edit - whichever save() commits last would overwrite the other's changes.
-    // With @Version, Hibernate includes "AND version = ?" in every UPDATE and throws
-    // ObjectOptimisticLockingFailureException (mapped to HTTP 409 by GlobalExceptionHandler) if the row was already
-    // changed by someone else since it was read, instead of silently overwriting it.
+    // Optimistic locking prevents two concurrent updates from silently overwriting each other.
     @Version
     private Long version;
 }

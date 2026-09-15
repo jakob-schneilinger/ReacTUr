@@ -185,7 +185,6 @@ public class ExperimentEndpoint {
      * @param jwt            The Keycloak token containing the requesting user's internal ID.
      * @return A {@link ResponseEntity} containing the {@link ExperimentHistoryDto} history entries.
      */
-    // TODO-Future: Endpoint to get Logs by *Date* and by *User*, besides by *Experiment*
     @GetMapping("/{uuid}/history")
     public ResponseEntity<List<ExperimentHistoryDto>> getAuditLogs(
       @PathVariable UUID uuid,
