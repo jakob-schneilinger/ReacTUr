@@ -5,12 +5,13 @@ import com.reactur.backend.dtos.reactants.ReactantDto;
 import com.reactur.backend.dtos.reactants.StructureDto;
 import com.reactur.backend.entities.Reactant;
 import com.reactur.backend.enums.StructureFlag;
+import com.reactur.backend.mappers.options.ChemicalTypeMapper;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
 import java.util.List;
 
-@Mapper(componentModel = "spring")
+@Mapper(componentModel = "spring", uses = ChemicalTypeMapper.class)
 public interface ReactantMapper {
 
     @Mapping(target = "uuid", source = "reactant.id")
