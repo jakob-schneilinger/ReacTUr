@@ -94,8 +94,8 @@ class UserEndpointTest {
                 .andExpect(status().isOk());
     }
 
-    // SUPERVISOR must never add/modify users - setRole stays ADMIN-only,
-    // pinning against a future "extend everything to SUPERVISOR" regression.
+    // SUPERVISOR must never add/modify users. setRole stays ADMIN-only, pinning against a future
+    // "extend everything to SUPERVISOR" regression.
     @Test
     void setRole_WhenSupervisor_ShouldReturn403() throws Exception {
         String id = "some-id-lol";
@@ -160,8 +160,7 @@ class UserEndpointTest {
 
         when(userService.getRole(id)).thenReturn(mockResponse);
 
-        // Self-lookup: no role/authority required, only that the JWT subject matches the
-        // requested id (see the comment on UserEndpoint#getRole and SecurityConfig's exemption).
+        // Self-lookup: no role/authority required, only that the JWT subject matches the requested id.
         mockMvc.perform(get("/api/users/" + id + "/role")
                         .with(jwt().jwt(builder -> builder.subject(id))))
                 .andExpect(status().isOk())
@@ -216,8 +215,8 @@ class UserEndpointTest {
                 .andExpect(status().isOk());
     }
 
-    // SUPERVISOR must never add/modify users - archiveUser stays
-    // ADMIN-only, pinning against a future "extend everything to SUPERVISOR" regression.
+    // SUPERVISOR must never add/modify users. archiveUser stays ADMIN-only, pinning against a future
+    // "extend everything to SUPERVISOR" regression.
     @Test
     void archiveUser_WhenSupervisor_ShouldReturn403() throws Exception {
         String id = "some-id-lol";
@@ -273,8 +272,8 @@ class UserEndpointTest {
                 .andExpect(status().isNotFound());
     }
 
-    // SUPERVISOR must never add/modify users - restoreUser stays
-    // ADMIN-only, pinning against a future "extend everything to SUPERVISOR" regression.
+    // SUPERVISOR must never add/modify users. restoreUser stays ADMIN-only, pinning against a future
+    // "extend everything to SUPERVISOR" regression.
     @Test
     void restoreUser_WhenSupervisor_ShouldReturn403() throws Exception {
         String id = "some-id-lol";
@@ -299,8 +298,7 @@ class UserEndpointTest {
 
     @Test
     void anyEndpoint_whenUnauthenticated_returns401() throws Exception {
-        // Mirrors StructureEndpointTest/ChemicalTypeEndpointTest's pattern: a plain request with no
-        // JWT at all must be rejected by SecurityConfig before it ever reaches the controller.
+        // A request with no JWT must be rejected before it reaches the controller.
         mockMvc.perform(get("/api/users"))
                 .andExpect(status().isUnauthorized());
     }

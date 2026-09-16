@@ -23,6 +23,7 @@ import com.reactur.backend.mappers.MeasurementDataMapper;
 import com.reactur.backend.mappers.MetadataMapper;
 import com.reactur.backend.mappers.ReactantMapper;
 import com.reactur.backend.mappers.UserMapper;
+import com.reactur.backend.mappers.options.ChemicalTypeMapper;
 import com.reactur.backend.services.authorization.ExperimentAuthorization;
 import com.reactur.backend.mappers.options.InstrumentMapper;
 import com.reactur.backend.mappers.options.ModalityMapper;
@@ -124,6 +125,8 @@ class ExperimentServiceTest {
     ReflectionTestUtils.setField(metadataMapper, "instrumentMapper", instrumentMapper);
     ReflectionTestUtils.setField(metadataMapper, "modalityMapper", modalityMapper);
 
+    ReflectionTestUtils.setField(reactantMapper, "chemicalTypeMapper", Mappers.getMapper(ChemicalTypeMapper.class));
+
     ReflectionTestUtils.setField(experimentMapper, "metadataMapper", metadataMapper);
     ReflectionTestUtils.setField(experimentMapper, "measurementDataMapper", measurementDataMapper);
     ReflectionTestUtils.setField(experimentMapper, "reactantMapper", reactantMapper);
@@ -171,12 +174,10 @@ class ExperimentServiceTest {
       .build();
   }
 
-  /**
-   * Stubs the repositories so that every reference contained in {@code dto} (scientist, both
-   * reactants, solvent, instrument, modality, plus an ACTIVE structure for any reactant) resolves
-   * successfully. Used by tests that need the "everything resolves" happy path, whether for
-   * creating or updating an experiment.
-   */
+  // Stubs the repositories so that every reference contained in dto (scientist, both reactants,
+  // solvent, instrument, modality, plus an ACTIVE structure for any reactant) resolves
+  // successfully. Used by tests that need the "everything resolves" happy path, whether for
+  // creating or updating an experiment.
   private void mockReferencesResolvable(SaveExperimentDto dto) {
     User scientist = new User();
     scientist.setId(dto.metadata().scientist());

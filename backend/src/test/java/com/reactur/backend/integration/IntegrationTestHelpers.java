@@ -30,12 +30,9 @@ final class IntegrationTestHelpers {
     private IntegrationTestHelpers() {
     }
 
-    /**
-     * Persists a {@link User} whose {@code id} IS the Keycloak subject that will later be passed
-     * to {@code jwt().jwt(builder -> builder.subject(...))} in a test - see
-     * {@code CustomJwtAuthenticationConverter#convert}, which looks the JWT subject up directly as
-     * {@code User.id}.
-     */
+    // Persists a User whose id IS the Keycloak subject that will later be passed to
+    // jwt().jwt(builder -> builder.subject(...)) in a test. CustomJwtAuthenticationConverter.convert
+    // looks the JWT subject up directly as User.id.
     static User persistUser(UserRepository userRepository, String keycloakId, Role role) {
         User user = User.builder()
                 .id(keycloakId)
@@ -47,11 +44,9 @@ final class IntegrationTestHelpers {
         return userRepository.save(user);
     }
 
-    /**
-     * Persists a {@link Reactant} plus an ACTIVE {@link ReactantStructure} for it, since
-     * {@code ExperimentValidator#validateReactantHasActiveStructure} requires at least one ACTIVE
-     * structure before the reactant can be referenced by an experiment.
-     */
+    // Persists a Reactant plus an ACTIVE ReactantStructure for it, since
+    // ExperimentValidator.validateReactantHasActiveStructure requires at least one ACTIVE structure
+    // before the reactant can be referenced by an experiment.
     static Reactant persistReactantWithActiveStructure(
             ReactantRepository reactantRepository,
             ReactantStructureRepository structureRepository,
@@ -76,11 +71,8 @@ final class IntegrationTestHelpers {
         return reactant;
     }
 
-    /**
-     * Persists a bare {@link Reactant} with no associated {@link ReactantStructure} at all -
-     * needed for scenarios exercising the structure-generation lifecycle from a genuinely clean
-     * starting point (e.g. INT-05's "real Reactant with no existing structures").
-     */
+    // Persists a bare Reactant with no associated ReactantStructure at all, needed for scenarios
+    // exercising the structure-generation lifecycle from a genuinely clean starting point.
     static Reactant persistReactant(ReactantRepository reactantRepository, User createdBy, String shortName) {
         Reactant reactant = Reactant.builder()
                 .shortName(shortName)
@@ -90,12 +82,10 @@ final class IntegrationTestHelpers {
         return reactantRepository.save(reactant);
     }
 
-    /**
-     * Persists a {@link Reactant} plus a single {@link ReactantStructure} carrying the given
-     * {@link StructureFlag} - mirrors {@link #persistReactantWithActiveStructure} but for
-     * non-ACTIVE flags (e.g. PENDING/READY), needed for scenarios asserting that a reactant
-     * without an ACTIVE structure cannot yet be used in an experiment (INT-03).
-     */
+    // Persists a Reactant plus a single ReactantStructure carrying the given flag. Mirrors
+    // persistReactantWithActiveStructure but for non-ACTIVE flags (e.g. PENDING/READY), needed for
+    // scenarios asserting that a reactant without an ACTIVE structure cannot yet be used in an
+    // experiment.
     static Reactant persistReactantWithStructure(
             ReactantRepository reactantRepository,
             ReactantStructureRepository structureRepository,
@@ -128,11 +118,9 @@ final class IntegrationTestHelpers {
         return modalityRepository.save(Modality.builder().name(name).build());
     }
 
-    /**
-     * Persists a real {@link ChemicalType} option - needed by {@code CreateReactantDto#chemicalType}
-     * (see {@code ReactantValidator#validateForCreate}, which resolves it via a real
-     * {@code ChemicalTypeRepository.findById} lookup), for INT-07's reactant-creation scenarios.
-     */
+    // Persists a real ChemicalType option, needed by CreateReactantDto.chemicalType.
+    // ReactantValidator.validateForCreate resolves it via a real ChemicalTypeRepository.findById
+    // lookup.
     static ChemicalType persistChemicalType(ChemicalTypeRepository chemicalTypeRepository, String name) {
         return chemicalTypeRepository.save(ChemicalType.builder().name(name).build());
     }

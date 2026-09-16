@@ -50,15 +50,12 @@ class CustomJwtAuthenticationConverterTest {
                 .build();
     }
 
-    /**
-     * Collects a converted token's granted authority names into a plain, guaranteed non-null Set,
-     * so the tests below can use simple, null-safe {@code Set.contains(...)}/{@code equals(...)}
-     * checks instead of repeatedly dereferencing {@code Authentication.getAuthorities()}/
-     * {@code GrantedAuthority.getAuthority()} - neither of which is annotated {@code @NotNull} on
-     * the Spring Security side, which is exactly why IDEs flag every direct chained call on them.
-     * The {@code assertNotNull} here is the one place that's actually checked; everything the
-     * tests do with the returned {@code Set<String>} afterward is null-safe by construction.
-     */
+    // Collects a converted token's granted authority names into a plain, guaranteed non-null Set,
+    // so the tests below can use simple, null-safe Set.contains(...)/equals(...) checks instead of
+    // repeatedly dereferencing Authentication.getAuthorities()/GrantedAuthority.getAuthority(),
+    // neither of which is annotated @NotNull on the Spring Security side. The assertNotNull here is
+    // the one place that's actually checked; everything the tests do with the returned Set<String>
+    // afterward is null-safe by construction.
     private Set<String> authorityNamesOf(AbstractAuthenticationToken token) {
         Collection<? extends GrantedAuthority> authorities = token.getAuthorities();
         assertNotNull(authorities);
@@ -79,7 +76,7 @@ class CustomJwtAuthenticationConverterTest {
 
     @Test
     void convert_ShouldGrantUnauthorized_WhenUserIsDeactivated_RegardlessOfStoredRole() {
-        // Regression test: archiveUser only ever set User.deactivatedAt - nothing consulted that
+        // Regression test: archiveUser only ever set User.deactivatedAt. Nothing consulted that
         // field when granting authorities, so a deactivated ADMIN kept full API access for as
         // long as their token/session remained valid. Confirmed by review before this fix.
         User deactivatedAdmin = User.builder().id(KEYCLOAK_ID).role(Role.ADMIN).deactivatedAt(Instant.now()).build();
@@ -87,10 +84,10 @@ class CustomJwtAuthenticationConverterTest {
 
         AbstractAuthenticationToken token = converter.convert(jwtFor());
 
-        // Exactly one authority, and it's ROLE_UNAUTHORIZED - strictly stronger than checking
+        // Exactly one authority, and it's ROLE_UNAUTHORIZED. That's strictly stronger than checking
         // "contains UNAUTHORIZED" and "doesn't contain ADMIN" as two separate assertions.
         assertEquals(Set.of("ROLE_UNAUTHORIZED"), authorityNamesOf(token));
-        // The stored role itself must be left untouched - archiving is reversible.
+        // The stored role itself must be left untouched: archiving is reversible.
         assertEquals(Role.ADMIN, deactivatedAdmin.getRole());
         verify(userRepository, never()).save(any());
     }

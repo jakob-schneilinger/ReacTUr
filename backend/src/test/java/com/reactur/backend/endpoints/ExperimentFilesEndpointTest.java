@@ -264,8 +264,7 @@ class ExperimentFilesEndpointTest {
 
     @Test
     void anyEndpoint_whenUnauthenticated_returns401() throws Exception {
-        // Mirrors StructureEndpointTest/ChemicalTypeEndpointTest's pattern: a plain request with no
-        // JWT at all must be rejected by SecurityConfig before it ever reaches the controller.
+        // A request with no JWT must be rejected before it reaches the controller.
         UUID fileId = UUID.randomUUID();
 
         mockMvc.perform(get("/api/file/" + fileId + "/details"))

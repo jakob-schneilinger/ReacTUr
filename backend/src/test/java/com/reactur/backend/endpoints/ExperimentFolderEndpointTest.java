@@ -53,7 +53,7 @@ class ExperimentFolderEndpointTest {
 
   private final String userId = "mock-keycloak-id-123";
 
-  // Grants the minimum authority needed to pass SecurityConfig's global "approved user" gate.
+  // Grants the minimum authority needed to pass the app's "approved user" security gate.
   private static org.springframework.test.web.servlet.request.RequestPostProcessor asUser(String subject) {
     return jwt().jwt(builder -> builder.subject(subject)).authorities(new SimpleGrantedAuthority("ROLE_USER"));
   }
@@ -94,8 +94,7 @@ class ExperimentFolderEndpointTest {
 
   @Test
   void createFolder_whenNameExceedsMaxLength_returns400BadRequest() throws Exception {
-    // Validation Test: Name exceeds 255 characters, which violates the newly-added @Size(max = 255)
-    // (matching ExperimentFolder.name's default, unannotated DB column length).
+    // Validation Test: Name exceeds 255 characters, which violates the max-length constraint.
     SaveFolderDto invalidRequestDto = new SaveFolderDto("a".repeat(256));
 
     mockMvc.perform(post("/api/folders")
@@ -126,9 +125,8 @@ class ExperimentFolderEndpointTest {
 
   @Test
   void getMyFolders_whenServiceThrowsUnexpectedException_returns500InternalServerError() throws Exception {
-    // Negative path: even though getMyFolders has no ownership-related failure mode of its own
-    // (it only ever lists the requesting user's own folders), an unexpected service failure must
-    // still surface as a 500 via GlobalExceptionHandler's catch-all, not leak past the endpoint.
+    // Negative path: even though getMyFolders has no ownership-related failure mode of its own, an
+    // unexpected service failure must still surface as a 500, not leak past the endpoint.
     Mockito.when(folderService.getMyFolders(userId))
       .thenThrow(new RuntimeException("Unexpected failure"));
 
@@ -267,8 +265,7 @@ class ExperimentFolderEndpointTest {
 
   @Test
   void anyEndpoint_whenUnauthenticated_returns401() throws Exception {
-    // Mirrors StructureEndpointTest/ChemicalTypeEndpointTest's pattern: a plain request with no
-    // JWT at all must be rejected by SecurityConfig before it ever reaches the controller.
+    // A request with no JWT must be rejected before it reaches the controller.
     mockMvc.perform(get("/api/folders"))
       .andExpect(status().isUnauthorized());
   }

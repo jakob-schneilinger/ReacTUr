@@ -71,16 +71,14 @@ class ExperimentEndpointTest {
   @MockitoBean
   private ExperimentHistoryService experimentHistoryService;
 
-  // Grants the minimum authority needed to pass SecurityConfig's global "approved user" gate,
-  // matching the RoleExtractor -> Role.USER mapping exercised by most of these tests.
+  // Grants the minimum authority needed to pass the app's "approved user" security gate, matching
+  // the role mapping most of these tests exercise.
   private static RequestPostProcessor asUser(String subject) {
     return jwt().jwt(builder -> builder.subject(subject)).authorities(new SimpleGrantedAuthority("ROLE_USER"));
   }
 
   @Test
   void createExperiment_whenInputIsValid_returns201Created() throws Exception {
-
-    // ## Data to send and to expect to be returned
     UUID reactantA = UUID.randomUUID();
     UUID reactantB = UUID.randomUUID();
     UUID newExperimentId = UUID.randomUUID();
@@ -110,16 +108,12 @@ class ExperimentEndpointTest {
       newExperimentId, List.of("10.1000/rxn123"), null, null, null, null, null, null, null
     );
 
-    // ## Mocking of the service layer to accept the DTO and return the expected answer
     when(experimentService.createExperiment(any(SaveExperimentDto.class), anyString(), any(Role.class)))
       .thenReturn(expectedResponseDto);
 
-
-    // ## Http call with the security tokens, and verifying the answer
     mockMvc.perform(post("/api/experiment")
-        // CSRF token (required for POST requests)
         .with(csrf())
-        // Keycloak JWT Mock for how CustomJwtAuthenticationConverter expects it
+        // Simulated Keycloak JWT claims
         .with(jwt().jwt(builder -> builder
           .subject("mock-keycloak-id-123")
           .claim("email", "chemist@tuwien.ac.at")
@@ -134,7 +128,7 @@ class ExperimentEndpointTest {
       .andExpect(jsonPath("$.uuid").value(newExperimentId.toString()))
       .andExpect(jsonPath("$.dois[0]").value("10.1000/rxn123"));
 
-    // ## Extra check: Making sure that the service got the right DTO, that nothing got accidentally changed
+    // Extra check: Making sure that the service got the right DTO, that nothing got accidentally changed
     ArgumentCaptor<SaveExperimentDto> dtoCaptor = ArgumentCaptor.forClass(SaveExperimentDto.class);
 
     verify(experimentService).createExperiment(
@@ -171,7 +165,7 @@ class ExperimentEndpointTest {
     );
 
     SaveExperimentDto invalidRequestDto = new SaveExperimentDto(
-      null, // <---
+      null,
       UUID.randomUUID(),
       validMetadata,
       validMeasurement,
@@ -183,9 +177,7 @@ class ExperimentEndpointTest {
         .with(asUser("mock-keycloak-id-123"))
         .contentType(MediaType.APPLICATION_JSON)
         .content(objectMapper.writeValueAsString(invalidRequestDto)))
-
       .andExpect(status().isBadRequest());
-
   }
 
   @Test
@@ -211,7 +203,7 @@ class ExperimentEndpointTest {
       UUID.randomUUID(),
       validMetadata,
       validMeasurement,
-      List.of("not-a-real-doi") // <--- missing the mandatory "10.<digits>/" prefix
+      List.of("not-a-real-doi") // missing the mandatory "10.<digits>/" prefix
     );
 
     mockMvc.perform(post("/api/experiment")
@@ -354,7 +346,6 @@ class ExperimentEndpointTest {
   void archiveExperiment_whenServiceThrowsForbidden_returns403() throws Exception {
     UUID experimentId = UUID.randomUUID();
 
-    // Mock the void method to throw our exception
     doThrow(new AccessDeniedException("Forbidden"))
       .when(experimentService).archiveExperiment(eq(experimentId), anyString(), any(Role.class));
 
@@ -590,7 +581,6 @@ class ExperimentEndpointTest {
 
   @Test
   void searchExperiments_whenValidFiltersAndPagination_returns200OkWithPage() throws Exception {
-    // Setup expected data
     GetExperimentDto experiment1 = new GetExperimentDto(UUID.randomUUID(), List.of("10.1000/rxn1"), null, null, null, null, null, null, null);
     GetExperimentDto experiment2 = new GetExperimentDto(UUID.randomUUID(), List.of("10.1000/rxn2"), null, null, null, null, null, null, null);
 
@@ -602,7 +592,6 @@ class ExperimentEndpointTest {
         2 // Total elements
       );
 
-    // service call
     when(experimentService.searchExperiments(
         any(SearchParametersDto.class),
         any(Pageable.class),
@@ -610,7 +599,6 @@ class ExperimentEndpointTest {
         any(Role.class)
       )) .thenReturn(mockPage);
 
-    // HTTP GET request with query parameters simulating the frontend URL
     mockMvc.perform(get("/api/experiment")
         .param("temperatureMin", "20.0")
         .param("temperatureMax", "30.0")
@@ -625,7 +613,6 @@ class ExperimentEndpointTest {
       .andExpect(jsonPath("$.totalElements").value(2))
       .andExpect(jsonPath("$.pageable.pageSize").value(20));
 
-    // 4. Verify the DTO was populated correctly by Spring's argument resolver
     ArgumentCaptor<SearchParametersDto> dtoCaptor = ArgumentCaptor.forClass(SearchParametersDto.class);
     ArgumentCaptor<Pageable> pageableCaptor = ArgumentCaptor.forClass(Pageable.class);
 
@@ -649,7 +636,7 @@ class ExperimentEndpointTest {
 
   @Test
   void searchExperiments_whenInvalidFilterProvided_returns400BadRequest() throws Exception {
-    // Simulating the user sending a negative concentration (which fails our @PositiveOrZero validation)
+    // A negative concentration fails the @PositiveOrZero validation constraint.
     mockMvc.perform(get("/api/experiment")
         .param("concentrationA_Min", "-5.0")
         .with(asUser("mock-keycloak-id-123")))
@@ -660,8 +647,7 @@ class ExperimentEndpointTest {
 
   @Test
   void anyEndpoint_whenUnauthenticated_returns401() throws Exception {
-    // Mirrors StructureEndpointTest/ChemicalTypeEndpointTest's pattern: a plain request with no
-    // JWT at all must be rejected by SecurityConfig before it ever reaches the controller.
+    // A request with no JWT must be rejected before it reaches the controller.
     UUID experimentId = UUID.randomUUID();
 
     mockMvc.perform(get("/api/experiment/" + experimentId))

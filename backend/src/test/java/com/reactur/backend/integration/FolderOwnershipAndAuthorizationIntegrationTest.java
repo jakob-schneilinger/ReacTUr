@@ -49,9 +49,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
- * Tier-1 integration tests covering INT-12 through INT-16 of
- * {@code backend/docs/INTEGRATION_TEST_SCENARIOS.md} - Folder Ownership (E) and the remainder of
- * the Authorization Matrix (F).
+ * Tier-1 integration tests covering Folder Ownership and the remainder of the Authorization Matrix
+ * scenarios (SCENARIO-12 through SCENARIO-16).
  * <p>
  * Follows exactly the pattern established by {@link ExperimentLifecycleIntegrationTest}: real
  * Spring context, real H2 database, real security filter chain, real
@@ -64,8 +63,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * API, unused by these particular scenarios but still mocked for context-consistency with the
  * other classes in this tier), and {@link S3Client} (the SeaweedFS/S3 file storage backend).
  * <p>
- * <b>INT-15 (the "UNAUTHORIZED global gate" scenario) is intentionally NOT reimplemented here</b>
- * - it is already fully covered by
+ * <b>SCENARIO-15 (the "UNAUTHORIZED global gate" scenario) is intentionally NOT reimplemented here:</b>
+ * it is already fully covered by
  * {@link ExperimentLifecycleIntegrationTest#scenarioC_realConverterDbRoleLookup_determinesAuthorizationOutcome()},
  * which proves a real {@code Role.UNAUTHORIZED} DB row is rejected by {@code SecurityConfig}'s
  * global gate. Nothing about that gate is Folder-specific, so duplicating it here would add no
@@ -73,9 +72,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  */
 @SpringBootTest(
         webEnvironment = SpringBootTest.WebEnvironment.MOCK,
-        // Same rationale as ExperimentLifecycleIntegrationTest: SeaweedFsConfig/StructureApiClientImpl
-        // require these @Value properties to be resolvable even though the beans hosting them are
-        // @MockitoBean-overridden below, and application-test.yml intentionally doesn't define them.
         properties = {
                 "seaweedfs.s3.endpoint=http://localhost:8333",
                 "seaweedfs.s3.access-key=integration-test-access-key",
@@ -84,12 +80,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
         })
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
-// @Transactional wraps each test method in a real transaction that's rolled back at the end -
-// without this, every real MockMvc-driven write here would actually commit to the shared, named
-// H2 instance (jdbc:h2:mem:kineticsdb, see application-test.yml) and could leak into other test
-// classes (e.g. @DataJpaTest repository tests asserting on unscoped, whole-table counts) depending
-// on execution order/context lifecycle. Confirmed root cause of a real, order-dependent test
-// failure observed in IntelliJ's runner (though not under `./mvnw -o clean test`'s default order).
 @Transactional
 class FolderOwnershipAndAuthorizationIntegrationTest {
 
@@ -120,12 +110,9 @@ class FolderOwnershipAndAuthorizationIntegrationTest {
     @MockitoBean
     private S3Client s3Client;
 
-    /**
-     * Identical in spirit and implementation to
-     * {@code ExperimentLifecycleIntegrationTest#asRealJwtSubject} - see that method's Javadoc for
-     * the full rationale on why this pattern (rather than the {@code jwt()} post-processor) is
-     * required to exercise the real {@code CustomJwtAuthenticationConverter}.
-     */
+    // Identical in spirit and implementation to ExperimentLifecycleIntegrationTest.asRealJwtSubject.
+    // See that method's comment for the full rationale on why this pattern (rather than the jwt()
+    // post-processor) is required to exercise the real CustomJwtAuthenticationConverter.
     private RequestPostProcessor asRealJwtSubject(String keycloakId) {
         Instant now = Instant.now();
         Jwt jwt = Jwt.withTokenValue(keycloakId)
@@ -142,11 +129,9 @@ class FolderOwnershipAndAuthorizationIntegrationTest {
         };
     }
 
-    /**
-     * Builds a minimal-but-valid {@link SaveExperimentDto} - shared by every scenario below that
-     * needs a real experiment to own/fold/archive but doesn't otherwise care about the exact
-     * metadata/measurement values.
-     */
+    // Builds a minimal-but-valid SaveExperimentDto, shared by every scenario below that needs a real
+    // experiment to own/fold/archive but doesn't otherwise care about the exact metadata/measurement
+    // values.
     private SaveExperimentDto buildValidExperimentDto(
             UUID reactantAId, UUID reactantBId, String scientistId, UUID solventId
     ) {
@@ -166,11 +151,9 @@ class FolderOwnershipAndAuthorizationIntegrationTest {
         return new SaveExperimentDto(reactantAId, reactantBId, metadata, measurement, List.of());
     }
 
-    /**
-     * Issues a real {@code POST /api/experiment} (creator == scientist == {@code creatorId}) and
-     * returns the created experiment's UUID - shared by every scenario below that needs a real,
-     * persisted experiment as a starting point.
-     */
+    // Issues a real POST /api/experiment (creator == scientist == creatorId) and returns the
+    // created experiment's UUID, shared by every scenario below that needs a real, persisted
+    // experiment as a starting point.
     private UUID createOwnExperiment(String creatorId) throws Exception {
         User creator = IntegrationTestHelpers.persistUser(userRepository, creatorId, Role.USER);
         Reactant reactantA = IntegrationTestHelpers.persistReactantWithActiveStructure(
@@ -190,7 +173,7 @@ class FolderOwnershipAndAuthorizationIntegrationTest {
         return objectMapper.readValue(responseBody, GetExperimentDto.class).uuid();
     }
 
-    /** Issues a real {@code POST /api/folders} and returns the created folder's UUID. */
+    // Issues a real POST /api/folders and returns the created folder's UUID.
     private UUID createFolder(String ownerId, String name) throws Exception {
         String responseBody = mockMvc.perform(post("/api/folders")
                         .with(asRealJwtSubject(ownerId))
@@ -201,11 +184,9 @@ class FolderOwnershipAndAuthorizationIntegrationTest {
         return objectMapper.readValue(responseBody, GetFolderDto.class).id();
     }
 
-    /**
-     * Issues a real {@code GET /api/folders} for {@code userId} and returns the parsed list of
-     * {@link GetFolderDto} - the "independent follow-up read" used throughout this class to prove
-     * real persistence rather than trusting a mutating endpoint's own echoed response.
-     */
+    // Issues a real GET /api/folders for userId and returns the parsed list of GetFolderDto: the
+    // "independent follow-up read" used throughout this class to prove real persistence rather than
+    // trusting a mutating endpoint's own echoed response.
     private List<GetFolderDto> getMyFolders(String userId) throws Exception {
         String responseBody = mockMvc.perform(get("/api/folders")
                         .with(asRealJwtSubject(userId)))
@@ -220,20 +201,17 @@ class FolderOwnershipAndAuthorizationIntegrationTest {
     }
 
     // ------------------------------------------------------------------------------------------
-    // INT-12 - Owner CRUD succeeds, including the one-folder-per-experiment auto-move rule
+    // SCENARIO-12 - Owner CRUD succeeds, including the one-folder-per-experiment auto-move rule
     // ------------------------------------------------------------------------------------------
     @Nested
-    class Int12FolderOwnerCrudAndAutoMove {
+    class Scenario12FolderOwnerCrudAndAutoMove {
 
-        /**
-         * A real USER (creator+scientist of a real experiment) creates a folder, adds their
-         * experiment to it, removes it, and deletes the folder - every step confirmed via an
-         * independent, follow-up real {@code GET /api/folders} rather than trusting the mutating
-         * endpoint's own echoed response.
-         */
+        // A user (creator and scientist of an experiment) creates a folder, adds their experiment
+        // to it, removes it, and deletes the folder. Each step is checked with a follow-up GET
+        // request rather than trusting what the mutating endpoint echoes back.
         @Test
         void ownerCreatesAddsRemovesAndDeletes_allSucceedWithRealPersistence() throws Exception {
-            String userAId = "integration-int12-usera-" + UUID.randomUUID();
+            String userAId = "integration-scenario12-usera-" + UUID.randomUUID();
             UUID experimentId = createOwnExperiment(userAId);
 
             UUID folderId = createFolder(userAId, "Folder-" + UUID.randomUUID());
@@ -270,24 +248,12 @@ class FolderOwnershipAndAuthorizationIntegrationTest {
                     "Deleted folder must no longer appear in GET /api/folders: " + foldersAfterDelete);
         }
 
-        /**
-         * Sub-case surfaced by directly reading {@code ExperimentFolderServiceImpl.addExperimentToFolder}
-         * (the "One Folder Per User" block):
-         * <pre>
-         *     // One Folder Per User: Find all user's folders and remove this experiment
-         *     List&lt;ExperimentFolder&gt; allUserFolders = folderRepository.findAllByOwner_Id(requestingUserId);
-         *     for (ExperimentFolder oldFolder : allUserFolders) {
-         *       if (!oldFolder.getId().equals(folderId)) {
-         *         boolean removed = oldFolder.getExperiments().removeIf(exp -&gt; exp.getId().equals(experimentId));
-         *         ...
-         * </pre>
-         * (verified directly in the current source, lines 80-90). Adding an experiment already
-         * present in one of the user's OTHER folders silently removes it from there first, so an
-         * experiment can only ever live in one of a given user's folders at a time.
-         */
+        // An experiment already sitting in one of the user's other folders is moved rather than
+        // duplicated: adding it to a new folder removes it from the old one first, so it only ever
+        // lives in one folder at a time.
         @Test
         void addingExperimentAlreadyInAnotherOwnFolder_autoMovesItAndRemovesFromTheFirst() throws Exception {
-            String userAId = "integration-int12-automove-" + UUID.randomUUID();
+            String userAId = "integration-scenario12-automove-" + UUID.randomUUID();
             UUID experimentId = createOwnExperiment(userAId);
 
             UUID firstFolderId = createFolder(userAId, "FirstFolder-" + UUID.randomUUID());
@@ -318,82 +284,54 @@ class FolderOwnershipAndAuthorizationIntegrationTest {
     }
 
     // ------------------------------------------------------------------------------------------
-    // INT-13 - Owner cannot add a non-owned/non-scientist experiment to their own folder
+    // SCENARIO-13 - Owner cannot add a non-owned/non-scientist experiment to their own folder
     // ------------------------------------------------------------------------------------------
     @Nested
-    class Int13FolderOwnerCannotAddNonOwnedExperiment {
+    class Scenario13FolderOwnerCannotAddNonOwnedExperiment {
 
-        /**
-         * {@code UserA} genuinely owns the target folder - the folder-ownership check inside
-         * {@code getFolderAndValidateOwnership} passes. Rejection instead comes from a second,
-         * independent check directly inside {@code addExperimentToFolder} (verified in the current
-         * source):
-         * <pre>
-         *     if (!experimentAuthorization.isCreatorOrScientist(experiment, requestingUserId)) {
-         *       log.warn("User {} tried to add non-owned experiment {} to folder", requestingUserId, experimentId);
-         *       throw new AccessDeniedException("User not authorized to add a not-owned experiment to a folder");
-         *     }
-         * </pre>
-         * (lines 75-78 in the current file). A follow-up {@code GET /api/folders} confirms the
-         * folder was never actually mutated by the rejected call.
-         */
+        // UserA owns the target folder, so ownership isn't the problem here. The rejection instead
+        // comes from a separate check: only the experiment's creator or designated scientist may add
+        // it to a folder. A follow-up GET confirms the folder was never actually changed by the
+        // rejected call.
         @Test
         void addingNonOwnedNonScientistExperiment_isForbiddenEvenInOwnFolder() throws Exception {
-            String userAId = "integration-int13-usera-" + UUID.randomUUID();
+            String userAId = "integration-scenario13-usera-" + UUID.randomUUID();
             IntegrationTestHelpers.persistUser(userRepository, userAId, Role.USER);
             UUID folderId = createFolder(userAId, "Folder-" + UUID.randomUUID());
 
-            // UserB's real experiment - UserA is neither creator nor designated scientist.
-            String userBId = "integration-int13-userb-" + UUID.randomUUID();
+            // UserB's real experiment. UserA is neither creator nor designated scientist.
+            String userBId = "integration-scenario13-userb-" + UUID.randomUUID();
             UUID userBExperimentId = createOwnExperiment(userBId);
 
             mockMvc.perform(post("/api/folders/{folderId}/experiments/{experimentId}", folderId, userBExperimentId)
                             .with(asRealJwtSubject(userAId)))
                     .andExpect(status().isForbidden());
 
-            // Independent follow-up read: the folder must remain empty - the rejected call never mutated it.
+            // Independent follow-up read: the folder must remain empty, since the rejected call
+            // never mutated it.
             GetFolderDto folderAfterAttempt = findFolder(getMyFolders(userAId), folderId);
             assertTrue(folderAfterAttempt.experimentIds().isEmpty());
         }
     }
 
     // ------------------------------------------------------------------------------------------
-    // INT-14 - Zero privileged bypass, even for ADMIN/SUPERVISOR
+    // SCENARIO-14 - Zero privileged bypass, even for ADMIN/SUPERVISOR
     // ------------------------------------------------------------------------------------------
     @Nested
-    class Int14FolderZeroPrivilegedBypass {
+    class Scenario14FolderZeroPrivilegedBypass {
 
-        /**
-         * {@code UserA}'s real folder (containing a real experiment) is targeted by a real
-         * {@code ADMIN} and, separately, a real {@code SUPERVISOR} - neither of whom owns it.
-         * All 6 attempts (2 roles x {add, remove, delete}) must be 403, confirmed by direct read of
-         * {@code ExperimentFolderServiceImpl.getFolderAndValidateOwnership} (verified in the
-         * current source):
-         * <pre>
-         *   private ExperimentFolder getFolderAndValidateOwnership(UUID folderId, String requestingUserId) {
-         *     ExperimentFolder folder = folderRepository.findById(folderId)
-         *       .orElseThrow(() -&gt; new ResourceNotFoundException("Folder not found."));
-         *
-         *     if (!folder.getOwner().getId().equals(requestingUserId)) {
-         *       ...
-         *       throw new AccessDeniedException("You do not have permission to access this folder.");
-         *     }
-         *     return folder;
-         *   }
-         * </pre>
-         * (lines 135-146 in the current file) - a pure {@code owner.getId().equals(requestingUserId)}
-         * check with no {@code isPrivileged}/role branch at all, unlike every other privileged
-         * resource in the system. This is called first by {@code addExperimentToFolder},
-         * {@code removeExperimentFromFolder}, and {@code deleteFolder} alike, so it fires before
-         * any experiment lookup - the target experiment doesn't even need to exist for the 403 to
-         * be returned, though a real one is used below anyway for realism.
-         * <p>
-         * A follow-up {@code GET /api/folders} (as {@code UserA}) confirms the folder and its
-         * experiment survive every rejected attempt untouched.
-         */
+        // UserA's folder is targeted by an ADMIN and, separately, a SUPERVISOR, neither of whom
+        // owns it. All 6 attempts (2 roles x add/remove/delete) should be 403, since folder access
+        // is a pure ownership check with no privileged-role exception, unlike most other resources
+        // in this system. That check runs before the folder is even touched, so the target
+        // experiment doesn't strictly need to exist for the 403, though a real one is used here
+        // anyway.
+        //
+        // A follow-up GET (as UserA) confirms the folder and its experiment survive every rejected
+        // attempt untouched.
         @Test
         void adminAndSupervisor_forbiddenOnAddRemoveAndDelete() throws Exception {
-            String userAId = "integration-int14-usera-" + UUID.randomUUID();
+            String userAId = "integration-scenario14-usera-" + UUID.randomUUID();
             UUID experimentId = createOwnExperiment(userAId);
             UUID folderId = createFolder(userAId, "Folder-" + UUID.randomUUID());
 
@@ -401,9 +339,9 @@ class FolderOwnershipAndAuthorizationIntegrationTest {
                             .with(asRealJwtSubject(userAId)))
                     .andExpect(status().isOk());
 
-            String adminId = "integration-int14-admin-" + UUID.randomUUID();
+            String adminId = "integration-scenario14-admin-" + UUID.randomUUID();
             IntegrationTestHelpers.persistUser(userRepository, adminId, Role.ADMIN);
-            String supervisorId = "integration-int14-supervisor-" + UUID.randomUUID();
+            String supervisorId = "integration-scenario14-supervisor-" + UUID.randomUUID();
             IntegrationTestHelpers.persistUser(userRepository, supervisorId, Role.SUPERVISOR);
 
             for (String privilegedId : List.of(adminId, supervisorId)) {
@@ -428,40 +366,23 @@ class FolderOwnershipAndAuthorizationIntegrationTest {
     }
 
     // ------------------------------------------------------------------------------------------
-    // INT-16 - Privileged bypass, the allowed direction (completes the pilot's Scenario B pair)
+    // SCENARIO-16 - Privileged bypass, the allowed direction (completes the pilot's Scenario B pair)
     // ------------------------------------------------------------------------------------------
     @Nested
-    class Int16PrivilegedBypassAllowedDirection {
+    class Scenario16PrivilegedBypassAllowedDirection {
 
-        /**
-         * {@code UserA} creates a real experiment (creator+scientist). A real {@code SUPERVISOR}
-         * - neither creator nor scientist - archives it via {@code DELETE /api/experiment/{uuid}}.
-         * Per {@code ExperimentAuthorization#canModify} (verified in the current source):
-         * <pre>
-         *     public boolean canModify(Experiment experiment, String userId, Role role) {
-         *         return isPrivileged(role) || isCreatorOrScientist(experiment, userId);
-         *     }
-         * </pre>
-         * and {@code isPrivileged}:
-         * <pre>
-         *     public boolean isPrivileged(Role role) {
-         *         return role == Role.ADMIN || role == Role.SUPERVISOR;
-         *     }
-         * </pre>
-         * this must succeed (204) - the positive counterpart to the existing pilot's
-         * {@code ExperimentLifecycleIntegrationTest.scenarioB_*}, which only proved the *forbidden*
-         * direction for a plain, non-creator/non-scientist {@code Role.USER}. A follow-up real
-         * {@code GET} (as {@code UserA}, since the experiment is now archived and - per
-         * {@code ExperimentAuthorization#canView} - only creator/scientist/privileged may view an
-         * archived one) confirms {@code archivedAt} is genuinely set, not merely that the DELETE
-         * call itself returned 204.
-         */
+        // UserA creates an experiment (creator and scientist). A SUPERVISOR, who is neither,
+        // archives it. Privileged roles (ADMIN/SUPERVISOR) can modify any experiment regardless of
+        // ownership, so this should succeed (204). This is the positive counterpart to
+        // ExperimentLifecycleIntegrationTest's scenario B, which only tested the forbidden direction
+        // for a plain user. A follow-up GET, made as UserA since only the creator, scientist, or a
+        // privileged role can view an archived experiment, confirms archivedAt is genuinely set.
         @Test
         void supervisorArchivesNonOwnedExperiment_succeedsAndArchivedAtIsSet() throws Exception {
-            String userAId = "integration-int16-usera-" + UUID.randomUUID();
+            String userAId = "integration-scenario16-usera-" + UUID.randomUUID();
             UUID experimentId = createOwnExperiment(userAId);
 
-            String supervisorId = "integration-int16-supervisor-" + UUID.randomUUID();
+            String supervisorId = "integration-scenario16-supervisor-" + UUID.randomUUID();
             IntegrationTestHelpers.persistUser(userRepository, supervisorId, Role.SUPERVISOR);
 
             mockMvc.perform(delete("/api/experiment/{uuid}", experimentId)

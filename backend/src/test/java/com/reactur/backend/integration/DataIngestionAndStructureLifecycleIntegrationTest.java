@@ -60,9 +60,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
- * Tier-1 integration tests covering INT-01 through INT-06 of
- * {@code backend/docs/INTEGRATION_TEST_SCENARIOS.md} - Data Ingestion & Metadata Standardization
- * (A) and 3D Structure Generation / Human-in-the-Loop (B).
+ * Tier-1 integration tests covering Data Ingestion & Metadata Standardization and 3D Structure
+ * Generation / Human-in-the-Loop scenarios (SCENARIO-01 through SCENARIO-06).
  * <p>
  * Follows exactly the pattern established by {@link ExperimentLifecycleIntegrationTest}: real
  * Spring context, real H2 database, real security filter chain, real
@@ -75,15 +74,12 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * <p>
  * Only three beans are mocked, for the same reason as the pilot: {@link JwtDecoder} (no real
  * Keycloak in this tier), {@link StructureApiClient} (external chemistry structure-generation
- * API), and {@link S3Client} (the SeaweedFS/S3 file storage backend). Everything else - including
- * the real {@link StructureService} bean, autowired directly below so INT-05 can invoke its
- * {@code @Scheduled} polling method synchronously rather than waiting on real scheduling - is real.
+ * API), and {@link S3Client} (the SeaweedFS/S3 file storage backend). Everything else is real,
+ * including the real {@link StructureService} bean, autowired directly below so SCENARIO-05 can invoke
+ * its {@code @Scheduled} polling method synchronously rather than waiting on real scheduling.
  */
 @SpringBootTest(
         webEnvironment = SpringBootTest.WebEnvironment.MOCK,
-        // Same rationale as ExperimentLifecycleIntegrationTest: SeaweedFsConfig/StructureApiClientImpl
-        // require these @Value properties to be resolvable even though the beans hosting them are
-        // @MockitoBean-overridden below, and application-test.yml intentionally doesn't define them.
         properties = {
                 "seaweedfs.s3.endpoint=http://localhost:8333",
                 "seaweedfs.s3.access-key=integration-test-access-key",
@@ -92,12 +88,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
         })
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
-// @Transactional wraps each test method in a real transaction that's rolled back at the end -
-// without this, every real MockMvc-driven write here would actually commit to the shared, named
-// H2 instance (jdbc:h2:mem:kineticsdb, see application-test.yml) and could leak into other test
-// classes (e.g. @DataJpaTest repository tests asserting on unscoped, whole-table counts) depending
-// on execution order/context lifecycle. Confirmed root cause of a real, order-dependent test
-// failure observed in IntelliJ's runner (though not under `./mvnw -o clean test`'s default order).
+// @Transactional wraps each test method in a real transaction that's rolled back at the end.
+// Without this, every real MockMvc-driven write here would actually commit to the shared, named
+// H2 instance (jdbc:h2:mem:kineticsdb, application-test.yml) and could leak into other test
+// classes (@DataJpaTest repository tests asserting on unscoped, whole-table counts) depending
+// on execution order/context lifecycle.
 @Transactional
 class DataIngestionAndStructureLifecycleIntegrationTest {
 
@@ -137,12 +132,7 @@ class DataIngestionAndStructureLifecycleIntegrationTest {
     @MockitoBean
     private S3Client s3Client;
 
-    /**
-     * Identical in spirit and implementation to
-     * {@code ExperimentLifecycleIntegrationTest#asRealJwtSubject} - see that method's Javadoc for
-     * the full rationale on why this pattern (rather than the {@code jwt()} post-processor) is
-     * required to exercise the real {@code CustomJwtAuthenticationConverter}.
-     */
+    // Identical to ExperimentLifecycleIntegrationTest.asRealJwtSubject.
     private RequestPostProcessor asRealJwtSubject(String keycloakId) {
         Instant now = Instant.now();
         Jwt jwt = Jwt.withTokenValue(keycloakId)
@@ -159,10 +149,8 @@ class DataIngestionAndStructureLifecycleIntegrationTest {
         };
     }
 
-    /**
-     * Builds a minimal-but-valid {@link SaveExperimentDto}, shared across several scenarios below
-     * that don't otherwise care about the exact metadata/measurement values.
-     */
+    // Builds a minimal valid SaveExperimentDto, for scenarios that
+    // don't care about the exact metadata/measurement values
     private SaveExperimentDto buildValidExperimentDto(
             UUID reactantAId, UUID reactantBId, String scientistId, UUID solventId, UUID instrumentId, UUID modalityId
     ) {
@@ -183,35 +171,30 @@ class DataIngestionAndStructureLifecycleIntegrationTest {
     }
 
     // ------------------------------------------------------------------------------------------
-    // INT-01 - Full round trip: experiment creation, metadata/file separation, independent re-read
+    // SCENARIO-01 - Full round trip: experiment creation, metadata/file separation, independent re-read
     // ------------------------------------------------------------------------------------------
     @Nested
-    class Int01DataIngestionRoundTrip {
+    class Scenario01DataIngestionRoundTrip {
 
-        /**
-         * A real USER (creator+scientist) creates a real experiment, then POSTs a raw CSV file to
-         * it via {@code ExperimentFilesEndpoint} (mounted at {@code /api/file/{experimentId}} -
-         * verified by reading that class directly, NOT {@code /api/experiment/{uuid}/files} as a
-         * naive guess might assume). Both the metadata and the attachment are then independently
-         * re-read (two separate real GET requests, neither of which reuses the POST responses),
-         * proving the metadata/file separation and real persistence of both halves.
-         * <p>
-         * Builds on {@code ExperimentLifecycleIntegrationTest.scenarioA_*} (which only covers the
-         * metadata half) by adding the file-attachment half; the metadata-only assertions are kept
-         * intentionally minimal here to avoid duplicating that coverage.
-         */
+        // A user (creator and scientist) creates an experiment, then uploads a CSV file to it
+        // through /api/file/{experimentId}. The metadata and the file are then read back
+        // independently, in two separate GET requests, to confirm they're stored separately and
+        // both actually persisted rather than just echoed back from the earlier responses.
+        //
+        // This builds on ExperimentLifecycleIntegrationTest's scenario A, which only covers the
+        // metadata half; the metadata assertions here stay minimal to avoid repeating that coverage.
         @Test
         void createExperimentThenUploadFile_bothPersistIndependently() throws Exception {
-            String creatorId = "integration-int01-creator-" + UUID.randomUUID();
+            String creatorId = "integration-scenario01-creator-" + UUID.randomUUID();
             User creator = IntegrationTestHelpers.persistUser(userRepository, creatorId, Role.USER);
 
             Reactant reactantA = IntegrationTestHelpers.persistReactantWithActiveStructure(
-                    reactantRepository, reactantStructureRepository, creator, "Int01ReactantA-" + UUID.randomUUID());
+                    reactantRepository, reactantStructureRepository, creator, "Scenario01ReactantA-" + UUID.randomUUID());
             Reactant reactantB = IntegrationTestHelpers.persistReactantWithActiveStructure(
-                    reactantRepository, reactantStructureRepository, creator, "Int01ReactantB-" + UUID.randomUUID());
-            Solvent solvent = IntegrationTestHelpers.persistSolvent(solventRepository, "Int01Solvent-" + UUID.randomUUID());
-            Instrument instrument = IntegrationTestHelpers.persistInstrument(instrumentRepository, "Int01Instrument-" + UUID.randomUUID());
-            Modality modality = IntegrationTestHelpers.persistModality(modalityRepository, "Int01Modality-" + UUID.randomUUID());
+                    reactantRepository, reactantStructureRepository, creator, "Scenario01ReactantB-" + UUID.randomUUID());
+            Solvent solvent = IntegrationTestHelpers.persistSolvent(solventRepository, "Scenario01Solvent-" + UUID.randomUUID());
+            Instrument instrument = IntegrationTestHelpers.persistInstrument(instrumentRepository, "Scenario01Instrument-" + UUID.randomUUID());
+            Modality modality = IntegrationTestHelpers.persistModality(modalityRepository, "Scenario01Modality-" + UUID.randomUUID());
 
             SaveExperimentDto requestDto = buildValidExperimentDto(
                     reactantA.getId(), reactantB.getId(), creatorId, solvent.getId(), instrument.getId(), modality.getId());
@@ -231,7 +214,7 @@ class DataIngestionAndStructureLifecycleIntegrationTest {
                     "text/csv",
                     "time,signal\n0,1.23\n1,2.34\n".getBytes(StandardCharsets.UTF_8));
 
-            // S3Client is mocked - putObject is void, so no stubbing is needed (default Mockito
+            // S3Client is mocked and putObject is void, so no stubbing is needed (default Mockito
             // behavior for a void method on a mock is to do nothing).
             String uploadResponseBody = mockMvc.perform(multipart("/api/file/{experimentId}", experimentId)
                             .file(csvFile)
@@ -245,7 +228,7 @@ class DataIngestionAndStructureLifecycleIntegrationTest {
                     objectMapper.readValue(uploadResponseBody, ExperimentAttachmentDetailsDto.class);
             assertNotNull(uploaded.uuid(), "Uploaded attachment must have a non-null uuid");
 
-            // Independent re-read #1: a fresh GET /api/experiment/{uuid} - not the create response -
+            // Independent re-read #1: a fresh GET /api/experiment/{uuid}, not the "create" response,
             // shows the metadata correctly persisted AND the attachment listed separately from it.
             mockMvc.perform(get("/api/experiment/{uuid}", experimentId)
                             .with(asRealJwtSubject(creatorId)))
@@ -268,28 +251,23 @@ class DataIngestionAndStructureLifecycleIntegrationTest {
     }
 
     // ------------------------------------------------------------------------------------------
-    // INT-02 - Mandatory metadata rejected end-to-end, nothing persisted
+    // SCENARIO-02 - Mandatory metadata rejected end-to-end, nothing persisted
     // ------------------------------------------------------------------------------------------
     @Nested
-    class Int02MandatoryMetadataRejected {
+    class Scenario02MandatoryMetadataRejected {
 
-        /**
-         * A {@code SaveExperimentDto} missing a mandatory metadata field (a null {@code solvent},
-         * which carries {@code @NotNull} on {@link SaveMetadataDto}) is rejected end-to-end with a
-         * real 400 from Bean Validation - real {@code MethodArgumentNotValidException} ->
-         * {@code GlobalExceptionHandler}, not a mocked/simulated rejection. A follow-up real search
-         * scoped to this scientist then confirms zero experiments exist for them, proving nothing
-         * was persisted despite the request reaching the controller layer.
-         */
+        // A request missing a mandatory metadata field (a null solvent) is rejected with 400 by
+        // Bean Validation before it ever reaches the service layer. A follow-up search scoped to
+        // this scientist then confirms nothing was persisted.
         @Test
         void missingSolvent_rejectedAndNothingPersisted() throws Exception {
-            String creatorId = "integration-int02-creator-" + UUID.randomUUID();
+            String creatorId = "integration-scenario02-creator-" + UUID.randomUUID();
             User creator = IntegrationTestHelpers.persistUser(userRepository, creatorId, Role.USER);
 
             Reactant reactantA = IntegrationTestHelpers.persistReactantWithActiveStructure(
-                    reactantRepository, reactantStructureRepository, creator, "Int02ReactantA-" + UUID.randomUUID());
+                    reactantRepository, reactantStructureRepository, creator, "Scenario02ReactantA-" + UUID.randomUUID());
             Reactant reactantB = IntegrationTestHelpers.persistReactantWithActiveStructure(
-                    reactantRepository, reactantStructureRepository, creator, "Int02ReactantB-" + UUID.randomUUID());
+                    reactantRepository, reactantStructureRepository, creator, "Scenario02ReactantB-" + UUID.randomUUID());
 
             SaveMetadataDto metadataMissingSolvent = new SaveMetadataDto(
                     LocalDate.now().minusDays(1),
@@ -323,28 +301,26 @@ class DataIngestionAndStructureLifecycleIntegrationTest {
     }
 
     // ------------------------------------------------------------------------------------------
-    // INT-03 - Reactant without an ACTIVE structure blocks experiment creation
+    // SCENARIO-03 - Reactant without an ACTIVE structure blocks experiment creation
     // ------------------------------------------------------------------------------------------
     @Nested
-    class Int03ReactantWithoutActiveStructureBlocksCreation {
+    class Scenario03ReactantWithoutActiveStructureBlocksCreation {
 
-        /**
-         * A real Reactant with only a PENDING structure (not yet ACTIVE) is referenced as reactant
-         * A in a create request. The real {@code ExperimentValidator.validateReactantHasActiveStructure}
-         * path rejects it with 422 - and a follow-up search scoped to this scientist confirms
-         * nothing was persisted.
-         */
+        // A reactant with only a PENDING structure (not yet ACTIVE) is used as reactant A in a
+        // create request. This should be rejected with 422, since a reactant needs an active
+        // structure before it can be used in an experiment. A follow-up search confirms nothing was
+        // persisted.
         @Test
         void pendingStructureOnly_rejectsExperimentCreationWith422() throws Exception {
-            String creatorId = "integration-int03-creator-" + UUID.randomUUID();
+            String creatorId = "integration-scenario03-creator-" + UUID.randomUUID();
             User creator = IntegrationTestHelpers.persistUser(userRepository, creatorId, Role.USER);
 
             Reactant reactantWithoutActiveStructure = IntegrationTestHelpers.persistReactantWithStructure(
                     reactantRepository, reactantStructureRepository, creator,
-                    "Int03PendingReactant-" + UUID.randomUUID(), StructureFlag.PENDING);
+                    "Scenario03PendingReactant-" + UUID.randomUUID(), StructureFlag.PENDING);
             Reactant reactantB = IntegrationTestHelpers.persistReactantWithActiveStructure(
-                    reactantRepository, reactantStructureRepository, creator, "Int03ReactantB-" + UUID.randomUUID());
-            Solvent solvent = IntegrationTestHelpers.persistSolvent(solventRepository, "Int03Solvent-" + UUID.randomUUID());
+                    reactantRepository, reactantStructureRepository, creator, "Scenario03ReactantB-" + UUID.randomUUID());
+            Solvent solvent = IntegrationTestHelpers.persistSolvent(solventRepository, "Scenario03Solvent-" + UUID.randomUUID());
 
             SaveExperimentDto requestDto = buildValidExperimentDto(
                     reactantWithoutActiveStructure.getId(), reactantB.getId(), creatorId, solvent.getId(), null, null);
@@ -365,39 +341,31 @@ class DataIngestionAndStructureLifecycleIntegrationTest {
     }
 
     // ------------------------------------------------------------------------------------------
-    // INT-04 - Archived-reference resilience on update
+    // SCENARIO-04 - Archived-reference resilience on update
     // ------------------------------------------------------------------------------------------
     @Nested
-    class Int04ArchivedReferenceResilienceOnUpdate {
+    class Scenario04ArchivedReferenceResilienceOnUpdate {
 
-        /**
-         * An experiment is created referencing a real Solvent while it is still active. An ADMIN
-         * then archives that Solvent via the real {@code DELETE /api/solvent/{uuid}} endpoint
-         * (soft-archive, sets {@code archivedAt} - never a hard delete). The experiment's
-         * creator/scientist then issues a real {@code PUT /api/experiment/{uuid}} re-sending the
-         * exact same (now-archived) solvent reference, unchanged.
-         * <p>
-         * This must succeed (200): confirmed directly against the actual current
-         * {@code ExperimentValidator.validate()} source (shared by create+update), which resolves
-         * the solvent via a plain {@code solventRepository.findById(...)} - existence only, with
-         * no {@code archivedAt} check anywhere in that method or in
-         * {@code OptionServiceImpl.archiveOption} (which also never deletes the row, only stamps
-         * {@code archivedAt}). This is a regression guard: if {@code ExperimentValidator} ever
-         * grows an {@code archivedAt} check, this test should start failing.
-         */
+        // An experiment is created referencing an active solvent. An ADMIN then archives that
+        // solvent (a soft-archive, not a hard delete). The experiment's creator then updates the
+        // experiment, re-sending that same now-archived solvent reference unchanged.
+        //
+        // This should still succeed, since validation only checks that the solvent exists, not
+        // whether it's archived. This test acts as a regression guard: if that validation ever
+        // starts checking archivedAt too, this test should start failing.
         @Test
         void updateAfterReferencedSolventArchived_stillSucceeds() throws Exception {
-            String creatorId = "integration-int04-creator-" + UUID.randomUUID();
+            String creatorId = "integration-scenario04-creator-" + UUID.randomUUID();
             User creator = IntegrationTestHelpers.persistUser(userRepository, creatorId, Role.USER);
 
-            String adminId = "integration-int04-admin-" + UUID.randomUUID();
+            String adminId = "integration-scenario04-admin-" + UUID.randomUUID();
             IntegrationTestHelpers.persistUser(userRepository, adminId, Role.ADMIN);
 
             Reactant reactantA = IntegrationTestHelpers.persistReactantWithActiveStructure(
-                    reactantRepository, reactantStructureRepository, creator, "Int04ReactantA-" + UUID.randomUUID());
+                    reactantRepository, reactantStructureRepository, creator, "Scenario04ReactantA-" + UUID.randomUUID());
             Reactant reactantB = IntegrationTestHelpers.persistReactantWithActiveStructure(
-                    reactantRepository, reactantStructureRepository, creator, "Int04ReactantB-" + UUID.randomUUID());
-            Solvent solvent = IntegrationTestHelpers.persistSolvent(solventRepository, "Int04Solvent-" + UUID.randomUUID());
+                    reactantRepository, reactantStructureRepository, creator, "Scenario04ReactantB-" + UUID.randomUUID());
+            Solvent solvent = IntegrationTestHelpers.persistSolvent(solventRepository, "Scenario04Solvent-" + UUID.randomUUID());
 
             SaveExperimentDto createDto = buildValidExperimentDto(
                     reactantA.getId(), reactantB.getId(), creatorId, solvent.getId(), null, null);
@@ -411,7 +379,7 @@ class DataIngestionAndStructureLifecycleIntegrationTest {
 
             UUID experimentId = objectMapper.readValue(createResponseBody, GetExperimentDto.class).uuid();
 
-            // A real ADMIN archives the referenced solvent - a real soft-archive, not a hard delete.
+            // A real ADMIN archives the referenced solvent: a real soft-archive, not a hard delete.
             mockMvc.perform(delete("/api/solvent/{uuid}", solvent.getId())
                             .with(asRealJwtSubject(adminId)))
                     .andExpect(status().isOk());
@@ -436,29 +404,24 @@ class DataIngestionAndStructureLifecycleIntegrationTest {
     }
 
     // ------------------------------------------------------------------------------------------
-    // INT-05 - Full structure lifecycle: PENDING -> READY -> ACTIVE -> usable in an experiment
+    // SCENARIO-05 - Full structure lifecycle: PENDING -> READY -> ACTIVE -> usable in an experiment
     // ------------------------------------------------------------------------------------------
     @Nested
-    class Int05StructureLifecycle {
+    class Scenario05StructureLifecycle {
 
-        /**
-         * A real Reactant with no existing structures. An ADMIN calls
-         * {@code POST /api/structure/{reactantId}/generate} (stubbed {@code triggerJob} returns a
-         * canned job ID) - creating a real PENDING row. {@code StructureServiceImpl}'s
-         * {@code @Scheduled} poll ({@code fetchPendingStructuresFromAPI}) is invoked directly
-         * (via the real, autowired {@link StructureService} bean) rather than waiting on real
-         * scheduling, with the stubbed {@code checkJobStatus} reporting success - turning the row
-         * READY. The ADMIN then calls {@code POST /api/structure/{structureId}/select}, turning it
-         * ACTIVE. Finally, a subsequent real experiment-creation request referencing that reactant
-         * succeeds - the positive counterpart to INT-03's negative case.
-         */
+        // A reactant starts with no structures. An ADMIN triggers structure generation, creating a
+        // PENDING row. The scheduled poll that normally checks job status is called directly here
+        // instead of waiting for it to run on its own, and turns the row READY once the (stubbed)
+        // job reports success. The ADMIN then selects that structure, making it ACTIVE. Finally,
+        // this reactant can now be used in a new experiment: the positive counterpart to
+        // SCENARIO-03's negative case.
         @Test
         void pendingToReadyToActive_thenUsableInExperiment() throws Exception {
-            String adminId = "integration-int05-admin-" + UUID.randomUUID();
+            String adminId = "integration-scenario05-admin-" + UUID.randomUUID();
             User admin = IntegrationTestHelpers.persistUser(userRepository, adminId, Role.ADMIN);
 
             Reactant reactant = IntegrationTestHelpers.persistReactant(
-                    reactantRepository, admin, "Int05Reactant-" + UUID.randomUUID());
+                    reactantRepository, admin, "Scenario05Reactant-" + UUID.randomUUID());
 
             String jobId = "mock-job-" + UUID.randomUUID();
             when(structureApiClient.triggerJob(anyString())).thenReturn(jobId);
@@ -476,7 +439,7 @@ class DataIngestionAndStructureLifecycleIntegrationTest {
             when(structureApiClient.checkJobStatus(jobId))
                     .thenReturn(new JobStatusResult(JobStatus.SUCCEEDED, List.of("mock-xyz-structure-payload"), null));
 
-            // Invoke the @Scheduled poll method directly, synchronously, on the real bean - rather
+            // Invoke the @Scheduled poll method directly, synchronously, on the real bean, rather
             // than waiting on the real fixedDelay=60000 scheduling.
             structureService.fetchPendingStructuresFromAPI();
 
@@ -496,10 +459,10 @@ class DataIngestionAndStructureLifecycleIntegrationTest {
             ReactantStructure activeStructure = reactantStructureRepository.findById(readyStructureId).orElseThrow();
             assertEquals(StructureFlag.ACTIVE, activeStructure.getFlag());
 
-            // Positive counterpart to INT-03: this reactant is now usable in a new experiment.
+            // Positive counterpart to SCENARIO-03: this reactant is now usable in a new experiment.
             Reactant otherReactant = IntegrationTestHelpers.persistReactantWithActiveStructure(
-                    reactantRepository, reactantStructureRepository, admin, "Int05OtherReactant-" + UUID.randomUUID());
-            Solvent solvent = IntegrationTestHelpers.persistSolvent(solventRepository, "Int05Solvent-" + UUID.randomUUID());
+                    reactantRepository, reactantStructureRepository, admin, "Scenario05OtherReactant-" + UUID.randomUUID());
+            Solvent solvent = IntegrationTestHelpers.persistSolvent(solventRepository, "Scenario05Solvent-" + UUID.randomUUID());
 
             SaveExperimentDto experimentDto = buildValidExperimentDto(
                     reactant.getId(), otherReactant.getId(), adminId, solvent.getId(), null, null);
@@ -513,26 +476,22 @@ class DataIngestionAndStructureLifecycleIntegrationTest {
     }
 
     // ------------------------------------------------------------------------------------------
-    // INT-06 - Structure endpoints are ADMIN/SUPERVISOR-only
+    // SCENARIO-06 - Structure endpoints are ADMIN/SUPERVISOR-only
     // ------------------------------------------------------------------------------------------
     @Nested
-    class Int06StructureEndpointsRoleGate {
+    class Scenario06StructureEndpointsRoleGate {
 
-        /**
-         * A plain USER is forbidden (403) on all three {@code /api/structure/**} endpoints -
-         * {@code uploadStructure}, {@code generateStructureFromAPI}, {@code selectStructure} (exact
-         * paths/methods confirmed by reading {@code StructureEndpoint.java} directly). Since
-         * {@code @PreAuthorize("hasAnyRole('ADMIN','SUPERVISOR')")} is evaluated before the
-         * controller method body runs, arbitrary (non-persisted) path-variable UUIDs are sufficient
-         * to prove the role gate - the request never reaches the service/DB layer at all.
-         */
+        // A plain USER is forbidden (403) on all three /api/structure/** endpoints: upload,
+        // generate, and select. The role check happens before the controller method runs, so these
+        // path-variable UUIDs don't even need to point to anything real; the request is rejected
+        // before it reaches the service or database.
         @Test
         void plainUser_forbiddenOnAllThreeStructureEndpoints() throws Exception {
-            String userId = "integration-int06-user-" + UUID.randomUUID();
+            String userId = "integration-scenario06-user-" + UUID.randomUUID();
             User user = IntegrationTestHelpers.persistUser(userRepository, userId, Role.USER);
 
             Reactant reactant = IntegrationTestHelpers.persistReactant(
-                    reactantRepository, user, "Int06Reactant-" + UUID.randomUUID());
+                    reactantRepository, user, "Scenario06Reactant-" + UUID.randomUUID());
 
             MockMultipartFile structureFile = new MockMultipartFile(
                     "file", "structure.mol", "chemical/x-mdl-molfile", "mock-structure-payload".getBytes(StandardCharsets.UTF_8));
@@ -551,16 +510,13 @@ class DataIngestionAndStructureLifecycleIntegrationTest {
                     .andExpect(status().isForbidden());
         }
 
-        /**
-         * Both ADMIN and SUPERVISOR succeed on all three {@code /api/structure/**} endpoints,
-         * proving parity per the settled authorization matrix (see
-         * {@code backend/docs/AUTHORIZATION_POLICY.md}) - this is the positive counterpart to the
-         * forbidden-USER case above.
-         */
+        // Both ADMIN and SUPERVISOR succeed on all three /api/structure/** endpoints, proving parity
+        // per the settled authorization matrix. This is the positive counterpart to the
+        // forbidden-USER case above.
         @Test
         void adminAndSupervisor_succeedOnAllThreeStructureEndpoints() throws Exception {
-            assertAllThreeStructureEndpointsSucceedFor(Role.ADMIN, "int06-admin");
-            assertAllThreeStructureEndpointsSucceedFor(Role.SUPERVISOR, "int06-supervisor");
+            assertAllThreeStructureEndpointsSucceedFor(Role.ADMIN, "scenario06-admin");
+            assertAllThreeStructureEndpointsSucceedFor(Role.SUPERVISOR, "scenario06-supervisor");
         }
 
         private void assertAllThreeStructureEndpointsSucceedFor(Role role, String subjectPrefix) throws Exception {
@@ -569,7 +525,7 @@ class DataIngestionAndStructureLifecycleIntegrationTest {
 
             // 1. uploadStructure
             Reactant uploadReactant = IntegrationTestHelpers.persistReactant(
-                    reactantRepository, user, "Int06UploadReactant-" + subjectPrefix + "-" + UUID.randomUUID());
+                    reactantRepository, user, "Scenario06UploadReactant-" + subjectPrefix + "-" + UUID.randomUUID());
             MockMultipartFile structureFile = new MockMultipartFile(
                     "file", "structure.mol", "chemical/x-mdl-molfile", "mock-structure-payload".getBytes(StandardCharsets.UTF_8));
 
@@ -581,7 +537,7 @@ class DataIngestionAndStructureLifecycleIntegrationTest {
 
             // 2. generateStructureFromAPI
             Reactant generateReactant = IntegrationTestHelpers.persistReactant(
-                    reactantRepository, user, "Int06GenerateReactant-" + subjectPrefix + "-" + UUID.randomUUID());
+                    reactantRepository, user, "Scenario06GenerateReactant-" + subjectPrefix + "-" + UUID.randomUUID());
             String jobId = "mock-job-" + subjectPrefix + "-" + UUID.randomUUID();
             when(structureApiClient.triggerJob(anyString())).thenReturn(jobId);
 
@@ -597,7 +553,7 @@ class DataIngestionAndStructureLifecycleIntegrationTest {
             // 3. selectStructure
             Reactant selectReactant = IntegrationTestHelpers.persistReactantWithStructure(
                     reactantRepository, reactantStructureRepository, user,
-                    "Int06SelectReactant-" + subjectPrefix + "-" + UUID.randomUUID(), StructureFlag.READY);
+                    "Scenario06SelectReactant-" + subjectPrefix + "-" + UUID.randomUUID(), StructureFlag.READY);
             UUID readyStructureId = reactantStructureRepository.findByReactant_Id(selectReactant.getId())
                     .get(0).getId();
 

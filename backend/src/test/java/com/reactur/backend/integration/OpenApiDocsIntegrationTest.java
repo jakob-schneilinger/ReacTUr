@@ -24,13 +24,13 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * springdoc actually introspected the real controllers/DTOs at startup.
  */
 @SpringBootTest(
-        webEnvironment = SpringBootTest.WebEnvironment.MOCK,
-        properties = {
-                "seaweedfs.s3.endpoint=http://localhost:8333",
-                "seaweedfs.s3.access-key=integration-test-access-key",
-                "seaweedfs.s3.secret-key=integration-test-secret-key",
-                "external-api.reactur.base-url=http://localhost:8000"
-        })
+  webEnvironment = SpringBootTest.WebEnvironment.MOCK,
+  properties = {
+    "seaweedfs.s3.endpoint=http://localhost:8333",
+    "seaweedfs.s3.access-key=integration-test-access-key",
+    "seaweedfs.s3.secret-key=integration-test-secret-key",
+    "external-api.reactur.base-url=http://localhost:8000"
+  })
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
 class OpenApiDocsIntegrationTest {

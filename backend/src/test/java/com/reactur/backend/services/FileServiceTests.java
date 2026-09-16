@@ -125,9 +125,9 @@ class FileServiceTests {
 
     @Test
     void storeFile_ShouldDeleteOrphanedS3ObjectAndThrowConflict_WhenExperimentArchivedDuringUpload() {
-        // Covers the race condition fix documented in Software_todo.md's Race condition inventory item: the
-        // archived-state check and the attachment save straddle a real S3 call, so storeFile re-checks the
-        // experiment's current state via a second, fresh findById immediately after the S3 upload completes.
+        // The archived-state check and the attachment save straddle a real S3 call, so storeFile
+        // re-checks the experiment's current state via a second, fresh findById immediately after the
+        // S3 upload completes.
         UUID experimentId = UUID.randomUUID();
         Experiment notYetArchived = new Experiment();
         Experiment archivedDuringUpload = new Experiment();
@@ -365,8 +365,8 @@ class FileServiceTests {
         attachment.setExperiment(experiment);
 
         when(attachmentRepository.findById(fileId)).thenReturn(Optional.of(attachment));
-        // FileServiceImpl.archiveFile re-checks the parent experiment's current archived state with a fresh
-        // repository read immediately before saving (see the Race condition inventory item in Software_todo.md).
+        // archiveFile re-checks the parent experiment's current archived state with a fresh
+        // repository read immediately before saving.
         when(experimentRepository.findById(any())).thenReturn(Optional.of(experiment));
 
         fileService.archiveFile(fileId, REQUESTING_USER_ID, REQUESTING_USER_ROLE);
@@ -376,10 +376,10 @@ class FileServiceTests {
 
     @Test
     void archiveFile_ShouldThrowResourceConflict_WhenExperimentArchivedConcurrently() {
-        // Covers the fresh-recheck fix (see Race condition inventory item in Software_todo.md): the FIRST check
-        // (against attachment.getExperiment(), a snapshot loaded at the top of the method) still sees the
-        // experiment as active, but the second, fresh experimentRepository.findById() read - issued right before
-        // the save - sees that it was archived by a concurrent request in the meantime.
+        // The first check (against attachment.getExperiment(), a snapshot loaded at the top of the
+        // method) still sees the experiment as active, but the second, fresh
+        // experimentRepository.findById() read, issued right before the save, sees that it was
+        // archived by a concurrent request in the meantime.
         UUID fileId = UUID.randomUUID();
         Experiment staleSnapshot = new Experiment();
         Experiment currentlyArchived = new Experiment();

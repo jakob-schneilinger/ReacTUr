@@ -48,7 +48,7 @@ import static org.mockito.Mockito.when;
 // Boot's silently auto-configured replacement database.
 //
 // @Import(ExperimentServiceImpl.class) registers the REAL service in this @DataJpaTest context so
-// it is wired with the REAL, H2-backed ExperimentRepository - this lets buildSearchSpecification's
+// it is wired with the REAL, H2-backed ExperimentRepository. This lets buildSearchSpecification's
 // Specification lambda actually run against real persisted data, rather than only proving (as
 // ExperimentServiceTest's mocked-repository test does) that the repository method gets invoked.
 //

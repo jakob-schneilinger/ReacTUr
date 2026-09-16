@@ -18,6 +18,7 @@ import com.reactur.backend.exceptions.ResourceNotFoundException;
 import com.reactur.backend.exceptions.UnprocessableEntityException;
 import com.reactur.backend.exceptions.ValidationException;
 import com.reactur.backend.mappers.ReactantMapper;
+import com.reactur.backend.mappers.options.ChemicalTypeMapper;
 import com.reactur.backend.repositories.ReactantRepository;
 import com.reactur.backend.repositories.ReactantStructureRepository;
 import com.reactur.backend.services.implementations.ReactantServiceImpl;
@@ -85,6 +86,10 @@ class ReactantServiceTest {
 
     @BeforeEach
     void setUp() {
+        // ReactantMapperImpl relies on Spring field injection for its `uses` mapper, so for this
+        // plain spy instance (no Spring context) we wire it in manually.
+        ReflectionTestUtils.setField(reactantMapper, "chemicalTypeMapper", Mappers.getMapper(ChemicalTypeMapper.class));
+
         ReactantValidator validator = new ReactantValidator(reactantRepository, userRepository, chemicalTypeRepository);
         ReflectionTestUtils.setField(reactantService, "reactantValidator", validator);
 
@@ -122,11 +127,9 @@ class ReactantServiceTest {
                 .build();
     }
 
-    /**
-     * Stubs the dependencies needed for {@code createReactant} to succeed end-to-end: the
-     * requesting user resolves, there is no name conflict, the chemical type resolves, and save()
-     * returns the persisted entity with {@link #VALID_UUID} assigned.
-     */
+    // Stubs the dependencies needed for createReactant to succeed end-to-end: the requesting user
+    // resolves, there is no name conflict, the chemical type resolves, and save() returns the
+    // persisted entity with VALID_UUID assigned.
     private void mockSuccessfulReactantCreationDependencies() {
         when(userRepository.findById(MOCK_USER_ID)).thenReturn(Optional.of(mockUser));
         when(reactantRepository.hasNameConflict(anyCollection())).thenReturn(false);
@@ -138,11 +141,9 @@ class ReactantServiceTest {
         when(chemicalTypeRepository.findById(VALID_CHEMICAL_TYPE_ID)).thenReturn(Optional.of(mockChemicalType));
     }
 
-    /**
-     * Stubs the dependencies needed for a PATCH against {@link #mockReactant} (identified by
-     * {@link #VALID_UUID}) to succeed: the reactant is found, there is no name conflict, save()
-     * echoes back the (mutated) entity, and it has no structures attached.
-     */
+    // Stubs the dependencies needed for a PATCH against mockReactant (identified by VALID_UUID) to
+    // succeed: the reactant is found, there is no name conflict, save() echoes back the (mutated)
+    // entity, and it has no structures attached.
     private void mockSuccessfulPatchDependencies() {
         when(reactantRepository.findById(VALID_UUID)).thenReturn(Optional.of(mockReactant));
         when(reactantRepository.hasNameConflictExcludingId(anyCollection(), eq(VALID_UUID))).thenReturn(false);

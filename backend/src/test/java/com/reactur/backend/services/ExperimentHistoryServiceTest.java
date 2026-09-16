@@ -289,7 +289,7 @@ class ExperimentHistoryServiceTest {
     // Regression test: a previous version of ExperimentHistoryServiceImpl silently dropped
     // list-typed property changes (Javers' ListChange) from the diff map entirely, because its
     // instanceof-chain only handled ValueChange/ReferenceChange explicitly. Confirmed empirically
-    // before the rewrite - the changes map came back completely empty for this exact scenario.
+    // before the rewrite: the changes map came back completely empty for this exact scenario.
     assertTrue(updateEntry.changes().containsKey("dois"), "Expected 'dois' to appear in the diff map");
     assertEquals("[10.1000/old-doi] -> [10.1000/new-doi]", updateEntry.changes().get("dois"));
   }

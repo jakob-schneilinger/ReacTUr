@@ -86,30 +86,27 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * CustomJwtAuthenticationConverter} itself - is real.
  */
 @SpringBootTest(
-        webEnvironment = SpringBootTest.WebEnvironment.MOCK,
-        // SeaweedFsConfig#endpoint/accessKey/secretKey and StructureApiClientImpl's constructor
-        // arg are required @Value properties with no defaults (see application-dev.yml, which
-        // sources them from env vars); application-test.yml intentionally doesn't define them.
-        // Even though S3Client and StructureApiClient are @MockitoBean-overridden below, the
-        // *configuration/implementation classes that host them* (SeaweedFsConfig,
-        // StructureApiClientImpl) are still fully instantiated with real property injection
-        // before any bean override is applied, so the full context still needs these properties
-        // resolvable. Supplied here as harmless dummy values, scoped only to this test class,
-        // rather than editing application-test.yml.
-        properties = {
-                "seaweedfs.s3.endpoint=http://localhost:8333",
-                "seaweedfs.s3.access-key=integration-test-access-key",
-                "seaweedfs.s3.secret-key=integration-test-secret-key",
-                "external-api.reactur.base-url=http://localhost:8000"
-        })
+  webEnvironment = SpringBootTest.WebEnvironment.MOCK,
+  // SeaweedFsConfig#endpoint/accessKey/secretKey and StructureApiClientImpl's constructor
+  // arg are required @Value properties with no defaults; application-test.yml intentionally doesn't define them.
+  // Even though S3Client and StructureApiClient are @MockitoBean-overridden below, the
+  // configuration/implementation classes that host them (SeaweedFsConfig,
+  // StructureApiClientImpl) are still fully instantiated with real property injection
+  // before any bean override is applied, so the full context still needs these properties
+  // resolvable. Supplied here as harmless dummy values, scoped only to this test class,
+  // rather than editing application-test.yml.
+  properties = {
+    "seaweedfs.s3.endpoint=http://localhost:8333",
+    "seaweedfs.s3.access-key=integration-test-access-key",
+    "seaweedfs.s3.secret-key=integration-test-secret-key",
+    "external-api.reactur.base-url=http://localhost:8000"
+  })
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
-// @Transactional wraps each test method in a real transaction that's rolled back at the end -
-// without this, every real MockMvc-driven write here would actually commit to the shared, named
-// H2 instance (jdbc:h2:mem:kineticsdb, see application-test.yml) and could leak into other test
-// classes (e.g. @DataJpaTest repository tests asserting on unscoped, whole-table counts) depending
-// on execution order/context lifecycle. Confirmed root cause of a real, order-dependent test
-// failure observed in IntelliJ's runner (though not under `./mvnw -o clean test`'s default order).
+// @Transactional wraps each test method in a real transaction that's rolled back at the end.
+// Without this, every real MockMvc-driven write here would actually commit to the shared, named
+// H2 instance (jdbc:h2:mem:kineticsdb) and could leak into other test
+// classes depending on execution order/context lifecycle.
 @Transactional
 class ExperimentLifecycleIntegrationTest {
 
@@ -146,14 +143,10 @@ class ExperimentLifecycleIntegrationTest {
     @MockitoBean
     private S3Client s3Client;
 
-    /**
-     * Stubs the mocked {@link JwtDecoder} so that the opaque bearer token {@code keycloakId}
-     * decodes to a {@link Jwt} carrying only that subject claim, then returns a {@link
-     * RequestPostProcessor} that attaches {@code Authorization: Bearer <keycloakId>} to the
-     * request. Routing the request through the real {@code BearerTokenAuthenticationFilter} this
-     * way (rather than the {@code jwt()} post-processor - see class Javadoc) is what allows the
-     * real {@code CustomJwtAuthenticationConverter} to actually run.
-     */
+    // Stubs the mocked JwtDecoder so the bearer token keycloakId decodes to a Jwt with just that
+    // subject claim, then returns a RequestPostProcessor that attaches it as an Authorization
+    // header. This lets the request go through the real authentication filter and converter
+    // instead of the jwt() post-processor.
     private RequestPostProcessor asRealJwtSubject(String keycloakId) {
         Instant now = Instant.now();
         Jwt jwt = Jwt.withTokenValue(keycloakId)
@@ -170,21 +163,14 @@ class ExperimentLifecycleIntegrationTest {
         };
     }
 
-    /**
-     * Scenario A - full real round-trip (happy path).
-     * <p>
-     * A real {@code User} (Role.USER) acts as both creator and designated scientist. Real
-     * Reactant (x2, each with an ACTIVE structure), Solvent, Instrument, and Modality rows are
-     * persisted via their real repositories. The user then POSTs a valid {@code
-     * SaveExperimentDto} - this must pass through the real {@code CustomJwtAuthenticationConverter}
-     * (DB lookup on the JWT subject), the real {@code SecurityConfig} filter chain, the real
-     * {@code ExperimentValidator} (which re-checks every referenced entity against the real DB),
-     * and the real {@code ExperimentServiceImpl}/{@code ExperimentRepository} to actually persist
-     * the new experiment.
-     * <p>
-     * A second, independent real GET request is then issued for the newly created UUID, proving
-     * the data was genuinely persisted (not just echoed back from an in-memory/mocked service).
-     */
+    // Scenario A: full happy-path round trip. A user acts as both creator and designated
+    // scientist. Two reactants (each with an ACTIVE structure), a solvent, an instrument, and a
+    // modality are persisted first. The user then POSTs a valid experiment, which goes through the
+    // whole real stack: authentication, the security filter chain, validation against the
+    // database, and finally saving.
+    //
+    // A second, independent GET request for the new experiment's UUID then confirms the data was
+    // actually persisted, not just echoed back in the response.
     @Test
     void scenarioA_createThenGet_realRoundTripPersistsAndReturnsMatchingData() throws Exception {
         String creatorId = "integration-creator-" + UUID.randomUUID();
@@ -243,19 +229,12 @@ class ExperimentLifecycleIntegrationTest {
                 .andExpect(jsonPath("$.archivedAt").doesNotExist());
     }
 
-    /**
-     * Scenario B - cross-user authorization enforcement, backed by real persistence.
-     * <p>
-     * UserA (Role.USER) creates a real experiment via a real POST (both creator and scientist).
-     * UserB - a different, real, persisted {@code User} (Role.USER), who is neither the creator
-     * nor the designated scientist - then attempts to DELETE (archive) it. Per {@code
-     * ExperimentAuthorization#canModify}, only the creator, the designated scientist, or a
-     * privileged role (ADMIN/SUPERVISOR) may modify an experiment, so this must be rejected with
-     * 403. A follow-up real GET as UserA then confirms {@code archivedAt} is still {@code null},
-     * proving the real {@code ExperimentAuthorization} + real persistence layer together enforced
-     * this (the request was rejected before ever mutating the DB row), not merely that the HTTP
-     * call itself returned an error code.
-     */
+    // Scenario B: cross-user authorization. UserA creates an experiment (both creator and
+    // scientist). UserB, a different user with no relation to it, then tries to archive it. Only
+    // the creator, the designated scientist, or a privileged role may modify an experiment, so this
+    // should be rejected with 403. A follow-up GET as UserA confirms archivedAt is still null,
+    // proving the request was actually blocked rather than just returning an error code without
+    // changing anything.
     @Test
     void scenarioB_deleteByNonCreatorNonScientist_isForbiddenAndDoesNotArchive() throws Exception {
         String userAId = "integration-usera-" + UUID.randomUUID();
@@ -296,7 +275,7 @@ class ExperimentLifecycleIntegrationTest {
 
         UUID experimentId = objectMapper.readValue(responseBody, GetExperimentDto.class).uuid();
 
-        // UserB - real, persisted, but neither creator nor scientist - must be forbidden.
+        // UserB is real and persisted, but neither creator nor scientist, so this must be forbidden.
         mockMvc.perform(delete("/api/experiment/{uuid}", experimentId)
                         .with(asRealJwtSubject(userBId)))
                 .andExpect(status().isForbidden());
@@ -308,21 +287,11 @@ class ExperimentLifecycleIntegrationTest {
                 .andExpect(jsonPath("$.archivedAt").doesNotExist());
     }
 
-    /**
-     * Scenario C - the actual "real converter DB lookup" gap being closed.
-     * <p>
-     * A real {@code User} with {@code Role.UNAUTHORIZED} calls {@code GET /api/experiment}. This
-     * must be rejected with 403 by {@code SecurityConfig}'s global gate ({@code
-     * anyRequest().hasAnyRole("USER","ADMIN","SUPERVISOR")}) - and critically, the {@code
-     * ROLE_UNAUTHORIZED} authority it's rejecting was derived by the REAL {@code
-     * CustomJwtAuthenticationConverter} from the REAL database row (via the real {@code
-     * BearerTokenAuthenticationFilter} -> real {@code JwtAuthenticationProvider} pipeline), not
-     * from any hardcoded test authority.
-     * <p>
-     * As the positive counterpart in the same test, a second real {@code User} with {@code
-     * Role.USER} performs the identical call (different subject) and receives 200 - proving the
-     * DB state, not the test setup, is what determines the outcome.
-     */
+    // Scenario C: a user with Role.UNAUTHORIZED calls GET /api/experiment and is rejected with
+    // 403. The role that got them rejected came from an actual database lookup on the JWT subject,
+    // not from anything hardcoded in the test. As a positive counterpart, a second user with
+    // Role.USER makes the same call and gets 200, showing it's the database state, not the test
+    // setup, that decides the outcome.
     @Test
     void scenarioC_realConverterDbRoleLookup_determinesAuthorizationOutcome() throws Exception {
         String unauthorizedUserId = "integration-unauthorized-" + UUID.randomUUID();

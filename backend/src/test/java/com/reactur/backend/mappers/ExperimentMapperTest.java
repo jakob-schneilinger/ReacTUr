@@ -12,6 +12,7 @@ import com.reactur.backend.entities.options.Instrument;
 import com.reactur.backend.entities.options.Modality;
 import com.reactur.backend.entities.options.Solvent;
 import com.reactur.backend.enums.Role;
+import com.reactur.backend.mappers.options.ChemicalTypeMapper;
 import com.reactur.backend.mappers.options.InstrumentMapper;
 import com.reactur.backend.mappers.options.ModalityMapper;
 import com.reactur.backend.mappers.options.SolventMapper;
@@ -36,9 +37,8 @@ class ExperimentMapperTest {
 
     @BeforeEach
     void setUp() {
-        // ExperimentMapperImpl (and the mappers it delegates to) rely on Spring field injection
-        // for their `uses` mappers, so for a plain unit test (no Spring context) we have to wire
-        // them in manually, mirroring the pattern used in ExperimentServiceTest.
+        // ExperimentMapperImpl (and the mappers it delegates to) rely on Spring field injection for
+        // their `uses` mappers, so for a plain unit test (no Spring context) we wire them in manually.
         ReactantMapper reactantMapper = Mappers.getMapper(ReactantMapper.class);
         UserMapper userMapper = Mappers.getMapper(UserMapper.class);
         MeasurementDataMapper measurementDataMapper = Mappers.getMapper(MeasurementDataMapper.class);
@@ -52,6 +52,8 @@ class ExperimentMapperTest {
         ReflectionTestUtils.setField(metadataMapper, "solventMapper", solventMapper);
         ReflectionTestUtils.setField(metadataMapper, "instrumentMapper", instrumentMapper);
         ReflectionTestUtils.setField(metadataMapper, "modalityMapper", modalityMapper);
+
+        ReflectionTestUtils.setField(reactantMapper, "chemicalTypeMapper", Mappers.getMapper(ChemicalTypeMapper.class));
 
         ReflectionTestUtils.setField(mapper, "metadataMapper", metadataMapper);
         ReflectionTestUtils.setField(mapper, "measurementDataMapper", measurementDataMapper);

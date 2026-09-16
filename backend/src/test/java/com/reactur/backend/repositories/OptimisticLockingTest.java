@@ -25,8 +25,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * Proves that the {@code @Version} fields added to Reactant, Experiment, ReactantStructure, User and
- * ExperimentFolder (see the "Race condition inventory" item in Software_todo.md) actually cause Hibernate to
- * reject a stale concurrent write, instead of silently overwriting it.
+ * ExperimentFolder actually cause Hibernate to reject a stale concurrent write, instead of silently
+ * overwriting it.
  * <p>
  * This can only be proven against a real database (Mockito mocks don't simulate Hibernate's version-check
  * behavior at all - a mocked {@code save()} just returns whatever it's told to). The thread-free way to
@@ -117,7 +117,7 @@ class OptimisticLockingTest {
         entityManager.clear();
 
         // This is exactly the shape of the real bug: one "transaction" (updateExperiment) edits an unrelated
-        // field, the other (archiveExperiment) sets archivedAt - without @Version, the first one's stale save
+        // field, the other (archiveExperiment) sets archivedAt. Without @Version, the first one's stale save
         // would have silently overwritten the second one's archivedAt back to null.
         Experiment updateAttempt = experimentRepository.findById(saved.getId()).orElseThrow();
         entityManager.clear();

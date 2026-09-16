@@ -18,20 +18,16 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-// TODO: Remove explanations:
-// * {@code ReactantServiceTest} mocks {@link ReactantRepository} directly, so it can only prove that
-// * {@code hasNameConflict}/{@code hasNameConflictExcludingId} are *called* with lowercased
-// * arguments - it structurally cannot prove that the underlying JPQL (with its {@code LOWER(...)}
-// * wrapping) is actually case-insensitive. Only a real query execution against a real database can
-// * prove that, which is what this test does.
-// * <p>
-// * Activates the "test" Spring profile so that {@code src/test/resources/application-test.yml}
-// * (H2 in-memory, {@code ddl-auto: create-drop}) is used, and disables Spring Boot's automatic
-// * test-database replacement ({@code @AutoConfigureTestDatabase} is otherwise implied by
-// * {@code @DataJpaTest} with {@code Replace.ANY}) so that config is actually honored rather than
-// * being silently swapped out for an auto-configured embedded database. No other test in this
-// * codebase activates the "test" profile/config yet, so this is the first to wire it up.
-// */
+/**
+ * This test needs a real database, not a mock, to prove the underlying query is genuinely
+ * case-insensitive: mocking {@code ReactantRepository} could only prove that
+ * {@code hasNameConflict}/{@code hasNameConflictExcludingId} are called with lowercased arguments,
+ * not that the query itself (with its {@code LOWER(...)} wrapping) actually behaves that way.
+ * <p>
+ * Activates the "test" Spring profile so that {@code application-test.yml} (H2 in-memory,
+ * {@code ddl-auto: create-drop}) is used, and disables Spring Boot's automatic test-database
+ * replacement so that config actually takes effect instead of being silently swapped out.
+ */
 @DataJpaTest
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @ActiveProfiles("test")

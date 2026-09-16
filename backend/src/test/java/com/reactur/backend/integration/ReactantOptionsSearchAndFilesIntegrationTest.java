@@ -67,9 +67,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
- * Tier-1 integration tests covering INT-07 through INT-11 of
- * {@code backend/docs/INTEGRATION_TEST_SCENARIOS.md} - Reactant &amp; Options Catalog Management
- * (C) and Search &amp; Retrieval (D).
+ * Tier-1 integration tests covering Reactant &amp; Options Catalog Management and Search &amp;
+ * Retrieval scenarios (SCENARIO-07 through SCENARIO-11).
  * <p>
  * Follows exactly the pattern established by {@link ExperimentLifecycleIntegrationTest} and
  * {@link DataIngestionAndStructureLifecycleIntegrationTest}: real Spring context, real H2
@@ -85,9 +84,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  */
 @SpringBootTest(
         webEnvironment = SpringBootTest.WebEnvironment.MOCK,
-        // Same rationale as ExperimentLifecycleIntegrationTest: SeaweedFsConfig/StructureApiClientImpl
-        // require these @Value properties to be resolvable even though the beans hosting them are
-        // @MockitoBean-overridden below, and application-test.yml intentionally doesn't define them.
         properties = {
                 "seaweedfs.s3.endpoint=http://localhost:8333",
                 "seaweedfs.s3.access-key=integration-test-access-key",
@@ -96,12 +92,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
         })
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
-// @Transactional wraps each test method in a real transaction that's rolled back at the end -
-// without this, every real MockMvc-driven write here would actually commit to the shared, named
-// H2 instance (jdbc:h2:mem:kineticsdb, see application-test.yml) and could leak into other test
-// classes (e.g. @DataJpaTest repository tests asserting on unscoped, whole-table counts) depending
-// on execution order/context lifecycle. Confirmed root cause of a real, order-dependent test
-// failure observed in IntelliJ's runner (though not under `./mvnw -o clean test`'s default order).
 @Transactional
 class ReactantOptionsSearchAndFilesIntegrationTest {
 
@@ -141,12 +131,6 @@ class ReactantOptionsSearchAndFilesIntegrationTest {
     @MockitoBean
     private S3Client s3Client;
 
-    /**
-     * Identical in spirit and implementation to
-     * {@code ExperimentLifecycleIntegrationTest#asRealJwtSubject} - see that method's Javadoc for
-     * the full rationale on why this pattern (rather than the {@code jwt()} post-processor) is
-     * required to exercise the real {@code CustomJwtAuthenticationConverter}.
-     */
     private RequestPostProcessor asRealJwtSubject(String keycloakId) {
         Instant now = Instant.now();
         Jwt jwt = Jwt.withTokenValue(keycloakId)
@@ -163,11 +147,9 @@ class ReactantOptionsSearchAndFilesIntegrationTest {
         };
     }
 
-    /**
-     * Builds a minimal-but-valid {@link SaveExperimentDto} with a caller-supplied temperature and
-     * rate constant, shared by INT-10 (which needs distinct values to filter on) and INT-11 (which
-     * doesn't care about the exact values).
-     */
+    // Builds a minimal-but-valid SaveExperimentDto with a caller-supplied temperature and rate
+    // constant, shared by SCENARIO-10 (which needs distinct values to filter on) and SCENARIO-11 (which
+    // doesn't care about the exact values).
     private SaveExperimentDto buildExperimentDto(
             UUID reactantAId, UUID reactantBId, String scientistId, UUID solventId,
             double temperature, double rateConstant
@@ -188,11 +170,9 @@ class ReactantOptionsSearchAndFilesIntegrationTest {
         return new SaveExperimentDto(reactantAId, reactantBId, metadata, measurement, List.of());
     }
 
-    /**
-     * Issues a real {@code POST /api/experiment} and returns the created experiment's UUID -
-     * shared by INT-10 and INT-11, which both need to seed one or more real experiments before
-     * exercising their respective scenario.
-     */
+    // Issues a real POST /api/experiment and returns the created experiment's UUID, shared by
+    // SCENARIO-10 and SCENARIO-11, which both need to seed one or more real experiments before exercising
+    // their respective scenario.
     private UUID createExperiment(String creatorId, SaveExperimentDto dto) throws Exception {
         String responseBody = mockMvc.perform(post("/api/experiment")
                         .with(asRealJwtSubject(creatorId))
@@ -204,35 +184,25 @@ class ReactantOptionsSearchAndFilesIntegrationTest {
     }
 
     // ------------------------------------------------------------------------------------------
-    // INT-07 - Reactant creation, required + optional fields
+    // SCENARIO-07 - Reactant creation, required + optional fields
     // ------------------------------------------------------------------------------------------
     @Nested
-    class Int07ReactantCreation {
+    class Scenario07ReactantCreation {
 
-        /**
-         * A real ADMIN POSTs a {@code CreateReactantDto} carrying only the required fields
-         * ({@code smiles}, {@code chemicalType}, {@code shortName}) - every optional field is
-         * {@code null}. {@code POST /api/reactant} is {@code @PreAuthorize("hasAnyRole('ADMIN','SUPERVISOR')")}
-         * (verified directly in {@code ReactantEndpoint.java}), so ADMIN succeeds (201). An
-         * independent real {@code GET /api/reactant/{uuid}} then confirms every submitted field
-         * round-tripped, and that the optional fields default to empty string/empty list (per
-         * {@code ReactantServiceImpl#createReactant}'s null-coalescing), never {@code null}.
-         * <p>
-         * Asserts {@code chemicalType.name} rather than {@code chemicalType.uuid}: per
-         * {@code ReactantMapperTest}'s own documented "Known limitation", {@code ReactantMapper}
-         * has no wired-up {@code ChemicalTypeMapper} for the nested entity-&gt;DTO conversion, so
-         * {@code chemicalType.uuid} always comes out {@code null} even though the real persisted
-         * entity has one - only {@code chemicalType.name} genuinely round-trips today.
-         */
+        // An ADMIN creates a reactant with only the required fields (smiles, chemicalType,
+        // shortName), leaving every optional field null. Both ADMIN and SUPERVISOR are allowed to
+        // create reactants, so this succeeds (201). A follow-up GET confirms every submitted field
+        // round-tripped, and that the optional fields come back as empty string/empty list rather
+        // than null.
         @Test
         void requiredFieldsOnly_createsAndRoundTrips() throws Exception {
-            String adminId = "integration-int07-admin-" + UUID.randomUUID();
+            String adminId = "integration-scenario07-admin-" + UUID.randomUUID();
             IntegrationTestHelpers.persistUser(userRepository, adminId, Role.ADMIN);
 
             ChemicalType chemicalType = IntegrationTestHelpers.persistChemicalType(
-                    chemicalTypeRepository, "Int07ChemType-" + UUID.randomUUID());
+                    chemicalTypeRepository, "Scenario07ChemType-" + UUID.randomUUID());
 
-            String shortName = "Int07Required-" + UUID.randomUUID();
+            String shortName = "Scenario07Required-" + UUID.randomUUID();
             CreateReactantDto requestDto = new CreateReactantDto(
                     "C1=CC=CC=C1", chemicalType.getId(), shortName,
                     null, null, null, null, null, null);
@@ -247,7 +217,7 @@ class ReactantOptionsSearchAndFilesIntegrationTest {
 
             ReactantDetailDto created = objectMapper.readValue(responseBody, ReactantDetailDto.class);
 
-            // Independent follow-up read: a fresh GET - not the create response - proves real
+            // Independent follow-up read: a fresh GET, not the create response, proves real
             // persistence and shows every field correctly round-tripped.
             mockMvc.perform(get("/api/reactant/{uuid}", created.uuid())
                             .with(asRealJwtSubject(adminId)))
@@ -265,21 +235,19 @@ class ReactantOptionsSearchAndFilesIntegrationTest {
                     .andExpect(jsonPath("$.archivedAt").doesNotExist());
         }
 
-        /**
-         * A real SUPERVISOR (also permitted to create reactants, per the settled matrix) POSTs a
-         * {@code CreateReactantDto} with every optional field populated (additional short names,
-         * chemical name, CAS number, InChIKey, comment, references). An independent real GET then
-         * confirms all of them - not just the required trio - round-tripped correctly.
-         */
+        // A real SUPERVISOR (also permitted to create reactants, per the settled matrix) POSTs a
+        // CreateReactantDto with every optional field populated (additional short names, chemical
+        // name, CAS number, InChIKey, comment, references). An independent real GET then confirms
+        // all of them, not just the required trio, round-tripped correctly.
         @Test
         void allOptionalFieldsPopulated_createsAndRoundTrips() throws Exception {
-            String supervisorId = "integration-int07-supervisor-" + UUID.randomUUID();
+            String supervisorId = "integration-scenario07-supervisor-" + UUID.randomUUID();
             IntegrationTestHelpers.persistUser(userRepository, supervisorId, Role.SUPERVISOR);
 
             ChemicalType chemicalType = IntegrationTestHelpers.persistChemicalType(
-                    chemicalTypeRepository, "Int07ChemTypeOpt-" + UUID.randomUUID());
+                    chemicalTypeRepository, "Scenario07ChemTypeOpt-" + UUID.randomUUID());
 
-            String shortName = "Int07Optional-" + UUID.randomUUID();
+            String shortName = "Scenario07Optional-" + UUID.randomUUID();
             CreateReactantDto requestDto = new CreateReactantDto(
                     "C1=CC=CC=C1O", chemicalType.getId(), shortName,
                     List.of("Alt1-" + UUID.randomUUID(), "Alt2-" + UUID.randomUUID()),
@@ -287,7 +255,7 @@ class ReactantOptionsSearchAndFilesIntegrationTest {
                     "123-45-6",
                     "ABCDEFGHIJKLMN-OPQRSTUVWX-Y",
                     "Test comment for optional fields",
-                    List.of("10.1000/int07-optional-ref"));
+                    List.of("10.1000/scenario07-optional-ref"));
 
             String responseBody = mockMvc.perform(post("/api/reactant")
                             .with(asRealJwtSubject(supervisorId))
@@ -313,31 +281,27 @@ class ReactantOptionsSearchAndFilesIntegrationTest {
                     .andExpect(jsonPath("$.casNumber").value("123-45-6"))
                     .andExpect(jsonPath("$.inChiKey").value("ABCDEFGHIJKLMN-OPQRSTUVWX-Y"))
                     .andExpect(jsonPath("$.comment").value("Test comment for optional fields"))
-                    .andExpect(jsonPath("$.references[0]").value("10.1000/int07-optional-ref"))
+                    .andExpect(jsonPath("$.references[0]").value("10.1000/scenario07-optional-ref"))
                     .andExpect(jsonPath("$.archivedAt").doesNotExist());
         }
     }
 
     // ------------------------------------------------------------------------------------------
-    // INT-08 - Options catalog creation: ADMIN succeeds, SUPERVISOR forbidden
+    // SCENARIO-08 - Options catalog creation: ADMIN succeeds, SUPERVISOR forbidden
     // ------------------------------------------------------------------------------------------
     @Nested
-    class Int08OptionsCatalogRoleGate {
+    class Scenario08OptionsCatalogRoleGate {
 
-        /**
-         * Representative of the 4 genuinely-identical options endpoints (chemical type, solvent,
-         * instrument, modality) - {@code POST /api/chemical_type} is
-         * {@code @PreAuthorize("hasRole('ADMIN')")} (verified directly in
-         * {@code AbstractOptionsEndpoint.java}, the shared superclass all 4 endpoints extend
-         * without overriding this annotation). A real ADMIN succeeds (201); an independent real
-         * {@code GET /api/chemical_type} then confirms the new option is genuinely listed.
-         */
+        // Representative of the 4 nearly-identical options endpoints (chemical type, solvent,
+        // instrument, modality), which all share the same access rule. Only ADMIN can create a new
+        // chemical type, so this succeeds (201), and a follow-up GET confirms the new option is
+        // genuinely listed.
         @Test
         void adminCreatesChemicalType_succeeds() throws Exception {
-            String adminId = "integration-int08-admin-" + UUID.randomUUID();
+            String adminId = "integration-scenario08-admin-" + UUID.randomUUID();
             IntegrationTestHelpers.persistUser(userRepository, adminId, Role.ADMIN);
 
-            String typeName = "Int08ChemType-" + UUID.randomUUID();
+            String typeName = "Scenario08ChemType-" + UUID.randomUUID();
 
             mockMvc.perform(post("/api/chemical_type")
                             .with(asRealJwtSubject(adminId))
@@ -346,7 +310,7 @@ class ReactantOptionsSearchAndFilesIntegrationTest {
                     .andExpect(status().isCreated())
                     .andExpect(jsonPath("$[*].name", hasItem(typeName)));
 
-            // Independent follow-up read: a fresh GET - not the create response - confirms real
+            // Independent follow-up read: a fresh GET, not the create response, confirms real
             // persistence.
             mockMvc.perform(get("/api/chemical_type")
                             .with(asRealJwtSubject(adminId)))
@@ -354,19 +318,15 @@ class ReactantOptionsSearchAndFilesIntegrationTest {
                     .andExpect(jsonPath("$[*].name", hasItem(typeName)));
         }
 
-        /**
-         * The same endpoint, called by a real SUPERVISOR - who has no elevated rights on the
-         * options catalog at all, unlike Reactant creation (INT-07) - must be rejected with 403,
-         * per {@code hasRole('ADMIN')} (note: not {@code hasAnyRole('ADMIN','SUPERVISOR')}, unlike
-         * {@code ReactantEndpoint#createReactant}). An independent follow-up GET then confirms
-         * nothing was persisted.
-         */
+        // A SUPERVISOR calling the same endpoint should be rejected with 403: unlike reactant
+        // creation, the options catalog is ADMIN-only. A follow-up GET confirms nothing was
+        // persisted.
         @Test
         void supervisorCreatesChemicalType_isForbidden() throws Exception {
-            String supervisorId = "integration-int08-supervisor-" + UUID.randomUUID();
+            String supervisorId = "integration-scenario08-supervisor-" + UUID.randomUUID();
             IntegrationTestHelpers.persistUser(userRepository, supervisorId, Role.SUPERVISOR);
 
-            String typeName = "Int08ForbiddenChemType-" + UUID.randomUUID();
+            String typeName = "Scenario08ForbiddenChemType-" + UUID.randomUUID();
 
             mockMvc.perform(post("/api/chemical_type")
                             .with(asRealJwtSubject(supervisorId))
@@ -383,24 +343,20 @@ class ReactantOptionsSearchAndFilesIntegrationTest {
     }
 
     // ------------------------------------------------------------------------------------------
-    // INT-09 - Reactant archive: ADMIN succeeds, SUPERVISOR forbidden
+    // SCENARIO-09 - Reactant archive: ADMIN succeeds, SUPERVISOR forbidden
     // ------------------------------------------------------------------------------------------
     @Nested
-    class Int09ReactantArchiveRoleGate {
+    class Scenario09ReactantArchiveRoleGate {
 
-        /**
-         * {@code DELETE /api/reactant/{uuid}} is {@code @PreAuthorize("hasRole('ADMIN')")}
-         * (verified directly in {@code ReactantEndpoint.java}) and returns 204. A real ADMIN
-         * archives a real, experiment-free Reactant; an independent follow-up
-         * {@code GET /api/reactant/{uuid}} then confirms {@code archivedAt} is now set.
-         */
+        // Archiving a reactant is ADMIN-only and returns 204. An ADMIN archives a reactant with no
+        // experiments attached, and a follow-up GET confirms archivedAt is now set.
         @Test
         void adminArchivesReactant_succeedsAndArchivedAtSet() throws Exception {
-            String adminId = "integration-int09-admin-" + UUID.randomUUID();
+            String adminId = "integration-scenario09-admin-" + UUID.randomUUID();
             User admin = IntegrationTestHelpers.persistUser(userRepository, adminId, Role.ADMIN);
 
             Reactant reactant = IntegrationTestHelpers.persistReactant(
-                    reactantRepository, admin, "Int09AdminReactant-" + UUID.randomUUID());
+                    reactantRepository, admin, "Scenario09AdminReactant-" + UUID.randomUUID());
 
             mockMvc.perform(delete("/api/reactant/{uuid}", reactant.getId())
                             .with(asRealJwtSubject(adminId)))
@@ -413,19 +369,16 @@ class ReactantOptionsSearchAndFilesIntegrationTest {
                     .andExpect(jsonPath("$.archivedAt").exists());
         }
 
-        /**
-         * The same endpoint, called by a real SUPERVISOR - who, unlike for Reactant *creation*
-         * (INT-07), has no archive rights at all (archiving is treated as archive-management,
-         * ADMIN-only per {@code ReactantEndpoint.java}'s comment on this exact endpoint) - must be
-         * rejected with 403. An independent follow-up GET confirms the entity remains unarchived.
-         */
+        // A SUPERVISOR calling the same endpoint should be rejected with 403: unlike reactant
+        // creation, archiving is treated as ADMIN-only. A follow-up GET confirms the reactant
+        // remains unarchived.
         @Test
         void supervisorArchivesReactant_isForbiddenAndRemainsUnarchived() throws Exception {
-            String supervisorId = "integration-int09-supervisor-" + UUID.randomUUID();
+            String supervisorId = "integration-scenario09-supervisor-" + UUID.randomUUID();
             User supervisor = IntegrationTestHelpers.persistUser(userRepository, supervisorId, Role.SUPERVISOR);
 
             Reactant reactant = IntegrationTestHelpers.persistReactant(
-                    reactantRepository, supervisor, "Int09SupervisorReactant-" + UUID.randomUUID());
+                    reactantRepository, supervisor, "Scenario09SupervisorReactant-" + UUID.randomUUID());
 
             mockMvc.perform(delete("/api/reactant/{uuid}", reactant.getId())
                             .with(asRealJwtSubject(supervisorId)))
@@ -440,35 +393,28 @@ class ReactantOptionsSearchAndFilesIntegrationTest {
     }
 
     // ------------------------------------------------------------------------------------------
-    // INT-10 - Metadata + rate-constant-range filtering, full real round trip
+    // SCENARIO-10 - Metadata + rate-constant-range filtering, full real round trip
     // ------------------------------------------------------------------------------------------
     @Nested
-    class Int10MetadataAndRateConstantFiltering {
+    class Scenario10MetadataAndRateConstantFiltering {
 
-        /**
-         * Three real experiments are seeded for the same (uniquely random) scientist: one matching
-         * both a {@code temperatureMin} filter and a nested {@code measurementSearch.rateConstantMin}
-         * filter, one failing only the rate-constant filter, and one failing only the temperature
-         * filter (confirmed against {@code ExperimentServiceImpl#buildSearchSpecification}, which
-         * AND-combines every supplied filter). A single real
-         * {@code GET /api/experiment?temperatureMin=...&measurementSearch.rateConstantMin=...}
-         * (the nested dotted-path query-param binding syntax confirmed working in
-         * {@code ExperimentEndpointTest}) - additionally scoped by {@code scientist} to this test's
-         * unique creator, so concurrently-seeded data from other tests/methods sharing the same H2
-         * instance can never leak in - returns exactly the one matching experiment, proving the
-         * full controller -&gt; real Spring converter -&gt; real service -&gt; real repository/
-         * Specification wiring works end-to-end over real HTTP.
-         */
+        // Three experiments are seeded for the same scientist: one matching both a temperatureMin
+        // filter and a nested measurementSearch.rateConstantMin filter, one failing only the
+        // rate-constant filter, and one failing only the temperature filter, since both filters
+        // must hold at once for a match. A single GET /api/experiment request with both query
+        // parameters, scoped by scientist to this test's own unique creator so other tests' data
+        // sharing the same H2 instance can't leak in, should return only the one experiment that
+        // satisfies both filters.
         @Test
         void combinedTemperatureAndRateConstantFilter_returnsOnlyMatchingExperiment() throws Exception {
-            String creatorId = "integration-int10-creator-" + UUID.randomUUID();
+            String creatorId = "integration-scenario10-creator-" + UUID.randomUUID();
             User creator = IntegrationTestHelpers.persistUser(userRepository, creatorId, Role.USER);
 
             Reactant reactantA = IntegrationTestHelpers.persistReactantWithActiveStructure(
-                    reactantRepository, reactantStructureRepository, creator, "Int10ReactantA-" + UUID.randomUUID());
+                    reactantRepository, reactantStructureRepository, creator, "Scenario10ReactantA-" + UUID.randomUUID());
             Reactant reactantB = IntegrationTestHelpers.persistReactantWithActiveStructure(
-                    reactantRepository, reactantStructureRepository, creator, "Int10ReactantB-" + UUID.randomUUID());
-            Solvent solvent = IntegrationTestHelpers.persistSolvent(solventRepository, "Int10Solvent-" + UUID.randomUUID());
+                    reactantRepository, reactantStructureRepository, creator, "Scenario10ReactantB-" + UUID.randomUUID());
+            Solvent solvent = IntegrationTestHelpers.persistSolvent(solventRepository, "Scenario10Solvent-" + UUID.randomUUID());
 
             // Matches both filters: temperature (25.0) >= 20.0 AND rateConstant (10.0) >= 5.0.
             UUID matchingId = createExperiment(creatorId, buildExperimentDto(
@@ -493,37 +439,33 @@ class ReactantOptionsSearchAndFilesIntegrationTest {
     }
 
     // ------------------------------------------------------------------------------------------
-    // INT-11 - Raw file retrieval round trip
+    // SCENARIO-11 - Raw file retrieval round trip
     // ------------------------------------------------------------------------------------------
     @Nested
-    class Int11RawFileRetrieval {
+    class Scenario11RawFileRetrieval {
 
         private static final byte[] CANNED_BYTES = "time,signal\n0,1.0\n".getBytes(StandardCharsets.UTF_8);
 
-        /**
-         * A real creator+scientist USER creates a real experiment and uploads a real file to it
-         * (reusing the INT-01 pattern). The mocked {@link S3Client#getObject(GetObjectRequest)} is
-         * then stubbed to return a canned byte stream, and the creator downloads that file via
-         * {@code GET /api/file/{fileId}} ({@code ExperimentFilesEndpoint}). The response body bytes
-         * are asserted to exactly match the canned bytes, and the {@code Content-Disposition}
-         * header is confirmed to be an attachment.
-         */
+        // A creator uploads a file to their own experiment, the mocked S3 client is stubbed to
+        // return canned bytes on download, and the creator downloads the file back. The response
+        // body should match those canned bytes exactly, with a Content-Disposition header marking
+        // it as an attachment.
         @Test
         void creatorDownloadsFile_bytesMatchCannedS3Response() throws Exception {
-            String creatorId = "integration-int11-creator-" + UUID.randomUUID();
+            String creatorId = "integration-scenario11-creator-" + UUID.randomUUID();
             User creator = IntegrationTestHelpers.persistUser(userRepository, creatorId, Role.USER);
 
             Reactant reactantA = IntegrationTestHelpers.persistReactantWithActiveStructure(
-                    reactantRepository, reactantStructureRepository, creator, "Int11ReactantA-" + UUID.randomUUID());
+                    reactantRepository, reactantStructureRepository, creator, "Scenario11ReactantA-" + UUID.randomUUID());
             Reactant reactantB = IntegrationTestHelpers.persistReactantWithActiveStructure(
-                    reactantRepository, reactantStructureRepository, creator, "Int11ReactantB-" + UUID.randomUUID());
-            Solvent solvent = IntegrationTestHelpers.persistSolvent(solventRepository, "Int11Solvent-" + UUID.randomUUID());
+                    reactantRepository, reactantStructureRepository, creator, "Scenario11ReactantB-" + UUID.randomUUID());
+            Solvent solvent = IntegrationTestHelpers.persistSolvent(solventRepository, "Scenario11Solvent-" + UUID.randomUUID());
 
             UUID experimentId = createExperiment(creatorId, buildExperimentDto(
                     reactantA.getId(), reactantB.getId(), creatorId, solvent.getId(), 22.0, 4.0));
 
             MockMultipartFile csvFile = new MockMultipartFile(
-                    "file", "int11-measurement.csv", "text/csv",
+                    "file", "scenario11-measurement.csv", "text/csv",
                     "time,signal\n0,1.23\n".getBytes(StandardCharsets.UTF_8));
 
             String uploadResponseBody = mockMvc.perform(multipart("/api/file/{experimentId}", experimentId)
@@ -548,43 +490,31 @@ class ReactantOptionsSearchAndFilesIntegrationTest {
             assertArrayEquals(CANNED_BYTES, downloadedBytes);
         }
 
-        /**
-         * Deviation from the scenario doc's literal wording, and why: per the real
-         * {@code ExperimentAuthorization#canView} (read directly - not assumed), <b>any</b> approved
-         * role (including a plain, non-creator/non-scientist USER) may view an <b>active</b>
-         * experiment's files; only an <b>archived</b> experiment restricts viewing to the creator,
-         * the designated scientist, or a privileged role. So a non-creator/non-scientist/
-         * non-privileged USER downloading a file from an otherwise-untouched active experiment
-         * would actually succeed (200), not 403 - the scenario doc's assumption doesn't match this
-         * branch of the real code as written.
-         * <p>
-         * To genuinely exercise the forbidden branch the scenario intends to cover, the experiment
-         * is archived first by its own creator (a real, allowed {@code DELETE
-         * /api/experiment/{uuid}}, since {@code canModify} permits the creator/scientist regardless
-         * of archived state) - only then does a second, real, non-creator/non-scientist/
-         * non-privileged {@code USER} get a genuine 403 on the download, proving
-         * {@code ExperimentAuthorization}'s ownership+role check holds through a real end-to-end
-         * HTTP request in this tier, not merely at the unit level.
-         */
+        // Any approved role can view an active experiment's files, even a plain USER who is
+        // neither the creator nor the scientist. Only an archived experiment restricts viewing to
+        // the creator, the scientist, or a privileged role. So to actually trigger a 403, the
+        // experiment first needs to be archived (creators can always archive their own experiment,
+        // regardless of its state), and only then does an unrelated USER get rejected when trying
+        // to download a file from it.
         @Test
         void nonPrivilegedNonCreatorUser_forbiddenOnArchivedExperimentDownload() throws Exception {
-            String creatorId = "integration-int11b-creator-" + UUID.randomUUID();
+            String creatorId = "integration-scenario11b-creator-" + UUID.randomUUID();
             User creator = IntegrationTestHelpers.persistUser(userRepository, creatorId, Role.USER);
 
-            String otherUserId = "integration-int11b-other-" + UUID.randomUUID();
+            String otherUserId = "integration-scenario11b-other-" + UUID.randomUUID();
             IntegrationTestHelpers.persistUser(userRepository, otherUserId, Role.USER);
 
             Reactant reactantA = IntegrationTestHelpers.persistReactantWithActiveStructure(
-                    reactantRepository, reactantStructureRepository, creator, "Int11bReactantA-" + UUID.randomUUID());
+                    reactantRepository, reactantStructureRepository, creator, "Scenario11bReactantA-" + UUID.randomUUID());
             Reactant reactantB = IntegrationTestHelpers.persistReactantWithActiveStructure(
-                    reactantRepository, reactantStructureRepository, creator, "Int11bReactantB-" + UUID.randomUUID());
-            Solvent solvent = IntegrationTestHelpers.persistSolvent(solventRepository, "Int11bSolvent-" + UUID.randomUUID());
+                    reactantRepository, reactantStructureRepository, creator, "Scenario11bReactantB-" + UUID.randomUUID());
+            Solvent solvent = IntegrationTestHelpers.persistSolvent(solventRepository, "Scenario11bSolvent-" + UUID.randomUUID());
 
             UUID experimentId = createExperiment(creatorId, buildExperimentDto(
                     reactantA.getId(), reactantB.getId(), creatorId, solvent.getId(), 22.0, 4.0));
 
             MockMultipartFile csvFile = new MockMultipartFile(
-                    "file", "int11b-measurement.csv", "text/csv",
+                    "file", "scenario11b-measurement.csv", "text/csv",
                     "time,signal\n0,9.99\n".getBytes(StandardCharsets.UTF_8));
 
             String uploadResponseBody = mockMvc.perform(multipart("/api/file/{experimentId}", experimentId)
@@ -595,13 +525,13 @@ class ReactantOptionsSearchAndFilesIntegrationTest {
 
             UUID fileId = objectMapper.readValue(uploadResponseBody, ExperimentAttachmentDetailsDto.class).uuid();
 
-            // The creator archives their own experiment - a real, allowed DELETE.
+            // The creator archives their own experiment: a real, allowed DELETE.
             mockMvc.perform(delete("/api/experiment/{uuid}", experimentId)
                             .with(asRealJwtSubject(creatorId)))
                     .andExpect(status().isNoContent());
 
-            // otherUser is neither the creator, the scientist, nor privileged - and the experiment
-            // is now archived, so ExperimentAuthorization#canView genuinely denies them.
+            // otherUser is neither the creator, the scientist, nor privileged, and the experiment
+            // is now archived, so ExperimentAuthorization.canView genuinely denies them.
             mockMvc.perform(get("/api/file/{fileId}", fileId)
                             .with(asRealJwtSubject(otherUserId)))
                     .andExpect(status().isForbidden());

@@ -113,7 +113,7 @@ class ExperimentValidatorTest {
         );
     }
 
-    /** Stubs all repositories with valid, matching entities for the "happy path". */
+    // Stubs all repositories with valid, matching entities for the "happy path".
     private void stubAllValid() {
         when(userRepository.findById(scientistId)).thenReturn(Optional.of(scientist));
         when(reactantRepository.findByIdForUpdate(reactantAId)).thenReturn(Optional.of(reactantA));

@@ -81,7 +81,7 @@ class MetadataMapperTest {
 
     @Test
     void metadataToGetMetadataDto_shouldMapNullInstrumentAndModality_whenNotProvided() {
-        // Instrument and modality are legitimately optional per ExperimentValidator.
+        // Instrument and modality are legitimately optional.
         metadata.setInstrument(null);
         metadata.setModality(null);
 

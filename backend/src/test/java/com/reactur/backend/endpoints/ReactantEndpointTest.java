@@ -146,7 +146,7 @@ class ReactantEndpointTest {
                 .andExpect(jsonPath("$.shortName").value("Ethene"));
     }
 
-    // Confirmed by the team: SUPERVISOR may create reactants but not update them - this stays
+    // Confirmed by the team: SUPERVISOR may create reactants but not update them. This stays
     // ADMIN-only, pinning against a future "extend everything to SUPERVISOR" regression.
     @Test
     void updateReactant_WhenSupervisor_ShouldReturn403() throws Exception {
@@ -342,7 +342,7 @@ class ReactantEndpointTest {
     }
 
     // Confirmed by the team: restoring is archive-management, which stays ADMIN-only even though
-    // SUPERVISOR may create reactants - pins against a future "extend everything to SUPERVISOR"
+    // SUPERVISOR may create reactants. Pins against a future "extend everything to SUPERVISOR"
     // regression.
     @Test
     void restoreReactant_WhenSupervisor_ShouldReturn403() throws Exception {
@@ -368,8 +368,7 @@ class ReactantEndpointTest {
 
     @Test
     void anyEndpoint_whenUnauthenticated_returns401() throws Exception {
-        // Mirrors StructureEndpointTest/ChemicalTypeEndpointTest's pattern: a plain request with no
-        // JWT at all must be rejected by SecurityConfig before it ever reaches the controller.
+        // A request with no JWT must be rejected before it reaches the controller.
         mockMvc.perform(get("/api/reactant"))
                 .andExpect(status().isUnauthorized());
     }

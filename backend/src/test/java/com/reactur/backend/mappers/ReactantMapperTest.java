@@ -6,9 +6,11 @@ import com.reactur.backend.dtos.reactants.StructureDto;
 import com.reactur.backend.entities.Reactant;
 import com.reactur.backend.entities.options.ChemicalType;
 import com.reactur.backend.enums.StructureFlag;
+import com.reactur.backend.mappers.options.ChemicalTypeMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mapstruct.factory.Mappers;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import java.time.Instant;
 import java.util.List;
@@ -26,6 +28,10 @@ class ReactantMapperTest {
 
     @BeforeEach
     void setUp() {
+        // ReactantMapperImpl relies on Spring field injection for its `uses` mapper, so for a plain
+        // unit test (no Spring context) we wire it in manually.
+        ReflectionTestUtils.setField(mapper, "chemicalTypeMapper", Mappers.getMapper(ChemicalTypeMapper.class));
+
         chemicalType = ChemicalType.builder()
                 .id(UUID.randomUUID())
                 .name("Acid")
@@ -63,11 +69,8 @@ class ReactantMapperTest {
         assertEquals(reactant.getReferences(), dto.references());
         assertEquals(List.of(structure), dto.structures());
 
-        // Known limitation (see TODO on ReactantMapper): the nested ChemicalType -> ChemicalTypeDto
-        // mapping is not wired up via a ChemicalTypeMapper, so its uuid always comes out null even
-        // though the source entity has one. Name still maps correctly.
         assertEquals(chemicalType.getName(), dto.chemicalType().name());
-        assertNull(dto.chemicalType().uuid());
+        assertEquals(chemicalType.getId(), dto.chemicalType().uuid());
     }
 
     @Test
@@ -94,6 +97,7 @@ class ReactantMapperTest {
         assertEquals(reactant.getChemicalName(), dto.chemicalName());
         assertEquals(StructureFlag.READY, dto.flag());
         assertEquals(chemicalType.getName(), dto.chemicalType().name());
+        assertEquals(chemicalType.getId(), dto.chemicalType().uuid());
     }
 
     @Test

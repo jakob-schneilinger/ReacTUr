@@ -12,9 +12,8 @@ import java.util.UUID;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
- * Proves behavioral parity with the hand-written {@code FileServiceImpl.mapToDto}/
- * {@code mapToDetailsDto}/{@code getDownloadUrl} methods this mapper replaced - same field
- * mappings, same {@code "/api/file/{id}"} download URL shape.
+ * Verifies the field mappings and the {@code "/api/file/{id}"} download URL shape this mapper
+ * produces.
  */
 class ExperimentAttachmentMapperTest {
 
