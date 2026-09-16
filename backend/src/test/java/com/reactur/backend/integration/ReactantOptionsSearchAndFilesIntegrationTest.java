@@ -226,6 +226,7 @@ class ReactantOptionsSearchAndFilesIntegrationTest {
                     .andExpect(jsonPath("$.smiles").value("C1=CC=CC=C1"))
                     .andExpect(jsonPath("$.shortName").value(shortName))
                     .andExpect(jsonPath("$.chemicalType.name").value(chemicalType.getName()))
+                    .andExpect(jsonPath("$.chemicalType.uuid").value(chemicalType.getId().toString()))
                     .andExpect(jsonPath("$.additionalShortNames", empty()))
                     .andExpect(jsonPath("$.chemicalName").value(""))
                     .andExpect(jsonPath("$.casNumber").value(""))
@@ -275,6 +276,7 @@ class ReactantOptionsSearchAndFilesIntegrationTest {
                     .andExpect(jsonPath("$.smiles").value("C1=CC=CC=C1O"))
                     .andExpect(jsonPath("$.shortName").value(shortName))
                     .andExpect(jsonPath("$.chemicalType.name").value(chemicalType.getName()))
+                    .andExpect(jsonPath("$.chemicalType.uuid").value(chemicalType.getId().toString()))
                     .andExpect(jsonPath("$.additionalShortNames",
                             containsInAnyOrder(requestDto.additionalShortNames().toArray())))
                     .andExpect(jsonPath("$.chemicalName").value("Full Chemical Name"))
