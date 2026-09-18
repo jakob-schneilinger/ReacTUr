@@ -5,17 +5,19 @@
     <div class="input-group">
       <label>{{ t('rateConstantRange') }}</label>
       <div class="rate-constant-range-group">
-        <div class="clearable-wrapper">
-          <input type="number" [placeholder]="t('labels.from')" class="rate-constant-range-input"
+        <div class="clearable-wrapper has-unit" [class.has-value]="!!params.rateConstantMin">
+          <input type="number" [placeholder]="t('labels.from')" class="rate-constant-range-input" [class.pr-5rem]="!!params.rateConstantMin"
                  [(ngModel)]="params.rateConstantMin" (ngModelChange)="emitSearch()">
+          <span class="unit">M⁻¹s⁻¹</span>
           @if (params.rateConstantMin) {
             <span class="bi bi-x clear-btn" (click)="clearField('rateConstantMin')"></span>
           }
         </div>
         <span class="separator">-</span>
-        <div class="clearable-wrapper">
-          <input type="number" [placeholder]="t('labels.to')" class="rate-constant-range-input"
+        <div class="clearable-wrapper has-unit" [class.has-value]="!!params.rateConstantMax">
+          <input type="number" [placeholder]="t('labels.to')" class="rate-constant-range-input" [class.pr-5rem]="!!params.rateConstantMax"
                  [(ngModel)]="params.rateConstantMax" (ngModelChange)="emitSearch()">
+          <span class="unit">M⁻¹s⁻¹</span>
           @if (params.rateConstantMax) {
             <span class="bi bi-x clear-btn" (click)="clearField('rateConstantMax')"></span>
           }
@@ -62,7 +64,7 @@
       <label>{{ t('temperature') }}</label>
       <div class="temperature-group">
         <div class="clearable-wrapper has-unit" [class.has-value]="!!params.temperature_Min">
-          <input type="number" [placeholder]="t('labels.min')" class="temp-input"
+          <input type="number" [placeholder]="t('labels.min')" class="temp-input" [class.pr-3_5rem]="!!params.temperature_Min"
                  [(ngModel)]="params.temperature_Min" (ngModelChange)="emitSearch()">
           <span class="unit">°C</span>
           @if (params.temperature_Min) {
@@ -71,7 +73,7 @@
         </div>
         <span class="separator">-</span>
         <div class="clearable-wrapper has-unit" [class.has-value]="!!params.temperature_Max">
-          <input type="number" [placeholder]="t('labels.max')" class="temp-input"
+          <input type="number" [placeholder]="t('labels.max')" class="temp-input" [class.pr-3_5rem]="!!params.temperature_Max"
                  [(ngModel)]="params.temperature_Max" (ngModelChange)="emitSearch()">
           <span class="unit">°C</span>
           @if (params.temperature_Max) {
@@ -98,7 +100,7 @@
       <label>{{ t('concentrationA') }}</label>
       <div class="concentration-group">
         <div class="clearable-wrapper has-unit" [class.has-value]="!!params.concentrationA_Min">
-          <input type="number" [placeholder]="t('labels.min')" class="concentration-input"
+          <input type="number" [placeholder]="t('labels.min')" class="concentration-input" [class.pr-4rem]="!!params.concentrationA_Min"
                  [(ngModel)]="params.concentrationA_Min" (ngModelChange)="emitSearch()">
           <span class="unit">mM</span>
           @if (params.concentrationA_Min) {
@@ -107,7 +109,7 @@
         </div>
         <span class="separator">-</span>
         <div class="clearable-wrapper has-unit" [class.has-value]="!!params.concentrationA_Max">
-          <input type="number" [placeholder]="t('labels.max')" class="concentration-input"
+          <input type="number" [placeholder]="t('labels.max')" class="concentration-input" [class.pr-4rem]="!!params.concentrationA_Max"
                  [(ngModel)]="params.concentrationA_Max" (ngModelChange)="emitSearch()">
           <span class="unit">mM</span>
           @if (params.concentrationA_Max) {
@@ -122,7 +124,7 @@
       <label>{{ t('concentrationB') }}</label>
       <div class="concentration-group">
         <div class="clearable-wrapper has-unit" [class.has-value]="!!params.concentrationB_Min">
-          <input type="number" [placeholder]="t('labels.min')" class="concentration-input"
+          <input type="number" [placeholder]="t('labels.min')" class="concentration-input" [class.pr-4rem]="!!params.concentrationB_Min"
                  [(ngModel)]="params.concentrationB_Min" (ngModelChange)="emitSearch()">
           <span class="unit">mM</span>
           @if (params.concentrationB_Min) {
@@ -131,7 +133,7 @@
         </div>
         <span class="separator">-</span>
         <div class="clearable-wrapper has-unit" [class.has-value]="!!params.concentrationB_Max">
-          <input type="number" [placeholder]="t('labels.max')" class="concentration-input"
+          <input type="number" [placeholder]="t('labels.max')" class="concentration-input" [class.pr-4rem]="!!params.concentrationB_Max"
                  [(ngModel)]="params.concentrationB_Max" (ngModelChange)="emitSearch()">
           <span class="unit">mM</span>
           @if (params.concentrationB_Max) {
@@ -170,7 +172,7 @@
       <label>{{ t('wavelengthRange') }}</label>
       <div class="wavelength-group">
         <div class="clearable-wrapper has-unit" [class.has-value]="!!params.wavelength_Min">
-          <input type="number" [placeholder]="t('labels.min')" class="wavelength-input"
+          <input type="number" [placeholder]="t('labels.min')" class="wavelength-input" [class.pr-4rem]="!!params.wavelength_Min"
                  [(ngModel)]="params.wavelength_Min" (ngModelChange)="emitSearch()">
           <span class="unit">nm</span>
           @if (params.wavelength_Min) {
@@ -179,7 +181,7 @@
         </div>
         <span class="separator">-</span>
         <div class="clearable-wrapper has-unit" [class.has-value]="!!params.wavelength_Max">
-          <input type="number" [placeholder]="t('labels.max')" class="wavelength-input"
+          <input type="number" [placeholder]="t('labels.max')" class="wavelength-input" [class.pr-4rem]="!!params.wavelength_Max"
                  [(ngModel)]="params.wavelength_Max" (ngModelChange)="emitSearch()">
           <span class="unit">nm</span>
           @if (params.wavelength_Max) {
@@ -193,17 +195,19 @@
     <div class="input-group">
       <label>{{ t('pfoRateConstantRange') }}</label>
       <div class="pfo-rate-constant-range-group">
-        <div class="clearable-wrapper">
-          <input type="number" [placeholder]="t('labels.from')" class="pfo-rate-constant-range-input"
+        <div class="clearable-wrapper has-unit" [class.has-value]="!!params.pFO_rateConstantMin">
+          <input type="number" [placeholder]="t('labels.from')" class="pfo-rate-constant-range-input" [class.pr-4rem]="!!params.pFO_rateConstantMin"
                  [(ngModel)]="params.pFO_rateConstantMin" (ngModelChange)="emitSearch()">
+          <span class="unit">M⁻¹</span>
           @if (params.pFO_rateConstantMin) {
             <span class="bi bi-x clear-btn" (click)="clearField('pFO_rateConstantMin')"></span>
           }
         </div>
         <span class="separator">-</span>
-        <div class="clearable-wrapper">
-          <input type="number" [placeholder]="t('labels.to')" class="pfo-rate-constant-range-input"
+        <div class="clearable-wrapper has-unit" [class.has-value]="!!params.pFO_rateConstantMax">
+          <input type="number" [placeholder]="t('labels.to')" class="pfo-rate-constant-range-input"  [class.pr-4rem]="!!params.pFO_rateConstantMax"
                  [(ngModel)]="params.pFO_rateConstantMax" (ngModelChange)="emitSearch()">
+          <span class="unit">M⁻¹</span>
           @if (params.pFO_rateConstantMax) {
             <span class="bi bi-x clear-btn" (click)="clearField('pFO_rateConstantMax')"></span>
           }
