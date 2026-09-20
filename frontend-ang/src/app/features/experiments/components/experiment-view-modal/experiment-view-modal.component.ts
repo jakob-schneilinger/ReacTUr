@@ -22,7 +22,7 @@ import { ExperimentService } from '../../experiment.service';
   templateUrl: './experiment-view-modal.component.html',
   styleUrls: ['./experiment-view-modal.component.scss'],
   standalone: true,
-  imports: [CommonModule, AppModalComponent, UploadedFileComponent, RouterLink, TRANSLOCO_IMPORTS],
+  imports: [CommonModule, AppModalComponent, UploadedFileComponent, TRANSLOCO_IMPORTS],
 })
 export class ExperimentViewModalComponent implements OnInit, OnChanges {
   @Input() selectedExperiment: GetExperimentDto | undefined;

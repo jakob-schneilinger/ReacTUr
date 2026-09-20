@@ -21,6 +21,12 @@
 }
 
 .substructure-btn {
+  transition: transform 0.2s ease-in-out;
+  color: $light_gray_hover;
+
+  &:hover {
+    transform: scale(1.1);
+  }
 }
 
 .remove-condition-btn {

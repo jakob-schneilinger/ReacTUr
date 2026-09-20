@@ -279,11 +279,11 @@
       "smarts": "SMARTS",
       "smiles": "SMILES",
       "removeGroup": "Remove Group",
-      "addRule": "Add Rule",
+      "addRule": "Add Substructure",
       "addGroup": "Add Group ( )",
       "searchButton": "Search Substructures",
       "resultsLabel": "Search Results",
-      "placeholder": "Draw or paste sequence...",
+      "placeholder": "Draw or paste substructure...",
       "removeReactant": "Remove Reactant",
       "drawSubstructure": "Draw Substructure",
       "warnings": {

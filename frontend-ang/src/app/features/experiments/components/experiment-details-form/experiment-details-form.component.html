@@ -153,7 +153,7 @@
     <label>{{ 'experiments.details.form.labels.rateConstant' | transloco }}</label>
     <div class="search-field" [class.has-value]="experimentForm.get('rateConstant')?.value">
       <input type="number" formControlName="rateConstant" (keydown)="preventComma($event)" [class.is-invalid]="isInvalid('rateConstant')" [placeholder]="'experiments.details.form.placeholders.value' | transloco" />
-      <span class="icon unit-label text-dark">M-1s-1</span>
+      <span class="icon unit-label text-dark">M⁻¹s⁻¹</span>
       @if (experimentForm.get('rateConstant')?.value) {
         <span class="icon bi bi-x text-black clear-btn" (click)="clearControl('rateConstant')"></span>
       }
@@ -203,6 +203,7 @@
     <label>{{ 'experiments.details.form.labels.pfoRateConstant' | transloco }}</label>
     <div class="search-field" [class.has-value]="experimentForm.get('pFO_rateConstant')?.value">
       <input type="number" formControlName="pFO_rateConstant" (keydown)="preventComma($event)" [class.is-invalid]="isInvalid('pFO_rateConstant')" [placeholder]="'experiments.details.form.placeholders.value' | transloco" />
+      <span class="icon unit-label text-dark">M-1</span>
       @if (experimentForm.get('pFO_rateConstant')?.value) {
         <span class="icon bi bi-x text-black clear-btn" (click)="clearControl('pFO_rateConstant')"></span>
       }
