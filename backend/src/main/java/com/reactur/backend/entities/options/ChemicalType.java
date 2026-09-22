@@ -7,6 +7,9 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 
+/**
+ * The chemical classification assigned to a reactant. Shared fields defined in {@link BaseOption}.
+ */
 @Entity
 @Table(name = "chemical_type")
 @Getter

@@ -11,11 +11,6 @@ import java.util.UUID;
 
 /**
  * Maps {@link ExperimentAttachment} to its two response DTOs.
- * <p>
- * Extracted from {@code FileServiceImpl}'s previously hand-written {@code mapToDto}/
- * {@code mapToDetailsDto} private methods, for consistency with how every other entity in this
- * codebase is mapped (via a dedicated MapStruct interface, not manual field-by-field construction).
- * See the resolved "ExperimentAttachmentMapper?" TODO in {@code ExperimentMapper.java}.
  */
 @Mapper(componentModel = "spring")
 public interface ExperimentAttachmentMapper {
@@ -30,8 +25,10 @@ public interface ExperimentAttachmentMapper {
     ExperimentAttachmentDetailsDto toDetailsDto(ExperimentAttachment entity);
 
     /**
-     * Same computation as the original {@code FileServiceImpl.getDownloadUrl} - byte-for-byte
-     * identical URL shape, just relocated here.
+     * Builds the URL clients use to download this file, by its attachment ID.
+     *
+     * @param id the attachment's ID
+     * @return the download URL
      */
     @Named("computeDownloadUrl")
     default String computeDownloadUrl(UUID id) {

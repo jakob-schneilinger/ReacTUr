@@ -49,6 +49,12 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
+/**
+ * Pure unit test for {@link FileServiceImpl}, with the repository and S3 client mocked. Covers
+ * upload, download, and archive of a file, including the S3-upload-then-DB-save compensating
+ * delete on failure, and the fresh-read race-condition recheck against a concurrently archived
+ * parent experiment.
+ */
 class FileServiceTests {
 
     @Mock

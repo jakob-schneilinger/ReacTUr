@@ -32,6 +32,11 @@ import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+/**
+ * {@code @WebMvcTest} slice test for {@link ReactantEndpoint}: the service layer is mocked, but
+ * the real security filter chain runs, so these tests cover request validation, the per-endpoint
+ * role restrictions declared with {@code @PreAuthorize}, and HTTP status mapping for each outcome.
+ */
 @WebMvcTest(ReactantEndpoint.class)
 @Import({SecurityConfig.class, GlobalExceptionHandler.class})
 class ReactantEndpointTest {

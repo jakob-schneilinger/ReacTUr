@@ -18,6 +18,10 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import java.util.List;
 
+/**
+ * Configures the application's security filter chains, CORS policy, and JWT-based
+ * authentication.
+ */
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity
@@ -26,6 +30,17 @@ public class SecurityConfig {
 
     private final CustomJwtAuthenticationConverter customJwtAuthenticationConverter;
 
+    /**
+     * Security filter chain for the Swagger/OpenAPI documentation endpoints. Evaluated first
+     * ({@code @Order(1)}) since it claims only those specific paths via {@code securityMatcher};
+     * every other request falls through to {@link #filterChain}. Permits all requests: the API
+     * documentation itself isn't sensitive, and the endpoints it describes still enforce their
+     * own authorization independently.
+     *
+     * @param http the security configuration builder
+     * @return the built filter chain
+     * @throws Exception if the security configuration is invalid
+     */
     @Bean
     @Order(1)
     public SecurityFilterChain swaggerFilterChain(HttpSecurity http) throws Exception {
@@ -40,6 +55,15 @@ public class SecurityConfig {
         return http.build();
     }
 
+    /**
+     * Security filter chain for every other request: stateless, JWT-bearer-token authentication
+     * via {@link CustomJwtAuthenticationConverter}. Any approved role may call most endpoints;
+     * per-endpoint/method restrictions on top of that are declared with {@code @PreAuthorize}
+     * where needed.
+     *
+     * @param http the security configuration builder
+     * @return the built filter chain
+     */
     @Bean
     @Order(2)
     public SecurityFilterChain filterChain(HttpSecurity http) {
@@ -69,6 +93,11 @@ public class SecurityConfig {
         return http.build();
     }
 
+    /**
+     * Allows the frontend's dev-server origin to call this API from a browser.
+     *
+     * @return the CORS configuration source
+     */
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();

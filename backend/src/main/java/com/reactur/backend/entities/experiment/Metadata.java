@@ -23,6 +23,10 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.util.UUID;
 
+/**
+ * The conditions an {@link Experiment} was run under: when, by whom, and with which reactants,
+ * solvent, and instrumentation.
+ */
 @Entity
 @Table(name = "metadata")
 @Getter
@@ -39,6 +43,11 @@ public class Metadata {
     @Column(name = "date", nullable = false)
     private LocalDate date;
 
+    /**
+     * The user who actually performed the experiment. Distinct from {@link Experiment}'s {@code
+     * createdBy}, the user who submitted the record; they are often but not always the same
+     * person.
+     */
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "scientist_id", nullable = false)
     private User scientist;

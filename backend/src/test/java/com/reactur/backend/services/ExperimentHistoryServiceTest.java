@@ -45,6 +45,15 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
+/**
+ * Pure unit test for {@link ExperimentHistoryServiceImpl}, with repositories mocked. Covers two
+ * things: the same view-authorization rules as {@link ExperimentAuthorization} (active vs.
+ * archived, creator/scientist/privileged access), using a mocked {@link Javers}; and the actual
+ * commit-rendering logic (CREATE/UPDATE/ARCHIVE/RESTORE classification, value/reference/list
+ * change rendering, ignored properties) against a real, in-memory {@code Javers} instance built
+ * fresh per test via {@code JaversBuilder}, so the rendering is verified against genuine Javers
+ * output rather than a hand-built mock.
+ */
 class ExperimentHistoryServiceTest {
 
   @Mock private Javers javers;

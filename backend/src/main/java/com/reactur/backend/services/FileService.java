@@ -13,6 +13,9 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.List;
 import java.util.UUID;
 
+/**
+ * Manages files attached to experiments: storage in SeaweedFS, metadata in the database.
+ */
 public interface FileService {
 
     /**
@@ -72,7 +75,7 @@ public interface FileService {
     /**
      * Retrieves all file attachments associated with a specific experiment.
      * <p>
-     * Intentionally NOT SECURED - this is an INTERNAL helper used by
+     * Intentionally not secured: this is an internal helper used by
      * {@code ExperimentService} after the parent experiment's own view authorization has
      * already been checked, not a directly user-facing lookup.
      * </p>

@@ -36,6 +36,11 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 
+/**
+ * Pure unit test for {@link UserServiceImpl}, with the repository mocked. Covers setting a
+ * user's role (including the last-admin-demotion guard), deactivating and restoring a user
+ * (including the no-op case when already in the target state), and listing users.
+ */
 @ExtendWith(MockitoExtension.class)
 class UserServiceTest {
 

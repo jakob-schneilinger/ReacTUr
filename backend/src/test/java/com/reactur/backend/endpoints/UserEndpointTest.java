@@ -26,6 +26,12 @@ import static org.springframework.security.test.web.servlet.request.SecurityMock
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+/**
+ * {@code @WebMvcTest} slice test for {@link UserEndpoint}: the service layer is mocked, but the
+ * real security filter chain runs, so these tests cover the per-endpoint role restrictions
+ * declared with {@code @PreAuthorize} (including the self-or-admin rule on the role lookup), and
+ * HTTP status mapping for each outcome.
+ */
 @WebMvcTest(UserEndpoint.class)
 @Import({SecurityConfig.class, GlobalExceptionHandler.class})
 class UserEndpointTest {

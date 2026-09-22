@@ -15,10 +15,10 @@ public interface ReactantStructureRepository extends JpaRepository<ReactantStruc
     /**
      * Batch variant of {@link #findByReactant_Id(UUID)}: fetches all structures for a collection
      * of reactant IDs in a single query, so callers that need structures for many reactants at
-     * once (e.g. {@code ReactantServiceImpl}'s list endpoints) can avoid issuing one query per
-     * reactant.
+     * once can avoid issuing one query per reactant.
      *
      * @param reactantIds the reactant IDs to fetch structures for
+     * @return the matching structures
      */
     List<ReactantStructure> findByReactant_IdIn(Collection<UUID> reactantIds);
 

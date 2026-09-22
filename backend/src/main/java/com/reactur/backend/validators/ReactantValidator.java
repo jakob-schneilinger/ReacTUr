@@ -41,10 +41,27 @@ public class ReactantValidator {
     /**
      * Bundles the entities resolved while validating a reactant create/update so that
      * callers can reuse them without re-fetching by ID.
+     *
+     * @param activeUser   the authenticated user creating the reactant, or {@code null} for an update
+     * @param chemicalType the resolved chemical type, or {@code null} if none was provided/changed
      */
     public record ValidatedReferences(User activeUser, ChemicalType chemicalType) {
     }
 
+    /**
+     * Validates a {@link CreateReactantDto} before a new reactant is persisted: rejects malformed
+     * additional short names, checks for short-name/CAS-number/InChIKey conflicts with existing
+     * reactants, and resolves the authenticated user and chemical type the DTO references.
+     *
+     * @param saveReactant the DTO to validate
+     * @param userId       the Keycloak ID of the authenticated user creating the reactant
+     * @return the resolved {@link User} and {@link ChemicalType}, for reuse without re-fetching
+     *         by ID
+     * @throws ValidationException          if the additional short names are malformed
+     * @throws ResourceConflictException    if a name, CAS number, or InChIKey conflicts with an
+     *                                      existing reactant
+     * @throws UnprocessableEntityException if the referenced chemical type does not exist
+     */
     public ValidatedReferences validateForCreate(CreateReactantDto saveReactant, String userId) {
         List<String> validationErrors = new ArrayList<>();
         validateAdditionalShortNames(saveReactant.shortName(), saveReactant.additionalShortNames(), validationErrors);
@@ -91,6 +108,26 @@ public class ReactantValidator {
         return new ValidatedReferences(activeUser, chemicalType);
     }
 
+    /**
+     * Validates an {@link UpdateReactantDto} before an existing reactant is patched: rejects
+     * blank or malformed fields, checks for short-name/CAS-number/InChIKey conflicts with other
+     * reactants (excluding the one being updated), and resolves the new chemical type if one was
+     * provided.
+     * <p>
+     * Unset ({@code null}) fields are treated as "not being changed": validation only runs
+     * against fields actually present in the patch, falling back to {@code existingReactant}'s
+     * current values when checking for conflicts.
+     *
+     * @param uuid             the ID of the reactant being updated
+     * @param patchDto         the partial update to validate
+     * @param existingReactant the reactant's current state, used to resolve unset fields
+     * @return the resolved {@link ChemicalType} if a new one was provided, otherwise {@code
+     *         null}; the user component is always {@code null}, updates don't reassign the creator
+     * @throws ValidationException          if a provided field is blank or malformed
+     * @throws ResourceConflictException    if a changed name, CAS number, or InChIKey conflicts
+     *                                      with another reactant
+     * @throws UnprocessableEntityException if a provided chemical type does not exist
+     */
     public ValidatedReferences validateForUpdate(UUID uuid, UpdateReactantDto patchDto, Reactant existingReactant) {
         List<String> validationErrors = new ArrayList<>();
 
@@ -145,6 +182,15 @@ public class ReactantValidator {
         return new ValidatedReferences(null, chemicalType);
     }
     
+    /**
+     * Appends a message to {@code validationErrors} for each violation found in {@code
+     * additionalShortNames}: blank entries, case-insensitive duplicates among themselves, or a
+     * case-insensitive overlap with {@code shortName}. Does nothing if the list is null or empty.
+     *
+     * @param shortName            the reactant's primary short name
+     * @param additionalShortNames the additional short names to validate
+     * @param validationErrors     the list to append violation messages to
+     */
     private void validateAdditionalShortNames(String shortName, List<String> additionalShortNames, List<String> validationErrors) {
         if (additionalShortNames == null || additionalShortNames.isEmpty()) {
             return;
@@ -173,6 +219,10 @@ public class ReactantValidator {
      * Collects the short names to check for conflicts, lowercased so they satisfy the
      * case-insensitive contract of {@link ReactantRepository#hasNameConflict(java.util.Collection)}
      * and {@link ReactantRepository#hasNameConflictExcludingId(java.util.Collection, java.util.UUID)}.
+     *
+     * @param primary    the primary short name, or null
+     * @param additional the additional short names, or null
+     * @return the lowercased, deduplicated set of names to check
      */
     private Set<String> collectNames(String primary, List<String> additional) {
         Set<String> names = new HashSet<>();

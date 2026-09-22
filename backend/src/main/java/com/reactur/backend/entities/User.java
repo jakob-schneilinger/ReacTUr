@@ -13,6 +13,11 @@ import java.time.LocalDateTime;
 
 import java.time.Instant;
 
+/**
+ * An application user, synchronized from Keycloak on first login. The row is keyed by the
+ * Keycloak subject claim rather than a generated identifier, so it can always be looked up
+ * directly from a JWT's {@code sub} claim.
+ */
 @Entity
 @Table(name = "app_user")
 @Getter
@@ -22,6 +27,7 @@ import java.time.Instant;
 @Builder
 public class User {
 
+    /** The Keycloak subject claim (not a generated UUID), also used as the JWT lookup key. */
     @Id
     @Column(unique = true, nullable = false, updatable = false)
     private String id;
@@ -35,14 +41,14 @@ public class User {
     @Column(name = "last_name")
     private String lastName;
 
+    /**
+     * Read fresh from this column on every request, never trusted from the JWT itself. The
+     * Keycloak token carries no role claim; it only identifies which user row to look up.
+     */
     @Enumerated(EnumType.STRING)
     @Column(name="role", nullable = false)
     @Builder.Default
     private Role role = Role.UNAUTHORIZED;
-
-    // Roles are always read fresh from this column on every request, never trusted from a token
-    // claim. The Keycloak JWT itself carries no role claim; it's only used to identify which
-    // user's DB row to look up.
 
     @Column(name = "created_at", updatable = false)
     @Builder.Default
@@ -51,7 +57,10 @@ public class User {
     @Column(name = "deactivated_at")
     private Instant deactivatedAt;
 
-    // Optimistic locking prevents two concurrent role changes from silently overwriting each other.
+    /**
+     * Optimistic-locking token. Prevents two concurrent role changes on the same user from
+     * silently overwriting each other.
+     */
     @Version
     private Long version;
 }

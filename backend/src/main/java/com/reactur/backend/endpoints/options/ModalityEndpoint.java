@@ -5,6 +5,7 @@ import com.reactur.backend.services.options.ModalityService;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+/** Concrete REST controller for {@link ModalityDto} options; all endpoint logic lives in {@link AbstractOptionsEndpoint}. */
 @RestController
 @RequestMapping("/api/modality")
 public class ModalityEndpoint extends AbstractOptionsEndpoint<ModalityDto> {

@@ -18,6 +18,9 @@ import lombok.Setter;
 import java.time.Instant;
 import java.util.UUID;
 
+/**
+ * A file (e.g. raw measurement data) uploaded and attached to an {@link Experiment}.
+ */
 @Entity
 @Table(name = "experiment_attachments")
 @Getter
@@ -41,6 +44,7 @@ public class ExperimentAttachment {
     @Column(name = "file_type", nullable = false)
     private String fileType;
 
+    /** The object key this file's bytes are stored under in the S3/SeaweedFS backend, not a local path. */
     @Column(name = "storage_reference_id", nullable = false)
     private String storageReferenceId;
 

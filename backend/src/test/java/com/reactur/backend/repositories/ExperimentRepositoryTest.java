@@ -19,6 +19,10 @@ import java.util.UUID;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+/**
+ * Verifies {@link ExperimentRepository}'s custom queries against a real database: filtering to
+ * only archived experiments, and finding a user's archived experiments by creator or scientist.
+ */
 // See ReactantRepositoryTest for why @DataJpaTest + @AutoConfigureTestDatabase(Replace.NONE) +
 // @ActiveProfiles("test") are all required together.
 @DataJpaTest

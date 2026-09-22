@@ -40,10 +40,9 @@ public class StructureServiceImpl implements StructureService {
      * Basic upper bound on the size of a single structure payload accepted from the external
      * structure-generation API before persisting it (A08 - response content validation).
      * <p>
-     * {@link com.reactur.backend.entities.ReactantStructure#getStructure()} is backed by a
-     * Postgres {@code TEXT} column, which has no meaningful size limit of its own (~1GB hard
-     * ceiling), so this is purely an application-level sanity guard rather than a mirror of a DB
-     * constraint. Legitimate payloads here are XYZ/MOL-format 3D structures for the small organic
+     * {@link ReactantStructure}'s {@code structure} field is backed by a Postgres {@code TEXT}
+     * column, which has no meaningful size limit of its own (~1GB hard ceiling), so this is
+     * purely an application-level sanity guard rather than a mirror of a DB constraint. Legitimate payloads here are XYZ/MOL-format 3D structures for the small organic
      * reactants this system deals with (roughly tens to a few thousand atoms); even a generous
      * ~10,000-atom XYZ file (at ~50-60 chars/atom line) is still well under 1MB. 1,000,000
      * characters gives about two orders of magnitude of headroom over any realistic legitimate
@@ -53,14 +52,10 @@ public class StructureServiceImpl implements StructureService {
     private static final int MAX_STRUCTURE_LENGTH = 1_000_000;
 
     /**
-     * Provisional per-file size cap in bytes (default 1MB) for manually-uploaded structure files,
-     * matching the limit the frontend's FileUploadComponent already enforces for reactant structure
-     * uploads (see reactant-details-page.component.html's {@code [maxFileSizeMB]="1"}). This is NOT a
-     * finalized product decision - see Software_todo.md item 14 - just a stop-gap so the backend
-     * enforces something instead of relying solely on the frontend. Deployers can override via
-     * {@code app.upload.structure-file.max-size-bytes} without a code change.
-     * TODO: replace with a properly decided, tested limit (and matching file-type restrictions) once
-     * product/Dennis decide the real policy - see Software_todo.md item 14.
+     * Provisional per-file size cap in bytes (default 1MB) for manually-uploaded structure files.
+     * Not a finalized product decision, just a stop-gap so the backend enforces something instead
+     * of relying solely on the frontend. Deployers can override via {@code
+     * app.upload.structure-file.max-size-bytes} without a code change.
      */
     @Value("${app.upload.structure-file.max-size-bytes:1048576}")
     private long maxStructureFileSizeBytes = 1_048_576L;
@@ -290,6 +285,9 @@ public class StructureServiceImpl implements StructureService {
      * Basic (deliberately non-chemistry-aware) content check for a structure string returned by
      * the external API: rejects {@code null}, blank/whitespace-only content, and anything beyond
      * {@link #MAX_STRUCTURE_LENGTH}. This does not attempt to parse or validate XYZ/MOL syntax.
+     *
+     * @param structure the structure content to check
+     * @return true if the content passes the basic sanity check
      */
     private boolean isValidStructure(String structure) {
         return structure != null && !structure.isBlank() && structure.length() <= MAX_STRUCTURE_LENGTH;

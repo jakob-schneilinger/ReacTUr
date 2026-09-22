@@ -47,7 +47,7 @@ import java.util.stream.Collectors;
  * class is responsible for: (1) classifying each commit as CREATE/UPDATE/ARCHIVE/RESTORE, (2)
  * rendering each changed property as a "before -&gt; after" display string, and (3) resolving
  * reference IDs (instrument/modality/solvent/reactant/user UUIDs, and commit author IDs) to
- * human-readable names instead of raw UUIDs - batching those lookups instead of querying once per
+ * human-readable names instead of raw UUIDs, batching those lookups instead of querying once per
  * individual change.
  */
 @Slf4j
@@ -93,7 +93,13 @@ public class ExperimentHistoryServiceImpl implements ExperimentHistoryService {
                 .toList();
     }
 
-    /** Gathers every Javers change recorded against the experiment itself and its Metadata/ExperimentResult sub-entities. */
+    /**
+     * Gathers every Javers change recorded against the experiment itself and its
+     * Metadata/ExperimentResult sub-entities.
+     *
+     * @param experiment the experiment to fetch changes for
+     * @return every change found, across all three entities
+     */
     private List<Change> fetchAllChanges(Experiment experiment) {
         List<Change> allChanges = new ArrayList<>(javers.findChanges(
                 QueryBuilder.byInstanceId(experiment.getId(), Experiment.class).build()
@@ -114,6 +120,14 @@ public class ExperimentHistoryServiceImpl implements ExperimentHistoryService {
         return allChanges;
     }
 
+    /**
+     * Assembles one {@link ExperimentHistoryDto} entry from a single Javers commit and its changes.
+     *
+     * @param commit           the commit's metadata (author, date)
+     * @param changesInCommit  the changes recorded in this commit
+     * @param entityLookupMap  ID-to-display-name lookups, from {@link #buildEntityLookupMap}
+     * @return the assembled history entry
+     */
     private ExperimentHistoryDto toHistoryDto(CommitMetadata commit, List<Change> changesInCommit, Map<String, String> entityLookupMap) {
         String commitType = classifyCommitType(changesInCommit);
         Map<String, String> diffMap = buildDiffMap(changesInCommit, entityLookupMap);
@@ -125,6 +139,9 @@ public class ExperimentHistoryServiceImpl implements ExperimentHistoryService {
     /**
      * A commit is CREATE if it contains Javers' {@link NewObject} marker, ARCHIVE/RESTORE if the
      * {@code archivedAt} property transitioned null&lt;-&gt;non-null, and UPDATE otherwise.
+     *
+     * @param changesInCommit the changes recorded in the commit
+     * @return the classified commit type
      */
     private String classifyCommitType(List<Change> changesInCommit) {
         boolean isNewObject = changesInCommit.stream().anyMatch(NewObject.class::isInstance);
@@ -146,7 +163,13 @@ public class ExperimentHistoryServiceImpl implements ExperimentHistoryService {
         return "UPDATE";
     }
 
-    /** Renders every non-ignored property change in a commit as a "before -> after" display string. */
+    /**
+     * Renders every non-ignored property change in a commit as a "before -> after" display string.
+     *
+     * @param changesInCommit the changes recorded in the commit
+     * @param entityLookupMap ID-to-display-name lookups, from {@link #buildEntityLookupMap}
+     * @return a map of property name to its rendered "before -> after" change
+     */
     private Map<String, String> buildDiffMap(List<Change> changesInCommit, Map<String, String> entityLookupMap) {
         Map<String, String> diffMap = new HashMap<>();
 
@@ -165,21 +188,31 @@ public class ExperimentHistoryServiceImpl implements ExperimentHistoryService {
         return diffMap;
     }
 
+    /**
+     * The property a change is about, or null if it's not a {@link PropertyChange} (e.g.
+     * NewObject/ObjectRemoved).
+     *
+     * @param change the change to inspect
+     * @return the property name, or null if the change has none
+     */
     private String propertyNameOf(Change change) {
         return change instanceof PropertyChange<?> propertyChange ? propertyChange.getPropertyName() : null;
     }
 
     /**
      * Renders a single property change. {@link ReferenceChange} gets special handling to resolve
-     * IDs to display names; every other {@link PropertyChange} - values, lists, sets, maps, and
-     * any future Javers change type - is rendered generically via its own left/right values.
+     * IDs to display names; every other {@link PropertyChange} (values, lists, sets, maps, and any
+     * future Javers change type) is rendered generically via its own left/right values.
      * <p>
-     * This is deliberate: the previous version of this class enumerated ValueChange/ReferenceChange
-     * explicitly and silently dropped list-typed property changes (e.g. {@code Experiment.dois})
-     * from the audit trail entirely, because Javers' {@code ListChange} matched neither case -
-     * confirmed with a real Javers instance in a throwaway test before this rewrite. Falling back
-     * to the shared {@link PropertyChange} contract instead of an exhaustive type list means no
-     * future property type (list, set, map, or otherwise) can go silently unhandled again.
+     * Matching against the shared {@link PropertyChange} contract, rather than enumerating each
+     * concrete change type individually, means a property type this method doesn't specifically
+     * know about (e.g. a list-typed change) still gets rendered instead of silently dropped from
+     * the audit trail.
+     *
+     * @param change          the change to render
+     * @param entityLookupMap ID-to-display-name lookups, from {@link #buildEntityLookupMap}
+     * @return the rendered "before -> after" string, or null if the change carries no single
+     *         property value of its own
      */
     private String renderChange(Change change, Map<String, String> entityLookupMap) {
         return switch (change) {
@@ -189,6 +222,14 @@ public class ExperimentHistoryServiceImpl implements ExperimentHistoryService {
         };
     }
 
+    /**
+     * Resolves both sides of a reference change from IDs to display names via {@code
+     * entityLookupMap}, falling back to the raw ID string if not found.
+     *
+     * @param refChange       the reference change to render
+     * @param entityLookupMap ID-to-display-name lookups, from {@link #buildEntityLookupMap}
+     * @return the rendered "before -> after" string
+     */
     private String renderReferenceChange(ReferenceChange refChange, Map<String, String> entityLookupMap) {
         Object leftId = idOf(refChange.getLeft());
         Object rightId = idOf(refChange.getRight());
@@ -199,14 +240,29 @@ public class ExperimentHistoryServiceImpl implements ExperimentHistoryService {
         return leftDisplay + " -> " + rightDisplay;
     }
 
-    /** Extracts the raw concrete-domain-object ID (a UUID or a String, depending on the referenced entity) from one side of a ReferenceChange. */
+    /**
+     * Extracts the raw concrete-domain-object ID (a UUID or a String, depending on the referenced
+     * entity) from one side of a ReferenceChange.
+     *
+     * @param referenceEndpoint one side ({@code getLeft()}/{@code getRight()}) of a {@link ReferenceChange}
+     * @return the raw ID, or null if the endpoint isn't a resolvable {@link InstanceId}
+     */
     private Object idOf(Object referenceEndpoint) {
         return referenceEndpoint instanceof InstanceId instanceId ? instanceId.getCdoId() : null;
     }
 
     // --- Resolving reference IDs (instrument/modality/solvent/reactant/user) to display names ---
 
-    /** Groups the reference IDs collected from a batch of changes by which repository each one belongs to. */
+    /**
+     * Groups the reference IDs collected from a batch of changes by which repository each one
+     * belongs to.
+     *
+     * @param instrumentIds referenced instrument IDs
+     * @param modalityIds   referenced modality IDs
+     * @param solventIds    referenced solvent IDs
+     * @param reactantIds   referenced reactant IDs
+     * @param userIds       referenced user IDs (commit authors and scientist/creator references)
+     */
     private record ReferencedIds(
             Set<UUID> instrumentIds,
             Set<UUID> modalityIds,
@@ -219,6 +275,14 @@ public class ExperimentHistoryServiceImpl implements ExperimentHistoryService {
         }
     }
 
+    /**
+     * Batch-resolves every instrument/modality/solvent/reactant/user ID referenced anywhere in
+     * {@code allChanges} to a human-readable display name, one query per repository rather than
+     * one query per reference.
+     *
+     * @param allChanges every change collected for the experiment being rendered
+     * @return a map of ID (as a string) to display name
+     */
     private Map<String, String> buildEntityLookupMap(List<Change> allChanges) {
         ReferencedIds ids = collectReferencedIds(allChanges);
 
@@ -242,6 +306,13 @@ public class ExperimentHistoryServiceImpl implements ExperimentHistoryService {
         return lookupMap;
     }
 
+    /**
+     * Scans every change for the IDs that {@link #buildEntityLookupMap} will need to resolve:
+     * every commit author, plus both sides of every {@link ReferenceChange}.
+     *
+     * @param allChanges every change collected for the experiment being rendered
+     * @return the collected IDs, grouped by which repository each belongs to
+     */
     private ReferencedIds collectReferencedIds(List<Change> allChanges) {
         ReferencedIds ids = ReferencedIds.empty();
 
@@ -261,6 +332,15 @@ public class ExperimentHistoryServiceImpl implements ExperimentHistoryService {
         return ids;
     }
 
+    /**
+     * Adds {@code id} to the matching bucket in {@code ids} based on which reference property it
+     * came from. Does nothing for a property this audit trail doesn't resolve a display name
+     * for, or if the cast to the expected ID type fails.
+     *
+     * @param propertyName the name of the property the reference change is on
+     * @param id           the raw referenced ID, or null
+     * @param ids          the bucket set to add {@code id} to
+     */
     private void addReferencedId(String propertyName, Object id, ReferencedIds ids) {
         if (id == null) {
             return;

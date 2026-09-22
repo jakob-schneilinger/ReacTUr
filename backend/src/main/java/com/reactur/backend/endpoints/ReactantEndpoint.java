@@ -26,6 +26,9 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 import java.util.UUID;
 
+/**
+ * REST controller for managing reactants.
+ */
 @Slf4j
 @RestController
 @RequestMapping("/api/reactant")
@@ -34,6 +37,14 @@ public class ReactantEndpoint {
 
     private final ReactantService reactantService;
 
+    /**
+     * Creates a new reactant. Only ADMIN and SUPERVISOR may create reactants.
+     *
+     * @param saveReactant the reactant to create
+     * @param jwt          the Keycloak token containing the requesting user's internal ID
+     * @return a {@link ResponseEntity} containing the created {@link ReactantDetailDto} and a 201
+     *         Created status
+     */
     @PostMapping
     @PreAuthorize("hasAnyRole('ADMIN','SUPERVISOR')")
     public ResponseEntity<ReactantDetailDto> createReactant(@Valid @RequestBody CreateReactantDto saveReactant, @AuthenticationPrincipal Jwt jwt) {
@@ -42,6 +53,14 @@ public class ReactantEndpoint {
         return ResponseEntity.status(HttpStatus.CREATED).body(created);
     }
 
+    /**
+     * Partially updates an existing reactant. Only ADMIN may update a reactant.
+     *
+     * @param uuid         the UUID of the reactant to update
+     * @param saveReactant the fields to change; unset fields are left as they are
+     * @param jwt          the Keycloak token containing the requesting user's internal ID
+     * @return a {@link ResponseEntity} containing the updated {@link ReactantDetailDto}
+     */
     @PatchMapping("/{uuid}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ReactantDetailDto> updateReactant(
@@ -53,6 +72,14 @@ public class ReactantEndpoint {
         return ResponseEntity.ok(updated);
     }
 
+    /**
+     * Retrieves the full details of a reactant, including its structures. Visible to any
+     * approved user.
+     *
+     * @param uuid the UUID of the reactant
+     * @param jwt  the Keycloak token containing the requesting user's internal ID
+     * @return a {@link ResponseEntity} containing the {@link ReactantDetailDto}
+     */
     @GetMapping("/{uuid}")
     public ResponseEntity<ReactantDetailDto> getReactantDetail(@PathVariable UUID uuid, @AuthenticationPrincipal Jwt jwt) {
         log.info("GET /api/reactant/{} called by user {}", uuid, jwt.getSubject());
@@ -60,6 +87,12 @@ public class ReactantEndpoint {
         return ResponseEntity.ok(detail);
     }
 
+    /**
+     * Lists all active (non-archived) reactants. Visible to any approved user.
+     *
+     * @param jwt the Keycloak token containing the requesting user's internal ID
+     * @return a {@link ResponseEntity} containing the active {@link ReactantDto}s
+     */
     @GetMapping
     public ResponseEntity<List<ReactantDto>> getAllReactants(@AuthenticationPrincipal Jwt jwt) {
         log.info("GET /api/reactant called by user {}", jwt.getSubject());
@@ -67,6 +100,12 @@ public class ReactantEndpoint {
         return ResponseEntity.ok(reactants);
     }
 
+    /**
+     * Lists all archived reactants. Only ADMIN and SUPERVISOR may view archived reactants.
+     *
+     * @param jwt the Keycloak token containing the requesting user's internal ID
+     * @return a {@link ResponseEntity} containing the archived {@link ReactantDto}s
+     */
     @GetMapping("/archived")
     @PreAuthorize("hasAnyRole('ADMIN','SUPERVISOR')")
     public ResponseEntity<List<ReactantDto>> getArchivedReactants(@AuthenticationPrincipal Jwt jwt) {
@@ -75,6 +114,13 @@ public class ReactantEndpoint {
         return ResponseEntity.ok(archived);
     }
 
+    /**
+     * Archives (soft-deletes) a reactant. Only ADMIN may archive a reactant.
+     *
+     * @param uuid the UUID of the reactant to archive
+     * @param jwt  the Keycloak token containing the requesting user's internal ID
+     * @return a {@link ResponseEntity} with a 204 No Content status
+     */
     @DeleteMapping("/{uuid}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> archiveReactant(@PathVariable UUID uuid, @AuthenticationPrincipal Jwt jwt) {
@@ -83,8 +129,14 @@ public class ReactantEndpoint {
         return ResponseEntity.noContent().build();
     }
 
-    // Restoring a reactant is treated as archive-management, which stays ADMIN-only.
-    // SUPERVISOR may create reactants but not undo an ADMIN's archive decision.
+    /**
+     * Restores a previously archived reactant. Treated as archive-management, so it stays
+     * ADMIN-only even though SUPERVISOR may create reactants.
+     *
+     * @param uuid the UUID of the archived reactant to restore
+     * @param jwt  the Keycloak token containing the requesting user's internal ID
+     * @return a {@link ResponseEntity} containing the restored {@link ReactantDto}
+     */
     @PutMapping("/{uuid}/restore")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ReactantDto> restoreReactant(@PathVariable UUID uuid, @AuthenticationPrincipal Jwt jwt) {

@@ -273,6 +273,31 @@
                     <ossindexAnalyzerEnabled>false</ossindexAnalyzerEnabled>
                 </configuration>
             </plugin>
+
+            <!-- maven-javadoc-plugin: JavaDoc content validation only, catching broken {@link}
+                 targets, mismatched @param, missing @return, and malformed tag syntax. Like the
+                 OWASP plugin above, deliberately NOT bound to any lifecycle phase, so it never
+                 runs as part of a normal `./mvnw -o clean test`. Run manually when needed:
+                     ./mvnw javadoc:javadoc
+                 Not used to generate or publish HTML documentation as a project deliverable.
+                 -Xmaxwarns raised because the underlying javadoc/javac tool silently caps warning
+                 output at 100 by default, which hides real issues in a codebase this size. -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <configuration>
+                    <doclint>all</doclint>
+                    <quiet>true</quiet>
+                    <!-- Default javadoc scope is public+protected only. Private members must
+                         be checked as well or a large part of the codebase's JavaDoc would never
+                         actually be validated. -->
+                    <show>private</show>
+                    <additionalOptions>
+                        <additionalOption>-Xmaxwarns</additionalOption>
+                        <additionalOption>100000</additionalOption>
+                    </additionalOptions>
+                </configuration>
+            </plugin>
         </plugins>
     </build>
 

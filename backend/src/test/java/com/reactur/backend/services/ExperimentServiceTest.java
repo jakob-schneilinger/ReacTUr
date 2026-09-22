@@ -77,6 +77,12 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+/**
+ * Pure unit test for {@link ExperimentServiceImpl}, with repositories, mappers, and validators
+ * mocked. Organized by operation ({@code @Nested} per CRUD method plus search), covering the
+ * authorization rules on each, and that the search endpoint builds and executes the expected
+ * paginated query.
+ */
 @ExtendWith(MockitoExtension.class) // Tells JUnit to use Mockito instead of loading Spring Boot
 class ExperimentServiceTest {
 

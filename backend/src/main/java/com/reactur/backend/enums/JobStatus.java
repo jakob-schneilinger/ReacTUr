@@ -11,6 +11,12 @@ public enum JobStatus {
     FAILED,
     UNKNOWN;
 
+    /**
+     * True only for {@link #SUCCEEDED}. A {@link #FAILED} job is finished too, but not "finished"
+     * in this sense.
+     *
+     * @return true if this status is {@link #SUCCEEDED}
+     */
     public boolean isFinished() {
         return this == SUCCEEDED;
     }
@@ -23,6 +29,13 @@ public enum JobStatus {
         return this == FAILED;
     }
 
+    /**
+     * Parses the external API's status string, case-insensitively, falling back to {@link
+     * #UNKNOWN} for anything unrecognized.
+     *
+     * @param status the raw status string from the external API
+     * @return the parsed status
+     */
     public static JobStatus fromString(String status) {
         if (status == null) return UNKNOWN;
         try {

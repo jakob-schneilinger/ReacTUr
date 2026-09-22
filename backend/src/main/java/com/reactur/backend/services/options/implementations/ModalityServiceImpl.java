@@ -7,6 +7,7 @@ import com.reactur.backend.repositories.options.ModalityRepository;
 import com.reactur.backend.services.options.ModalityService;
 import org.springframework.stereotype.Service;
 
+/** Concrete service bean for {@link Modality} options; all logic lives in {@link OptionServiceImpl}. */
 @Service
 public class ModalityServiceImpl extends OptionServiceImpl<Modality, ModalityDto> implements ModalityService {
 

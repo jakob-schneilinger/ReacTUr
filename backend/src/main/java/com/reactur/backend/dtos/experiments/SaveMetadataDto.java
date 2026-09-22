@@ -15,6 +15,7 @@ import java.util.UUID;
  * DTO for creating or updating experimental metadata.
  *
  * @param date           The date the experiment was conducted.
+ * @param scientist      The Keycloak ID of the user who performed the experiment.
  * @param temperature    The temperature during the experiment in °C.
  * @param solvent        The UUID of the solvent used.
  * @param concentrationA The concentration of reactant A.

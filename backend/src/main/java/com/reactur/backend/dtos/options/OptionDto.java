@@ -3,7 +3,7 @@ package com.reactur.backend.dtos.options;
 import com.reactur.backend.dtos.DetailsDto;
 
 /**
- * Interface for Options that are determined by the admin
+ * Interface for Options that are determined by the admin.
  */
 public interface OptionDto extends DetailsDto {
 

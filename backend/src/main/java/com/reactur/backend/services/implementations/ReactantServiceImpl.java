@@ -170,6 +170,14 @@ public class ReactantServiceImpl implements ReactantService {
         return reactantMapper.toDto(saved, determineAggregateFlag(uuid));
     }
 
+    /**
+     * Computes a single reactant's aggregate structure flag by issuing its own query, for callers
+     * that already have just one reactant at hand. See {@link #determineAggregateFlag(List)} for
+     * the batch-oriented counterpart.
+     *
+     * @param reactantId the reactant to compute the flag for
+     * @return the aggregate flag, or null if the reactant has no structures
+     */
     private StructureFlag determineAggregateFlag(UUID reactantId) {
         List<StructureDto> structures = structureService.getStructuresByReactant(reactantId);
         if (structures == null) return null;
@@ -181,6 +189,9 @@ public class ReactantServiceImpl implements ReactantService {
      * {@link #getAllReactants()} and {@link #getArchivedReactants()}: computes the aggregate flag
      * from a reactant's own pre-fetched sublist of {@link ReactantStructure}s (see
      * {@link #groupStructuresByReactantId(List)}) instead of issuing a per-reactant query.
+     *
+     * @param structures the reactant's own structures
+     * @return the aggregate flag, or null if there are no structures
      */
     private StructureFlag determineAggregateFlag(List<ReactantStructure> structures) {
         if (structures == null) return null;
@@ -191,6 +202,9 @@ public class ReactantServiceImpl implements ReactantService {
      * Priority logic shared by both {@link #determineAggregateFlag(UUID)} and
      * {@link #determineAggregateFlag(List)}: ACTIVE &gt; READY &gt; PENDING &gt; all-FAILED &gt;
      * REJECTED.
+     *
+     * @param flags the reactant's structures' flags
+     * @return the single, aggregate flag, or null if {@code flags} is null or empty
      */
     private StructureFlag determineAggregateFlagFromFlags(List<StructureFlag> flags) {
         if (flags == null || flags.isEmpty()) return null;
@@ -208,6 +222,9 @@ public class ReactantServiceImpl implements ReactantService {
      * groups them by reactant ID, avoiding the N+1 pattern of calling
      * {@code structureService.getStructuresByReactant} once per reactant (which itself repeats a
      * now-redundant reactant-existence check for every call).
+     *
+     * @param reactants the reactants to fetch structures for
+     * @return a map of reactant ID to that reactant's structures
      */
     private Map<UUID, List<ReactantStructure>> groupStructuresByReactantId(List<Reactant> reactants) {
         List<UUID> reactantIds = reactants.stream().map(Reactant::getId).toList();

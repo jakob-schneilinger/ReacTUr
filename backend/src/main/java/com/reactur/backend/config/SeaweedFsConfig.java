@@ -11,6 +11,9 @@ import software.amazon.awssdk.services.s3.S3Configuration;
 
 import java.net.URI;
 
+/**
+ * Configures the S3 client used to talk to the SeaweedFS-based file storage backend.
+ */
 @Configuration
 public class SeaweedFsConfig {
 
@@ -23,6 +26,12 @@ public class SeaweedFsConfig {
     @Value("${seaweedfs.s3.secret-key}")
     private String secretKey;
 
+    /**
+     * The region is a required AWS SDK field with no real meaning for a self-hosted SeaweedFS
+     * instance, so a fixed placeholder value is used.
+     *
+     * @return the configured S3 client
+     */
     @Bean
     public S3Client s3Client() {
         return S3Client.builder()

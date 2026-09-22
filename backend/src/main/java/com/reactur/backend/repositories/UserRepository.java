@@ -8,6 +8,11 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface UserRepository extends JpaRepository<User, String> {
 
-    /** Used to guard against demoting the last remaining ADMIN (see {@code UserServiceImpl.setRole}). */
+    /**
+     * Used to guard against ending up with zero remaining ADMIN users.
+     *
+     * @param role the role to count
+     * @return the number of users with that role
+     */
     long countByRole(Role role);
 }

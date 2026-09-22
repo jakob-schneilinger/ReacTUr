@@ -20,6 +20,13 @@ import org.springframework.web.bind.annotation.RequestBody;
 import java.util.List;
 import java.util.UUID;
 
+/**
+ * Shared REST controller implementation for the simple, admin-managed option catalogs (chemical
+ * type, instrument, modality, solvent): list, create, archive, restore. Concrete subclasses only
+ * supply the request mapping and the specific {@link OptionService} to delegate to.
+ *
+ * @param <T> the option DTO type
+ */
 @Slf4j
 public abstract class AbstractOptionsEndpoint<T extends OptionDto> {
 
@@ -29,12 +36,28 @@ public abstract class AbstractOptionsEndpoint<T extends OptionDto> {
         this.service = service;
     }
 
+    /**
+     * Lists every non-archived option in this catalog. Visible to any approved user.
+     *
+     * @param request the current HTTP request, used only for logging the method and path
+     * @param jwt     the Keycloak token containing the requesting user's internal ID
+     * @return a {@link ResponseEntity} containing every active option
+     */
     @GetMapping()
     public ResponseEntity<List<T>> getKnownOptions(HttpServletRequest request, @AuthenticationPrincipal Jwt jwt) {
         log.info("{} {} called by user {}", request.getMethod(), request.getRequestURI(), jwt.getSubject());
         return ResponseEntity.ok(service.getKnownOptions());
     }
 
+    /**
+     * Creates a new option in this catalog. Only ADMIN may create options.
+     *
+     * @param optionDto the option to create
+     * @param request   the current HTTP request, used only for logging the method and path
+     * @param jwt       the Keycloak token containing the requesting user's internal ID
+     * @return a {@link ResponseEntity} containing the full, updated option list and a 201 Created
+     *         status
+     */
     @PostMapping()
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<List<T>> createOptions(@RequestBody @Valid T optionDto, HttpServletRequest request, @AuthenticationPrincipal Jwt jwt) {
@@ -42,6 +65,14 @@ public abstract class AbstractOptionsEndpoint<T extends OptionDto> {
         return ResponseEntity.status(HttpStatus.CREATED).body(service.createOptions(optionDto));
     }
 
+    /**
+     * Archives (soft-deletes) an option. Only ADMIN may archive options.
+     *
+     * @param uuid    the UUID of the option to archive
+     * @param request the current HTTP request, used only for logging the method and path
+     * @param jwt     the Keycloak token containing the requesting user's internal ID
+     * @return a {@link ResponseEntity} with a 200 OK status
+     */
     @DeleteMapping("/{uuid}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> archiveOption(@PathVariable UUID uuid, HttpServletRequest request, @AuthenticationPrincipal Jwt jwt) {
@@ -50,6 +81,14 @@ public abstract class AbstractOptionsEndpoint<T extends OptionDto> {
         return ResponseEntity.ok().build();
     }
 
+    /**
+     * Restores a previously archived option. Only ADMIN may restore options.
+     *
+     * @param uuid    the UUID of the option to restore
+     * @param request the current HTTP request, used only for logging the method and path
+     * @param jwt     the Keycloak token containing the requesting user's internal ID
+     * @return a {@link ResponseEntity} with a 200 OK status
+     */
     @PutMapping("/{uuid}/restore")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> restoreOption(@PathVariable UUID uuid, HttpServletRequest request, @AuthenticationPrincipal Jwt jwt) {

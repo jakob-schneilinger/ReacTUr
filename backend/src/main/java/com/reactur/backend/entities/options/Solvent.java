@@ -7,6 +7,9 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 
+/**
+ * The solvent an experiment was run in. Shared fields defined in {@link BaseOption}.
+ */
 @Entity
 @Table(name = "solvent")
 @Getter

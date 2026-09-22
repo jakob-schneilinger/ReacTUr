@@ -5,6 +5,7 @@ import com.reactur.backend.dtos.experiments.SaveExperimentDto;
 import com.reactur.backend.dtos.experiments.SearchParametersDto;
 import com.reactur.backend.enums.Role;
 import com.reactur.backend.exceptions.ResourceConflictException;
+import com.reactur.backend.exceptions.ResourceNotFoundException;
 import com.reactur.backend.exceptions.UnprocessableEntityException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -17,7 +18,6 @@ import java.util.UUID;
  * This service takes care of the experiment's information data transfer, semantic validation of
  * chemical entities, and role-based access control to ensure efficient and secure
  * experiment management.
- * </p>
  */
 @Service
 public interface ExperimentService {
@@ -48,6 +48,7 @@ public interface ExperimentService {
    * @param requestingUserId   The internal ID of the authenticated user.
    * @param requestingUserRole The role of the authenticated user.
    * @return The requested {@link GetExperimentDto}.
+   * @throws ResourceNotFoundException if no experiment exists for the given ID.
    * @throws AccessDeniedException if attempting to access an unauthorized archived record.
    */
   GetExperimentDto getExperiment(UUID experimentId, String requestingUserId, Role requestingUserRole);
@@ -59,6 +60,7 @@ public interface ExperimentService {
    * @param experimentId       The UUID of the experiment to archive.
    * @param requestingUserId   The internal ID of the authenticated user.
    * @param requestingUserRole The role of the authenticated user.
+   * @throws ResourceNotFoundException if no experiment exists for the given ID.
    * @throws AccessDeniedException if the user lacks ownership or admin rights.
    */
   void archiveExperiment(UUID experimentId, String requestingUserId, Role requestingUserRole);
@@ -71,6 +73,7 @@ public interface ExperimentService {
    * @param requestingUserId   The internal ID of the authenticated user.
    * @param requestingUserRole The role of the authenticated user.
    * @return The restored {@link GetExperimentDto}.
+   * @throws ResourceNotFoundException if no experiment exists for the given ID.
    * @throws AccessDeniedException if the user lacks ownership or admin rights.
    */
   GetExperimentDto restoreExperiment(UUID experimentId, String requestingUserId, Role requestingUserRole);
@@ -101,6 +104,7 @@ public interface ExperimentService {
    * @param requestingUserId   The internal ID of the authenticated user.
    * @param requestingUserRole The role of the authenticated user.
    * @return The updated {@link GetExperimentDto}.
+   * @throws ResourceNotFoundException if no experiment exists for the given ID.
    * @throws ResourceConflictException if the target experiment is archived.
    * @throws UnprocessableEntityException if any referenced chemical entities do not exist.
    * @throws AccessDeniedException if the user lacks ownership or admin rights.

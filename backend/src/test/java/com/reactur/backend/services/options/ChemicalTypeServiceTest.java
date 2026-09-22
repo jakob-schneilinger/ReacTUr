@@ -22,6 +22,12 @@ import java.util.UUID;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+/**
+ * Pure unit test for {@link ChemicalTypeServiceImpl}, with the repository and mapper mocked;
+ * representative of all four option-catalog services since they share {@code
+ * OptionServiceImpl}'s implementation. Covers listing, creating (including the duplicate-name
+ * conflict), and archiving/restoring an option.
+ */
 @ExtendWith(MockitoExtension.class)
 public class ChemicalTypeServiceTest {
 

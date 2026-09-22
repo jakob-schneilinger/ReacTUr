@@ -14,6 +14,10 @@ import lombok.experimental.SuperBuilder;
 import java.time.Instant;
 import java.util.UUID;
 
+/**
+ * Shared fields for the simple, admin-managed option catalogs ({@link ChemicalType}, {@link
+ * Instrument}, {@link Modality}, {@link Solvent}): a unique name and an archived-state timestamp.
+ */
 @MappedSuperclass
 @Getter
 @Setter

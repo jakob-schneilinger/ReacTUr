@@ -40,6 +40,11 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
+/**
+ * Pure unit test for {@link ExperimentFolderServiceImpl}, with repositories mocked. Covers folder
+ * ownership enforcement (no privileged bypass), the one-folder-per-user rule when adding an
+ * experiment, and that adding requires the experiment itself to be owned by the requesting user.
+ */
 class ExperimentFolderServiceTest {
 
   @Mock

@@ -19,6 +19,11 @@ import java.util.UUID;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
+/**
+ * Verifies the field mappings this mapper produces, including that the nested chemical type is
+ * correctly delegated to {@link ChemicalTypeMapper} and that the computed structure flag passes
+ * through both {@code toDto} overloads correctly.
+ */
 class ReactantMapperTest {
 
     private final ReactantMapper mapper = Mappers.getMapper(ReactantMapper.class);

@@ -21,19 +21,25 @@ public interface ExperimentRepository extends JpaRepository<Experiment, UUID>, J
   List<Experiment> findByArchivedAtIsNotNull();
 
   /**
-   * Same as findById, but takes a DB-level pessimistic write lock on the row (a SQL SELECT FOR UPDATE) held for
-   * the rest of the enclosing transaction. Used by ExperimentFolderServiceImpl.addExperimentToFolder to serialize
-   * its one-folder-per-user check against other concurrent adds of the same experiment - see the Race condition
-   * inventory item in Software_todo.md. Only safe inside a transaction whose critical section does no slow
-   * external I/O while the lock is held.
+   * Same as {@code findById}, but takes a DB-level pessimistic write lock on the row (a SQL
+   * {@code SELECT ... FOR UPDATE}) held for the rest of the enclosing transaction. Used to
+   * serialize a per-experiment invariant check against other concurrent operations on the same
+   * experiment. Only safe inside a transaction whose critical section does no slow external I/O
+   * while the lock is held.
+   *
+   * @param id the ID of the experiment to lock
+   * @return the locked experiment, if it exists
    */
   @Lock(LockModeType.PESSIMISTIC_WRITE)
   @Query("SELECT e FROM Experiment e WHERE e.id = :id")
   Optional<Experiment> findByIdForUpdate(@Param("id") java.util.UUID id);
 
   /**
-   * Searches for all the experiments of user "userId" where the user is either the scientist associated with the
-   * experiment, or the user that added the experiment to the DB
+   * Finds every archived experiment where {@code userId} is either the designated scientist or
+   * the user who created the experiment record.
+   *
+   * @param userId the Keycloak ID to search by
+   * @return the matching archived experiments
    */
   @Query("SELECT e FROM Experiment e WHERE e.archivedAt IS NOT NULL AND (e.createdBy.id = :userId OR e.metadata.scientist.id = :userId)")
   List<Experiment> findArchivedExperimentsForUser(@Param("userId") String userId);

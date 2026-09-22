@@ -42,6 +42,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
+/**
+ * Verifies {@link ExperimentServiceImpl#buildSearchSpecification} against a real database:
+ * reactant/metadata/measurement filters actually narrow the result set correctly, including the
+ * reactant commutativity rule and combining multiple filters together.
+ */
 // Same rationale as ReactantRepositoryTest/ExperimentRepositoryTest: @DataJpaTest +
 // @AutoConfigureTestDatabase(Replace.NONE) + @ActiveProfiles("test") together ensure the real
 // H2 "test" profile database (src/test/resources/application-test.yml) is used instead of Spring

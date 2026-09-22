@@ -11,6 +11,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
+/** Maps {@link ExperimentFolder} to {@link GetFolderDto}, flattening its experiments down to just their IDs. */
 @Mapper(componentModel = "spring")
 public interface FolderMapper {
 

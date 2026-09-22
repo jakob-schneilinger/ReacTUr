@@ -2,10 +2,14 @@ package com.reactur.backend.services;
 
 import com.reactur.backend.dtos.users.GetUserDto;
 import com.reactur.backend.dtos.users.RoleDto;
+import com.reactur.backend.exceptions.ResourceConflictException;
 import com.reactur.backend.exceptions.ResourceNotFoundException;
 
 import java.util.List;
 
+/**
+ * Manages application users: listing, role changes, and deactivation/restoration.
+ */
 public interface UserService {
 
     /**
@@ -21,6 +25,7 @@ public interface UserService {
      * @param id the unique identifier of the user.
      * @param roleDto the DTO containing the new role.
      * @throws ResourceNotFoundException if the user does not exist.
+     * @throws ResourceConflictException if this change would demote the last remaining ADMIN.
      */
     void setRole(String id, RoleDto roleDto);
 

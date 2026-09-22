@@ -8,6 +8,10 @@ import com.reactur.backend.mappers.options.SolventMapper;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
+/**
+ * Maps {@link Metadata} to {@link GetMetadataDto}, delegating nested scientist, solvent,
+ * instrument, and modality conversion to the mappers named in {@code uses}.
+ */
 @Mapper(
   componentModel = "spring",
   uses = {

@@ -18,6 +18,14 @@ import java.util.stream.Collectors;
 @Component
 public class RoleExtractor {
 
+    /**
+     * Resolves the caller's {@link Role} from their granted authorities. Falls back to {@link
+     * Role#UNAUTHORIZED} if the authentication is null or carries none of the expected {@code
+     * ROLE_*} authorities.
+     *
+     * @param authentication the current security context's authentication, may be null
+     * @return the resolved role
+     */
     public Role extractRole(Authentication authentication) {
         if (authentication == null) {
             return Role.UNAUTHORIZED;

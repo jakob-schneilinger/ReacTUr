@@ -13,6 +13,10 @@ import java.util.UUID;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+/**
+ * Verifies that this mapper flattens a folder's experiments down to their IDs, including the
+ * empty-list and null-list edge cases.
+ */
 class FolderMapperTest {
 
     private final FolderMapper mapper = Mappers.getMapper(FolderMapper.class);

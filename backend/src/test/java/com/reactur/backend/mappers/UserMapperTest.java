@@ -11,6 +11,7 @@ import java.time.Instant;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
+/** Verifies the field mappings this mapper produces, and null-safety for a null input. */
 class UserMapperTest {
 
     private final UserMapper mapper = Mappers.getMapper(UserMapper.class);

@@ -12,6 +12,10 @@ import java.util.UUID;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
+/**
+ * Verifies the field mappings and renames this mapper produces, including a null reactant
+ * mapping to a null reactant ID.
+ */
 class StructureMapperTest {
 
     private final StructureMapper mapper = Mappers.getMapper(StructureMapper.class);

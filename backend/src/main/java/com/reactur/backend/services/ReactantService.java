@@ -16,6 +16,7 @@ public interface ReactantService {
      * Creates a new reactant in the system.
      *
      * @param saveReactant the DTO containing the data for the new reactant
+     * @param userId       the Keycloak ID of the authenticated user creating the reactant
      * @return the {@link ReactantDetailDto} representing the newly created reactant
      * @throws ResourceConflictException if a reactant with the same shortName already exists
      */

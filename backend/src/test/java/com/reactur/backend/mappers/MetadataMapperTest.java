@@ -21,6 +21,10 @@ import java.util.UUID;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
+/**
+ * Verifies the field mappings this mapper produces, including that the nested scientist, solvent,
+ * instrument, and modality are correctly delegated to their own mappers.
+ */
 class MetadataMapperTest {
 
     private final MetadataMapper mapper = Mappers.getMapper(MetadataMapper.class);

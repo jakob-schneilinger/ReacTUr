@@ -7,6 +7,7 @@ import com.reactur.backend.repositories.options.SolventRepository;
 import com.reactur.backend.services.options.SolventService;
 import org.springframework.stereotype.Service;
 
+/** Concrete service bean for {@link Solvent} options; all logic lives in {@link OptionServiceImpl}. */
 @Service
 public class SolventServiceImpl extends OptionServiceImpl<Solvent, SolventDto> implements SolventService {
 

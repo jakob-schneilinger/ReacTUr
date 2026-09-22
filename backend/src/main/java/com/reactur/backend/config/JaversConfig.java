@@ -8,9 +8,19 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.Jwt;
 
 
+/**
+ * Configures Javers, the audit-trail library used to record entity change history.
+ */
 @Configuration
 public class JaversConfig {
 
+    /**
+     * Identifies the author of a Javers commit as the current request's authenticated Keycloak
+     * subject, falling back to {@code "system"} for changes made outside an HTTP request (e.g. a
+     * scheduled job).
+     *
+     * @return the configured author provider
+     */
     @Bean
     public AuthorProvider provideJaversAuthor() {
         return () -> {

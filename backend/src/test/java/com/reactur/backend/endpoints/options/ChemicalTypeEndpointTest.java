@@ -19,6 +19,13 @@ import static org.springframework.security.test.web.servlet.request.SecurityMock
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+/**
+ * {@code @WebMvcTest} slice test for {@link ChemicalTypeEndpoint}, representative of all four
+ * option-catalog endpoints since they share {@link
+ * com.reactur.backend.endpoints.options.AbstractOptionsEndpoint}'s implementation. The service
+ * layer is mocked, but the real security filter chain runs, so these tests cover the ADMIN-only
+ * write restrictions and HTTP status mapping for each outcome.
+ */
 @WebMvcTest(ChemicalTypeEndpoint.class)
 @Import({SecurityConfig.class, GlobalExceptionHandler.class})
 class ChemicalTypeEndpointTest {

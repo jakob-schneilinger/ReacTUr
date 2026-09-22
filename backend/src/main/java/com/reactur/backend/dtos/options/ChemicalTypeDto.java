@@ -13,15 +13,15 @@ import java.util.UUID;
  * @param archivedAt The timestamp when the option was archived.
  */
 public record ChemicalTypeDto(
-  // Present for the response shape (getKnownOptions()); ignored on create.
+  // Present in the response only; ignored on create.
   UUID uuid,
 
   @NotBlank(message = "Name must not be empty")
   String name,
   // (Semantic - Service Layer): Verify no existing option shares this name (case-insensitive)
 
-  // Present for the response shape (getKnownOptions()); ignored on create. A newly created option
-  // always starts non-archived regardless of what the client sends.
+  // Present in the response only; ignored on create. A newly created option always starts
+  // non-archived regardless of what the client sends.
   Instant archivedAt
 ) implements OptionDto {
 }

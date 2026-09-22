@@ -50,15 +50,11 @@ public class FileServiceImpl implements FileService {
     private String bucketName;
 
     /**
-     * Provisional per-attachment size cap in bytes (default 10MB), matching the limit the frontend's
-     * FileUploadComponent already enforces for experiment attachments (see
-     * experiment-details-page.component.html's {@code [maxFileSizeMB]="10"}). This is NOT a finalized
-     * product decision - see Software_todo.md item 14 - just a stop-gap so the backend enforces
-     * something instead of relying solely on the frontend and Spring's blanket
-     * {@code spring.servlet.multipart.max-file-size}. Deployers can override via
-     * {@code app.upload.experiment-attachment.max-size-bytes} without a code change.
-     * TODO: replace with a properly decided, tested limit (and matching file-type restrictions) once
-     * product/Dennis decide the real policy - see Software_todo.md item 14.
+     * Provisional per-attachment size cap in bytes (default 10MB). Not a finalized product
+     * decision, just a stop-gap so the backend enforces something instead of relying solely on
+     * the frontend and Spring's blanket {@code spring.servlet.multipart.max-file-size}. Deployers
+     * can override via {@code app.upload.experiment-attachment.max-size-bytes} without a code
+     * change.
      */
     @Value("${app.upload.experiment-attachment.max-size-bytes:10485760}")
     private long maxAttachmentSizeBytes = 10_485_760L;
@@ -246,6 +242,14 @@ public class FileServiceImpl implements FileService {
     }
 
 
+    /**
+     * Streams the file in fixed-size chunks rather than loading it fully into memory, and returns
+     * its SHA-256 checksum as a lowercase hex string.
+     *
+     * @param file the file to checksum
+     * @return the checksum, as a lowercase hex string
+     * @throws FileStorageException if the file can't be read or hashing fails
+     */
     private String calculateSha256(MultipartFile file) {
         try (InputStream is = file.getInputStream()) {
             MessageDigest digest = MessageDigest.getInstance("SHA-256");

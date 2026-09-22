@@ -33,6 +33,12 @@ import static org.springframework.security.test.web.servlet.request.SecurityMock
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+/**
+ * {@code @WebMvcTest} slice test for {@link ExperimentFilesEndpoint}: the service layer is
+ * mocked, but the real security filter chain runs, so these tests cover request handling, HTTP
+ * status mapping for each outcome, and that the authenticated user's ID and role are correctly
+ * passed through to the service.
+ */
 @WebMvcTest(ExperimentFilesEndpoint.class)
 @Import({SecurityConfig.class, GlobalExceptionHandler.class, RoleExtractor.class})
 class ExperimentFilesEndpointTest {

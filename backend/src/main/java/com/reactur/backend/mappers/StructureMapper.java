@@ -5,6 +5,7 @@ import com.reactur.backend.entities.ReactantStructure;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
+/** Maps {@link ReactantStructure} to {@link StructureDto}. */
 @Mapper(componentModel = "spring")
 public interface StructureMapper {
 

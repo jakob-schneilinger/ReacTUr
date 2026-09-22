@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.UUID;
 
 /**
- * DTO used for creating or updating a reactant in the database.
+ * DTO used for creating a reactant in the database.
  *
  * @param smiles               The SMILES string representing the chemical structure.
  * @param chemicalType         The UUID of the chemical type.

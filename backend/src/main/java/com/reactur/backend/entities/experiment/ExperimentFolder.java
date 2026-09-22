@@ -23,6 +23,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+/**
+ * A personal collection of {@link Experiment}s created by one {@link User}, used to organize
+ * experiments the user cares about.
+ */
 @Entity
 @Table(name = "experiment_folder")
 @Getter
@@ -39,13 +43,16 @@ public class ExperimentFolder {
   @Column(name = "name", nullable = false)
   private String name;
 
-  // Owner is strictly the user who created the folder.
+  /** Strictly the user who created the folder; folders are not shared or transferable. */
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "owner_id", referencedColumnName = "id", nullable = false)
   private User owner;
 
-  // ManyToMany allows an experiment to exist in multiple folders
-  // (if Creator and Scientist both want it in their own personal folders).
+  /**
+   * Many-to-many because the same experiment can be organized into multiple folders at once,
+   * including folders belonging to different users (e.g. both the creator and the scientist
+   * keeping it in their own personal folders).
+   */
   @ManyToMany(fetch = FetchType.LAZY)
   @JoinTable(
     name = "folder_experiments",
@@ -55,8 +62,10 @@ public class ExperimentFolder {
   @Builder.Default
   private List<Experiment> experiments = new ArrayList<>();
 
-  // Optimistic locking prevents a stale save from resurrecting or double-modifying a concurrently
-  // deleted/changed folder.
+  /**
+   * Optimistic-locking token. Prevents a stale save from resurrecting or double-modifying a
+   * folder concurrently deleted or changed by another add/remove/delete operation.
+   */
   @Version
   private Long version;
 }

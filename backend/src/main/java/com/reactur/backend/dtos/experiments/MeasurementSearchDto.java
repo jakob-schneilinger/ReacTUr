@@ -14,7 +14,7 @@ public record MeasurementSearchDto(
   Double rateConstantMin,
   Double rateConstantMax
 
-  // (Semantic - Service/DB Layer): Like the parent DTO, Min > Max inversions are allowed
-  // in the payload and will simply result in 0 database matches.
+  // (Semantic - Service/DB Layer): Min > Max inversions are allowed in this payload and will
+  // simply result in 0 database matches.
 ) {
 }

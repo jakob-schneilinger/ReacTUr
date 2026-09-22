@@ -8,6 +8,10 @@ import org.mapstruct.factory.Mappers;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
+/**
+ * Verifies the field renames this mapper produces, plus null handling for individual fields and
+ * for a fully null input.
+ */
 class MeasurementDataMapperTest {
 
     private final MeasurementDataMapper mapper = Mappers.getMapper(MeasurementDataMapper.class);

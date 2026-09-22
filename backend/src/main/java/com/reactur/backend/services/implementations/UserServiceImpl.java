@@ -118,8 +118,12 @@ public class UserServiceImpl implements UserService {
     // to recover in the app.
     /**
      * True if {@code user} currently holds the ADMIN role, the requested {@code newRole} would
-     * take it away, and no other ADMIN account exists to fall back on - which would otherwise
-     * leave the system with zero admins and no in-app way to recover.
+     * take it away, and no other ADMIN account exists to fall back on. Allowing this would leave
+     * the system with zero admins and no in-app way to recover.
+     *
+     * @param user    the user whose role is being changed
+     * @param newRole the role being assigned
+     * @return true if this change would demote the last remaining admin
      */
     private boolean isDemotingTheLastAdmin(User user, Role newRole) {
         return user.getRole() == Role.ADMIN

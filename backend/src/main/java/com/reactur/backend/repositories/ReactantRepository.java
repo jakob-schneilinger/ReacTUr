@@ -21,13 +21,17 @@ public interface ReactantRepository extends JpaRepository<Reactant, UUID> {
     List<Reactant> findAllByArchivedAtIsNotNull();
 
     /**
-     * Same as findById, but takes a DB-level pessimistic write lock on the row (a SQL SELECT FOR UPDATE) held for
-     * the rest of the enclosing transaction. Used wherever a multi-row invariant tied to this reactant (e.g. exactly
-     * one ACTIVE structure, or has an ACTIVE structure at all) needs to be read-then-written atomically against
-     * other transactions touching the same reactant's structures - see StructureServiceImpl uploadStructure and
-     * selectStructure, and ExperimentValidator validateReactantHasActiveStructure, plus the Race condition
-     * inventory item in Software_todo.md. Only safe inside a transaction whose critical section does no slow
-     * external I/O (network calls) while the lock is held - do not use this around S3/HTTP calls.
+     * Same as {@code findById}, but takes a DB-level pessimistic write lock on the row (a SQL
+     * {@code SELECT ... FOR UPDATE}) held for the rest of the enclosing transaction. Used wherever
+     * a multi-row invariant tied to this reactant (e.g. exactly one ACTIVE structure, or having an
+     * ACTIVE structure at all) needs to be read-then-written atomically against other transactions
+     * touching the same reactant's structures.
+     * <p>
+     * Only safe inside a transaction whose critical section does no slow external I/O (network
+     * calls) while the lock is held. Do not use this around S3/HTTP calls.
+     *
+     * @param id the ID of the reactant to lock
+     * @return the locked reactant, if it exists
      */
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("SELECT r FROM Reactant r WHERE r.id = :id")
@@ -40,13 +44,15 @@ public interface ReactantRepository extends JpaRepository<Reactant, UUID> {
      * <b>Contract:</b> the comparison is case-insensitive, but JPQL's {@code LOWER(...)} only
      * lower-cases a single scalar expression, not each element of a bound {@code IN} collection.
      * Every element of {@code names} MUST therefore already be lowercased by the caller before
-     * being passed in (see {@code ReactantValidator.collectNames}); this method does not do it for
-     * you.
+     * being passed in (see {@code ReactantValidator.collectNames}); this method does not do it on
+     * itself.
      * <p>
-     * TODO: check-then-save race - not atomic without a DB-level unique constraint (needs a
-     * migration-tooling decision first). To review in the JavaDoc pass.
+     * <b>Known limitation:</b> this check is check-then-save, not atomic under concurrent calls;
+     * two simultaneous creates could both observe no conflict and both proceed. Closing this
+     * requires a database-level unique constraint, deferred pending a migration-tooling decision.
      *
      * @param names candidate short names to check for conflicts; MUST already be lowercased
+     * @return true if any of the given names is already in use
      */
     @Query("""
         SELECT COUNT(r) > 0 FROM Reactant r
@@ -60,11 +66,12 @@ public interface ReactantRepository extends JpaRepository<Reactant, UUID> {
      * updating an existing reactant so that it doesn't conflict with its own current names).
      * <p>
      * <b>Contract:</b> as with {@link #hasNameConflict(Collection)}, {@code names} MUST already be
-     * lowercased by the caller — {@code LOWER(...)} here only applies to the scalar entity fields,
+     * lowercased by the caller. {@code LOWER(...)} here only applies to the scalar entity fields,
      * not to the elements of the bound {@code names} collection.
      *
      * @param names candidate short names to check for conflicts; MUST already be lowercased
      * @param excludeId id of the reactant to exclude from the conflict check
+     * @return true if any of the given names is already in use by another reactant
      */
     @Query("""
         SELECT COUNT(r) > 0 FROM Reactant r

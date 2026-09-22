@@ -24,6 +24,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+/**
+ * A chemical substance identified by its SMILES string, CAS number, and InChIKey, classified by
+ * a {@link ChemicalType}. Used as one of the two reactants in an experiment.
+ */
 @Entity
 @Table(name = "reactant")
 @Getter
@@ -78,7 +82,11 @@ public class Reactant {
     @JoinColumn(name = "created_by", referencedColumnName = "id", nullable = false)
     private User createdBy;
 
-    // Optimistic locking prevents two concurrent updates from silently overwriting each other.
+    /**
+     * Optimistic-locking token. Prevents two concurrent updates that each edit different fields
+     * of the same reactant from silently overwriting each other; the losing write throws {@code
+     * ObjectOptimisticLockingFailureException} instead.
+     */
     @Version
     private Long version;
 }

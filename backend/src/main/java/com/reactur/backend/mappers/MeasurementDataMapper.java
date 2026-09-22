@@ -5,6 +5,7 @@ import com.reactur.backend.entities.experiment.ExperimentResult;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
+/** Maps {@link ExperimentResult} to {@link MeasurementDataDto}. */
 @Mapper(componentModel = "spring")
 public interface MeasurementDataMapper {
 

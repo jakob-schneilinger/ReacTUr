@@ -18,6 +18,10 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.util.UUID;
 
+/**
+ * REST controller for uploading and managing 3D structures for a reactant. Only ADMIN and
+ * SUPERVISOR may manage structures.
+ */
 @Slf4j
 @RestController
 @RequestMapping("/api/structure")
@@ -26,6 +30,15 @@ public class StructureEndpoint {
 
     private final StructureService structureService;
 
+    /**
+     * Uploads a structure file manually for a reactant. The uploaded structure becomes that
+     * reactant's ACTIVE structure immediately.
+     *
+     * @param reactantId the UUID of the reactant to upload a structure for
+     * @param file       the structure file
+     * @param jwt        the Keycloak token containing the requesting user's internal ID
+     * @return a {@link ResponseEntity} containing the saved {@link StructureDto}
+     */
     @PostMapping(path = "/{reactantId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @PreAuthorize("hasAnyRole('ADMIN','SUPERVISOR')")
     public ResponseEntity<StructureDto> uploadStructure(
@@ -39,6 +52,15 @@ public class StructureEndpoint {
         return ResponseEntity.ok(structureDto);
     }
 
+    /**
+     * Triggers structure generation for a reactant via the external structure-generation API.
+     * Creates a PENDING structure record with the external job ID; the result is picked up later
+     * by the scheduled polling job.
+     *
+     * @param reactantId the UUID of the reactant whose SMILES should be used
+     * @param jwt        the Keycloak token containing the requesting user's internal ID
+     * @return a {@link ResponseEntity} with a 204 No Content status
+     */
     @PostMapping("/{reactantId}/generate")
     @PreAuthorize("hasAnyRole('ADMIN','SUPERVISOR')")
     public ResponseEntity<Void> generateStructureFromAPI(@PathVariable UUID reactantId, @AuthenticationPrincipal Jwt jwt) {
@@ -49,6 +71,14 @@ public class StructureEndpoint {
         return ResponseEntity.noContent().build();
     }
 
+    /**
+     * Selects a structure to become the reactant's ACTIVE structure, rejecting whichever other
+     * structure of the same reactant was previously ACTIVE.
+     *
+     * @param structureId the UUID of the structure to activate
+     * @param jwt         the Keycloak token containing the requesting user's internal ID
+     * @return a {@link ResponseEntity} containing the updated {@link StructureDto}
+     */
     @PostMapping("/{structureId}/select")
     @PreAuthorize("hasAnyRole('ADMIN','SUPERVISOR')")
     public ResponseEntity<StructureDto> selectStructure(@PathVariable UUID structureId, @AuthenticationPrincipal Jwt jwt) {

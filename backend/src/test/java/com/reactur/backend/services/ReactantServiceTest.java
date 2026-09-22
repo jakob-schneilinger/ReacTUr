@@ -51,6 +51,11 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 
 import static org.mockito.Mockito.*;
 
+/**
+ * Pure unit test for {@link ReactantServiceImpl}, with repositories, the validator, and the
+ * structure service mocked. Organized by operation ({@code @Nested} per CRUD method), including
+ * the aggregate-structure-flag computation for both a single reactant and the batch list views.
+ */
 @ExtendWith(MockitoExtension.class)
 class ReactantServiceTest {
 

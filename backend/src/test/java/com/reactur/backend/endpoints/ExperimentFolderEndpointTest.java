@@ -31,6 +31,12 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+/**
+ * {@code @WebMvcTest} slice test for {@link ExperimentFolderEndpoint}: the service layer is
+ * mocked, but the real security filter chain runs, so these tests cover request handling, HTTP
+ * status mapping for each outcome, and that the authenticated user's ID is correctly passed
+ * through to the service.
+ */
 @WebMvcTest(ExperimentFolderEndpoint.class)
 @Import(SecurityConfig.class)
 @EnableConfigurationProperties(org.springframework.boot.h2console.autoconfigure.H2ConsoleProperties.class)

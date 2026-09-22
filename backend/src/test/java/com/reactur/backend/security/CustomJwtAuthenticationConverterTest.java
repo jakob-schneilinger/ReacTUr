@@ -26,6 +26,11 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+/**
+ * Pure unit test for {@link CustomJwtAuthenticationConverter}, with the repository mocked: covers
+ * new-user sync on first login, granting the stored DB role rather than trusting the token, and
+ * forcing UNAUTHORIZED for a deactivated user regardless of their stored role.
+ */
 @ExtendWith(MockitoExtension.class)
 class CustomJwtAuthenticationConverterTest {
 

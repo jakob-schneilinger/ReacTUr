@@ -7,6 +7,7 @@ import com.reactur.backend.repositories.options.ChemicalTypeRepository;
 import com.reactur.backend.services.options.ChemicalTypeService;
 import org.springframework.stereotype.Service;
 
+/** Concrete service bean for {@link ChemicalType} options; all logic lives in {@link OptionServiceImpl}. */
 @Service
 public class ChemicalTypeServiceImpl extends OptionServiceImpl<ChemicalType, ChemicalTypeDto> implements ChemicalTypeService {
 

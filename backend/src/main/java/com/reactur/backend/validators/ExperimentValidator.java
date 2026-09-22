@@ -47,6 +47,13 @@ public class ExperimentValidator {
     /**
      * Bundles the entities resolved while validating a {@link SaveExperimentDto} so that
      * callers can reuse them without re-fetching by ID.
+     *
+     * @param scientist  the resolved scientist
+     * @param reactantA  the resolved first reactant
+     * @param reactantB  the resolved second reactant
+     * @param solvent    the resolved solvent
+     * @param instrument the resolved instrument, or {@code null} if none was provided
+     * @param modality   the resolved modality, or {@code null} if none was provided
      */
     public record ValidatedReferences(
             User scientist,
@@ -58,14 +65,49 @@ public class ExperimentValidator {
     ) {
     }
 
+    /**
+     * Validates a {@link SaveExperimentDto} before a new experiment is created: verifies the
+     * scientist, both reactants, and the referenced solvent/instrument/modality all exist, and
+     * that reactant A and B are not the same reactant.
+     *
+     * @param experimentDto the DTO to validate
+     * @return the resolved entities, for reuse without re-fetching by ID
+     * @throws UnprocessableEntityException if any referenced entity does not exist, or a
+     *                                      reactant lacks an ACTIVE 3D structure
+     * @throws ValidationException          if reactant A and B are the same reactant
+     */
     public ValidatedReferences validateForCreate(SaveExperimentDto experimentDto) {
         return validate(experimentDto, "create", "Reactants A and B cannot be the same.");
     }
 
+    /**
+     * Same validation as {@link #validateForCreate(SaveExperimentDto)}, for an experiment update.
+     *
+     * @param experimentDto the DTO to validate
+     * @return the resolved entities, for reuse without re-fetching by ID
+     * @throws UnprocessableEntityException if any referenced entity does not exist, or a
+     *                                      reactant lacks an ACTIVE 3D structure
+     * @throws ValidationException          if reactant A and B are the same reactant
+     */
     public ValidatedReferences validateForUpdate(SaveExperimentDto experimentDto) {
         return validate(experimentDto, "update", "Reactant A and B cannot be the same in an update.");
     }
 
+    /**
+     * Shared implementation for {@link #validateForCreate(SaveExperimentDto)} and {@link
+     * #validateForUpdate(SaveExperimentDto)}.
+     * <p>
+     * Both reactants are fetched with a pessimistic write lock, held until the enclosing
+     * transaction commits, so that a concurrent {@code StructureServiceImpl.uploadStructure} call
+     * replacing one of these reactants' structures can't run between this method's
+     * active-structure check and the experiment actually being saved.
+     *
+     * @param experimentDto       the DTO to validate
+     * @param operation           a short label ("create" or "update") used in the log message if
+     *                            the same-reactant check fails
+     * @param sameReactantMessage the exception message to use if reactant A and B are the same
+     * @return the resolved entities, for reuse without re-fetching by ID
+     */
     private ValidatedReferences validate(SaveExperimentDto experimentDto, String operation, String sameReactantMessage) {
         User scientist = userRepository.findById(experimentDto.metadata().scientist())
                 .orElseThrow(() -> new UnprocessableEntityException(
@@ -113,6 +155,7 @@ public class ExperimentValidator {
      *
      * @param reactant The Reactant to validate.
      * @param label A label (e.g., "A" or "B") for clearer error messages.
+     * @throws UnprocessableEntityException if the reactant has no ACTIVE 3D structure
      */
     private void validateReactantHasActiveStructure(Reactant reactant, String label) {
         // The write lock taken when this reactant was fetched above is still held here.

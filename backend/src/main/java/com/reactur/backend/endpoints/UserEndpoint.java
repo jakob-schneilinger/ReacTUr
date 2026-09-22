@@ -21,6 +21,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
+/**
+ * REST controller for managing application users and their roles.
+ */
 @Slf4j
 @RestController
 @RequestMapping("/api/users")
@@ -29,6 +32,12 @@ public class UserEndpoint {
 
     private final UserService userService;
 
+    /**
+     * Lists every user in the system. Only ADMIN and SUPERVISOR may list all users.
+     *
+     * @param jwt the Keycloak token containing the requesting user's internal ID
+     * @return a {@link ResponseEntity} containing every {@link GetUserDto}
+     */
     @GetMapping
     @PreAuthorize("hasAnyRole('ADMIN','SUPERVISOR')")
     public ResponseEntity<List<GetUserDto>> getAllUsers(@AuthenticationPrincipal Jwt jwt) {
@@ -36,6 +45,14 @@ public class UserEndpoint {
         return ResponseEntity.ok(userService.getAllUsers());
     }
 
+    /**
+     * Changes a user's role. Only ADMIN may change roles.
+     *
+     * @param id      the Keycloak ID of the user whose role is being changed
+     * @param setRole the new role to assign
+     * @param jwt     the Keycloak token containing the requesting user's internal ID
+     * @return a {@link ResponseEntity} with a 200 OK status
+     */
     @PostMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> setRole(
@@ -48,9 +65,15 @@ public class UserEndpoint {
         return ResponseEntity.ok().build();
     }
 
-    // Anyone can check their own role. The frontend needs this to detect a still-pending account
-    // approval, so it must keep working even for unauthenticated/unapproved callers. Checking
-    // someone else's role requires ADMIN.
+    /**
+     * Retrieves a user's current role. Anyone can check their own role, since the frontend needs
+     * this to detect a still-pending account approval, so it must keep working even for
+     * unapproved callers. Checking someone else's role requires ADMIN.
+     *
+     * @param id  the Keycloak ID of the user whose role is being requested
+     * @param jwt the Keycloak token containing the requesting user's internal ID
+     * @return a {@link ResponseEntity} containing the user's {@link RoleDto}
+     */
     @GetMapping("/{id}/role")
     @PreAuthorize("#id == authentication.name or hasRole('ADMIN')")
     public ResponseEntity<RoleDto> getRole(@PathVariable String id, @AuthenticationPrincipal Jwt jwt) {
@@ -58,6 +81,14 @@ public class UserEndpoint {
         return ResponseEntity.ok(userService.getRole(id));
     }
 
+    /**
+     * Deactivates a user, revoking their access on their next request without deleting their
+     * record. Only ADMIN may deactivate a user.
+     *
+     * @param id  the Keycloak ID of the user to deactivate
+     * @param jwt the Keycloak token containing the requesting user's internal ID
+     * @return a {@link ResponseEntity} with a 200 OK status
+     */
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> archiveUser(@PathVariable String id, @AuthenticationPrincipal Jwt jwt) {
@@ -66,6 +97,14 @@ public class UserEndpoint {
         return ResponseEntity.ok().build();
     }
 
+    /**
+     * Reactivates a previously deactivated user, restoring their stored role. Only ADMIN may
+     * restore a user.
+     *
+     * @param id  the Keycloak ID of the user to restore
+     * @param jwt the Keycloak token containing the requesting user's internal ID
+     * @return a {@link ResponseEntity} with a 200 OK status
+     */
     @PutMapping("/{id}/restore")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> restoreUser(@PathVariable String id, @AuthenticationPrincipal Jwt jwt) {

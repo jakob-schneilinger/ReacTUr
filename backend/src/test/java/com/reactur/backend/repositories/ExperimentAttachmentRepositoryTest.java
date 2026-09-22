@@ -21,6 +21,10 @@ import java.util.UUID;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+/**
+ * Verifies {@link ExperimentAttachmentRepository}'s custom query against a real database: only
+ * an experiment's non-archived attachments are returned.
+ */
 // See ReactantRepositoryTest for why @DataJpaTest + @AutoConfigureTestDatabase(Replace.NONE) +
 // @ActiveProfiles("test") are all required together.
 @DataJpaTest

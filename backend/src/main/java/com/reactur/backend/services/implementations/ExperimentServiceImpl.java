@@ -288,6 +288,14 @@ public class ExperimentServiceImpl implements ExperimentService {
     ));
   }
 
+  /**
+   * Builds the JPA {@link Specification} for {@link #searchExperiments}: always excludes
+   * archived experiments, then AND-combines whichever reactant/metadata/measurement filters
+   * {@code params} actually supplied.
+   *
+   * @param params the search filters to apply; may be null, meaning no filters
+   * @return the built specification
+   */
   private Specification<Experiment> buildSearchSpecification(SearchParametersDto params) {
     return (root, query, cb) -> {
       List<Predicate> predicates = new ArrayList<>();
@@ -311,8 +319,15 @@ public class ExperimentServiceImpl implements ExperimentService {
     };
   }
 
-  // Reactant commutativity rule: an experiment's reactantA/reactantB are an unordered pair, so a
-  // search for "A and B" must also match experiments where they're stored the other way around.
+  /**
+   * An experiment's reactantA/reactantB are an unordered pair, so a search for "A and B" must
+   * also match experiments where they're stored the other way around.
+   *
+   * @param predicates the predicate list to add to
+   * @param root       the query root
+   * @param cb         the criteria builder
+   * @param params     the search filters
+   */
   private void addReactantPredicates(List<Predicate> predicates, Root<Experiment> root, CriteriaBuilder cb, SearchParametersDto params) {
     boolean hasA = params.reactantA() != null && !params.reactantA().isEmpty();
     boolean hasB = params.reactantB() != null && !params.reactantB().isEmpty();
@@ -343,6 +358,15 @@ public class ExperimentServiceImpl implements ExperimentService {
     }
   }
 
+  /**
+   * Adds every metadata-field filter (date, temperature, concentrations, wavelength, comment,
+   * scientist, solvent, instrument, modality) that {@code params} actually supplied.
+   *
+   * @param predicates   the predicate list to add to
+   * @param metadataJoin the join to the experiment's metadata
+   * @param cb           the criteria builder
+   * @param params       the search filters
+   */
   private void addMetadataPredicates(List<Predicate> predicates, Join<Experiment, Metadata> metadataJoin, CriteriaBuilder cb, SearchParametersDto params) {
     if (params.dateMin() != null) predicates.add(cb.greaterThanOrEqualTo(metadataJoin.get("date"), params.dateMin()));
     if (params.dateMax() != null) predicates.add(cb.lessThanOrEqualTo(metadataJoin.get("date"), params.dateMax()));
@@ -378,7 +402,15 @@ public class ExperimentServiceImpl implements ExperimentService {
     }
   }
 
-  // RESULT JOIN (for MeasurementSearchDto): only joins the result table if measurement filters were provided.
+  /**
+   * Joins the result table and adds the rate-constant range filters, only if measurement filters
+   * were actually supplied.
+   *
+   * @param predicates the predicate list to add to
+   * @param root       the query root
+   * @param cb         the criteria builder
+   * @param params     the search filters
+   */
   private void addMeasurementPredicates(List<Predicate> predicates, Root<Experiment> root, CriteriaBuilder cb, SearchParametersDto params) {
     if (params.measurementSearch() == null) {
       return;

@@ -29,6 +29,12 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+/**
+ * Verifies the field mappings this mapper produces, including that nested reactants, user,
+ * metadata, and measurement result are correctly delegated to their own mappers, and that the
+ * two {@code experimentToGetExperimentDto} overloads source attachments differently (an explicit
+ * list versus deriving them from the experiment's own file collection).
+ */
 class ExperimentMapperTest {
 
     private final ExperimentMapper mapper = Mappers.getMapper(ExperimentMapper.class);

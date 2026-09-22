@@ -15,6 +15,10 @@ import java.util.UUID;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+/**
+ * Verifies {@link ExperimentFolderRepository}'s custom query against a real database: a user
+ * only ever gets back folders they own.
+ */
 // See ReactantRepositoryTest for why @DataJpaTest + @AutoConfigureTestDatabase(Replace.NONE) +
 // @ActiveProfiles("test") are all required together.
 @DataJpaTest

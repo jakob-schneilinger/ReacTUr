@@ -8,6 +8,9 @@ import org.springframework.security.access.AccessDeniedException;
 import java.util.List;
 import java.util.UUID;
 
+/**
+ * Provides the human-readable audit trail (change history) for an experiment.
+ */
 public interface ExperimentHistoryService {
 
     /**

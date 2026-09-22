@@ -14,6 +14,10 @@ import lombok.Builder;
 
 import java.util.UUID;
 
+/**
+ * The measured kinetics outcome of an {@link Experiment}: its rate constant and the associated
+ * error.
+ */
 @Entity
 @Table(name = "experiment_result")
 @Getter
@@ -30,7 +34,7 @@ public class ExperimentResult {
     @Column(name = "rate_constant", nullable = false)
     private Double rateConstant;
 
-    // Optional in DTO, it remains nullable here
+    /** Null unless the experiment was also fit to a pseudo-first-order (PFO) model. */
     @Column(name = "pfo_rate_constant")
     private Double pfoRateConstant;
 

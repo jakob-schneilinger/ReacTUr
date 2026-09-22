@@ -36,6 +36,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 
+/**
+ * Pure unit test for {@link StructureServiceImpl}, with repositories and the external API client
+ * mocked. Covers manual upload (including replacing the previous structure), triggering external
+ * generation (including the not-fixable-yet duplicate-job conflict guard), and selecting a
+ * structure as ACTIVE (including its idempotent and conflict cases).
+ */
 @ExtendWith(MockitoExtension.class)
 class StructureServiceTest {
 

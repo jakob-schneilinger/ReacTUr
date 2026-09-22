@@ -143,6 +143,16 @@ public class ExperimentFolderServiceImpl implements ExperimentFolderService {
     folderRepository.delete(folder);
   }
 
+  /**
+   * Looks up a folder and rejects the call unless {@code requestingUserId} is its owner. Folders
+   * have no privileged bypass: not even ADMIN/SUPERVISOR can modify a folder they don't own.
+   *
+   * @param folderId         the UUID of the folder to look up
+   * @param requestingUserId the Keycloak ID of the requesting user
+   * @return the folder, if it exists and is owned by the requesting user
+   * @throws ResourceNotFoundException if no folder exists for the given ID
+   * @throws AccessDeniedException     if the requesting user is not the folder's owner
+   */
   private ExperimentFolder getFolderAndValidateOwnership(UUID folderId, String requestingUserId) {
     ExperimentFolder folder = folderRepository.findById(folderId)
       .orElseThrow(() -> new ResourceNotFoundException("Folder not found."));

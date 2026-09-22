@@ -6,7 +6,7 @@ import com.reactur.backend.enums.StructureFlag;
 import java.util.UUID;
 
 /**
- * DTO representing the basic information of a reactant[cite: 6].
+ * DTO representing the basic information of a reactant.
  *
  * @param uuid         The unique identifier of the reactant.
  * @param smiles       The SMILES string representing the chemical structure.
