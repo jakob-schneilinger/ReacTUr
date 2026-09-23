@@ -151,8 +151,8 @@ afterward.
 A brand-new ReacTUr installation has no privileged accounts. Every new user who logs in for the
 first time is automatically added to the database with the role `UNAUTHORIZED`, including the
 very first one, since there is no admin yet to promote them through the normal flow. The only way
-to create the first privileged account is to log in with the just now create keycloak account and 
-afterwards set the role with direct database access:
+to create the first privileged account is to log in with the just-now-created keycloak account (so that it
+gets added to the database) and afterward set the role with direct database access:
 
 ```
 docker exec -it kinetics-postgres psql -U <POSTGRES_USER> -d <POSTGRES_DB> \
