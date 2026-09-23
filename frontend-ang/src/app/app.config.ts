@@ -43,7 +43,7 @@ export const appConfig: ApplicationConfig = {
     importProvidersFrom(NgbModule),
     provideTransloco({
       config: {
-        availableLangs: ['en', 'test'],
+        availableLangs: ['en', 'de'],
         defaultLang: 'en',
         reRenderOnLangChange: true,
         prodMode: !isDevMode(),

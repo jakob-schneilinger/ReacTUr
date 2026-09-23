@@ -1,5 +1,9 @@
 
 services:
+
+  # ------------------------------------
+  # Postgres
+  # ------------------------------------
   postgres:
     image: postgres:15-alpine
     container_name: kinetics-postgres
@@ -12,6 +16,9 @@ services:
     volumes:
       - postgres-data:/var/lib/postgresql/data
 
+  # ------------------------------------
+  # Keycloak
+  # ------------------------------------
   keycloak:
     image: quay.io/keycloak/keycloak:26.6.1
     container_name: kinetics-keycloak
@@ -24,6 +31,9 @@ services:
     volumes:
       - ./keycloak-config:/opt/keycloak/data/import
 
+  # ------------------------------------
+  # SeaweedFS
+  # ------------------------------------
   seaweedfs-master:
     image: chrislusf/seaweedfs:4.44
     container_name: kinetics-seaweed-master
@@ -63,6 +73,44 @@ services:
       - "8333:8333"
     depends_on:
       - seaweedfs-filer
+
+  # ------------------------------------
+  # Springboot Backend
+  # ------------------------------------
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: kinetics-backend
+    ports:
+      - "8080:8080"
+    environment:
+      - DB_HOST=${DB_HOST}
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - SEAWEEDFS_ENDPOINT=${SEAWEEDFS_ENDPOINT}
+      - SEAWEEDFS_ACCESS_KEY=${SEAWEEDFS_ACCESS_KEY}
+      - SEAWEEDFS_SECRET_KEY=${SEAWEEDFS_SECRET_KEY}
+      - REACTUR_API_BASE_URL=${REACTUR_API_BASE_URL}
+      - SPRING_PROFILES_ACTIVE=dev
+    depends_on:
+      - postgres
+      - keycloak
+      - seaweedfs-s3
+
+  # ------------------------------------
+  # Angular Frontend
+  # ------------------------------------
+  frontend:
+    build:
+      context: ./frontend-ang
+      dockerfile: Dockerfile
+    container_name: kinetics-frontend
+    ports:
+      - "4200:80"
+    depends_on:
+      - backend
 
 volumes:
   postgres-data:

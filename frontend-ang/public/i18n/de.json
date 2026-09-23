@@ -1,0 +1,760 @@
+{
+  "header": {
+    "title": "ReacTUr",
+    "logoAlt": "ReacTUr Logo",
+    "search": "Experiment-Suche",
+    "createExperiment": "Experiment erstellen",
+    "reactants": "Reaktanten",
+    "admin": "Admin",
+    "userProfile": "Benutzerprofil",
+    "greetings": "Hallo",
+    "logout": "Abmelden",
+    "experimentPlanning": "Planung",
+    "login": "Anmelden",
+    "myExperiments": "Meine Experimente",
+    "showTooltips": "Tooltips anzeigen",
+    "language": "Sprache"
+  },
+  "selectionOptions": {
+    "type": "Typ",
+    "modality": "Modalität",
+    "instrument": "Instrument",
+    "solvent": "Lösungsmittel"
+  },
+  "userRoles": {
+    "user": "BENUTZER",
+    "supervisor": "BETREUER",
+    "unauthorized": "UNBEFUGT",
+    "admin": "ADMIN"
+  },
+  "login": {
+    "title": "ReacTUr",
+    "login": "Anmelden",
+    "loginInstruction": "Bitte melden Sie sich mit Ihrem TU-Konto an, um fortzufahren.",
+    "loginButton": "Anmelden mit TU SSO"
+  },
+  "planning": {
+    "title": "Experimentplanung (Kinetik)",
+    "subtitle": "Simulieren Sie Reaktionen 2. Ordnung basierend auf unterschiedlichen Startkonzentrationen.",
+    "reactionParams": "Reaktionsparameter",
+    "rateConstant": "Geschwindigkeitskonstante (k)",
+    "rateConstantHelp": "z.B. aus früheren Experimenten",
+    "concA": "Startkonz.",
+    "concB": "Startkonz.",
+    "duration": "Simulationsdauer",
+    "simulateBtn": "Kinetik simulieren",
+    "halfLife": "50% Umsatz (Halbwertszeit)",
+    "reactionEnd": "99% Umsatz (Reaktionsende)",
+    "emptyChart": "Geben Sie die Parameter ein und klicken Sie auf 'Kinetik simulieren', um das Reaktionsprofil anzuzeigen."
+  },
+  "admin": {
+    "user": {
+      "title": "Benutzerverwaltung",
+      "searchPlaceholder": "Benutzer nach Name, E-Mail oder Rolle suchen...",
+      "pendingTitle": "Ausstehende Freigaben",
+      "activeTitle": "Aktive Benutzer",
+      "unauthorizedTitle": "Unbefugte Benutzer",
+      "deactivatedTitle": "Deaktivierte Benutzer",
+      "table": {
+        "headerName": "NAME",
+        "headerEmail": "E-MAIL",
+        "headerRole": "ROLLE",
+        "headerAction": "AKTION",
+        "rolePlaceholder": "Rolle auswählen...",
+        "actionReject": "Ablehnen",
+        "actionDeactivate": "Deaktivieren",
+        "actionReactivate": "Reaktivieren",
+        "noUsersFound": "Keine Benutzer in dieser Kategorie gefunden."
+      },
+      "notifications": {
+        "fetchError": "Fehler beim Abrufen der Benutzer",
+        "statusUpdated": "Benutzerstatus erfolgreich aktualisiert",
+        "statusError": "Fehler beim Aktualisieren des Benutzerstatus",
+        "roleUpdated": "Benutzerrolle erfolgreich aktualisiert",
+        "roleError": "Fehler beim Aktualisieren der Benutzerrolle"
+      }
+    },
+    "option": {
+      "title": "Systemkonfiguration",
+      "table": {
+        "headerValue": "WERT",
+        "headerStatus": "STATUS",
+        "headerAction": "AKTION",
+        "statusActive": "Aktiv",
+        "statusInactive": "Inaktiv",
+        "actionDeactivate": "Deaktivieren",
+        "actionActivate": "Aktivieren",
+        "loadingOptions": "Optionen werden geladen...",
+        "noOptionsFound": "Keine Optionen in dieser Kategorie gefunden."
+      },
+      "addPlaceholder": "Tippen Sie, um eine neue Option zur Kategorie \"{{category}}\" hinzuzufügen...",
+      "addButton": "Hinzufügen",
+      "modals": {
+        "add": {
+          "title": "Option zu \"{{category}}\" hinzufügen",
+          "message": "Sind Sie sicher, dass Sie die Option <strong>{{name}}</strong> zur Kategorie <strong>{{category}}</strong> hinzufügen möchten?",
+          "confirm": "Option hinzufügen"
+        }
+      },
+      "notifications": {
+        "loadError": "Laden der Optionen für {{category}} fehlgeschlagen",
+        "statusUpdated": "Optionsstatus erfolgreich aktualisiert",
+        "statusError": "Aktualisieren der Option fehlgeschlagen",
+        "addSuccess": "Neue Option erfolgreich hinzugefügt",
+        "addError": "Hinzufügen der neuen Option fehlgeschlagen"
+      }
+    }
+  },
+  "shared": {
+    "file": "Datei",
+    "upload": {
+      "title": "Dateien hochladen",
+      "removeFile": "Datei entfernen",
+      "removeConfirmMessage": "Sind Sie sicher, dass Sie <strong>{{fileName}}</strong> <strong>dauerhaft</strong> aus der Upload-Liste entfernen möchten?",
+      "removeConfirmLabel": "Dauerhaft entfernen",
+      "pastedDataExceedsSize": "Eingefügte Daten überschreiten die maximal zulässige Dateigröße von {{size}}MB.",
+      "maxFilesReached": "Maximale Anzahl an Dateien erreicht. Es sind nur {{count}} {{count, plural, =1 {Datei} other {Dateien}}} erlaubt.",
+      "fileAdded": "Datei hinzugefügt",
+      "fileAddedMessage": "\"{{fileName}}\" wurde hinzugefügt.",
+      "filesAdded": "Erfolg",
+      "filesAddedMessage": "{{count}} Dateien hinzugefügt.",
+      "fileRemoved": "Datei entfernt",
+      "fileRemovedMessage": "Die Datei \"{{fileName}}\" wurde erfolgreich aus der Liste entfernt.",
+      "dragDrop": {
+        "title": "Drag & Drop",
+        "or": "oder",
+        "browse": "Durchsuchen",
+        "allFiles": "Alle Dateien",
+        "and": "und",
+        "supports": "Unterstützt: {{extensions}}",
+        "maxSize": "Max: {{size}}MB",
+        "maxFilesSingle": ", {{count}} Datei",
+        "maxFilesPlural": ", {{count}} Dateien",
+        "maxFilesOnlySingle": "Max: {{count}} Datei",
+        "maxFilesOnlyPlural": "Max: {{count}} Dateien",
+        "errors": {
+          "typeNotAllowed": "Dateityp .{{extension}} ist nicht zulässig. Nur {{allowed}} werden unterstützt.",
+          "sizeExceeded": "Datei \"{{fileName}}\" überschreitet die maximale Größe von {{size}}MB.",
+          "uploadError": "Upload-Fehler"
+        }
+      },
+      "paste": {
+        "title": "Datentabelle einfügen",
+        "clear": "Leeren",
+        "saveCsv": "Als CSV speichern",
+        "loading": "Daten werden verarbeitet, bitte warten...",
+        "instruction": "Klicken Sie hier und drücken Sie <strong>Strg+V</strong> (oder Cmd+V), um Daten aus Excel/Prism/Sheets einzufügen.",
+        "previewAlert": "Es wird eine Vorschau der ersten <strong>{{previewCount}}</strong> Zeilen angezeigt. Alle <strong>{{totalCount}}</strong> Zeilen sind gespeichert und bereit für den Export."
+      }
+    },
+    "actions": {
+      "download": "Herunterladen",
+      "remove": "Entfernen",
+      "close": "Schließen",
+      "cancel": "Abbrechen",
+      "confirm": "Bestätigen",
+      "save": "Speichern",
+      "edit": "Bearbeiten",
+      "view": "Ansehen",
+      "add": "Hinzufügen",
+      "next": "Weiter",
+      "previous": "Zurück",
+      "history": "Verlauf"
+    },
+    "modals": {
+      "confirm": {
+        "title": "Bestätigen",
+        "message": "Sind Sie sicher, dass Sie fortfahren möchten?",
+        "confirm": "Bestätigen",
+        "cancel": "Abbrechen"
+      }
+    }
+  },
+  "search": {
+    "title": "Suche",
+    "advancedSearch": "Erweiterte Suche",
+    "initial": "Geben Sie Reaktanten ein, um nach Reaktionen zu suchen.",
+    "noResults": "Keine Experimente für diese Reaktanten gefunden.",
+    "countOnPage": "{{count}} Ergebnisse auf der Seite ({{total}} gesamt)",
+    "btnSearch": "Nach Experimenten suchen",
+    "btnCreate": "Neues Experiment erstellen",
+    "pagination": {
+      "showing": "Zeige {{start}} bis {{end}} von {{total}} Einträgen",
+      "perPage": "pro Seite"
+    },
+    "actions": {
+      "selectAll": "Seite auswählen",
+      "deselectAll": "Seite abwählen",
+      "exportSelected": "Ausgewählte exportieren ({{count}})",
+      "exportAll": "Alle exportieren ({{total}})",
+      "viewDetails": "Details ansehen",
+      "remove": "Entfernen",
+      "add": "Hinzufügen",
+      "hideDetails": "Details ausblenden",
+      "showDetails": "Details einblenden",
+      "archive": "Archivieren",
+      "restore": "Wiederherstellen"
+    },
+    "metadata": {
+      "rateConstant": "Geschwindigkeitskonstante",
+      "date": "Datum",
+      "solvent": "Lösungsmittel",
+      "temp": "Temp",
+      "conc": "Konz.",
+      "error": "Fehler",
+      "pfoRateConstant": "pFO-Geschwindigkeitskonstante",
+      "instrument": "Instrument",
+      "modality": "Modalität",
+      "wavelength": "Wellenlänge",
+      "notes": "Notizen"
+    },
+    "modals": {
+      "archive": {
+        "title": "Experiment archivieren",
+        "message": "Möchten Sie dieses Experiment wirklich archivieren?",
+        "confirm": "Archivieren"
+      },
+      "restore": {
+        "title": "Experiment wiederherstellen",
+        "message": "Möchten Sie dieses Experiment wirklich wiederherstellen?",
+        "confirm": "Wiederherstellen"
+      },
+      "draw": {
+        "title": "Struktur zeichnen",
+        "apply": "Struktur übernehmen"
+      }
+    },
+    "standard": {
+      "reactant1": "Reaktant 1",
+      "reactant2": "Reaktant 2",
+      "switchToExact": "Zum exakten Treffer wechseln",
+      "searchBySubstructure": "Nach Substruktur suchen",
+      "reactantError": "Reaktantenfehler",
+      "reactantFetchFailed": "Reaktanten konnten nicht abgerufen werden. Bitte laden Sie die Seite neu!"
+    },
+    "advanced": {
+      "title": "Erweiterte Suche",
+      "rateConstantRange": "Bereich der Geschwindigkeitskonstante",
+      "pfoRateConstantRange": "Bereich der pseudo-ersten-Ordnung Geschwindigkeitskonstante",
+      "dateRange": "Datumsbereich",
+      "scientist": "Wissenschaftler",
+      "temperature": "Temperatur",
+      "solvent": "Lösungsmittel",
+      "concentrationA": "Konzentration A",
+      "concentrationB": "Konzentration B",
+      "instrument": "Instrument",
+      "modality": "Modalität",
+      "wavelengthRange": "Wellenlängenbereich",
+      "comment": "Kommentar",
+      "clearFields": "Felder leeren",
+      "labels": {
+        "from": "Von",
+        "to": "Bis",
+        "min": "Min",
+        "max": "Max",
+        "reactantA": "Reaktant A",
+        "reactantB": "Reaktant B"
+      },
+      "placeholders": {
+        "scientist": "Name",
+        "solvent": "z.B. Wasser",
+        "reactant": "Nach Reaktant suchen...",
+        "instrument": "Instrumentenname",
+        "modality": "Modalitätstyp",
+        "comment": "Kommentar"
+      },
+      "warnings": {
+        "invalidRange": "Der Minimalwert darf nicht größer als der Maximalwert sein.",
+        "invalidDateRange": "Das Startdatum darf nicht nach dem Enddatum liegen.",
+        "fetchUsersError": "Fehler beim Abrufen der Benutzer"
+      }
+    },
+    "substructure": {
+      "group": "Gruppe ( )",
+      "operator": "Operator",
+      "format": "Format",
+      "or": "ODER",
+      "and": "UND",
+      "not": "NICHT",
+      "smarts": "SMARTS",
+      "smiles": "SMILES",
+      "removeGroup": "Gruppe entfernen",
+      "addRule": "Substruktur hinzufügen",
+      "addGroup": "Gruppe hinzufügen ( )",
+      "searchButton": "Substrukturen suchen",
+      "resultsLabel": "Suchergebnisse",
+      "placeholder": "Substruktur zeichnen oder einfügen...",
+      "removeReactant": "Reaktant entfernen",
+      "drawSubstructure": "Substruktur zeichnen",
+      "warnings": {
+        "maxDepth": "Maximale Gruppentiefe erreicht.",
+        "rdkitNotLoaded": "RDKit ist noch nicht geladen."
+      }
+    },
+    "selector": {
+      "placeholder": "Nach Name, SMILES oder Typ suchen...",
+      "drawMolecule": "Molekül zeichnen",
+      "clearSearch": "Suche leeren",
+      "removeReactant": "Reaktant entfernen"
+    },
+    "notifications": {
+      "errorTitle": "Fehler",
+      "experimentDetailsErrorMessage": "Experimentdetails konnten nicht gefunden werden.",
+      "restoreErrorMessage": "Experiment konnte nicht wiederhergestellt werden.",
+      "archiveErrorMessage": "Experiment konnte nicht archiviert werden.",
+      "restoreTitle": "Experiment wiederhergestellt",
+      "restoreMessage": "Experiment erfolgreich wiederhergestellt.",
+      "archiveTitle": "Experiment archiviert",
+      "archiveMessage": "Experiment erfolgreich archiviert."
+    }
+  },
+  "reactants": {
+    "status": {
+      "pending": "3D-Struktur wird generiert...",
+      "ready": "3D-Struktur wartet auf Bestätigung",
+      "failed": "Generierung fehlgeschlagen",
+      "missing": "Keine 3D-Struktur verfügbar"
+    },
+    "title": "Reaktanten",
+    "searchPlaceholder": "Nach Name, SMILES oder Typ suchen...",
+    "actions": {
+      "showReactants": "Reaktanten anzeigen",
+      "showArchived": "Archivierte anzeigen",
+      "addReactant": "Reaktant hinzufügen",
+      "viewDetails": "Details ansehen",
+      "editReactant": "Reaktant bearbeiten",
+      "archiveReactant": "Reaktant archivieren",
+      "restoreReactant": "Reaktant wiederherstellen",
+      "copySmiles": "SMILES kopieren"
+    },
+    "badges": {
+      "archived": "Archiviert"
+    },
+    "empty": {
+      "noArchived": "Keine archivierten Reaktanten gefunden.",
+      "noReactants": "Keine Reaktanten gefunden.",
+      "adjustSearch": "Versuchen Sie, Ihre Suchkriterien anzupassen."
+    },
+    "modals": {
+      "archive": {
+        "title": "Reaktant archivieren",
+        "message": "Sind Sie sicher, dass Sie den Reaktanten <strong>{{name}}</strong> archivieren möchten?",
+        "confirm": "Archivieren"
+      },
+      "restore": {
+        "title": "Reaktant wiederherstellen",
+        "message": "Sind Sie sicher, dass Sie den Reaktanten <strong>{{name}}</strong> wiederherstellen möchten?",
+        "confirm": "Wiederherstellen"
+      }
+    },
+    "notifications": {
+      "fetchError": "Reaktanten nicht verfügbar",
+      "fetchArchivedError": "Archivierte Reaktanten nicht verfügbar",
+      "notFoundTitle": "Fehler",
+      "notFoundMessage": "Reaktantendetails konnten nicht gefunden werden.",
+      "archivedTitle": "Reaktant archiviert",
+      "archivedMessage": "Der Reaktant \"{{name}}\" wurde erfolgreich archiviert.",
+      "archiveFailed": "Archivierung fehlgeschlagen",
+      "restoredTitle": "Reaktant wiederhergestellt",
+      "restoredMessage": "Der Reaktant \"{{name}}\" wurde erfolgreich wiederhergestellt.",
+      "restoreFailed": "Wiederherstellung fehlgeschlagen",
+      "copySuccessTitle": "Erfolg",
+      "copySuccessMessage": "SMILES in die Zwischenablage kopiert!",
+      "copyFailed": "Text konnte nicht kopiert werden"
+    },
+    "details": {
+      "addNew": "Neuen Reaktanten hinzufügen",
+      "form": {
+        "sections": {
+          "required": "Erforderlich",
+          "optional": "Optional"
+        },
+        "labels": {
+          "shortName": "Kurzname",
+          "smiles": "SMILES",
+          "type": "Typ",
+          "chemicalName": "Chemischer Name",
+          "additionalShortNames": "Zusätzliche Kurznamen",
+          "casNumber": "CAS-Nummer",
+          "references": "Referenz(en)",
+          "comment": "Kommentar"
+        },
+        "placeholders": {
+          "value": "Wert",
+          "selectOrType": "Auswählen oder tippen...",
+          "comment": "Weitere Details hinzufügen..."
+        },
+        "buttons": {
+          "addShortName": "Kurznamen hinzufügen",
+          "addReference": "Referenz hinzufügen",
+          "submit": "Absenden",
+          "cancel": "Abbrechen",
+          "archive": "Archivieren"
+        },
+        "errors": {
+          "shortNameRequired": "Kurzname ist erforderlich.",
+          "smilesRequired": "SMILES-String ist erforderlich.",
+          "smilesSyntax": "SMILES-Format ist ungültig. Bitte Syntax prüfen.",
+          "smilesSanitization": "SMILES-Format ist ungültig. Molekülstruktur hat die RDKit-Bereinigung nicht bestanden.",
+          "invalidType": "Bitte wählen Sie einen gültigen Typ aus der Liste.",
+          "fieldRequired": "Feld ist erforderlich."
+        }
+      },
+      "modals": {
+        "structureSelect": {
+          "title": "3D-Struktur auswählen",
+          "description": "Die API hat diese Strukturen generiert. Bitte überprüfen Sie die 3D-Modelle und wählen Sie die richtige Struktur für diesen Reaktanten aus.<br><strong>Das Speichern dieser Strukturdatei ist eine endgültige Aktion.</strong>",
+          "buttons": {
+            "select": "Diese Struktur übernehmen",
+            "rejectAll": "Alle verwerfen",
+            "cancel": "Abbrechen"
+          }
+        },
+        "structureConfirm": {
+          "title": "Hochgeladene 3D-Struktur bestätigen",
+          "description": "Bitte überprüfen Sie die hochgeladene 3D-Struktur. <strong>Das Speichern dieser Strukturdatei ist eine endgültige Aktion.</strong> <br>Wenn Sie die Struktur ändern möchten, brechen Sie bitte ab und laden Sie eine neue Datei hoch.",
+          "buttons": {
+            "confirm": "Bestätigen",
+            "cancel": "Abbrechen"
+          }
+        },
+        "archive": {
+          "title": "Reaktant archivieren",
+          "message": "Sind Sie sicher, dass Sie den Reaktanten {{name}} archivieren möchten?",
+          "confirm": "Archivieren"
+        },
+        "cancel": {
+          "title": "Ungespeicherte Änderungen",
+          "message": "Sie haben ungespeicherte Änderungen. Möchten Sie wirklich abbrechen? Alle Fortschritte gehen verloren.",
+          "confirm": "Änderungen verwerfen",
+          "cancelBtn": "Weiter bearbeiten"
+        }
+      },
+      "notifications": {
+        "errorTitle": "Fehler",
+        "loadError": "Laden der Reaktantendaten fehlgeschlagen",
+        "typeLoadErrorTitle": "Fehler beim Laden des Typs",
+        "typeLoadErrorMessage": "Bitte laden Sie die Seite neu! Fehler: {{error}}",
+        "pageRefreshTitle": "Seite neugeladen",
+        "savedTitle": "Reaktant gespeichert",
+        "savedMessage": "Reaktant wurde erfolgreich gespeichert!",
+        "saveErrorTitle": "Speichern fehlgeschlagen",
+        "saveErrorMessage": "Speichern des Reaktanten fehlgeschlagen! Fehler: {{error}}",
+        "archivedTitle": "Reaktant archiviert",
+        "archivedMessage": "Der Reaktant \"{{name}}\" wurde erfolgreich archiviert.",
+        "archiveFailedTitle": "Archivierung fehlgeschlagen",
+        "archiveFailedMessage": "Archivierung von Reaktant \"{{name}}\" fehlgeschlagen! Fehler: {{error}}",
+        "uploadTitle": "Upload erfolgreich",
+        "uploadMessage": "3D-Strukturdatei erfolgreich hochgeladen.",
+        "uploadErrorTitle": "Upload fehlgeschlagen",
+        "uploadErrorMessage": "Upload der 3D-Strukturdatei fehlgeschlagen! Fehler: {{error}}",
+        "generateTitle": "Generierung der 3D-Struktur gestartet",
+        "generateErrorTitle": "Starten der Generierung fehlgeschlagen",
+        "generateErrorMessage": "Fehler: {{error}}",
+        "structureSelectTitle": "Auswahl erfolgreich",
+        "structureSelectErrorTitle": "Strukturauswahl fehlgeschlagen",
+        "structureSelectErrorMessage": "Auswählen der Struktur fehlgeschlagen! Fehler: {{error}}",
+        "fieldEmptyErrorTitle": "Feld ist leer",
+        "fieldEmptyErrorMessage": "Bitte füllen Sie das letzte Feld aus, bevor Sie ein neues hinzufügen."
+      },
+      "structure": {
+        "failedGenerate": "Fehler beim Generieren der Struktur.",
+        "tryAgainButton": "Erneut versuchen",
+        "generating": "3D-Struktur wird generiert... Bitte warten.",
+        "refreshButton": "Status aktualisieren",
+        "generateComplete": "Strukturgenerierung abgeschlossen.",
+        "selectStructureButton": "Struktur auswählen",
+        "generateStructureButton": "Struktur aus SMILES generieren"
+      }
+    },
+    "structure": {
+      "noStructureLoaded": "Derzeit ist keine Reaktantenstruktur geladen.",
+      "switchToView": "Zur {{ view }}-Ansicht wechseln",
+      "addSmiles": "Smiles für 2D-Struktur hinzufügen",
+      "notifications": {
+        "fileFormatErrorTitle": "Dateiformatfehler",
+        "fileFormatErrorMessage": "XYZ-Daten erwartet, aber HTML/XML-Format erhalten. Dateiinnhalt überprüfen!",
+        "invalidXyzTitle": "Ungültige XYZ-Datei",
+        "invalidXyzMessage": "Die hochgeladene XYZ-Datei enthält keine gültige chemische Struktur. Dateiinnhalt überprüfen!",
+        "render2dErrorTitle": "2D-Rendering-Fehler",
+        "render2dErrorMessage": "2D-Struktur konnte nicht aus SMILES generiert werden."
+      }
+    },
+    "viewModal": {
+      "title": "Reaktantendetails",
+      "sections": {
+        "information": "Reaktanteninformationen",
+        "structure": "Reaktantenstruktur",
+        "attachedFiles": "Angehängte Dateien"
+      },
+      "labels": {
+        "shortName": "Kurzname",
+        "type": "Typ",
+        "smiles": "SMILES",
+        "chemicalName": "Chemischer Name",
+        "additionalNames": "Zusätzliche Namen",
+        "casNumber": "CAS-Nummer",
+        "comment": "Kommentar",
+        "references": "Referenzen"
+      },
+      "structure": {
+        "generate": "3D-Strukturen werden im Hintergrund generiert oder warten auf Bestätigung.",
+        "generateFailed": "Generierung der 3D-Struktur fehlgeschlagen."
+      },
+      "emptyFiles": "Keine Strukturdateien angehängt.",
+      "buttons": {
+        "edit": "Reaktant bearbeiten",
+        "close": "Schließen"
+      },
+      "notifications": {
+        "missing3dFileTitle": "Fehlende 3D-Datei",
+        "missing3dFileMessage": "3D-Datei(en) des Reaktanten nicht gefunden!"
+      }
+    },
+    "history": {
+      "title": "Experimentverlauf",
+      "noHistory": "Kein Verlauf für dieses Experiment verfügbar."
+    },
+    "extractedMetadata": {
+      "title": "Metadaten erkannt",
+      "description": "Wir haben die folgenden Details in Ihrer hochgeladenen Datei <strong>{{fileName}}</strong> gefunden. Wählen Sie die Daten aus, die Sie automatisch ausfüllen möchten.",
+      "table": {
+        "keep": "Behalten",
+        "property": "Eigenschaft",
+        "value": "Wert"
+      },
+      "labels": {
+        "date": "Datum",
+        "temperature": "Temperatur (°C)",
+        "instrument": "Instrument",
+        "modality": "Zelltyp",
+        "wavelength": "Wellenlänge (nm)",
+        "reactantA": "Reaktant A",
+        "concentrationA": "Konzentration A (mM)",
+        "reactantB": "Reaktant B",
+        "concentrationB": "Konzentration B (mM)",
+        "comment": "Anmerkungen"
+      },
+      "buttons": {
+        "useSelected": "Ausgewählte Metadaten verwenden",
+        "appliedTitle": "Metadaten angewendet",
+        "appliedMessage": "Formularfelder wurden aus der hochgeladenen Datei ausgefüllt."
+      }
+    }
+  },
+  "experiments": {
+    "view": {
+      "title": "Details",
+      "experimentMetadata": "Experiment-Metadaten",
+      "measurementData": "Messdaten",
+      "noMeasurementData": "Keine Messdaten verfügbar.",
+      "noReactants": "Diesem Experiment sind keine Reaktanten zugeordnet.",
+      "noFiles": "Keine Dateien angehängt.",
+      "planExperiment": "Experiment planen",
+      "labels": {
+        "concentrations": "Konzentrationen",
+        "instrument": "Instrument",
+        "modality": "Modalität",
+        "wavelength": "Wellenlänge",
+        "comment": "Kommentar",
+        "rateConstant": "Geschwindigkeitskonstante",
+        "error": "Fehler",
+        "pfoRateConstant": "pFO-Geschwindigkeitskonstante"
+      }
+    },
+    "details": {
+      "createNew": "Neues Experiment erstellen",
+      "editExisting": "Experiment bearbeiten",
+      "viewExisting": "Experiment ansehen",
+      "loading": "Experimentdetails werden geladen...",
+      "filesDirtyHint": "Experiment speichern, um geänderte Dateien zu übermitteln.",
+      "showHistory": "Verlauf anzeigen",
+      "form": {
+        "sections": {
+          "required": "Erforderlich",
+          "optional": "Optional"
+        },
+        "labels": {
+          "reactantA": "Reaktant A",
+          "reactantB": "Reaktant B",
+          "date": "Datum",
+          "scientist": "Wissenschaftler",
+          "temperature": "Temperatur",
+          "solvent": "Lösungsmittel",
+          "concentrationReactantA": "Konzentration Reaktant A (in Spritze)",
+          "concentrationReactantB": "Konzentration Reaktant B (in Spritze)",
+          "halfConcentrationReactantA": "Konzentration Reaktant A (real)",
+          "halfConcentrationReactantB": "Konzentration Reaktant B (real)",
+          "instrument": "Instrument",
+          "modality": "Modalität",
+          "wavelength": "Wellenlänge",
+          "comment": "Kommentar",
+          "rateConstant": "Geschwindigkeitskonstante",
+          "error": "Fehler",
+          "isErrorPercentage": "Prozentualer Fehler",
+          "pfoRateConstant": "Pseudo-Erste-Ordnung Geschwindigkeitskonstante",
+          "doi": "Digital Object Identifier (DOI)",
+          "createdBy": "Erstellt von",
+          "files": "Dateien"
+        },
+        "placeholders": {
+          "value": "Wert",
+          "selectOrType": "Auswählen oder tippen...",
+          "comment": "Weitere Details hinzufügen..."
+        },
+        "buttons": {
+          "submit": "Absenden",
+          "cancel": "Abbrechen",
+          "archive": "Archivieren"
+        },
+        "errors": {
+          "reactantARequired": "Reaktant A ist erforderlich.",
+          "reactantBRequired": "Reaktant B ist erforderlich.",
+          "reactantNotUnique": "Reaktant A und B müssen eindeutig sein.",
+          "dateRequired": "Datum ist erforderlich.",
+          "scientistRequired": "Name des Wissenschaftlers ist erforderlich.",
+          "temperatureRequired": "Temperatur ist erforderlich.",
+          "solventRequired": "Lösungsmittel ist erforderlich.",
+          "rateConstantRequired": "Geschwindigkeitskonstante ist erforderlich.",
+          "errorRequired": "Fehler ist erforderlich.",
+          "concentrationARequired": "Konzentration A ist erforderlich.",
+          "concentrationBRequired": "Konzentration B ist erforderlich.",
+          "concentrationNegative": "Konzentration darf nicht negativ sein.",
+          "rateConstantNegative": "Geschwindigkeitskonstante darf nicht negativ sein.",
+          "errorNegative": "Fehler darf nicht negativ sein.",
+          "errorPercentageLimit": "Prozentualer Fehler darf nicht größer als 100% sein.",
+          "invalidSolvent": "Bitte wählen Sie ein gültiges Lösungsmittel aus der Liste.",
+          "invalidInstrument": "Bitte wählen Sie ein gültiges Instrument aus der Liste.",
+          "invalidModality": "Bitte wählen Sie eine gültige Modalität aus der Liste.",
+          "wavelengthInvalid": "Wellenlänge ungültig.",
+          "wavelengthNegative": "Wellenlänge darf nicht negativ sein.",
+          "commentLength": "Kommentar darf nicht länger als 1000 Zeichen sein.",
+          "formInvalid": "Bitte beheben Sie die Fehler im Formular vor dem Absenden."
+        },
+        "dateTitle": "Datumsauswahl anzeigen"
+      },
+      "modals": {
+        "archive": {
+          "title": "Experiment archivieren",
+          "message": "Möchten Sie dieses Experiment wirklich archivieren? Diese Aktion kann nicht rückgängig gemacht werden.",
+          "confirm": "Archivieren"
+        },
+        "cancel": {
+          "title": "Ungespeicherte Änderungen",
+          "message": "Sie haben ungespeicherte Änderungen. Möchten Sie wirklich abbrechen? Alle Fortschritte gehen verloren.",
+          "confirm": "Änderungen verwerfen",
+          "cancelBtn": "Weiter bearbeiten"
+        }
+      },
+      "notifications": {
+        "errorTitle": "Fehler",
+        "loadError": "Experiment konnte nicht geladen werden",
+        "loadExpError": "Laden der Experimentdaten fehlgeschlagen! Fehler: {{error}}",
+        "loadArchivedError": "Laden der Experimentdaten fehlgeschlagen! Archiviertes Experiment kann nicht geladen werden.",
+        "permissionErrorTitle": "Berechtigungsfehler",
+        "permissionErrorMessage": "Berechtigungsfehler für dieses Experiment! Fehler: {{error}}",
+        "optionLoadErrorTitle": "Fehler beim Laden der Option",
+        "optionLoadErrorMessage": "{{category}} konnte nicht geladen werden! Bitte überprüfen Sie Ihre Verbindung oder versuchen Sie es später erneut. Fehler: {{error}}",
+        "savedTitle": "Experiment gespeichert",
+        "savedMessage": "Experiment wurde erfolgreich gespeichert!",
+        "savedErrorTitle": "Speichern fehlgeschlagen",
+        "savedErrorMessage": "Speichern des Experiments fehlgeschlagen! Fehler: {{error}}",
+        "archivedTitle": "Experiment archiviert",
+        "archivedMessage": "Experiment wurde erfolgreich archiviert!",
+        "archiveFailedTitle": "Archivierung fehlgeschlagen",
+        "archiveFailedMessage": "Archivierung des Experiments fehlgeschlagen! Fehler: {{error}}",
+        "userErrorTitle": "Benutzerfehler",
+        "userLoadError": "Benutzer konnten nicht abgerufen werden. Bitte laden Sie die Seite neu! Fehler: {{error}}",
+        "reactantErrorTitle": "Reaktantenfehler",
+        "reactantLoadError": "Reaktanten konnten nicht abgerufen werden. Bitte laden Sie die Seite neu! Fehler: {{error}}",
+        "historyLoadError": "Experimentverlauf konnte nicht geladen werden.",
+        "deleteFileErrorTitle": "Fehler beim Löschen",
+        "deleteFileErrorMessage": "Datei konnte nicht gelöscht werden.",
+        "metaDataTitle": "Metadaten angewendet",
+        "metaDataMessage": "Formularfelder wurden aus der hochgeladenen Datei ausgefüllt.",
+        "uploadErrorTitle": "Upload-Fehler",
+        "uploadErrorMessage": "Fehler beim Hochladen: {{fileName}}",
+        "commaWarningTitle": "Kommas nicht erlaubt",
+        "commaWarningMessage": "Bitte verwenden Sie Punkte statt Kommas in numerischen Eingabefeldern."
+      }
+    },
+    "my": {
+      "title": "Meine Experimente",
+      "active": "Aktive Experimente",
+      "archived": "Archiviert",
+      "loading": "Experimente werden geladen",
+      "noActive": "Sie haben derzeit keine aktiven Experimente.",
+      "noArchived": "Keine archivierten Experimente verfügbar.",
+      "notifications": {
+        "errorTitle": "Fehler",
+        "loadError": "Experimente konnten nicht geladen werden.",
+        "userLoadError": "Benutzerdaten konnten nicht geladen werden."
+      }
+    }
+  },
+  "exportModal": {
+    "title": "{{count}} Experiment(e) exportieren",
+    "format": "Format",
+    "json": "JSON",
+    "csv": "CSV",
+    "includeJsonFields": "JSON-Felder einschließen",
+    "availableCsvFields": "Verfügbare CSV-Felder",
+    "dragDropInstruction": "Ziehen Sie Felder in die Tabelle, um Ihren Export zu erstellen.",
+    "dragDropPlaceholder": "Felder hierher ziehen & ablegen...",
+    "categories": {
+      "reactantsStructures": "Reaktanten & Strukturen",
+      "kineticsData": "Kinetik / Daten",
+      "coreMetadata": "Kern & Metadaten"
+    },
+    "fields": {
+      "names": "Namen",
+      "smiles": "SMILES",
+      "chemicalType": "Chemischer Typ",
+      "structures": "3D-Strukturen",
+      "rateConstant": "Geschwindigkeitskonstante",
+      "pfo": "pFO-Geschwindigkeitskonstante",
+      "error": "Fehler / Varianz",
+      "doi": "DOI",
+      "temperature": "Temperatur",
+      "solvent": "Lösungsmittel",
+      "uuid": "UUID",
+      "createdBy": "Erstellt von",
+      "reactantAName": "Reaktant A (Name)",
+      "reactantASmiles": "Reaktant A (SMILES)",
+      "reactantAStruct": "Reaktant A (Strukturen)",
+      "reactantBName": "Reaktant B (Name)",
+      "reactantBSmiles": "Reaktant B (SMILES)",
+      "reactantBStruct": "Reaktant B (Strukturen)",
+      "reactantAType": "Reaktant A (Typ)",
+      "reactantBType": "Reaktant B (Typ)",
+      "instrument": "Instrument",
+      "modality": "Modalität",
+      "wavelength": "Wellenlänge",
+      "expComment": "Experimentkommentar",
+      "date": "Datum",
+      "scientist": "Wissenschaftler",
+      "concentrationA": "Konzentration A",
+      "concentrationB": "Konzentration B",
+      "isErrorPercentage": "Ist prozentualer Fehler"
+    },
+    "preview": {
+      "title": "Datenvorschau",
+      "showingItems": "Zeige erste {{count}} Elemente",
+      "copying": "Kopieren...",
+      "copied": "Kopiert!",
+      "copyFullData": "Vollständige Daten kopieren"
+    },
+    "buttons": {
+      "cancel": "Abbrechen",
+      "download": "{{format}} herunterladen"
+    }
+  },
+  "service": {
+    "notifications": {
+      "auth": {
+        "accessErrorTitle": "Zugriff verweigert",
+        "accessErrorMessage": "Sie haben nicht die erforderlichen Berechtigungen, um auf diese Seite zuzugreifen."
+      }
+    }
+  }
+}
