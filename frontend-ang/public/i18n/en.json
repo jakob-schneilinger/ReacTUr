@@ -594,7 +594,8 @@
           "isErrorPercentage": "Percentage Error",
           "pfoRateConstant": "Pseudo First Order Rate Constant",
           "doi": "Digital Object Identifier (DOI)",
-          "createdBy": "Created By"
+          "createdBy": "Created By",
+          "files": "Files"
         },
         "placeholders": {
           "value": "Value",
