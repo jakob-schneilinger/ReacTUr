@@ -78,7 +78,7 @@ Keycloak's public keys to verify each incoming JWT's signature independently of 
 
 **Important:** this setup is for local development only. No production deployment configuration
 exists yet: there is no production Spring profile, no TLS, and Keycloak runs in its own
-non-production `start-dev` mode. See [`backend/README.md`](backend/README.md) Known Limitations section for the full
+non-production `start-dev` mode. See [`backend/README.md`](backend/README.md)'s Known Limitations section for the full
 detail. Bringing this together into a single production-ready deployment path is planned future
 work, not an oversight.
 
@@ -180,7 +180,6 @@ reactur/
 ├── backend/            Spring Boot REST API, see backend/README.md
 ├── frontend-ang/       Angular web application, see frontend-ang/README.md
 ├── keycloak-config/    Keycloak realm import used by docker-compose.yml
-├── rdkit-services/     Experimental Python/RDKit service, not currently used by the running application
 ├── docker-compose.yml  Starts the full ReacTUr stack (Postgres, Keycloak, SeaweedFS, backend, frontend) for local development
 └── .env.example        Template for the environment variables docker-compose.yml and the backend need
 ```
