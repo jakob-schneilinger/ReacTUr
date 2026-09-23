@@ -12,6 +12,7 @@
     "experimentPlanning": "test",
     "login": "test",
     "myExperiments": "test",
+    "showTooltips": "test",
     "language": "test"
   },
   "selectionOptions": {
@@ -200,6 +201,7 @@
       "solvent": "test",
       "temp": "test",
       "conc": "test",
+      "error": "test",
       "pfoRateConstant": "test",
       "instrument": "test",
       "modality": "test",
@@ -581,6 +583,8 @@
           "solvent": "test",
           "concentrationReactantA": "test",
           "concentrationReactantB": "test",
+          "halfConcentrationReactantA": "test",
+          "halfConcentrationReactantB": "test",
           "instrument": "test",
           "modality": "test",
           "wavelength": "test",
@@ -590,7 +594,8 @@
           "isErrorPercentage": "test",
           "pfoRateConstant": "test",
           "doi": "test",
-          "createdBy": "test"
+          "createdBy": "test",
+          "files": "test"
         },
         "placeholders": {
           "value": "test",
@@ -668,7 +673,9 @@
         "metaDataTitle": "test",
         "metaDataMessage": "test",
         "uploadErrorTitle": "test",
-        "uploadErrorMessage": "test"
+        "uploadErrorMessage": "test",
+        "commaWarningTitle": "test",
+        "commaWarningMessage": "test"
       }
     },
     "my": {
