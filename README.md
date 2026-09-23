@@ -166,7 +166,7 @@ same ID ReacTUr stores internally as the user's identifier.
 
 Once at least one admin account exists, all further role changes go through the API instead of
 SQL: `POST /api/users/{uuid}` with a body of `{"role": "USER"}` (or `ADMIN`, `SUPERVISOR`,
-`UNAUTHORIZED`), callable only by an existing `ADMIN`. Direct database access is a one-time
+`UNAUTHORIZED`, see further infos in [`backend/AUTHORIZATION_POLICY.md`](backend/AUTHORIZATION_POLICY.md)), callable only by an existing `ADMIN`. Direct database access is a one-time
 bootstrap step, not a normal operating procedure.
 
 Authentication currently uses ReacTUr's own local Keycloak realm. Federating to TU Wien's
