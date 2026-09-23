@@ -28,7 +28,7 @@ management.
 ReacTUr has five components.
 
 The Angular frontend (`frontend-ang/`) is the chemist-facing web UI.
-This README does not duplicate frontend internals; see `frontend-ang/README.md` for that.
+This README does not duplicate frontend internals; see [`frontend-ang/README.md`](frontend-ang/README.md)`` for that.
 
 The Spring Boot backend (`backend/`) is the REST API: business logic, validation, and
 orchestration. See `backend/README.md` for the full architecture detail and the API
