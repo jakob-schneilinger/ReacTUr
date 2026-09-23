@@ -28,10 +28,10 @@ management.
 ReacTUr has five components.
 
 The Angular frontend (`frontend-ang/`) is the chemist-facing web UI.
-This README does not duplicate frontend internals; see [`frontend-ang/README.md`](frontend-ang/README.md)`` for that.
+This README does not duplicate frontend internals; see [`frontend-ang/README.md`](frontend-ang/README.md) for that.
 
 The Spring Boot backend (`backend/`) is the REST API: business logic, validation, and
-orchestration. See `backend/README.md` for the full architecture detail and the API
+orchestration. See [`backend/README.md`](backend/README.md) for the full architecture detail and the API
 documentation, including a Swagger UI generated automatically from the code.
 
 Keycloak handles identity and access management. It issues JWTs after login, and the backend
@@ -78,7 +78,7 @@ Keycloak's public keys to verify each incoming JWT's signature independently of 
 
 **Important:** this setup is for local development only. No production deployment configuration
 exists yet: there is no production Spring profile, no TLS, and Keycloak runs in its own
-non-production `start-dev` mode. See `backend/README.md`'s Known Limitations section for the full
+non-production `start-dev` mode. See [`backend/README.md`](backend/README.md) Known Limitations section for the full
 detail. Bringing this together into a single production-ready deployment path is planned future
 work, not an oversight.
 
