@@ -1,6 +1,6 @@
 # Frontend Laboratory Management System (Angular)
 
-This project is a modern Angular-based frontend application designed for laboratory experiment management. It was generated using [Angular CLI](https://github.com/angular/angular-cli) version 21.2.9.
+This project's frontend is a modern Angular-based application designed for laboratory experiment management. It was generated using [Angular CLI](https://github.com/angular/angular-cli) version 21.2.9.
 
 ## Key Features
 
