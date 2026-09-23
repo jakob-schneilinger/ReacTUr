@@ -142,8 +142,8 @@ Creating one is a separate, infrastructure-level step from the chemist-facing lo
 in Architecture. Every account exists because the Keycloak admin, a preconfigured infrastructure
 account (`KEYCLOAK_ADMIN_USER`/`KEYCLOAK_ADMIN_PASSWORD` in `.env`), not to be confused with
 ReacTUr's own `ADMIN` role covered below, created it by hand through Keycloak's own Admin Console
-at `http://localhost:8081`. That means logging in there as the Keycloak admin, switching to the
-`test` realm, then using Users → Add user, and setting a non-temporary password on the new user's
+at `http://localhost:8081`. That means logging in there as the Keycloak admin, clicking on Manage Realms and switching to the
+`test` realm, then using Users → Create new user, and setting a non-temporary password on the new user's
 Credentials tab. Only once that Keycloak account exists can the person log in to ReacTUr at all;
 the role-based access described below is a separate step, inside ReacTUr itself, that applies only
 afterward.
@@ -151,12 +151,15 @@ afterward.
 A brand-new ReacTUr installation has no privileged accounts. Every new user who logs in for the
 first time is automatically added to the database with the role `UNAUTHORIZED`, including the
 very first one, since there is no admin yet to promote them through the normal flow. The only way
-to create the first privileged account is direct database access:
+to create the first privileged account is to log in with the just now create keycloak account and 
+afterwards set the role with direct database access:
 
 ```
-docker exec -it kinetics-postgres psql -U kinetics_user -d kineticsdb \
+docker exec -it kinetics-postgres psql -U <POSTGRES_USER> -d <POSTGRES_DB> \
   -c "UPDATE app_user SET role = 'ADMIN' WHERE id = '<keycloak-user-uuid>';"
 ```
+
+Find the value for `<POSTGRES_USER>` and `<POSTGRES_DB>` in the `.env` file (`.env.example` provides an example).
 
 Find `<keycloak-user-uuid>` in Keycloak's own Admin Console under that user's details. It is the
 same ID ReacTUr stores internally as the user's identifier.
