@@ -85,7 +85,7 @@ shape of the API: the endpoint list, field names, and schemas. It does not expos
 and calling any other endpoint still requires a valid token.
 
 Whether these paths should instead be restricted to an internal network or VPN once a real
-production profile exists is an open decision, tracked in [`ISSUES.md`](ISSUES.md).
+production profile exists is an open decision, tracked in [`ISSUES.md`](../ISSUES.md).
 
 ### Authenticating "Try it out" requests
 
@@ -202,4 +202,4 @@ are not planned to change.
   authorization.
 
 Open work items, including deployment hardening and unresolved concurrency issues, are tracked in
-[`ISSUES.md`](ISSUES.md).
+[`ISSUES.md`](../ISSUES.md).
