@@ -195,3 +195,9 @@ development status. Many tracked limitations are deployment-specific.
 ## License
 
 MIT — see [`LICENSE`](LICENSE).
+
+## Walkthrough
+
+<video width="320" height="240" controls>
+  <source src="Walkthrough_speedup_compressed.mp4" type="video/mp4">
+</video>
