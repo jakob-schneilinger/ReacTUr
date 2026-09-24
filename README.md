@@ -198,6 +198,8 @@ MIT — see [`LICENSE`](LICENSE).
 
 ## Walkthrough
 
-<video width="320" height="240" controls>
+<video width="600" controls>
   <source src="Walkthrough_speedup_compressed.mp4" type="video/mp4">
 </video>
+
+![Video](./Walkthrough_speedup_compressed.mp4)
